@@ -8,6 +8,11 @@ The UPI ADO pipeline provides **phased deployment** for the UPI installation met
 
 ## ADO Prerequisites
 
+![ADO Prerequisites & Pipeline Execution Flow](../diagrams/pipeline/27-ado-prerequisites.svg){: .drawio-diagram }
+
+???+ note "Draw.io Source: ADO Prerequisites & Pipeline Execution Flow"
+    [:material-download: Download .drawio file](../diagrams/pipeline/27-ado-prerequisites.drawio){ .md-button } — Open in [draw.io](https://app.diagrams.net) for interactive editing.
+
 Before creating and running the UPI pipelines, ensure the following are configured in Azure DevOps:
 
 ### 1. Self-Hosted Agent Pool

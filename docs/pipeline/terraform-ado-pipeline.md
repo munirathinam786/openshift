@@ -12,6 +12,11 @@ The ADO pipeline provides **selective deployment** of any combination of the fou
 
 ## ADO Prerequisites
 
+![ADO Prerequisites & Pipeline Execution Flow](../diagrams/pipeline/27-ado-prerequisites.svg){: .drawio-diagram }
+
+???+ note "Draw.io Source: ADO Prerequisites & Pipeline Execution Flow"
+    [:material-download: Download .drawio file](../diagrams/pipeline/27-ado-prerequisites.drawio){ .md-button } — Open in [draw.io](https://app.diagrams.net) for interactive editing.
+
 Before creating and running any pipeline, the following must be configured in your Azure DevOps project:
 
 ### 1. Self-Hosted Agent Pool
