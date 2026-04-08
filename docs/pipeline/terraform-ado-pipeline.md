@@ -10,6 +10,82 @@ The ADO pipeline provides **selective deployment** of any combination of the fou
     [Management DC](../clusters/terraform-mgmt-dc.md) |
     [Management DR](../clusters/terraform-mgmt-dr.md)
 
+## ADO Prerequisites
+
+Before creating and running any pipeline, the following must be configured in your Azure DevOps project:
+
+### 1. Self-Hosted Agent Pool
+
+All pipelines use a **self-hosted Linux agent pool** named **`self-hosted-linux`**.
+
+| Requirement | Details |
+|---|---|
+| Pool Name | `self-hosted-linux` |
+| OS | Linux (RHEL 8+/9+ or Ubuntu 20.04+) |
+| Network Access | Must reach all bare-metal OpenShift cluster API endpoints (port 6443) and bastion hosts via SSH |
+| Terraform | Installed automatically by pipeline via `TerraformInstaller@1` task |
+| Tools | `oc`, `kubectl`, `jq`, `ssh` must be available on the agent |
+
+!!! tip "Agent Setup"
+    Go to **Project Settings → Agent Pools → Add Pool** → select **Self-hosted** → name it `self-hosted-linux`. Then install and register the Azure Pipelines agent on your Linux host.
+
+### 2. Terraform Extension (Marketplace)
+
+Install the **Terraform** extension from the Azure DevOps Marketplace:
+
+| Extension | Publisher | Task Used |
+|---|---|---|
+| [Terraform](https://marketplace.visualstudio.com/items?itemName=ms-devlabs.custom-terraform-tasks) | Microsoft DevLabs | `TerraformInstaller@1` |
+
+!!! warning "Required"
+    Without this extension, all pipelines will fail at the **Install Terraform** step. Install it from **Organization Settings → Extensions → Browse Marketplace**.
+
+### 3. ADO Variable Groups
+
+Create the following Variable Groups under **Project Settings → Pipelines → Library → + Variable Group**. Mark all values as **secret** (lock icon).
+
+| Variable Group | Used By Pipeline | Description |
+|---|---|---|
+| `ocp-baremetal-secrets` | IPI Multi-Cluster Deployment | Main deployment secrets (DC, DR, Mgmt) |
+| `ocp-baremetal-upi-secrets` | UPI Deployment | UPI main deployment secrets |
+| `ocp-baremetal-day2-secrets` | IPI Day 2 Operations | Day 2 operator secrets (LDAP, ArgoCD, OADP, etc.) |
+| `ocp-upi-day2-secrets` | UPI Day 2 Operations | UPI Day 2 operator secrets |
+| `ocp-baremetal-acm-secrets` | ACM Cluster Import | ACM import kubeconfig paths + secrets |
+| `ocp-baremetal-acm-dr-secrets` | ACM DR Failover/Failback | DR policy + failover secrets |
+| `ocp-virtualization-secrets` | OpenShift Virtualization (CNV) | CNV-specific secrets |
+| `ocp-mtc-secrets` | MTC Migration | Migration Toolkit for Containers secrets |
+| `ocp-vm-migration-secrets` | VM Migration | Source provider credentials for VM migration |
+
+### 4. Secret Variables Reference
+
+The following secrets must be populated across the variable groups above:
+
+| Secret Variable | Variable Group(s) | Description |
+|---|---|---|
+| `quay-admin-password` | `ocp-baremetal-secrets`, `ocp-baremetal-upi-secrets` | Quay mirror registry admin password |
+| `ngc-api-key` | `ocp-baremetal-secrets`, `ocp-baremetal-upi-secrets` | NVIDIA NGC API key for GPU operators |
+| `submariner-broker-token` | `ocp-baremetal-secrets` | Submariner broker ServiceAccount token |
+| `odf-dr-s3-access-key` | `ocp-baremetal-secrets`, `ocp-baremetal-upi-secrets` | S3 access key for ODF DR metadata |
+| `odf-dr-s3-secret-key` | `ocp-baremetal-secrets`, `ocp-baremetal-upi-secrets` | S3 secret key for ODF DR metadata |
+| `acs-central-admin-password` | `ocp-baremetal-secrets` | ACS Central initial admin password |
+| `acm-s3-access-key` | `ocp-baremetal-secrets` | S3 access key for ACM Observability |
+| `acm-s3-secret-key` | `ocp-baremetal-secrets` | S3 secret key for ACM Observability |
+| `ldap-bind-password` | `ocp-baremetal-day2-secrets`, `ocp-upi-day2-secrets` | LDAP bind password for OAuth |
+| `log-s3-access-key` | `ocp-baremetal-day2-secrets`, `ocp-upi-day2-secrets` | S3 access key for log forwarding |
+| `log-s3-secret-key` | `ocp-baremetal-day2-secrets`, `ocp-upi-day2-secrets` | S3 secret key for log forwarding |
+| `oadp-s3-access-key` | `ocp-baremetal-day2-secrets`, `ocp-upi-day2-secrets` | S3 access key for OADP backups |
+| `oadp-s3-secret-key` | `ocp-baremetal-day2-secrets`, `ocp-upi-day2-secrets` | S3 secret key for OADP backups |
+| `argocd-repo-token` | `ocp-baremetal-day2-secrets`, `ocp-upi-day2-secrets` | Git token for ArgoCD repo access |
+| `pac-webhook-secret` | `ocp-baremetal-day2-secrets`, `ocp-upi-day2-secrets` | Pipelines-as-Code webhook secret |
+| `pac-webhook-shared-secret` | `ocp-baremetal-day2-secrets`, `ocp-upi-day2-secrets` | Pipelines-as-Code shared secret |
+| `channel-git-token` | `ocp-baremetal-acm-dr-secrets` | Git token for ACM application channels |
+| `mtc-replication-repository-access-key` | `ocp-mtc-secrets` | S3 access key for MTC replication |
+| `mtc-replication-repository-secret-key` | `ocp-mtc-secrets` | S3 secret key for MTC replication |
+| `mtc-source-cluster-sa-token` | `ocp-mtc-secrets` | Source cluster SA token for MTC |
+| `source-provider-username` | `ocp-vm-migration-secrets` | Source hypervisor username |
+| `source-provider-password` | `ocp-vm-migration-secrets` | Source hypervisor password |
+| `source-provider-thumbprint` | `ocp-vm-migration-secrets` | Source hypervisor SSL thumbprint |
+
 ## Pipeline Parameters
 
 ![IPI Pipeline Parameters](../diagrams/pipeline/02-ipi-pipeline-parameters.svg){: .drawio-diagram }

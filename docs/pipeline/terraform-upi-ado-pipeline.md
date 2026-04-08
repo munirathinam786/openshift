@@ -6,6 +6,34 @@ The UPI ADO pipeline provides **phased deployment** for the UPI installation met
     This pipeline is specific to the **UPI** installation method.
     For the IPI multi-cluster pipeline, see: [ADO Pipeline (IPI)](terraform-ado-pipeline.md)
 
+## ADO Prerequisites
+
+Before creating and running the UPI pipelines, ensure the following are configured in Azure DevOps:
+
+### 1. Self-Hosted Agent Pool
+
+All UPI pipelines use a **self-hosted Linux agent pool** named **`self-hosted-linux`**.
+
+| Requirement | Details |
+|---|---|
+| Pool Name | `self-hosted-linux` |
+| OS | Linux (RHEL 8+/9+ or Ubuntu 20.04+) |
+| Network Access | Must reach bastion hosts (SSH), DHCP/TFTP servers (PXE boot), and cluster API endpoints (port 6443) |
+| Terraform | Installed automatically by pipeline via `TerraformInstaller@1` task |
+| Tools | `oc`, `kubectl`, `jq`, `ssh`, `openshift-install` must be available on the agent |
+
+### 2. Terraform Extension (Marketplace)
+
+Install the **Terraform** extension from the Azure DevOps Marketplace:
+
+| Extension | Publisher | Task Used |
+|---|---|---|
+| [Terraform](https://marketplace.visualstudio.com/items?itemName=ms-devlabs.custom-terraform-tasks) | Microsoft DevLabs | `TerraformInstaller@1` |
+
+### 3. ADO Variable Groups
+
+See the complete list of variable groups and secret variables in the [IPI Pipeline — ADO Prerequisites](terraform-ado-pipeline.md#ado-prerequisites) section. The UPI pipelines use the same variable groups (with `ocp-baremetal-upi-secrets` and `ocp-upi-day2-secrets` as UPI-specific groups).
+
 ## Pipeline Parameters
 
 ![UPI Pipeline Parameters](../diagrams/pipeline/07-upi-pipeline-parameters.svg){: .drawio-diagram }
