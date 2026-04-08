@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="app.diagrams.net" modified="2026-04-07T00:00:00.000Z" agent="GitHub Copilot" version="24.0.0" type="device">
+  <diagram id="d1" name="Inter-Cluster Connections">
+    <mxGraphModel dx="1422" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1400" pageHeight="600" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+        <mxCell id="dc_s" value="&lt;b&gt;DC Site&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;dashed=1;dashPattern=12 8;fillColor=none;fontSize=16;fontStyle=1;verticalAlign=top;align=left;spacingTop=8;spacingLeft=12;container=1;collapsible=0;strokeWidth=3;strokeColor=#2E7D32;" vertex="1" parent="1">
+          <mxGeometry x="20" y="50" width="650" height="500" as="geometry"/>
+        </mxCell>
+        <mxCell id="dc_wl" value="&lt;b&gt;DC Primary Workload&lt;/b&gt;" style="swimlane;startSize=35;fillColor=#2E7D32;fontColor=#FFFFFF;strokeColor=#2E7D32;rounded=1;fontSize=13;fontStyle=1;whiteSpace=wrap;html=1;container=1;collapsible=0;" vertex="1" parent="dc_s">
+          <mxGeometry x="20" y="45" width="300" height="260" as="geometry"/>
+        </mxCell>
+        <mxCell id="dc_api" value="API Server
+:6443" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#333333;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="dc_wl">
+          <mxGeometry x="15" y="45" width="130" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="dc_broker" value="Submariner Broker
+:8443" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E3F2FD;strokeColor=#326CE5;fontSize=11;fontStyle=1;fontColor=#326CE5;arcSize=10;" vertex="1" parent="dc_wl">
+          <mxGeometry x="15" y="100" width="140" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="dc_gw" value="Submariner Gateway
+:4500/UDP (IPsec)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E3F2FD;strokeColor=#326CE5;fontSize=11;fontStyle=1;fontColor=#326CE5;arcSize=10;" vertex="1" parent="dc_wl">
+          <mxGeometry x="15" y="155" width="160" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="dc_odf_c" value="ODF Ceph
+RBD Mirror Daemon" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E0F2F1;strokeColor=#00695C;fontSize=11;fontStyle=1;fontColor=#333333;arcSize=10;" vertex="1" parent="dc_wl">
+          <mxGeometry x="15" y="210" width="150" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="mdc_c" value="&lt;b&gt;Mgmt DC&lt;/b&gt;" style="swimlane;startSize=35;fillColor=#EF6C00;fontColor=#FFFFFF;strokeColor=#EF6C00;rounded=1;fontSize=13;fontStyle=1;whiteSpace=wrap;html=1;container=1;collapsible=0;" vertex="1" parent="dc_s">
+          <mxGeometry x="340" y="45" width="280" height="260" as="geometry"/>
+        </mxCell>
+        <mxCell id="acm_api" value="ACM Hub API
+:443" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EE0000;strokeColor=#CC0000;fontSize=11;fontStyle=1;fontColor=#FFFFFF;arcSize=10;" vertex="1" parent="mdc_c">
+          <mxGeometry x="15" y="45" width="120" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="acs_cent" value="ACS Central
+:443 gRPC" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FCE4EC;strokeColor=#C62828;fontSize=11;fontStyle=1;fontColor=#333333;arcSize=10;" vertex="1" parent="mdc_c">
+          <mxGeometry x="150" y="45" width="115" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="quay_p" value="Quay Enterprise
+:443" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8EAF6;strokeColor=#3F51B5;fontSize=11;fontStyle=1;fontColor=#333333;arcSize=10;" vertex="1" parent="mdc_c">
+          <mxGeometry x="15" y="100" width="120" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="acm_obs2" value="ACM Observability
+Thanos :10902" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF8E1;strokeColor=#F57F17;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="mdc_c">
+          <mxGeometry x="150" y="100" width="115" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="dr_s" value="&lt;b&gt;DR Site&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;dashed=1;dashPattern=12 8;fillColor=none;fontSize=16;fontStyle=1;verticalAlign=top;align=left;spacingTop=8;spacingLeft=12;container=1;collapsible=0;strokeWidth=3;strokeColor=#1565C0;" vertex="1" parent="1">
+          <mxGeometry x="700" y="50" width="650" height="500" as="geometry"/>
+        </mxCell>
+        <mxCell id="dr_wl" value="&lt;b&gt;DR Secondary Workload&lt;/b&gt;" style="swimlane;startSize=35;fillColor=#1565C0;fontColor=#FFFFFF;strokeColor=#1565C0;rounded=1;fontSize=13;fontStyle=1;whiteSpace=wrap;html=1;container=1;collapsible=0;" vertex="1" parent="dr_s">
+          <mxGeometry x="20" y="45" width="300" height="260" as="geometry"/>
+        </mxCell>
+        <mxCell id="dr_api" value="API Server
+:6443" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#333333;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="dr_wl">
+          <mxGeometry x="15" y="45" width="130" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="dr_gw" value="Submariner Gateway
+:4500/UDP (IPsec)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E3F2FD;strokeColor=#326CE5;fontSize=11;fontStyle=1;fontColor=#326CE5;arcSize=10;" vertex="1" parent="dr_wl">
+          <mxGeometry x="15" y="100" width="160" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="dr_odf_c" value="ODF Ceph
+RBD Mirror Daemon" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E0F2F1;strokeColor=#00695C;fontSize=11;fontStyle=1;fontColor=#333333;arcSize=10;" vertex="1" parent="dr_wl">
+          <mxGeometry x="15" y="155" width="150" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="mdr_c" value="&lt;b&gt;Mgmt DR&lt;/b&gt;" style="swimlane;startSize=35;fillColor=#EF6C00;fontColor=#FFFFFF;strokeColor=#EF6C00;rounded=1;fontSize=13;fontStyle=1;whiteSpace=wrap;html=1;container=1;collapsible=0;" vertex="1" parent="dr_s">
+          <mxGeometry x="340" y="45" width="280" height="200" as="geometry"/>
+        </mxCell>
+        <mxCell id="acm_s3" value="ACM Standby
+:443" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#EF6C00;fontSize=11;fontStyle=1;fontColor=#333333;arcSize=10;" vertex="1" parent="mdr_c">
+          <mxGeometry x="15" y="45" width="120" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="acs_sc" value="ACS SecuredCluster
+Sensor :443" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FCE4EC;strokeColor=#C62828;fontSize=11;fontStyle=1;fontColor=#333333;arcSize=10;" vertex="1" parent="mdr_c">
+          <mxGeometry x="150" y="45" width="120" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="quay_s3" value="Quay Enterprise
+:443" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8EAF6;strokeColor=#3F51B5;fontSize=11;fontStyle=1;fontColor=#333333;arcSize=10;" vertex="1" parent="mdr_c">
+          <mxGeometry x="15" y="100" width="120" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="c1" value="① IPsec Tunnel
+UDP 4500 + 500 + ESP" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#326CE5;fontSize=10;fontColor=#326CE5;labelBackgroundColor=#FFFFFF;strokeWidth=2;" edge="1" source="dc_gw" target="dr_gw" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="c2" value="② RBD Mirroring
+TCP 6789, 3300" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#00695C;fontSize=10;fontColor=#00695C;labelBackgroundColor=#FFFFFF;strokeWidth=2;" edge="1" source="dc_odf_c" target="dr_odf_c" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="c3" value="③ Cluster Import
+TCP 443" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#EF6C00;fontSize=10;fontColor=#EF6C00;labelBackgroundColor=#FFFFFF;strokeWidth=2;" edge="1" source="acm_api" target="dc_api" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="c4" value="④ Cluster Import
+TCP 443" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#EF6C00;fontSize=10;fontColor=#EF6C00;labelBackgroundColor=#FFFFFF;strokeWidth=2;" edge="1" source="acm_api" target="dr_api" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="c5" value="⑤ gRPC Stream
+TCP 443" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#C62828;fontSize=10;fontColor=#C62828;labelBackgroundColor=#FFFFFF;strokeWidth=2;" edge="1" source="acs_sc" target="acs_cent" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="c6" value="⑥ Geo-Replication
+TCP 443 (S3 API)" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#3F51B5;fontSize=10;fontColor=#3F51B5;dashed=1;dashPattern=8 4;labelBackgroundColor=#FFFFFF;strokeWidth=2;" edge="1" source="quay_p" target="quay_s3" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="c7" value="⑦ Failover
+Promotion" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#EF6C00;fontSize=10;fontColor=#EF6C00;dashed=1;dashPattern=8 4;labelBackgroundColor=#FFFFFF;strokeWidth=2;" edge="1" source="acm_api" target="acm_s3" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="c8" value="⑧ Broker Registration
+TCP 6443" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#326CE5;fontSize=10;fontColor=#326CE5;labelBackgroundColor=#FFFFFF;strokeWidth=2;" edge="1" source="dr_gw" target="dc_broker" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="t" value="&lt;b&gt;Complete Inter-Cluster Connection Map — All 8 Connections&lt;/b&gt;" style="text;html=1;align=center;verticalAlign=middle;strokeColor=none;fillColor=none;fontSize=18;fontColor=#333333;" vertex="1" parent="1">
+          <mxGeometry x="350" y="10" width="680" height="30" as="geometry"/>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

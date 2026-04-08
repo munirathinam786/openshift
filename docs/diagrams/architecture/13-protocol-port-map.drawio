@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="app.diagrams.net" modified="2026-04-07T00:00:00.000Z" agent="GitHub Copilot" version="24.0.0" type="device">
+  <diagram id="d1" name="Protocol Port Map">
+    <mxGraphModel dx="1422" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1000" pageHeight="440" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+        <mxCell id="t" value="&lt;b&gt;Multi-Cluster Protocol &amp;amp; Port Connectivity Map&lt;/b&gt;" style="text;html=1;align=center;verticalAlign=middle;strokeColor=none;fillColor=none;fontSize=18;fontColor=#333333;" vertex="1" parent="1">
+          <mxGeometry x="200" y="10" width="600" height="30" as="geometry"/>
+        </mxCell>
+        <mxCell id="dc_site" value="&lt;b&gt;DC Site&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;dashed=1;dashPattern=12 8;fillColor=none;fontSize=14;fontStyle=1;verticalAlign=top;align=left;spacingTop=5;spacingLeft=8;container=1;collapsible=0;strokeWidth=2;strokeColor=#2E7D32;" vertex="1" parent="1">
+          <mxGeometry x="20" y="60" width="440" height="340" as="geometry"/>
+        </mxCell>
+        <mxCell id="dc_wl" value="&lt;b&gt;DC Primary Workload&lt;/b&gt;" style="swimlane;startSize=35;fillColor=#2E7D32;fontColor=#FFFFFF;strokeColor=#2E7D32;rounded=1;fontSize=13;fontStyle=1;whiteSpace=wrap;html=1;container=1;collapsible=0;" vertex="1" parent="dc_site">
+          <mxGeometry x="15" y="35" width="195" height="175" as="geometry"/>
+        </mxCell>
+        <mxCell id="dc_api" value="API Server :6443" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#333333;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="dc_wl">
+          <mxGeometry x="10" y="45" width="175" height="25" as="geometry"/>
+        </mxCell>
+        <mxCell id="dc_brkr" value="Submariner Broker :8443" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#333333;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="dc_wl">
+          <mxGeometry x="10" y="75" width="175" height="25" as="geometry"/>
+        </mxCell>
+        <mxCell id="dc_gw" value="Submariner GW :4500/UDP" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#333333;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="dc_wl">
+          <mxGeometry x="10" y="105" width="175" height="25" as="geometry"/>
+        </mxCell>
+        <mxCell id="dc_odf" value="ODF Ceph RBD Mirror" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#333333;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="dc_wl">
+          <mxGeometry x="10" y="135" width="175" height="25" as="geometry"/>
+        </mxCell>
+        <mxCell id="mgmt_dc" value="&lt;b&gt;Mgmt DC&lt;/b&gt;" style="swimlane;startSize=35;fillColor=#EF6C00;fontColor=#FFFFFF;strokeColor=#EF6C00;rounded=1;fontSize=13;fontStyle=1;whiteSpace=wrap;html=1;container=1;collapsible=0;" vertex="1" parent="dc_site">
+          <mxGeometry x="230" y="35" width="195" height="175" as="geometry"/>
+        </mxCell>
+        <mxCell id="acm_api" value="ACM Hub API :443" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#333333;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="mgmt_dc">
+          <mxGeometry x="10" y="45" width="175" height="25" as="geometry"/>
+        </mxCell>
+        <mxCell id="acs_cent" value="ACS Central :443 gRPC" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#333333;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="mgmt_dc">
+          <mxGeometry x="10" y="75" width="175" height="25" as="geometry"/>
+        </mxCell>
+        <mxCell id="quay_p" value="Quay Enterprise :443" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#333333;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="mgmt_dc">
+          <mxGeometry x="10" y="105" width="175" height="25" as="geometry"/>
+        </mxCell>
+        <mxCell id="acm_obs" value="ACM Observability :10902" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#333333;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="mgmt_dc">
+          <mxGeometry x="10" y="135" width="175" height="25" as="geometry"/>
+        </mxCell>
+        <mxCell id="dr_site" value="&lt;b&gt;DR Site&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;dashed=1;dashPattern=12 8;fillColor=none;fontSize=14;fontStyle=1;verticalAlign=top;align=left;spacingTop=5;spacingLeft=8;container=1;collapsible=0;strokeWidth=2;strokeColor=#1565C0;" vertex="1" parent="1">
+          <mxGeometry x="520" y="60" width="440" height="340" as="geometry"/>
+        </mxCell>
+        <mxCell id="dr_wl" value="&lt;b&gt;DR Secondary Workload&lt;/b&gt;" style="swimlane;startSize=35;fillColor=#1565C0;fontColor=#FFFFFF;strokeColor=#1565C0;rounded=1;fontSize=13;fontStyle=1;whiteSpace=wrap;html=1;container=1;collapsible=0;" vertex="1" parent="dr_site">
+          <mxGeometry x="15" y="35" width="195" height="145" as="geometry"/>
+        </mxCell>
+        <mxCell id="dr_api" value="API Server :6443" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#333333;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="dr_wl">
+          <mxGeometry x="10" y="45" width="175" height="25" as="geometry"/>
+        </mxCell>
+        <mxCell id="dr_gw" value="Submariner GW :4500/UDP" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#333333;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="dr_wl">
+          <mxGeometry x="10" y="75" width="175" height="25" as="geometry"/>
+        </mxCell>
+        <mxCell id="dr_odf" value="ODF Ceph RBD Mirror" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#333333;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="dr_wl">
+          <mxGeometry x="10" y="105" width="175" height="25" as="geometry"/>
+        </mxCell>
+        <mxCell id="mgmt_dr" value="&lt;b&gt;Mgmt DR&lt;/b&gt;" style="swimlane;startSize=35;fillColor=#EF6C00;fontColor=#FFFFFF;strokeColor=#EF6C00;rounded=1;fontSize=13;fontStyle=1;whiteSpace=wrap;html=1;container=1;collapsible=0;" vertex="1" parent="dr_site">
+          <mxGeometry x="230" y="35" width="195" height="145" as="geometry"/>
+        </mxCell>
+        <mxCell id="acm_s" value="ACM Standby :443" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#333333;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="mgmt_dr">
+          <mxGeometry x="10" y="45" width="175" height="25" as="geometry"/>
+        </mxCell>
+        <mxCell id="acs_sc" value="ACS SecuredCluster :443" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#333333;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="mgmt_dr">
+          <mxGeometry x="10" y="75" width="175" height="25" as="geometry"/>
+        </mxCell>
+        <mxCell id="quay_s" value="Quay Enterprise :443" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#333333;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="mgmt_dr">
+          <mxGeometry x="10" y="105" width="175" height="25" as="geometry"/>
+        </mxCell>
+        <mxCell id="pe1" value="① IPsec UDP 4500+500" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#326CE5;fontSize=10;fontColor=#326CE5;labelBackgroundColor=#FFFFFF;strokeWidth=2;" edge="1" source="dc_gw" target="dr_gw" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="pe2" value="② RBD Mirroring TCP 6789" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#00695C;fontSize=10;fontColor=#00695C;labelBackgroundColor=#FFFFFF;strokeWidth=2;" edge="1" source="dc_odf" target="dr_odf" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="pe3" value="③ Klusterlet TCP 443" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#EF6C00;fontSize=10;fontColor=#EF6C00;labelBackgroundColor=#FFFFFF;strokeWidth=2;" edge="1" source="acm_api" target="dc_api" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="pe4" value="④ Klusterlet TCP 443" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#EF6C00;fontSize=10;fontColor=#EF6C00;labelBackgroundColor=#FFFFFF;strokeWidth=2;" edge="1" source="acm_api" target="dr_api" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="pe5" value="⑤ gRPC TCP 443" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#C62828;fontSize=10;fontColor=#C62828;labelBackgroundColor=#FFFFFF;strokeWidth=2;" edge="1" source="acs_sc" target="acs_cent" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="pe6" value="⑥ Geo-Repl S3 :443" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#7B1FA2;fontSize=10;fontColor=#7B1FA2;dashed=1;dashPattern=8 4;labelBackgroundColor=#FFFFFF;strokeWidth=2;" edge="1" source="quay_p" target="quay_s" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="pe7" value="⑦ Failover Promotion" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#EF6C00;fontSize=10;fontColor=#EF6C00;dashed=1;dashPattern=8 4;labelBackgroundColor=#FFFFFF;strokeWidth=2;" edge="1" source="acm_api" target="acm_s" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="pe8" value="⑧ Broker Reg TCP 6443" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#326CE5;fontSize=10;fontColor=#326CE5;labelBackgroundColor=#FFFFFF;strokeWidth=2;" edge="1" source="dr_gw" target="dc_brkr" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

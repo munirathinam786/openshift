@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="app.diagrams.net" modified="2026-04-07T00:00:00.000Z" agent="GitHub Copilot" version="24.0.0" type="device">
+  <diagram id="d1" name="ACM DR Pipeline">
+    <mxGraphModel dx="1422" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="860" pageHeight="370" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+        <mxCell id="normal" value="&lt;b&gt;Normal Operation&lt;/b&gt;" style="swimlane;startSize=35;fillColor=#2E7D32;fontColor=#FFFFFF;strokeColor=#2E7D32;rounded=1;fontSize=13;fontStyle=1;whiteSpace=wrap;html=1;container=1;collapsible=0;" vertex="1" parent="1">
+          <mxGeometry x="40" y="80" width="200" height="100" as="geometry"/>
+        </mxCell>
+        <mxCell id="n_dc" value="DC Primary: ACTIVE" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F5E9;strokeColor=#2E7D32;fontSize=11;fontStyle=1;fontColor=#2E7D32;arcSize=10;" vertex="1" parent="normal">
+          <mxGeometry x="15" y="50" width="170" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="n_dr" value="DR Secondary: STANDBY" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E3F2FD;strokeColor=#1565C0;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="normal">
+          <mxGeometry x="15" y="75" width="170" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="failover_s" value="&lt;b&gt;After Failover&lt;/b&gt;" style="swimlane;startSize=35;fillColor=#C62828;fontColor=#FFFFFF;strokeColor=#C62828;rounded=1;fontSize=13;fontStyle=1;whiteSpace=wrap;html=1;container=1;collapsible=0;" vertex="1" parent="1">
+          <mxGeometry x="320" y="80" width="200" height="100" as="geometry"/>
+        </mxCell>
+        <mxCell id="f_dc" value="DC Primary: DOWN" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FCE4EC;strokeColor=#C62828;fontSize=11;fontStyle=1;fontColor=#C62828;arcSize=10;" vertex="1" parent="failover_s">
+          <mxGeometry x="15" y="50" width="170" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="f_dr" value="DR Secondary: ACTIVE" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E3F2FD;strokeColor=#1565C0;fontSize=11;fontStyle=1;fontColor=#1565C0;arcSize=10;" vertex="1" parent="failover_s">
+          <mxGeometry x="15" y="75" width="170" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="failback_s" value="&lt;b&gt;After Failback&lt;/b&gt;" style="swimlane;startSize=35;fillColor=#2E7D32;fontColor=#FFFFFF;strokeColor=#2E7D32;rounded=1;fontSize=13;fontStyle=1;whiteSpace=wrap;html=1;container=1;collapsible=0;" vertex="1" parent="1">
+          <mxGeometry x="600" y="80" width="200" height="100" as="geometry"/>
+        </mxCell>
+        <mxCell id="b_dc" value="DC Primary: ACTIVE (restored)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F5E9;strokeColor=#2E7D32;fontSize=11;fontStyle=1;fontColor=#2E7D32;arcSize=10;" vertex="1" parent="failback_s">
+          <mxGeometry x="15" y="50" width="180" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="b_dr" value="DR Secondary: STANDBY" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E3F2FD;strokeColor=#1565C0;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="failback_s">
+          <mxGeometry x="15" y="75" width="170" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="e1" value="Failover" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#C62828;fontSize=10;fontColor=#C62828;labelBackgroundColor=#FFFFFF;strokeWidth=2;" edge="1" source="normal" target="failover_s" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e2" value="Failback" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#2E7D32;fontSize=10;fontColor=#2E7D32;labelBackgroundColor=#FFFFFF;strokeWidth=2;" edge="1" source="failover_s" target="failback_s" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="ps" value="&lt;b&gt;Pipeline Stages&lt;/b&gt;" style="swimlane;startSize=35;fillColor=#607D8B;fontColor=#FFFFFF;strokeColor=#607D8B;rounded=1;fontSize=13;fontStyle=1;whiteSpace=wrap;html=1;container=1;collapsible=0;" vertex="1" parent="1">
+          <mxGeometry x="40" y="230" width="760" height="110" as="geometry"/>
+        </mxCell>
+        <mxCell id="ps1" value="Stage 1:
+Configure DR
+(DRPolicy + DRPC)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#EF6C00;fontSize=11;fontStyle=1;fontColor=#333333;arcSize=10;" vertex="1" parent="ps">
+          <mxGeometry x="15" y="45" width="220" height="55" as="geometry"/>
+        </mxCell>
+        <mxCell id="ps2" value="Stage 2:
+Execute DR Action
+(Failover/Failback/Relocate)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FCE4EC;strokeColor=#C62828;fontSize=11;fontStyle=1;fontColor=#333333;arcSize=10;" vertex="1" parent="ps">
+          <mxGeometry x="260" y="45" width="230" height="55" as="geometry"/>
+        </mxCell>
+        <mxCell id="ps3" value="Stage 3:
+Validate DR
+(Check status)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F5E9;strokeColor=#2E7D32;fontSize=11;fontStyle=1;fontColor=#333333;arcSize=10;" vertex="1" parent="ps">
+          <mxGeometry x="520" y="45" width="210" height="55" as="geometry"/>
+        </mxCell>
+        <mxCell id="pe1" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#333333;fontSize=10;fontColor=#333333;labelBackgroundColor=#FFFFFF;strokeWidth=2;" edge="1" source="ps1" target="ps2" parent="ps">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="pe2" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#333333;fontSize=10;fontColor=#333333;labelBackgroundColor=#FFFFFF;strokeWidth=2;" edge="1" source="ps2" target="ps3" parent="ps">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="t" value="&lt;b&gt;ACM DR Failover/Failback Pipeline&lt;/b&gt;" style="text;html=1;align=center;verticalAlign=middle;strokeColor=none;fillColor=none;fontSize=18;fontColor=#333333;" vertex="1" parent="1">
+          <mxGeometry x="220" y="15" width="500" height="30" as="geometry"/>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

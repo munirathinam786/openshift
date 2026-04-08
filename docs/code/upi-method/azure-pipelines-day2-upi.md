@@ -1,0 +1,624 @@
+# azure-pipelines-day2-upi.yml — UPI Day 2 Pipeline
+
+Azure DevOps pipeline definition for UPI Day 2 post-install operations (Cluster Logging, OADP, LDAP/OAuth, GitOps/ArgoCD, Pipelines/Tekton).
+
+See the [pipeline documentation](../../pipeline/terraform-upi-ado-pipeline-day2.md) for parameter details and usage.
+
+## Source Code
+
+```hcl
+# =============================================================================
+# Azure DevOps Pipeline — UPI Day 2 Operations (Post-Install)
+# Cluster Logging, OADP Backup/Restore, LDAP/OAuth, GitOps (ArgoCD), Pipelines (Tekton)
+# =============================================================================
+
+trigger: none   # Day 2 is always manual — never auto-triggered
+
+parameters:
+  # ---- Deployment Scope ----
+  - name: deploymentScope
+    displayName: "Target Cluster(s)"
+    type: string
+    default: "dc-only"
+    values:
+      - dc-only
+      - dr-only
+      - dc-and-dr
+      - mgmt-dc-only
+      - mgmt-dr-only
+      - mgmt-clusters
+      - all-dc
+      - all-dr
+      - all
+
+  # ---- Day 2 Feature Selection ----
+  - name: enableClusterLogging
+    displayName: "Enable Cluster Logging (Elasticsearch + S3 forwarding)"
+    type: boolean
+    default: true
+
+  - name: enableOADP
+    displayName: "Enable OADP Backup & Restore (Velero + S3)"
+    type: boolean
+    default: true
+
+  - name: enableLDAP
+    displayName: "Enable LDAP / OAuth Integration"
+    type: boolean
+    default: true
+
+  - name: enableGitOps
+    displayName: "Enable OpenShift GitOps (Argo CD)"
+    type: boolean
+    default: true
+
+  - name: enablePipelines
+    displayName: "Enable OpenShift Pipelines (Tekton)"
+    type: boolean
+    default: true
+
+  # ---- Security & Compliance ----
+  - name: enableComplianceOperator
+    displayName: "Enable Compliance Operator (OpenSCAP)"
+    type: boolean
+    default: false
+
+  - name: enableFileIntegrityOperator
+    displayName: "Enable File Integrity Operator (AIDE)"
+    type: boolean
+    default: false
+
+  - name: enableCertManager
+    displayName: "Enable cert-manager (TLS lifecycle)"
+    type: boolean
+    default: false
+
+  - name: enableGatekeeper
+    displayName: "Enable OPA Gatekeeper (Policy Enforcement)"
+    type: boolean
+    default: false
+
+  - name: enableNetworkPolicies
+    displayName: "Enable Default Network Policies"
+    type: boolean
+    default: false
+
+  # ---- Networking ----
+  - name: enableNMState
+    displayName: "Enable NMState Operator"
+    type: boolean
+    default: false
+
+  - name: enableExternalDNS
+    displayName: "Enable ExternalDNS"
+    type: boolean
+    default: false
+
+  - name: enableIngressController
+    displayName: "Enable Custom Ingress Controller"
+    type: boolean
+    default: false
+
+  - name: enableMultusNetworks
+    displayName: "Enable Multus Networks"
+    type: boolean
+    default: false
+
+  - name: enableNetworkObservability
+    displayName: "Enable Network Observability"
+    type: boolean
+    default: false
+
+  # ---- Monitoring & Observability ----
+  - name: enableAlertmanagerConfig
+    displayName: "Enable Alertmanager Config"
+    type: boolean
+    default: false
+
+  - name: enableCustomGrafana
+    displayName: "Enable Custom Grafana Dashboards"
+    type: boolean
+    default: false
+
+  - name: enableOpenTelemetry
+    displayName: "Enable OpenTelemetry Collector"
+    type: boolean
+    default: false
+
+  - name: enableLokiLogging
+    displayName: "Enable Loki Logging"
+    type: boolean
+    default: false
+
+  - name: enableThanosRuler
+    displayName: "Enable Thanos Ruler"
+    type: boolean
+    default: false
+
+  # ---- Cluster Operations ----
+  - name: enableNodeTuning
+    displayName: "Enable Node Tuning Profiles"
+    type: boolean
+    default: false
+
+  - name: enableImageRegistry
+    displayName: "Enable Image Registry Config"
+    type: boolean
+    default: false
+
+  - name: enableCustomCatalogSource
+    displayName: "Enable Custom CatalogSource"
+    type: boolean
+    default: false
+
+  - name: enableMachineConfigPools
+    displayName: "Enable Machine Config Pools"
+    type: boolean
+    default: false
+
+  - name: enableNodeMaintenance
+    displayName: "Enable Node Maintenance Operator"
+    type: boolean
+    default: false
+
+  - name: enableCostManagement
+    displayName: "Enable Cost Management"
+    type: boolean
+    default: false
+
+  # ---- Developer Experience ----
+  - name: enableDevSpaces
+    displayName: "Enable OpenShift Dev Spaces"
+    type: boolean
+    default: false
+
+  - name: enableWebTerminal
+    displayName: "Enable Web Terminal"
+    type: boolean
+    default: false
+
+  - name: enableImageStreams
+    displayName: "Enable Image Streams"
+    type: boolean
+    default: false
+
+  # ---- AI/ML ----
+  - name: enableKubeRay
+    displayName: "Enable KubeRay Operator"
+    type: boolean
+    default: false
+
+  - name: enableTrainingOperator
+    displayName: "Enable Training Operator"
+    type: boolean
+    default: false
+
+  - name: enableModelRegistry
+    displayName: "Enable Model Registry"
+    type: boolean
+    default: false
+
+  - name: enableNvidiaNIM
+    displayName: "Enable NVIDIA NIM"
+    type: boolean
+    default: false
+
+  - name: enableMIGManager
+    displayName: "Enable NVIDIA MIG Manager"
+    type: boolean
+    default: false
+
+  # ---- Multi-Cluster / DR ----
+  - name: enableGlobalLoadBalancer
+    displayName: "Enable Global Load Balancer"
+    type: boolean
+    default: false
+
+  - name: enableVeleroSchedule
+    displayName: "Enable Velero Backup Schedules"
+    type: boolean
+    default: false
+
+  - name: enableDRRunbook
+    displayName: "Enable DR Runbook Automation"
+    type: boolean
+    default: false
+
+  # ---- Terraform Action ----
+  - name: terraformAction
+    displayName: "Terraform Action"
+    type: string
+    default: "plan"
+    values:
+      - plan
+      - apply
+      - destroy
+
+  # ---- Variable Group ----
+  - name: variableGroup
+    displayName: "ADO Variable Group (for secrets)"
+    type: string
+    default: "ocp-upi-day2-secrets"
+
+variables:
+  - group: ${{ parameters.variableGroup }}
+  - name: TF_IN_AUTOMATION
+    value: "true"
+  - name: TF_INPUT
+    value: "false"
+
+stages:
+  # =====================================================================
+  # Stage 1: DC Primary (UPI) — Day 2
+  # =====================================================================
+  - stage: Day2_UPI_DC_Primary
+    displayName: "Day 2 — UPI DC Primary"
+    condition: |
+      and(
+        succeeded(),
+        or(
+          eq('${{ parameters.deploymentScope }}', 'dc-only'),
+          eq('${{ parameters.deploymentScope }}', 'dc-and-dr'),
+          eq('${{ parameters.deploymentScope }}', 'all-dc'),
+          eq('${{ parameters.deploymentScope }}', 'all')
+        )
+      )
+    jobs:
+      - job: Day2UPIDCPrimary
+        displayName: "Terraform Day 2 — UPI DC Primary"
+        pool:
+          name: "self-hosted-linux"
+        steps:
+          - checkout: self
+
+          - task: TerraformInstaller@1
+            displayName: "Install Terraform"
+            inputs:
+              terraformVersion: "latest"
+
+          - script: |
+              cd openshiftbaremetal
+              terraform init -input=false
+            displayName: "Terraform Init — UPI DC Primary"
+
+          - script: |
+              cd openshiftbaremetal
+              EXTRA_ARGS=""
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_cluster_logging=${{ parameters.enableClusterLogging }}"
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_oadp=${{ parameters.enableOADP }}"
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_ldap=${{ parameters.enableLDAP }}"
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_openshift_gitops=${{ parameters.enableGitOps }}"
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_openshift_pipelines=${{ parameters.enablePipelines }}"
+              # New Day 2 modules
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_compliance_operator=${{ parameters.enableComplianceOperator }}"
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_file_integrity_operator=${{ parameters.enableFileIntegrityOperator }}"
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_cert_manager=${{ parameters.enableCertManager }}"
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_gatekeeper=${{ parameters.enableGatekeeper }}"
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_network_policies=${{ parameters.enableNetworkPolicies }}"
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_nmstate_operator=${{ parameters.enableNMState }}"
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_external_dns=${{ parameters.enableExternalDNS }}"
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_ingress_controller=${{ parameters.enableIngressController }}"
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_multus_networks=${{ parameters.enableMultusNetworks }}"
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_network_observability=${{ parameters.enableNetworkObservability }}"
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_alertmanager_config=${{ parameters.enableAlertmanagerConfig }}"
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_custom_grafana=${{ parameters.enableCustomGrafana }}"
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_opentelemetry=${{ parameters.enableOpenTelemetry }}"
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_loki_logging=${{ parameters.enableLokiLogging }}"
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_thanos_ruler=${{ parameters.enableThanosRuler }}"
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_node_tuning=${{ parameters.enableNodeTuning }}"
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_image_registry=${{ parameters.enableImageRegistry }}"
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_custom_catalogsource=${{ parameters.enableCustomCatalogSource }}"
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_machine_config_pools=${{ parameters.enableMachineConfigPools }}"
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_node_maintenance=${{ parameters.enableNodeMaintenance }}"
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_cost_management=${{ parameters.enableCostManagement }}"
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_devspaces=${{ parameters.enableDevSpaces }}"
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_web_terminal=${{ parameters.enableWebTerminal }}"
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_image_streams=${{ parameters.enableImageStreams }}"
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_kuberay=${{ parameters.enableKubeRay }}"
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_training_operator=${{ parameters.enableTrainingOperator }}"
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_model_registry=${{ parameters.enableModelRegistry }}"
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_nvidia_nim=${{ parameters.enableNvidiaNIM }}"
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_mig_manager=${{ parameters.enableMIGManager }}"
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_global_load_balancer=${{ parameters.enableGlobalLoadBalancer }}"
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_velero_schedule=${{ parameters.enableVeleroSchedule }}"
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_dr_runbook=${{ parameters.enableDRRunbook }}"
+
+              terraform ${{ parameters.terraformAction }} \
+                -var-file=terraform.tfvars \
+                -var-file=day2-terraform.tfvars \
+                $EXTRA_ARGS \
+                -input=false \
+                $(if [ "${{ parameters.terraformAction }}" = "apply" ] || [ "${{ parameters.terraformAction }}" = "destroy" ]; then echo "-auto-approve"; fi)
+            displayName: "Terraform ${{ parameters.terraformAction }} — UPI DC Primary Day 2"
+            env:
+              TF_VAR_ldap_bind_password: $(ldap-bind-password)
+              TF_VAR_log_s3_access_key: $(log-s3-access-key)
+              TF_VAR_log_s3_secret_key: $(log-s3-secret-key)
+              TF_VAR_oadp_s3_access_key: $(oadp-s3-access-key)
+              TF_VAR_oadp_s3_secret_key: $(oadp-s3-secret-key)
+              TF_VAR_argocd_repo_token: $(argocd-repo-token)
+              TF_VAR_pac_webhook_secret: $(pac-webhook-secret)
+              TF_VAR_pac_webhook_shared_secret: $(pac-webhook-shared-secret)
+
+  # =====================================================================
+  # Stage 2: DR Secondary (UPI) — Day 2
+  # =====================================================================
+  - stage: Day2_UPI_DR_Secondary
+    displayName: "Day 2 — UPI DR Secondary"
+    condition: |
+      and(
+        succeeded(),
+        or(
+          eq('${{ parameters.deploymentScope }}', 'dr-only'),
+          eq('${{ parameters.deploymentScope }}', 'dc-and-dr'),
+          eq('${{ parameters.deploymentScope }}', 'all-dr'),
+          eq('${{ parameters.deploymentScope }}', 'all')
+        )
+      )
+    dependsOn:
+      - ${{ if or(eq(parameters.deploymentScope, 'dc-and-dr'), eq(parameters.deploymentScope, 'all')) }}:
+          - Day2_UPI_DC_Primary
+    jobs:
+      - job: Day2UPIDRSecondary
+        displayName: "Terraform Day 2 — UPI DR Secondary"
+        pool:
+          name: "self-hosted-linux"
+        steps:
+          - checkout: self
+
+          - task: TerraformInstaller@1
+            displayName: "Install Terraform"
+            inputs:
+              terraformVersion: "latest"
+
+          - script: |
+              cd openshiftbaremetal-dr
+              terraform init -input=false
+            displayName: "Terraform Init — UPI DR Secondary"
+
+          - script: |
+              cd openshiftbaremetal-dr
+              EXTRA_ARGS=""
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_cluster_logging=${{ parameters.enableClusterLogging }}"
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_oadp=${{ parameters.enableOADP }}"
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_ldap=${{ parameters.enableLDAP }}"
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_openshift_gitops=${{ parameters.enableGitOps }}"
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_openshift_pipelines=${{ parameters.enablePipelines }}"
+              # New Day 2 modules
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_compliance_operator=${{ parameters.enableComplianceOperator }}"
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_file_integrity_operator=${{ parameters.enableFileIntegrityOperator }}"
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_cert_manager=${{ parameters.enableCertManager }}"
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_gatekeeper=${{ parameters.enableGatekeeper }}"
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_network_policies=${{ parameters.enableNetworkPolicies }}"
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_nmstate_operator=${{ parameters.enableNMState }}"
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_external_dns=${{ parameters.enableExternalDNS }}"
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_ingress_controller=${{ parameters.enableIngressController }}"
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_multus_networks=${{ parameters.enableMultusNetworks }}"
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_network_observability=${{ parameters.enableNetworkObservability }}"
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_alertmanager_config=${{ parameters.enableAlertmanagerConfig }}"
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_custom_grafana=${{ parameters.enableCustomGrafana }}"
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_opentelemetry=${{ parameters.enableOpenTelemetry }}"
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_loki_logging=${{ parameters.enableLokiLogging }}"
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_thanos_ruler=${{ parameters.enableThanosRuler }}"
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_node_tuning=${{ parameters.enableNodeTuning }}"
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_image_registry=${{ parameters.enableImageRegistry }}"
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_custom_catalogsource=${{ parameters.enableCustomCatalogSource }}"
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_machine_config_pools=${{ parameters.enableMachineConfigPools }}"
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_node_maintenance=${{ parameters.enableNodeMaintenance }}"
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_cost_management=${{ parameters.enableCostManagement }}"
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_devspaces=${{ parameters.enableDevSpaces }}"
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_web_terminal=${{ parameters.enableWebTerminal }}"
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_image_streams=${{ parameters.enableImageStreams }}"
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_kuberay=${{ parameters.enableKubeRay }}"
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_training_operator=${{ parameters.enableTrainingOperator }}"
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_model_registry=${{ parameters.enableModelRegistry }}"
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_nvidia_nim=${{ parameters.enableNvidiaNIM }}"
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_mig_manager=${{ parameters.enableMIGManager }}"
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_global_load_balancer=${{ parameters.enableGlobalLoadBalancer }}"
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_velero_schedule=${{ parameters.enableVeleroSchedule }}"
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_dr_runbook=${{ parameters.enableDRRunbook }}"
+
+              terraform ${{ parameters.terraformAction }} \
+                -var-file=terraform.tfvars \
+                -var-file=day2-terraform.tfvars \
+                $EXTRA_ARGS \
+                -input=false \
+                $(if [ "${{ parameters.terraformAction }}" = "apply" ] || [ "${{ parameters.terraformAction }}" = "destroy" ]; then echo "-auto-approve"; fi)
+            displayName: "Terraform ${{ parameters.terraformAction }} — UPI DR Secondary Day 2"
+            env:
+              TF_VAR_ldap_bind_password: $(ldap-bind-password)
+              TF_VAR_log_s3_access_key: $(log-s3-access-key)
+              TF_VAR_log_s3_secret_key: $(log-s3-secret-key)
+              TF_VAR_oadp_s3_access_key: $(oadp-s3-access-key)
+              TF_VAR_oadp_s3_secret_key: $(oadp-s3-secret-key)
+              TF_VAR_argocd_repo_token: $(argocd-repo-token)
+              TF_VAR_pac_webhook_secret: $(pac-webhook-secret)
+              TF_VAR_pac_webhook_shared_secret: $(pac-webhook-shared-secret)
+
+  # =====================================================================
+  # Stage 3: Management DC (UPI) — Day 2
+  # =====================================================================
+  - stage: Day2_UPI_Mgmt_DC
+    displayName: "Day 2 — UPI Management DC"
+    condition: |
+      and(
+        succeeded(),
+        or(
+          eq('${{ parameters.deploymentScope }}', 'mgmt-dc-only'),
+          eq('${{ parameters.deploymentScope }}', 'mgmt-clusters'),
+          eq('${{ parameters.deploymentScope }}', 'all-dc'),
+          eq('${{ parameters.deploymentScope }}', 'all')
+        )
+      )
+    jobs:
+      - job: Day2UPIMgmtDC
+        displayName: "Terraform Day 2 — UPI Management DC"
+        pool:
+          name: "self-hosted-linux"
+        steps:
+          - checkout: self
+
+          - task: TerraformInstaller@1
+            displayName: "Install Terraform"
+            inputs:
+              terraformVersion: "latest"
+
+          - script: |
+              cd mgmt-dc
+              terraform init -input=false
+            displayName: "Terraform Init — UPI Management DC"
+
+          - script: |
+              cd mgmt-dc
+              EXTRA_ARGS=""
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_cluster_logging=${{ parameters.enableClusterLogging }}"
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_oadp=${{ parameters.enableOADP }}"
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_ldap=${{ parameters.enableLDAP }}"
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_openshift_gitops=${{ parameters.enableGitOps }}"
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_openshift_pipelines=${{ parameters.enablePipelines }}"
+              # New Day 2 modules
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_compliance_operator=${{ parameters.enableComplianceOperator }}"
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_file_integrity_operator=${{ parameters.enableFileIntegrityOperator }}"
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_cert_manager=${{ parameters.enableCertManager }}"
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_gatekeeper=${{ parameters.enableGatekeeper }}"
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_network_policies=${{ parameters.enableNetworkPolicies }}"
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_nmstate_operator=${{ parameters.enableNMState }}"
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_external_dns=${{ parameters.enableExternalDNS }}"
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_ingress_controller=${{ parameters.enableIngressController }}"
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_multus_networks=${{ parameters.enableMultusNetworks }}"
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_network_observability=${{ parameters.enableNetworkObservability }}"
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_alertmanager_config=${{ parameters.enableAlertmanagerConfig }}"
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_custom_grafana=${{ parameters.enableCustomGrafana }}"
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_opentelemetry=${{ parameters.enableOpenTelemetry }}"
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_loki_logging=${{ parameters.enableLokiLogging }}"
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_thanos_ruler=${{ parameters.enableThanosRuler }}"
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_node_tuning=${{ parameters.enableNodeTuning }}"
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_image_registry=${{ parameters.enableImageRegistry }}"
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_custom_catalogsource=${{ parameters.enableCustomCatalogSource }}"
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_machine_config_pools=${{ parameters.enableMachineConfigPools }}"
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_node_maintenance=${{ parameters.enableNodeMaintenance }}"
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_cost_management=${{ parameters.enableCostManagement }}"
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_devspaces=${{ parameters.enableDevSpaces }}"
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_web_terminal=${{ parameters.enableWebTerminal }}"
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_image_streams=${{ parameters.enableImageStreams }}"
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_kuberay=${{ parameters.enableKubeRay }}"
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_training_operator=${{ parameters.enableTrainingOperator }}"
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_model_registry=${{ parameters.enableModelRegistry }}"
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_nvidia_nim=${{ parameters.enableNvidiaNIM }}"
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_mig_manager=${{ parameters.enableMIGManager }}"
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_global_load_balancer=${{ parameters.enableGlobalLoadBalancer }}"
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_velero_schedule=${{ parameters.enableVeleroSchedule }}"
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_dr_runbook=${{ parameters.enableDRRunbook }}"
+
+              terraform ${{ parameters.terraformAction }} \
+                -var-file=terraform.tfvars \
+                -var-file=day2-terraform.tfvars \
+                $EXTRA_ARGS \
+                -input=false \
+                $(if [ "${{ parameters.terraformAction }}" = "apply" ] || [ "${{ parameters.terraformAction }}" = "destroy" ]; then echo "-auto-approve"; fi)
+            displayName: "Terraform ${{ parameters.terraformAction }} — UPI Management DC Day 2"
+            env:
+              TF_VAR_ldap_bind_password: $(ldap-bind-password)
+              TF_VAR_log_s3_access_key: $(log-s3-access-key)
+              TF_VAR_log_s3_secret_key: $(log-s3-secret-key)
+              TF_VAR_oadp_s3_access_key: $(oadp-s3-access-key)
+              TF_VAR_oadp_s3_secret_key: $(oadp-s3-secret-key)
+              TF_VAR_argocd_repo_token: $(argocd-repo-token)
+              TF_VAR_pac_webhook_secret: $(pac-webhook-secret)
+              TF_VAR_pac_webhook_shared_secret: $(pac-webhook-shared-secret)
+
+  # =====================================================================
+  # Stage 4: Management DR (UPI) — Day 2
+  # =====================================================================
+  - stage: Day2_UPI_Mgmt_DR
+    displayName: "Day 2 — UPI Management DR"
+    condition: |
+      and(
+        succeeded(),
+        or(
+          eq('${{ parameters.deploymentScope }}', 'mgmt-dr-only'),
+          eq('${{ parameters.deploymentScope }}', 'mgmt-clusters'),
+          eq('${{ parameters.deploymentScope }}', 'all-dr'),
+          eq('${{ parameters.deploymentScope }}', 'all')
+        )
+      )
+    dependsOn:
+      - ${{ if or(eq(parameters.deploymentScope, 'mgmt-clusters'), eq(parameters.deploymentScope, 'all')) }}:
+          - Day2_UPI_Mgmt_DC
+    jobs:
+      - job: Day2UPIMgmtDR
+        displayName: "Terraform Day 2 — UPI Management DR"
+        pool:
+          name: "self-hosted-linux"
+        steps:
+          - checkout: self
+
+          - task: TerraformInstaller@1
+            displayName: "Install Terraform"
+            inputs:
+              terraformVersion: "latest"
+
+          - script: |
+              cd mgmt-dr
+              terraform init -input=false
+            displayName: "Terraform Init — UPI Management DR"
+
+          - script: |
+              cd mgmt-dr
+              EXTRA_ARGS=""
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_cluster_logging=${{ parameters.enableClusterLogging }}"
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_oadp=${{ parameters.enableOADP }}"
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_ldap=${{ parameters.enableLDAP }}"
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_openshift_gitops=${{ parameters.enableGitOps }}"
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_openshift_pipelines=${{ parameters.enablePipelines }}"
+              # New Day 2 modules
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_compliance_operator=${{ parameters.enableComplianceOperator }}"
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_file_integrity_operator=${{ parameters.enableFileIntegrityOperator }}"
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_cert_manager=${{ parameters.enableCertManager }}"
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_gatekeeper=${{ parameters.enableGatekeeper }}"
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_network_policies=${{ parameters.enableNetworkPolicies }}"
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_nmstate_operator=${{ parameters.enableNMState }}"
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_external_dns=${{ parameters.enableExternalDNS }}"
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_ingress_controller=${{ parameters.enableIngressController }}"
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_multus_networks=${{ parameters.enableMultusNetworks }}"
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_network_observability=${{ parameters.enableNetworkObservability }}"
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_alertmanager_config=${{ parameters.enableAlertmanagerConfig }}"
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_custom_grafana=${{ parameters.enableCustomGrafana }}"
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_opentelemetry=${{ parameters.enableOpenTelemetry }}"
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_loki_logging=${{ parameters.enableLokiLogging }}"
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_thanos_ruler=${{ parameters.enableThanosRuler }}"
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_node_tuning=${{ parameters.enableNodeTuning }}"
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_image_registry=${{ parameters.enableImageRegistry }}"
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_custom_catalogsource=${{ parameters.enableCustomCatalogSource }}"
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_machine_config_pools=${{ parameters.enableMachineConfigPools }}"
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_node_maintenance=${{ parameters.enableNodeMaintenance }}"
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_cost_management=${{ parameters.enableCostManagement }}"
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_devspaces=${{ parameters.enableDevSpaces }}"
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_web_terminal=${{ parameters.enableWebTerminal }}"
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_image_streams=${{ parameters.enableImageStreams }}"
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_kuberay=${{ parameters.enableKubeRay }}"
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_training_operator=${{ parameters.enableTrainingOperator }}"
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_model_registry=${{ parameters.enableModelRegistry }}"
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_nvidia_nim=${{ parameters.enableNvidiaNIM }}"
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_mig_manager=${{ parameters.enableMIGManager }}"
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_global_load_balancer=${{ parameters.enableGlobalLoadBalancer }}"
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_velero_schedule=${{ parameters.enableVeleroSchedule }}"
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_dr_runbook=${{ parameters.enableDRRunbook }}"
+
+              terraform ${{ parameters.terraformAction }} \
+                -var-file=terraform.tfvars \
+                -var-file=day2-terraform.tfvars \
+                $EXTRA_ARGS \
+                -input=false \
+                $(if [ "${{ parameters.terraformAction }}" = "apply" ] || [ "${{ parameters.terraformAction }}" = "destroy" ]; then echo "-auto-approve"; fi)
+            displayName: "Terraform ${{ parameters.terraformAction }} — UPI Management DR Day 2"
+            env:
+              TF_VAR_ldap_bind_password: $(ldap-bind-password)
+              TF_VAR_log_s3_access_key: $(log-s3-access-key)
+              TF_VAR_log_s3_secret_key: $(log-s3-secret-key)
+              TF_VAR_oadp_s3_access_key: $(oadp-s3-access-key)
+              TF_VAR_oadp_s3_secret_key: $(oadp-s3-secret-key)
+              TF_VAR_argocd_repo_token: $(argocd-repo-token)
+              TF_VAR_pac_webhook_secret: $(pac-webhook-secret)
+              TF_VAR_pac_webhook_shared_secret: $(pac-webhook-shared-secret)
+```

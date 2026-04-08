@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="app.diagrams.net" modified="2026-04-07T00:00:00.000Z" agent="GitHub Copilot" version="24.0.0" type="device">
+  <diagram id="d1" name="ACM Observability">
+    <mxGraphModel dx="1422" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="840" pageHeight="280" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+        <mxCell id="managed" value="&lt;b&gt;Managed Clusters&lt;/b&gt;" style="swimlane;startSize=35;fillColor=#7B1FA2;fontColor=#FFFFFF;strokeColor=#7B1FA2;rounded=1;fontSize=13;fontStyle=1;whiteSpace=wrap;html=1;container=1;collapsible=0;" vertex="1" parent="1">
+          <mxGeometry x="40" y="80" width="200" height="120" as="geometry"/>
+        </mxCell>
+        <mxCell id="p1" value="DC Prometheus" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F5E9;strokeColor=#2E7D32;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="managed">
+          <mxGeometry x="15" y="50" width="170" height="30" as="geometry"/>
+        </mxCell>
+        <mxCell id="p2" value="DR Prometheus" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E3F2FD;strokeColor=#1565C0;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="managed">
+          <mxGeometry x="15" y="90" width="170" height="30" as="geometry"/>
+        </mxCell>
+        <mxCell id="obs_stack" value="&lt;b&gt;ACM Observability Stack (Mgmt DC)&lt;/b&gt;" style="swimlane;startSize=35;fillColor=#2E7D32;fontColor=#FFFFFF;strokeColor=#2E7D32;rounded=1;fontSize=13;fontStyle=1;whiteSpace=wrap;html=1;container=1;collapsible=0;" vertex="1" parent="1">
+          <mxGeometry x="320" y="40" width="460" height="200" as="geometry"/>
+        </mxCell>
+        <mxCell id="collect" value="Metrics Collector
+remote-write" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#333333;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="obs_stack">
+          <mxGeometry x="15" y="50" width="140" height="45" as="geometry"/>
+        </mxCell>
+        <mxCell id="thanos_r" value="Thanos Receive" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#333333;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="obs_stack">
+          <mxGeometry x="175" y="50" width="130" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="thanos_s" value="Thanos Store" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#333333;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="obs_stack">
+          <mxGeometry x="175" y="110" width="130" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="s3_b" value="S3 Bucket
+(ODF RGW)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E0F2F1;strokeColor=#00695C;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="obs_stack">
+          <mxGeometry x="330" y="110" width="120" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="grafana" value="Grafana
+Dashboards" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF8E1;strokeColor=#F57F17;fontSize=11;fontStyle=1;fontColor=#333333;arcSize=10;" vertex="1" parent="obs_stack">
+          <mxGeometry x="330" y="50" width="120" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="oe1" value="remote-write" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#2E7D32;fontSize=10;fontColor=#2E7D32;labelBackgroundColor=#FFFFFF;strokeWidth=2;" edge="1" source="p1" target="collect" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="oe2" value="remote-write" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#1565C0;fontSize=10;fontColor=#1565C0;labelBackgroundColor=#FFFFFF;strokeWidth=2;" edge="1" source="p2" target="collect" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="oe3" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#333333;fontSize=10;fontColor=#333333;labelBackgroundColor=#FFFFFF;strokeWidth=2;" edge="1" source="collect" target="thanos_r" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="oe4" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#333333;fontSize=10;fontColor=#333333;labelBackgroundColor=#FFFFFF;strokeWidth=2;" edge="1" source="thanos_r" target="thanos_s" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="oe5" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#333333;fontSize=10;fontColor=#333333;labelBackgroundColor=#FFFFFF;strokeWidth=2;" edge="1" source="thanos_s" target="s3_b" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="oe6" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#F57F17;fontSize=10;fontColor=#F57F17;labelBackgroundColor=#FFFFFF;strokeWidth=2;" edge="1" source="thanos_r" target="grafana" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="t" value="&lt;b&gt;ACM Observability Data Flow&lt;/b&gt;" style="text;html=1;align=center;verticalAlign=middle;strokeColor=none;fillColor=none;fontSize=18;fontColor=#333333;" vertex="1" parent="1">
+          <mxGeometry x="280" y="10" width="350" height="25" as="geometry"/>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

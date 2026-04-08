@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="app.diagrams.net" modified="2026-04-07T00:00:00.000Z" agent="GitHub Copilot" version="24.0.0" type="device">
+  <diagram id="d1" name="MTC Pipeline">
+    <mxGraphModel dx="1422" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="920" pageHeight="400" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+        <mxCell id="trigger" value="MTC Pipeline
+Trigger" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1A237E;strokeColor=#1A237E;fontSize=11;fontStyle=1;fontColor=#FFFFFF;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="40" y="80" width="140" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="wf" value="&lt;b&gt;MTC Workload Migration Workflow&lt;/b&gt;" style="swimlane;startSize=35;fillColor=#7B1FA2;fontColor=#FFFFFF;strokeColor=#7B1FA2;rounded=1;fontSize=13;fontStyle=1;whiteSpace=wrap;html=1;container=1;collapsible=0;" vertex="1" parent="1">
+          <mxGeometry x="40" y="170" width="820" height="200" as="geometry"/>
+        </mxCell>
+        <mxCell id="t1" value="MTC Operator
+Install" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#333333;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="wf">
+          <mxGeometry x="15" y="50" width="130" height="45" as="geometry"/>
+        </mxCell>
+        <mxCell id="t2" value="Cluster
+Registration" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#333333;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="wf">
+          <mxGeometry x="165" y="50" width="120" height="45" as="geometry"/>
+        </mxCell>
+        <mxCell id="t3" value="MigStorage
+Setup" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#333333;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="wf">
+          <mxGeometry x="305" y="50" width="120" height="45" as="geometry"/>
+        </mxCell>
+        <mxCell id="t4" value="MigPlan
+Creation" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#333333;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="wf">
+          <mxGeometry x="445" y="50" width="120" height="45" as="geometry"/>
+        </mxCell>
+        <mxCell id="t5" value="Quiesce
+Source Pods" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#333333;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="wf">
+          <mxGeometry x="15" y="120" width="120" height="45" as="geometry"/>
+        </mxCell>
+        <mxCell id="t6" value="Backup
+PVs + State" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#333333;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="wf">
+          <mxGeometry x="155" y="120" width="120" height="45" as="geometry"/>
+        </mxCell>
+        <mxCell id="t7" value="Restore on
+Target" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#333333;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="wf">
+          <mxGeometry x="295" y="120" width="120" height="45" as="geometry"/>
+        </mxCell>
+        <mxCell id="t8" value="DVM/DIM
+Operations" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#333333;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="wf">
+          <mxGeometry x="435" y="120" width="120" height="45" as="geometry"/>
+        </mxCell>
+        <mxCell id="t9" value="Cutover
+Complete" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#333333;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="wf">
+          <mxGeometry x="575" y="120" width="120" height="45" as="geometry"/>
+        </mxCell>
+        <mxCell id="te0" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#333333;fontSize=10;fontColor=#333333;labelBackgroundColor=#FFFFFF;strokeWidth=2;" edge="1" source="t1" target="t2" parent="wf">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="te1" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#333333;fontSize=10;fontColor=#333333;labelBackgroundColor=#FFFFFF;strokeWidth=2;" edge="1" source="t2" target="t3" parent="wf">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="te2" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#333333;fontSize=10;fontColor=#333333;labelBackgroundColor=#FFFFFF;strokeWidth=2;" edge="1" source="t3" target="t4" parent="wf">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="te3" value="Execute" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#C62828;fontSize=10;fontColor=#C62828;labelBackgroundColor=#FFFFFF;strokeWidth=2;" edge="1" source="t4" target="t5" parent="wf">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="te4" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#333333;fontSize=10;fontColor=#333333;labelBackgroundColor=#FFFFFF;strokeWidth=2;" edge="1" source="t5" target="t6" parent="wf">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="te5" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#333333;fontSize=10;fontColor=#333333;labelBackgroundColor=#FFFFFF;strokeWidth=2;" edge="1" source="t6" target="t7" parent="wf">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="te6" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#333333;fontSize=10;fontColor=#333333;labelBackgroundColor=#FFFFFF;strokeWidth=2;" edge="1" source="t7" target="t8" parent="wf">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="te7" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#333333;fontSize=10;fontColor=#333333;labelBackgroundColor=#FFFFFF;strokeWidth=2;" edge="1" source="t8" target="t9" parent="wf">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e1" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#333333;fontSize=10;fontColor=#333333;labelBackgroundColor=#FFFFFF;strokeWidth=2;" edge="1" source="trigger" target="wf" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="t" value="&lt;b&gt;MTC Container Migration Pipeline&lt;/b&gt;" style="text;html=1;align=center;verticalAlign=middle;strokeColor=none;fillColor=none;fontSize=18;fontColor=#333333;" vertex="1" parent="1">
+          <mxGeometry x="250" y="15" width="400" height="25" as="geometry"/>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

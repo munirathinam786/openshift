@@ -1,0 +1,221 @@
+# Project information
+site_name: Terraform IaC for OpenShift Multi Cluster AirGapped
+site_url: https://example.com/terraform-iac/
+site_author: Sathishkumar Munirathinam (sathishkumar.munirathinam@kyndryl.com)
+site_description: >-
+  Terraform Infrastructure as Code documentation for deploying multi-cluster
+  OpenShift environments on bare metal in air-gapped mode with GPU support,
+  disaster recovery, and centralized management.
+
+# Copyright
+copyright: >-
+  Copyright &copy; 2026 — Terraform IaC for OpenShift Multi Cluster AirGapped<br/>
+  <strong>Author:</strong> Sathishkumar Munirathinam &nbsp;|&nbsp;
+  <a href="mailto:sathishkumar.munirathinam@kyndryl.com">sathishkumar.munirathinam@kyndryl.com</a>
+
+theme:
+  icon:
+    previous: fontawesome/solid/angle-left
+    next: fontawesome/solid/angle-right
+    admonition:
+      note: octicons/tag-16
+      abstract: octicons/checklist-16
+      info: octicons/info-16
+      tip: octicons/squirrel-16
+      success: octicons/check-16
+      question: octicons/question-16
+      warning: octicons/alert-16
+      failure: octicons/x-circle-16
+      danger: octicons/zap-16
+      bug: octicons/bug-16
+      example: octicons/beaker-16
+      quote: octicons/quote-16
+  name: material
+  features:
+    - announce.dismiss
+    - content.code.annotate
+    - content.code.copy
+    - content.tabs.link
+    - content.tooltips
+    - header.autohide
+    - navigation.expand
+    - navigation.indexes
+    - navigation.instant
+    - navigation.instant.progress
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.top
+    - navigation.tracking
+    - search.highlight
+    - search.share
+    - search.suggest
+    - toc.integrate
+  palette:
+    primary: custom
+  font:
+    text: Roboto
+    code: Roboto Mono
+
+nav:
+  - Home: "index.md"
+  - Architecture:
+    - Multi-Cluster Overview: "architecture/terraform-multi-cluster-overview.md"
+  - Cluster Environments:
+    - DC Primary — OCP + OpenShift AI (IPI): "clusters/terraform-ocp-baremetal.md"
+    - UPI Baremetal — OCP + OpenShift AI: "clusters/terraform-upi-baremetal.md"
+    - DR Secondary: "clusters/terraform-dr-secondary.md"
+    - Management DC: "clusters/terraform-mgmt-dc.md"
+    - Management DR: "clusters/terraform-mgmt-dr.md"
+  - Draw.io Diagrams: "diagrams/index.md"
+  - CI/CD Pipeline:
+    - ADO Pipeline (IPI — Day 1): "pipeline/terraform-ado-pipeline.md"
+    - ADO Pipeline (IPI — Day 2): "pipeline/terraform-ado-pipeline-day2.md"
+    - ADO Pipeline (UPI — Day 1): "pipeline/terraform-upi-ado-pipeline.md"
+    - ADO Pipeline (UPI — Day 2): "pipeline/terraform-upi-ado-pipeline-day2.md"
+    - ACM Cluster Import Pipeline: "pipeline/terraform-acm-import-pipeline.md"
+    - ACM DR Failover/Failback Pipeline: "pipeline/terraform-acm-dr-pipeline.md"
+    - OpenShift Virtualization Pipeline: "pipeline/terraform-cnv-pipeline.md"
+    - VM Migration Pipeline: "pipeline/terraform-vm-migration-pipeline.md"
+    - MTC Container Migration Pipeline: "pipeline/terraform-mtc-pipeline.md"
+  - Terraform Code:
+    - IPI DC Primary (ipi-method/openshiftbaremetal):
+      - main.tf: "code/ipi-method/openshiftbaremetal/main.md"
+      - variables.tf: "code/ipi-method/openshiftbaremetal/variables.md"
+      - terraform.tfvars (Day 1): "code/ipi-method/openshiftbaremetal/tfvars.md"
+      - day2-terraform.tfvars (Day 2): "code/ipi-method/openshiftbaremetal/day2-tfvars.md"
+      - outputs.tf: "code/ipi-method/openshiftbaremetal/outputs.md"
+      - versions.tf: "code/ipi-method/openshiftbaremetal/versions.md"
+      - openshift-virtualization.tfvars: "code/ipi-method/openshiftbaremetal/openshift-virtualization-tfvars.md"
+      - vm-migration.tfvars: "code/ipi-method/openshiftbaremetal/vm-migration-tfvars.md"
+      - mtc.tfvars: "code/ipi-method/openshiftbaremetal/mtc-tfvars.md"
+    - IPI DR Secondary (ipi-method/openshiftbaremetal-dr):
+      - main.tf: "code/ipi-method/openshiftbaremetal-dr/main.md"
+      - variables.tf: "code/ipi-method/openshiftbaremetal-dr/variables.md"
+      - terraform.tfvars (Day 1): "code/ipi-method/openshiftbaremetal-dr/tfvars.md"
+      - day2-terraform.tfvars (Day 2): "code/ipi-method/openshiftbaremetal-dr/day2-tfvars.md"
+      - outputs.tf: "code/ipi-method/openshiftbaremetal-dr/outputs.md"
+      - versions.tf: "code/ipi-method/openshiftbaremetal-dr/versions.md"
+      - openshift-virtualization.tfvars: "code/ipi-method/openshiftbaremetal-dr/openshift-virtualization-tfvars.md"
+      - vm-migration.tfvars: "code/ipi-method/openshiftbaremetal-dr/vm-migration-tfvars.md"
+      - mtc.tfvars: "code/ipi-method/openshiftbaremetal-dr/mtc-tfvars.md"
+    - IPI Management DC (ipi-method/mgmt-dc):
+      - main.tf: "code/ipi-method/mgmt-dc/main.md"
+      - variables.tf: "code/ipi-method/mgmt-dc/variables.md"
+      - terraform.tfvars (Day 1): "code/ipi-method/mgmt-dc/tfvars.md"
+      - day2-terraform.tfvars (Day 2): "code/ipi-method/mgmt-dc/day2-tfvars.md"
+      - acm-import.tfvars (ACM Import): "code/ipi-method/mgmt-dc/acm-import-tfvars.md"
+      - acm-dr.tfvars (ACM DR): "code/ipi-method/mgmt-dc/acm-dr-tfvars.md"
+      - outputs.tf: "code/ipi-method/mgmt-dc/outputs.md"
+      - versions.tf: "code/ipi-method/mgmt-dc/versions.md"
+    - IPI Management DR (ipi-method/mgmt-dr):
+      - main.tf: "code/ipi-method/mgmt-dr/main.md"
+      - variables.tf: "code/ipi-method/mgmt-dr/variables.md"
+      - terraform.tfvars (Day 1): "code/ipi-method/mgmt-dr/tfvars.md"
+      - day2-terraform.tfvars (Day 2): "code/ipi-method/mgmt-dr/day2-tfvars.md"
+      - acm-import.tfvars (ACM Import): "code/ipi-method/mgmt-dr/acm-import-tfvars.md"
+      - acm-dr.tfvars (ACM DR): "code/ipi-method/mgmt-dr/acm-dr-tfvars.md"
+      - outputs.tf: "code/ipi-method/mgmt-dr/outputs.md"
+      - versions.tf: "code/ipi-method/mgmt-dr/versions.md"
+    - IPI Azure DevOps Pipeline:
+      - azure-pipelines.yml (Day 1): "code/ipi-method/pipeline/azure-pipelines.md"
+      - azure-pipelines-day2.yml (Day 2): "code/ipi-method/pipeline/azure-pipelines-day2.md"
+      - azure-pipelines-acm-import.yml (ACM Import): "code/ipi-method/pipeline/azure-pipelines-acm-import.md"
+      - azure-pipelines-acm-dr.yml (ACM DR): "code/ipi-method/pipeline/azure-pipelines-acm-dr.md"
+      - azure-pipelines-cnv.yml (CNV): "code/ipi-method/pipeline/azure-pipelines-cnv.md"
+      - azure-pipelines-vm-migration.yml (VM Migration): "code/ipi-method/pipeline/azure-pipelines-vm-migration.md"
+      - azure-pipelines-mtc.yml (MTC): "code/ipi-method/pipeline/azure-pipelines-mtc.md"
+    - UPI DC Primary (upi-method/openshiftbaremetal):
+      - main.tf: "code/upi-method/main.md"
+      - variables.tf: "code/upi-method/variables.md"
+      - terraform.tfvars (Day 1): "code/upi-method/tfvars.md"
+      - day2-terraform.tfvars (Day 2): "code/upi-method/day2-tfvars.md"
+      - outputs.tf: "code/upi-method/outputs.md"
+      - versions.tf: "code/upi-method/versions.md"
+      - openshift-virtualization.tfvars: "code/upi-method/openshift-virtualization-tfvars.md"
+      - vm-migration.tfvars: "code/upi-method/vm-migration-tfvars.md"
+      - mtc.tfvars: "code/upi-method/mtc-tfvars.md"
+      - azure-pipelines-upi.yml (Day 1): "code/upi-method/azure-pipelines-upi.md"
+      - azure-pipelines-day2-upi.yml (Day 2): "code/upi-method/azure-pipelines-day2-upi.md"
+      - azure-pipelines-acm-import.yml (ACM Import): "code/upi-method/azure-pipelines-acm-import.md"
+      - azure-pipelines-acm-dr.yml (ACM DR): "code/upi-method/azure-pipelines-acm-dr.md"
+      - azure-pipelines-cnv.yml (CNV): "code/upi-method/azure-pipelines-cnv.md"
+      - azure-pipelines-vm-migration.yml (VM Migration): "code/upi-method/azure-pipelines-vm-migration.md"
+      - azure-pipelines-mtc.yml (MTC): "code/upi-method/azure-pipelines-mtc.md"
+    - UPI DR Secondary (upi-method/openshiftbaremetal-dr):
+      - main.tf: "code/upi-method/openshiftbaremetal-dr/main.md"
+      - variables.tf: "code/upi-method/openshiftbaremetal-dr/variables.md"
+      - terraform.tfvars (Day 1): "code/upi-method/openshiftbaremetal-dr/tfvars.md"
+      - day2-terraform.tfvars (Day 2): "code/upi-method/openshiftbaremetal-dr/day2-tfvars.md"
+      - outputs.tf: "code/upi-method/openshiftbaremetal-dr/outputs.md"
+      - versions.tf: "code/upi-method/openshiftbaremetal-dr/versions.md"
+      - openshift-virtualization.tfvars: "code/upi-method/openshiftbaremetal-dr/openshift-virtualization-tfvars.md"
+      - vm-migration.tfvars: "code/upi-method/openshiftbaremetal-dr/vm-migration-tfvars.md"
+      - mtc.tfvars: "code/upi-method/openshiftbaremetal-dr/mtc-tfvars.md"
+    - UPI Management DC (upi-method/mgmt-dc):
+      - main.tf: "code/upi-method/mgmt-dc/main.md"
+      - variables.tf: "code/upi-method/mgmt-dc/variables.md"
+      - terraform.tfvars (Day 1): "code/upi-method/mgmt-dc/tfvars.md"
+      - day2-terraform.tfvars (Day 2): "code/upi-method/mgmt-dc/day2-tfvars.md"
+      - acm-import.tfvars (ACM Import): "code/upi-method/mgmt-dc/acm-import-tfvars.md"
+      - acm-dr.tfvars (ACM DR): "code/upi-method/mgmt-dc/acm-dr-tfvars.md"
+      - outputs.tf: "code/upi-method/mgmt-dc/outputs.md"
+      - versions.tf: "code/upi-method/mgmt-dc/versions.md"
+    - UPI Management DR (upi-method/mgmt-dr):
+      - main.tf: "code/upi-method/mgmt-dr/main.md"
+      - variables.tf: "code/upi-method/mgmt-dr/variables.md"
+      - terraform.tfvars (Day 1): "code/upi-method/mgmt-dr/tfvars.md"
+      - day2-terraform.tfvars (Day 2): "code/upi-method/mgmt-dr/day2-tfvars.md"
+      - acm-import.tfvars (ACM Import): "code/upi-method/mgmt-dr/acm-import-tfvars.md"
+      - acm-dr.tfvars (ACM DR): "code/upi-method/mgmt-dr/acm-dr-tfvars.md"
+      - outputs.tf: "code/upi-method/mgmt-dr/outputs.md"
+      - versions.tf: "code/upi-method/mgmt-dr/versions.md"
+
+plugins:
+  - search
+  - glightbox
+  - tags
+
+markdown_extensions:
+  - tables
+  - abbr
+  - attr_list
+  - md_in_html
+  - def_list
+  - admonition
+  - footnotes
+  - toc:
+      permalink: true
+  - pymdownx.arithmatex:
+      generic: true
+  - pymdownx.betterem:
+      smart_enable: all
+  - pymdownx.caret
+  - pymdownx.details
+  - pymdownx.emoji:
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.keys
+  - pymdownx.mark
+  - pymdownx.smartsymbols
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.tilde
+
+extra_css:
+  - stylesheets/extra.css
+
+extra:
+  social:
+    - icon: fontawesome/solid/envelope
+      link: mailto:sathishkumar.munirathinam@kyndryl.com
+      name: Sathishkumar Munirathinam
+  generator: false
+
+extra_javascript:
+  - https://unpkg.com/tablesort@5.3.0/dist/tablesort.min.js

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="app.diagrams.net" modified="2026-04-07T00:00:00.000Z" agent="GitHub Copilot" version="24.0.0" type="device">
+  <diagram id="d1" name="ACM Re-Import">
+    <mxGraphModel dx="1422" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="540" pageHeight="210" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+        <mxCell id="hub" value="ACM Hub
+(Mgmt DR — Promoted)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#EF6C00;fontSize=11;fontStyle=1;fontColor=#333333;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="40" y="80" width="200" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="dc" value="DC Primary
+ManagedCluster" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F5E9;strokeColor=#2E7D32;fontSize=11;fontStyle=1;fontColor=#2E7D32;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="340" y="50" width="160" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="dr" value="DR Secondary
+ManagedCluster" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E3F2FD;strokeColor=#1565C0;fontSize=11;fontStyle=1;fontColor=#1565C0;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="340" y="130" width="160" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="e1" value="Re-Import" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#EF6C00;fontSize=10;fontColor=#EF6C00;labelBackgroundColor=#FFFFFF;strokeWidth=2;" edge="1" source="hub" target="dc" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e2" value="Re-Import" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#EF6C00;fontSize=10;fontColor=#EF6C00;labelBackgroundColor=#FFFFFF;strokeWidth=2;" edge="1" source="hub" target="dr" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="t" value="&lt;b&gt;ACM Hub Post-Failover Re-Import&lt;/b&gt;" style="text;html=1;align=center;verticalAlign=middle;strokeColor=none;fillColor=none;fontSize=18;fontColor=#333333;" vertex="1" parent="1">
+          <mxGeometry x="120" y="15" width="350" height="30" as="geometry"/>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

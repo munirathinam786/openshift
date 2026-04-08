@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="app.diagrams.net" modified="2026-04-07T00:00:00.000Z" agent="GitHub Copilot" version="24.0.0" type="device">
+  <diagram id="d1" name="UPI Install Flow">
+    <mxGraphModel dx="1422" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1350" pageHeight="420" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+        <mxCell id="p1" value="&lt;b&gt;Phase 1: Prerequisites&lt;/b&gt;" style="swimlane;startSize=35;fillColor=#E3F2FD;fontColor=#1565C0;strokeColor=#1565C0;rounded=1;fontSize=12;fontStyle=1;whiteSpace=wrap;html=1;container=1;collapsible=0;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="20" y="60" width="250" height="265" as="geometry"/>
+        </mxCell>
+        <mxCell id="dns" value="DNS Records" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#333333;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="p1">
+          <mxGeometry x="20" y="50" width="160" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="lb" value="HAProxy LB Config
+(Bootstrap backend incl.)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#333333;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="p1">
+          <mxGeometry x="20" y="100" width="200" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="qm" value="Quay Mirror
+(disconnected only)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#333333;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="p1">
+          <mxGeometry x="20" y="160" width="180" height="45" as="geometry"/>
+        </mxCell>
+        <mxCell id="p2" value="&lt;b&gt;Phase 2: Ignition&lt;/b&gt;" style="swimlane;startSize=35;fillColor=#FFF3E0;fontColor=#EF6C00;strokeColor=#EF6C00;rounded=1;fontSize=12;fontStyle=1;whiteSpace=wrap;html=1;container=1;collapsible=0;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="280" y="60" width="250" height="265" as="geometry"/>
+        </mxCell>
+        <mxCell id="ic" value="install-config.yaml
+platform: none" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#333333;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="p2">
+          <mxGeometry x="20" y="50" width="180" height="45" as="geometry"/>
+        </mxCell>
+        <mxCell id="ign" value="openshift-install
+create ignition-configs" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#333333;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="p2">
+          <mxGeometry x="20" y="105" width="200" height="45" as="geometry"/>
+        </mxCell>
+        <mxCell id="http" value="Bastion HTTP Server
+Serve *.ign on :8080" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#333333;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="p2">
+          <mxGeometry x="20" y="160" width="200" height="45" as="geometry"/>
+        </mxCell>
+        <mxCell id="p3" value="&lt;b&gt;Phase 3: Bootstrap + Control Plane&lt;/b&gt;" style="swimlane;startSize=35;fillColor=#FCE4EC;fontColor=#C62828;strokeColor=#C62828;rounded=1;fontSize=12;fontStyle=1;whiteSpace=wrap;html=1;container=1;collapsible=0;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="540" y="60" width="250" height="325" as="geometry"/>
+        </mxCell>
+        <mxCell id="boot" value="Boot Bootstrap VM
+Fetch bootstrap.ign" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#333333;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="p3">
+          <mxGeometry x="20" y="50" width="180" height="45" as="geometry"/>
+        </mxCell>
+        <mxCell id="cpn" value="Boot 3 Masters
+Fetch master.ign" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#333333;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="p3">
+          <mxGeometry x="20" y="105" width="180" height="45" as="geometry"/>
+        </mxCell>
+        <mxCell id="bw" value="bootstrap_complete
+Control plane self-hosted" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#333333;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="p3">
+          <mxGeometry x="20" y="160" width="210" height="45" as="geometry"/>
+        </mxCell>
+        <mxCell id="bc" value="bootstrap_cleanup
+Remove from LB, Power off" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FCE4EC;strokeColor=#C62828;fontSize=11;fontStyle=1;fontColor=#C62828;arcSize=10;" vertex="1" parent="p3">
+          <mxGeometry x="20" y="215" width="210" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="p4" value="&lt;b&gt;Phase 4: Workers + CSRs&lt;/b&gt;" style="swimlane;startSize=35;fillColor=#E8F5E9;fontColor=#2E7D32;strokeColor=#2E7D32;rounded=1;fontSize=12;fontStyle=1;whiteSpace=wrap;html=1;container=1;collapsible=0;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="800" y="60" width="250" height="260" as="geometry"/>
+        </mxCell>
+        <mxCell id="wk" value="Boot Workers
+Fetch worker.ign" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#333333;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="p4">
+          <mxGeometry x="20" y="50" width="180" height="45" as="geometry"/>
+        </mxCell>
+        <mxCell id="csr" value="Approve CSRs
+oc adm certificate approve" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#333333;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="p4">
+          <mxGeometry x="20" y="105" width="210" height="45" as="geometry"/>
+        </mxCell>
+        <mxCell id="cc" value="cluster_complete" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#333333;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="p4">
+          <mxGeometry x="20" y="160" width="140" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="p5" value="&lt;b&gt;Phase 5: Day-2 Operators&lt;/b&gt;" style="swimlane;startSize=35;fillColor=#F3E5F5;fontColor=#7B1FA2;strokeColor=#7B1FA2;rounded=1;fontSize=12;fontStyle=1;whiteSpace=wrap;html=1;container=1;collapsible=0;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="1060" y="60" width="250" height="220" as="geometry"/>
+        </mxCell>
+        <mxCell id="d2" value="NFD, GPU, ODF, AI,
+ServiceMesh, Serverless,
+Submariner, ACM, ACS, Quay
+(per cluster role)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#333333;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="p5">
+          <mxGeometry x="20" y="50" width="230" height="80" as="geometry"/>
+        </mxCell>
+        <mxCell id="pa1" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#333333;fontSize=10;fontColor=#333333;labelBackgroundColor=#FFFFFF;strokeWidth=2;" edge="1" source="p1" target="p2" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="pa2" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#333333;fontSize=10;fontColor=#333333;labelBackgroundColor=#FFFFFF;strokeWidth=2;" edge="1" source="p2" target="p3" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="pa3" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#333333;fontSize=10;fontColor=#333333;labelBackgroundColor=#FFFFFF;strokeWidth=2;" edge="1" source="p3" target="p4" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="pa4" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#333333;fontSize=10;fontColor=#333333;labelBackgroundColor=#FFFFFF;strokeWidth=2;" edge="1" source="p4" target="p5" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="t3" value="&lt;b&gt;UPI Install Flow Per Cluster — 5 Phases&lt;/b&gt;" style="text;html=1;align=center;verticalAlign=middle;strokeColor=none;fillColor=none;fontSize=18;fontColor=#333333;" vertex="1" parent="1">
+          <mxGeometry x="350" y="10" width="700" height="35" as="geometry"/>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

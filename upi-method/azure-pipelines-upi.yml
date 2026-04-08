@@ -1,0 +1,390 @@
+# =============================================================================
+# Azure DevOps Pipeline — OpenShift UPI Baremetal Deployment
+# UPI-specific: multi-phase install with manual node boot steps
+# =============================================================================
+
+trigger:
+  branches:
+    include:
+      - main
+  paths:
+    include:
+      - upi-method/**
+
+parameters:
+  # ---- Boot Method ----
+  - name: bootMethod
+    displayName: "Node Boot Method"
+    type: string
+    default: "pxe"
+    values:
+      - pxe                     # Automated PXE boot
+      - iso                     # ISO boot with embedded ignition
+      - manual                  # Operator manually boots nodes
+
+  # ---- Deployment Phase ----
+  - name: deploymentPhase
+    displayName: "Deployment Phase"
+    type: string
+    default: "full"
+    values:
+      - prerequisites           # DNS + LB + Quay Mirror only
+      - ignition                # Generate install-config + ignition configs
+      - bootstrap               # Boot bootstrap + control plane nodes
+      - compute                 # Boot worker nodes + approve CSRs
+      - day2-operators          # Install all day-2 operators
+      - full                    # Complete end-to-end deployment
+
+  # ---- Terraform Action ----
+  - name: terraformAction
+    displayName: "Terraform Action"
+    type: string
+    default: "plan"
+    values:
+      - plan                    # Preview changes only
+      - apply                   # Apply changes
+      - destroy                 # Tear down infrastructure
+
+  # ---- ODF Replication (DC ↔ DR) ----
+  - name: enableOdfReplication
+    displayName: "Enable ODF DR Replication (DC ↔ DR)"
+    type: boolean
+    default: false
+
+  - name: odfDrMode
+    displayName: "ODF DR Mode"
+    type: string
+    default: "regional-dr"
+    values:
+      - regional-dr             # Async replication (RPO: minutes)
+      - metro-dr                # Sync replication (RPO: zero)
+
+  # ---- Submariner Cross-Site Networking ----
+  - name: enableSubmariner
+    displayName: "Enable Submariner (DC ↔ DR cross-cluster networking)"
+    type: boolean
+    default: false
+
+  # ---- Variable Group ----
+  - name: variableGroup
+    displayName: "ADO Variable Group (for secrets)"
+    type: string
+    default: "ocp-baremetal-upi-secrets"
+
+variables:
+  - group: ${{ parameters.variableGroup }}
+  - name: TF_IN_AUTOMATION
+    value: "true"
+  - name: TF_INPUT
+    value: "false"
+  - name: WORKING_DIR
+    value: "upi-method"
+
+stages:
+  # =====================================================================
+  # Stage 1: Prerequisites — DNS, Load Balancer, Quay Mirror
+  # =====================================================================
+  - stage: Prerequisites
+    displayName: "Prerequisites — DNS + HAProxy LB + Quay Mirror"
+    condition: |
+      and(
+        succeeded(),
+        or(
+          eq('${{ parameters.deploymentPhase }}', 'prerequisites'),
+          eq('${{ parameters.deploymentPhase }}', 'full')
+        )
+      )
+    jobs:
+      - job: TerraformPrerequisites
+        displayName: "Terraform — Prerequisites"
+        pool:
+          name: "self-hosted-linux"
+        steps:
+          - checkout: self
+
+          - task: TerraformInstaller@1
+            displayName: "Install Terraform"
+            inputs:
+              terraformVersion: "latest"
+
+          - script: |
+              cd $(WORKING_DIR)
+              terraform init -input=false
+            displayName: "Terraform Init"
+
+          - script: |
+              cd $(WORKING_DIR)
+              terraform ${{ parameters.terraformAction }} \
+                -var-file=terraform.tfvars \
+                -var boot_method=${{ parameters.bootMethod }} \
+                -target=module.dns \
+                -target=module.haproxy \
+                -target=module.quay_mirror \
+                -input=false \
+                $(if [ "${{ parameters.terraformAction }}" = "apply" ] || [ "${{ parameters.terraformAction }}" = "destroy" ]; then echo "-auto-approve"; fi)
+            displayName: "Terraform ${{ parameters.terraformAction }} — Prerequisites"
+            env:
+              TF_VAR_quay_admin_password: $(quay-admin-password)
+
+  # =====================================================================
+  # Stage 2: Generate Ignition Configs
+  # =====================================================================
+  - stage: Ignition
+    displayName: "Generate install-config.yaml + Ignition Configs"
+    condition: |
+      and(
+        succeeded(),
+        or(
+          eq('${{ parameters.deploymentPhase }}', 'ignition'),
+          eq('${{ parameters.deploymentPhase }}', 'full')
+        )
+      )
+    dependsOn:
+      - ${{ if eq(parameters.deploymentPhase, 'full') }}:
+          - Prerequisites
+    jobs:
+      - job: TerraformIgnition
+        displayName: "Terraform — Ignition Generation"
+        pool:
+          name: "self-hosted-linux"
+        steps:
+          - checkout: self
+
+          - task: TerraformInstaller@1
+            displayName: "Install Terraform"
+            inputs:
+              terraformVersion: "latest"
+
+          - script: |
+              cd $(WORKING_DIR)
+              terraform init -input=false
+            displayName: "Terraform Init"
+
+          - script: |
+              cd $(WORKING_DIR)
+              terraform ${{ parameters.terraformAction }} \
+                -var-file=terraform.tfvars \
+                -var boot_method=${{ parameters.bootMethod }} \
+                -target=module.install_config \
+                -target=module.ignition \
+                -target=module.ignition_server \
+                -input=false \
+                $(if [ "${{ parameters.terraformAction }}" = "apply" ] || [ "${{ parameters.terraformAction }}" = "destroy" ]; then echo "-auto-approve"; fi)
+            displayName: "Terraform ${{ parameters.terraformAction }} — Ignition"
+            env:
+              TF_VAR_quay_admin_password: $(quay-admin-password)
+
+  # =====================================================================
+  # Stage 3: Bootstrap + Control Plane
+  # =====================================================================
+  - stage: Bootstrap
+    displayName: "Boot Bootstrap + Control Plane Nodes"
+    condition: |
+      and(
+        succeeded(),
+        or(
+          eq('${{ parameters.deploymentPhase }}', 'bootstrap'),
+          eq('${{ parameters.deploymentPhase }}', 'full')
+        )
+      )
+    dependsOn:
+      - ${{ if eq(parameters.deploymentPhase, 'full') }}:
+          - Ignition
+    jobs:
+      - job: TerraformBootstrap
+        displayName: "Terraform — Bootstrap + Control Plane"
+        pool:
+          name: "self-hosted-linux"
+        steps:
+          - checkout: self
+
+          - task: TerraformInstaller@1
+            displayName: "Install Terraform"
+            inputs:
+              terraformVersion: "latest"
+
+          - script: |
+              cd $(WORKING_DIR)
+              terraform init -input=false
+            displayName: "Terraform Init"
+
+          - script: |
+              cd $(WORKING_DIR)
+              terraform ${{ parameters.terraformAction }} \
+                -var-file=terraform.tfvars \
+                -var boot_method=${{ parameters.bootMethod }} \
+                -target=module.bootstrap \
+                -target=module.control_plane \
+                -target=module.bootstrap_complete \
+                -input=false \
+                $(if [ "${{ parameters.terraformAction }}" = "apply" ] || [ "${{ parameters.terraformAction }}" = "destroy" ]; then echo "-auto-approve"; fi)
+            displayName: "Terraform ${{ parameters.terraformAction }} — Bootstrap"
+            env:
+              TF_VAR_quay_admin_password: $(quay-admin-password)
+
+      - ${{ if eq(parameters.bootMethod, 'manual') }}:
+          - job: ManualBootGate
+            displayName: "Manual Boot Gate — Approve after booting nodes"
+            dependsOn: TerraformBootstrap
+            pool: server
+            steps:
+              - task: ManualValidation@0
+                displayName: "Confirm control plane nodes are booted"
+                inputs:
+                  notifyUsers: ""
+                  instructions: |
+                    Boot the 3 control plane nodes using the RHCOS ISO/PXE with the master ignition URL.
+                    Approve this step once all control plane nodes have started.
+
+  # =====================================================================
+  # Stage 4: Compute Nodes + CSR Approval
+  # =====================================================================
+  - stage: Compute
+    displayName: "Boot Compute Nodes + Approve CSRs"
+    condition: |
+      and(
+        succeeded(),
+        or(
+          eq('${{ parameters.deploymentPhase }}', 'compute'),
+          eq('${{ parameters.deploymentPhase }}', 'full')
+        )
+      )
+    dependsOn:
+      - ${{ if eq(parameters.deploymentPhase, 'full') }}:
+          - Bootstrap
+    jobs:
+      - job: TerraformCompute
+        displayName: "Terraform — Compute Nodes"
+        pool:
+          name: "self-hosted-linux"
+        steps:
+          - checkout: self
+
+          - task: TerraformInstaller@1
+            displayName: "Install Terraform"
+            inputs:
+              terraformVersion: "latest"
+
+          - script: |
+              cd $(WORKING_DIR)
+              terraform init -input=false
+            displayName: "Terraform Init"
+
+          - script: |
+              cd $(WORKING_DIR)
+              terraform ${{ parameters.terraformAction }} \
+                -var-file=terraform.tfvars \
+                -var boot_method=${{ parameters.bootMethod }} \
+                -target=module.compute_nodes \
+                -target=module.cluster_complete \
+                -input=false \
+                $(if [ "${{ parameters.terraformAction }}" = "apply" ] || [ "${{ parameters.terraformAction }}" = "destroy" ]; then echo "-auto-approve"; fi)
+            displayName: "Terraform ${{ parameters.terraformAction }} — Compute"
+            env:
+              TF_VAR_quay_admin_password: $(quay-admin-password)
+
+  # =====================================================================
+  # Stage 5: Day-2 Operators
+  # =====================================================================
+  - stage: Day2_Operators
+    displayName: "Day-2 Operators — GPU, ODF, AI, Monitoring"
+    condition: |
+      and(
+        succeeded(),
+        or(
+          eq('${{ parameters.deploymentPhase }}', 'day2-operators'),
+          eq('${{ parameters.deploymentPhase }}', 'full')
+        )
+      )
+    dependsOn:
+      - ${{ if eq(parameters.deploymentPhase, 'full') }}:
+          - Compute
+    jobs:
+      - job: TerraformDay2
+        displayName: "Terraform — Day-2 Operators"
+        pool:
+          name: "self-hosted-linux"
+        steps:
+          - checkout: self
+
+          - task: TerraformInstaller@1
+            displayName: "Install Terraform"
+            inputs:
+              terraformVersion: "latest"
+
+          - script: |
+              cd $(WORKING_DIR)
+              terraform init -input=false
+            displayName: "Terraform Init"
+
+          - script: |
+              cd $(WORKING_DIR)
+              EXTRA_ARGS=""
+              if [ "${{ parameters.enableSubmariner }}" = "true" ]; then
+                EXTRA_ARGS="$EXTRA_ARGS -var enable_submariner=true"
+              fi
+              if [ "${{ parameters.enableOdfReplication }}" = "true" ]; then
+                EXTRA_ARGS="$EXTRA_ARGS -var enable_odf_dr=true -var odf_dr_mode=${{ parameters.odfDrMode }}"
+              fi
+              terraform ${{ parameters.terraformAction }} \
+                -var-file=terraform.tfvars \
+                -var boot_method=${{ parameters.bootMethod }} \
+                $EXTRA_ARGS \
+                -input=false \
+                $(if [ "${{ parameters.terraformAction }}" = "apply" ] || [ "${{ parameters.terraformAction }}" = "destroy" ]; then echo "-auto-approve"; fi)
+            displayName: "Terraform ${{ parameters.terraformAction }} — Day-2 Operators"
+            env:
+              TF_VAR_quay_admin_password: $(quay-admin-password)
+              TF_VAR_ngc_api_key: $(ngc-api-key)
+              TF_VAR_odf_dr_s3_access_key: $(odf-dr-s3-access-key)
+              TF_VAR_odf_dr_s3_secret_key: $(odf-dr-s3-secret-key)
+
+  # =====================================================================
+  # Stage 6: Deployment Summary
+  # =====================================================================
+  - stage: Summary
+    displayName: "Deployment Summary"
+    dependsOn:
+      - Prerequisites
+      - Ignition
+      - Bootstrap
+      - Compute
+      - Day2_Operators
+    condition: always()
+    jobs:
+      - job: PrintSummary
+        displayName: "Print UPI Deployment Summary"
+        pool:
+          name: "self-hosted-linux"
+        steps:
+          - script: |
+              echo "============================================="
+              echo "  OpenShift UPI Deployment Summary"
+              echo "============================================="
+              echo ""
+              echo "  Install Method:       UPI (User Provisioned Infrastructure)"
+              echo "  Boot Method:          ${{ parameters.bootMethod }}"
+              echo "  Deployment Phase:     ${{ parameters.deploymentPhase }}"
+              echo "  Terraform Action:     ${{ parameters.terraformAction }}"
+              echo "  Submariner:           ${{ parameters.enableSubmariner }}"
+              echo "  ODF Replication:      ${{ parameters.enableOdfReplication }}"
+              echo "  ODF DR Mode:          ${{ parameters.odfDrMode }}"
+              echo ""
+              echo "  UPI Deployment Phases:"
+              echo "  ──────────────────────"
+              echo "  1. Prerequisites    → DNS + HAProxy LB + Quay Mirror"
+              echo "  2. Ignition         → install-config.yaml + ignition configs"
+              echo "  3. Bootstrap        → Bootstrap node + control plane boot"
+              echo "  4. Compute          → Worker nodes + CSR approval"
+              echo "  5. Day-2 Operators  → GPU, ODF, OpenShift AI, monitoring"
+              echo ""
+              echo "  Key UPI Differences from IPI:"
+              echo "  ─────────────────────────────"
+              echo "  • platform: none (no BMC management)"
+              echo "  • External HAProxy load balancer (required)"
+              echo "  • Manual/PXE/ISO node boot"
+              echo "  • Explicit CSR approval for worker nodes"
+              echo "  • Bootstrap node removed after install"
+              echo ""
+              echo "============================================="
+            displayName: "Summary"

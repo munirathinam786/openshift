@@ -1,0 +1,199 @@
+# =============================================================================
+# Azure DevOps Pipeline — MTC (Migration Toolkit for Containers) — UPI Method
+# Migrates containerized workloads between OpenShift clusters (UPI clusters)
+# =============================================================================
+
+trigger: none
+
+parameters:
+  - name: deploymentScope
+    displayName: "Target Cluster"
+    type: string
+    default: "dc-only"
+    values:
+      - dc-only
+      - dr-only
+
+  - name: mtcSourceClusterName
+    displayName: "Source Cluster Name"
+    type: string
+    default: "source-ocp-cluster"
+
+  - name: mtcSourceClusterUrl
+    displayName: "Source Cluster API URL"
+    type: string
+    default: ""
+
+  - name: mtcSourceClusterInsecure
+    displayName: "Skip TLS for Source Cluster"
+    type: boolean
+    default: false
+
+  - name: mtcMigrationType
+    displayName: "Migration Type"
+    type: string
+    default: "final"
+    values:
+      - stage
+      - final
+      - rollback
+
+  - name: mtcPvCopyMethod
+    displayName: "PV Copy Method"
+    type: string
+    default: "filesystem"
+    values:
+      - filesystem
+      - snapshot
+
+  - name: mtcPvVerify
+    displayName: "Verify PV Data Integrity"
+    type: boolean
+    default: true
+
+  - name: mtcDirectVolumeMigration
+    displayName: "Enable Direct Volume Migration"
+    type: boolean
+    default: true
+
+  - name: mtcDirectImageMigration
+    displayName: "Enable Direct Image Migration"
+    type: boolean
+    default: true
+
+  - name: mtcQuiescePods
+    displayName: "Quiesce Source Pods"
+    type: boolean
+    default: true
+
+  - name: mtcKeepAnnotations
+    displayName: "Preserve Annotations"
+    type: boolean
+    default: true
+
+  - name: mtcPreserveNodePorts
+    displayName: "Preserve NodePort Values"
+    type: boolean
+    default: false
+
+  - name: terraformAction
+    displayName: "Terraform Action"
+    type: string
+    default: "plan"
+    values:
+      - plan
+      - apply
+      - destroy
+
+  - name: variableGroup
+    displayName: "ADO Variable Group (for secrets)"
+    type: string
+    default: "ocp-mtc-secrets"
+
+variables:
+  - group: ${{ parameters.variableGroup }}
+  - name: TF_IN_AUTOMATION
+    value: "true"
+  - name: TF_INPUT
+    value: "false"
+
+stages:
+  - stage: MTC_DC_Primary
+    displayName: "MTC — UPI DC Primary"
+    condition: |
+      and(
+        succeeded(),
+        eq('${{ parameters.deploymentScope }}', 'dc-only')
+      )
+    jobs:
+      - job: MTCDCPrimary
+        displayName: "Terraform MTC — UPI DC Primary"
+        pool:
+          name: "self-hosted-linux"
+        steps:
+          - checkout: self
+
+          - task: TerraformInstaller@1
+            displayName: "Install Terraform"
+            inputs:
+              terraformVersion: "latest"
+
+          - script: |
+              cd openshiftbaremetal
+              terraform init -input=false
+            displayName: "Terraform Init — UPI DC Primary"
+
+          - script: |
+              cd openshiftbaremetal
+              terraform ${{ parameters.terraformAction }} \
+                -var-file=terraform.tfvars \
+                -var-file=mtc.tfvars \
+                -var enable_mtc=true \
+                -var mtc_source_cluster_name=${{ parameters.mtcSourceClusterName }} \
+                -var mtc_source_cluster_url="${{ parameters.mtcSourceClusterUrl }}" \
+                -var mtc_source_cluster_insecure=${{ parameters.mtcSourceClusterInsecure }} \
+                -var mtc_migration_type=${{ parameters.mtcMigrationType }} \
+                -var mtc_pv_copy_method=${{ parameters.mtcPvCopyMethod }} \
+                -var mtc_pv_verify=${{ parameters.mtcPvVerify }} \
+                -var mtc_enable_direct_volume_migration=${{ parameters.mtcDirectVolumeMigration }} \
+                -var mtc_enable_direct_image_migration=${{ parameters.mtcDirectImageMigration }} \
+                -var mtc_quiesce_pods=${{ parameters.mtcQuiescePods }} \
+                -var mtc_keep_annotations=${{ parameters.mtcKeepAnnotations }} \
+                -var mtc_preserve_node_ports=${{ parameters.mtcPreserveNodePorts }} \
+                -input=false \
+                $(if [ "${{ parameters.terraformAction }}" = "apply" ] || [ "${{ parameters.terraformAction }}" = "destroy" ]; then echo "-auto-approve"; fi)
+            displayName: "Terraform ${{ parameters.terraformAction }} — UPI DC Primary MTC"
+            env:
+              TF_VAR_mtc_source_cluster_sa_token: $(mtc-source-cluster-sa-token)
+              TF_VAR_mtc_replication_repository_access_key: $(mtc-s3-access-key)
+              TF_VAR_mtc_replication_repository_secret_key: $(mtc-s3-secret-key)
+
+  - stage: MTC_DR_Secondary
+    displayName: "MTC — UPI DR Secondary"
+    condition: |
+      and(
+        succeeded(),
+        eq('${{ parameters.deploymentScope }}', 'dr-only')
+      )
+    jobs:
+      - job: MTCDRSecondary
+        displayName: "Terraform MTC — UPI DR Secondary"
+        pool:
+          name: "self-hosted-linux"
+        steps:
+          - checkout: self
+
+          - task: TerraformInstaller@1
+            displayName: "Install Terraform"
+            inputs:
+              terraformVersion: "latest"
+
+          - script: |
+              cd openshiftbaremetal-dr
+              terraform init -input=false
+            displayName: "Terraform Init — UPI DR Secondary"
+
+          - script: |
+              cd openshiftbaremetal-dr
+              terraform ${{ parameters.terraformAction }} \
+                -var-file=terraform.tfvars \
+                -var-file=mtc.tfvars \
+                -var enable_mtc=true \
+                -var mtc_source_cluster_name=${{ parameters.mtcSourceClusterName }} \
+                -var mtc_source_cluster_url="${{ parameters.mtcSourceClusterUrl }}" \
+                -var mtc_source_cluster_insecure=${{ parameters.mtcSourceClusterInsecure }} \
+                -var mtc_migration_type=${{ parameters.mtcMigrationType }} \
+                -var mtc_pv_copy_method=${{ parameters.mtcPvCopyMethod }} \
+                -var mtc_pv_verify=${{ parameters.mtcPvVerify }} \
+                -var mtc_enable_direct_volume_migration=${{ parameters.mtcDirectVolumeMigration }} \
+                -var mtc_enable_direct_image_migration=${{ parameters.mtcDirectImageMigration }} \
+                -var mtc_quiesce_pods=${{ parameters.mtcQuiescePods }} \
+                -var mtc_keep_annotations=${{ parameters.mtcKeepAnnotations }} \
+                -var mtc_preserve_node_ports=${{ parameters.mtcPreserveNodePorts }} \
+                -input=false \
+                $(if [ "${{ parameters.terraformAction }}" = "apply" ] || [ "${{ parameters.terraformAction }}" = "destroy" ]; then echo "-auto-approve"; fi)
+            displayName: "Terraform ${{ parameters.terraformAction }} — UPI DR Secondary MTC"
+            env:
+              TF_VAR_mtc_source_cluster_sa_token: $(mtc-source-cluster-sa-token)
+              TF_VAR_mtc_replication_repository_access_key: $(mtc-s3-access-key)
+              TF_VAR_mtc_replication_repository_secret_key: $(mtc-s3-secret-key)

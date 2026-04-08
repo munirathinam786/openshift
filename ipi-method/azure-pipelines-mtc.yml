@@ -1,0 +1,243 @@
+# =============================================================================
+# Azure DevOps Pipeline — MTC (Migration Toolkit for Containers)
+# Migrates containerized workloads between OpenShift clusters
+# =============================================================================
+
+trigger: none
+
+parameters:
+  - name: deploymentScope
+    displayName: "Target Cluster"
+    type: string
+    default: "dc-only"
+    values:
+      - dc-only
+      - dr-only
+
+  # ---- Source Cluster ----
+  - name: mtcSourceClusterName
+    displayName: "Source Cluster Name"
+    type: string
+    default: "source-ocp-cluster"
+
+  - name: mtcSourceClusterUrl
+    displayName: "Source Cluster API URL"
+    type: string
+    default: ""
+
+  - name: mtcSourceClusterInsecure
+    displayName: "Skip TLS for Source Cluster"
+    type: boolean
+    default: false
+
+  # ---- Migration Type ----
+  - name: mtcMigrationType
+    displayName: "Migration Type"
+    type: string
+    default: "final"
+    values:
+      - stage
+      - final
+      - rollback
+
+  # ---- PV Options ----
+  - name: mtcPvCopyMethod
+    displayName: "PV Copy Method"
+    type: string
+    default: "filesystem"
+    values:
+      - filesystem
+      - snapshot
+
+  - name: mtcPvVerify
+    displayName: "Verify PV Data Integrity"
+    type: boolean
+    default: true
+
+  # ---- Direct Migration ----
+  - name: mtcDirectVolumeMigration
+    displayName: "Enable Direct Volume Migration"
+    type: boolean
+    default: true
+
+  - name: mtcDirectImageMigration
+    displayName: "Enable Direct Image Migration"
+    type: boolean
+    default: true
+
+  # ---- Migration Options ----
+  - name: mtcQuiescePods
+    displayName: "Quiesce Source Pods"
+    type: boolean
+    default: true
+
+  - name: mtcKeepAnnotations
+    displayName: "Preserve Annotations"
+    type: boolean
+    default: true
+
+  - name: mtcPreserveNodePorts
+    displayName: "Preserve NodePort Values"
+    type: boolean
+    default: false
+
+  # ---- Terraform Action ----
+  - name: terraformAction
+    displayName: "Terraform Action"
+    type: string
+    default: "plan"
+    values:
+      - plan
+      - apply
+      - destroy
+
+  - name: variableGroup
+    displayName: "ADO Variable Group (for secrets)"
+    type: string
+    default: "ocp-mtc-secrets"
+
+variables:
+  - group: ${{ parameters.variableGroup }}
+  - name: TF_IN_AUTOMATION
+    value: "true"
+  - name: TF_INPUT
+    value: "false"
+
+stages:
+  # =====================================================================
+  # Stage 1: DC Primary — MTC
+  # =====================================================================
+  - stage: MTC_DC_Primary
+    displayName: "MTC — DC Primary"
+    condition: |
+      and(
+        succeeded(),
+        eq('${{ parameters.deploymentScope }}', 'dc-only')
+      )
+    jobs:
+      - job: MTCDCPrimary
+        displayName: "Terraform MTC — DC Primary"
+        pool:
+          name: "self-hosted-linux"
+        steps:
+          - checkout: self
+
+          - task: TerraformInstaller@1
+            displayName: "Install Terraform"
+            inputs:
+              terraformVersion: "latest"
+
+          - script: |
+              cd openshiftbaremetal
+              terraform init -input=false
+            displayName: "Terraform Init — DC Primary"
+
+          - script: |
+              cd openshiftbaremetal
+              terraform ${{ parameters.terraformAction }} \
+                -var-file=terraform.tfvars \
+                -var-file=mtc.tfvars \
+                -var enable_mtc=true \
+                -var mtc_source_cluster_name=${{ parameters.mtcSourceClusterName }} \
+                -var mtc_source_cluster_url="${{ parameters.mtcSourceClusterUrl }}" \
+                -var mtc_source_cluster_insecure=${{ parameters.mtcSourceClusterInsecure }} \
+                -var mtc_migration_type=${{ parameters.mtcMigrationType }} \
+                -var mtc_pv_copy_method=${{ parameters.mtcPvCopyMethod }} \
+                -var mtc_pv_verify=${{ parameters.mtcPvVerify }} \
+                -var mtc_enable_direct_volume_migration=${{ parameters.mtcDirectVolumeMigration }} \
+                -var mtc_enable_direct_image_migration=${{ parameters.mtcDirectImageMigration }} \
+                -var mtc_quiesce_pods=${{ parameters.mtcQuiescePods }} \
+                -var mtc_keep_annotations=${{ parameters.mtcKeepAnnotations }} \
+                -var mtc_preserve_node_ports=${{ parameters.mtcPreserveNodePorts }} \
+                -input=false \
+                $(if [ "${{ parameters.terraformAction }}" = "apply" ] || [ "${{ parameters.terraformAction }}" = "destroy" ]; then echo "-auto-approve"; fi)
+            displayName: "Terraform ${{ parameters.terraformAction }} — DC Primary MTC"
+            env:
+              TF_VAR_mtc_source_cluster_sa_token: $(mtc-source-cluster-sa-token)
+              TF_VAR_mtc_replication_repository_access_key: $(mtc-s3-access-key)
+              TF_VAR_mtc_replication_repository_secret_key: $(mtc-s3-secret-key)
+
+  # =====================================================================
+  # Stage 2: DR Secondary — MTC
+  # =====================================================================
+  - stage: MTC_DR_Secondary
+    displayName: "MTC — DR Secondary"
+    condition: |
+      and(
+        succeeded(),
+        eq('${{ parameters.deploymentScope }}', 'dr-only')
+      )
+    jobs:
+      - job: MTCDRSecondary
+        displayName: "Terraform MTC — DR Secondary"
+        pool:
+          name: "self-hosted-linux"
+        steps:
+          - checkout: self
+
+          - task: TerraformInstaller@1
+            displayName: "Install Terraform"
+            inputs:
+              terraformVersion: "latest"
+
+          - script: |
+              cd openshiftbaremetal-dr
+              terraform init -input=false
+            displayName: "Terraform Init — DR Secondary"
+
+          - script: |
+              cd openshiftbaremetal-dr
+              terraform ${{ parameters.terraformAction }} \
+                -var-file=terraform.tfvars \
+                -var-file=mtc.tfvars \
+                -var enable_mtc=true \
+                -var mtc_source_cluster_name=${{ parameters.mtcSourceClusterName }} \
+                -var mtc_source_cluster_url="${{ parameters.mtcSourceClusterUrl }}" \
+                -var mtc_source_cluster_insecure=${{ parameters.mtcSourceClusterInsecure }} \
+                -var mtc_migration_type=${{ parameters.mtcMigrationType }} \
+                -var mtc_pv_copy_method=${{ parameters.mtcPvCopyMethod }} \
+                -var mtc_pv_verify=${{ parameters.mtcPvVerify }} \
+                -var mtc_enable_direct_volume_migration=${{ parameters.mtcDirectVolumeMigration }} \
+                -var mtc_enable_direct_image_migration=${{ parameters.mtcDirectImageMigration }} \
+                -var mtc_quiesce_pods=${{ parameters.mtcQuiescePods }} \
+                -var mtc_keep_annotations=${{ parameters.mtcKeepAnnotations }} \
+                -var mtc_preserve_node_ports=${{ parameters.mtcPreserveNodePorts }} \
+                -input=false \
+                $(if [ "${{ parameters.terraformAction }}" = "apply" ] || [ "${{ parameters.terraformAction }}" = "destroy" ]; then echo "-auto-approve"; fi)
+            displayName: "Terraform ${{ parameters.terraformAction }} — DR Secondary MTC"
+            env:
+              TF_VAR_mtc_source_cluster_sa_token: $(mtc-source-cluster-sa-token)
+              TF_VAR_mtc_replication_repository_access_key: $(mtc-s3-access-key)
+              TF_VAR_mtc_replication_repository_secret_key: $(mtc-s3-secret-key)
+
+  # =====================================================================
+  # Summary
+  # =====================================================================
+  - stage: Summary
+    displayName: "MTC Summary"
+    dependsOn:
+      - ${{ if eq(parameters.deploymentScope, 'dc-only') }}:
+          - MTC_DC_Primary
+      - ${{ if eq(parameters.deploymentScope, 'dr-only') }}:
+          - MTC_DR_Secondary
+    condition: succeeded()
+    jobs:
+      - job: PrintSummary
+        displayName: "MTC Summary"
+        pool:
+          name: "self-hosted-linux"
+        steps:
+          - script: |
+              echo "========================================"
+              echo "MTC (Migration Toolkit for Containers)"
+              echo "========================================"
+              echo "Scope:              ${{ parameters.deploymentScope }}"
+              echo "Action:             ${{ parameters.terraformAction }}"
+              echo "Migration Type:     ${{ parameters.mtcMigrationType }}"
+              echo "Source Cluster:     ${{ parameters.mtcSourceClusterName }}"
+              echo "PV Copy Method:     ${{ parameters.mtcPvCopyMethod }}"
+              echo "Direct Vol Mig:     ${{ parameters.mtcDirectVolumeMigration }}"
+              echo "Direct Image Mig:   ${{ parameters.mtcDirectImageMigration }}"
+              echo "Quiesce Pods:       ${{ parameters.mtcQuiescePods }}"
+              echo "========================================"
+            displayName: "Print Summary"

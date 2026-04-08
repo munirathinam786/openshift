@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="app.diagrams.net" modified="2026-04-07T00:00:00.000Z" agent="GitHub Copilot" version="24.0.0" type="device">
+  <diagram id="d1" name="DR Failover Sequence">
+    <mxGraphModel dx="1422" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="980" pageHeight="520" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+        <mxCell id="op" value="&lt;b&gt;Operations Team&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#333333;strokeColor=#333333;fontSize=11;fontStyle=1;fontColor=#FFFFFF;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="40" y="40" width="140" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="dc_a" value="&lt;b&gt;Mgmt DC (down)&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#C62828;strokeColor=#C62828;fontSize=11;fontStyle=1;fontColor=#FFFFFF;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="230" y="40" width="140" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="dr_a" value="&lt;b&gt;Mgmt DR&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EF6C00;strokeColor=#EF6C00;fontSize=11;fontStyle=1;fontColor=#FFFFFF;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="420" y="40" width="140" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="wl_dc" value="&lt;b&gt;DC Primary&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#2E7D32;strokeColor=#2E7D32;fontSize=11;fontStyle=1;fontColor=#FFFFFF;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="610" y="40" width="130" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="wl_dr" value="&lt;b&gt;DR Secondary&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1565C0;strokeColor=#1565C0;fontSize=11;fontStyle=1;fontColor=#FFFFFF;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="790" y="40" width="130" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="fail" value="❌ DC site failure detected" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FCE4EC;strokeColor=#C62828;fontSize=11;fontStyle=1;fontColor=#C62828;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="200" y="100" width="200" height="30" as="geometry"/>
+        </mxCell>
+        <mxCell id="ph1" value="&lt;b&gt;Phase 1 — ACM Failover&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FCE4EC;strokeColor=#C62828;dashed=1;dashPattern=8 4;fontSize=12;fontStyle=1;fontColor=#C62828;verticalAlign=top;align=left;spacingTop=5;container=1;collapsible=0;" vertex="1" parent="1">
+          <mxGeometry x="100" y="150" width="800" height="80" as="geometry"/>
+        </mxCell>
+        <mxCell id="s1" value="Promote ACM Standby → Active Hub" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#EF6C00;fontSize=11;fontStyle=1;fontColor=#333333;arcSize=10;" vertex="1" parent="ph1">
+          <mxGeometry x="20" y="35" width="250" height="35" as="geometry"/>
+        </mxCell>
+        <mxCell id="s2" value="Start MultiClusterHub controllers" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#333333;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="ph1">
+          <mxGeometry x="300" y="35" width="250" height="35" as="geometry"/>
+        </mxCell>
+        <mxCell id="ph2" value="&lt;b&gt;Phase 2 — Re-Import Clusters&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E3F2FD;strokeColor=#1565C0;dashed=1;dashPattern=8 4;fontSize=12;fontStyle=1;fontColor=#1565C0;verticalAlign=top;align=left;spacingTop=5;container=1;collapsible=0;" vertex="1" parent="1">
+          <mxGeometry x="100" y="250" width="800" height="80" as="geometry"/>
+        </mxCell>
+        <mxCell id="s3" value="Import DR workload (Klusterlet)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E3F2FD;strokeColor=#1565C0;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="ph2">
+          <mxGeometry x="20" y="35" width="230" height="35" as="geometry"/>
+        </mxCell>
+        <mxCell id="s4" value="Re-import DC workload (if reachable)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F5E9;strokeColor=#2E7D32;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="ph2">
+          <mxGeometry x="280" y="35" width="250" height="35" as="geometry"/>
+        </mxCell>
+        <mxCell id="ph3" value="&lt;b&gt;Phase 3 — Restore Services&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F5E9;strokeColor=#2E7D32;dashed=1;dashPattern=8 4;fontSize=12;fontStyle=1;fontColor=#2E7D32;verticalAlign=top;align=left;spacingTop=5;container=1;collapsible=0;" vertex="1" parent="1">
+          <mxGeometry x="100" y="350" width="800" height="80" as="geometry"/>
+        </mxCell>
+        <mxCell id="s5" value="ACS Sensor continues locally" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FCE4EC;strokeColor=#C62828;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="ph3">
+          <mxGeometry x="20" y="35" width="200" height="35" as="geometry"/>
+        </mxCell>
+        <mxCell id="s6" value="Quay serves from geo-replica" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8EAF6;strokeColor=#3F51B5;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="ph3">
+          <mxGeometry x="240" y="35" width="200" height="35" as="geometry"/>
+        </mxCell>
+        <mxCell id="s7" value="Re-apply governance policies" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#EF6C00;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="ph3">
+          <mxGeometry x="460" y="35" width="200" height="35" as="geometry"/>
+        </mxCell>
+        <mxCell id="done" value="✅ Mgmt DR is now the active ACM Hub" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F5E9;strokeColor=#2E7D32;fontSize=11;fontStyle=1;fontColor=#2E7D32;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="300" y="460" width="380" height="35" as="geometry"/>
+        </mxCell>
+        <mxCell id="t" value="&lt;b&gt;DR Failover — ACM Promotion Sequence&lt;/b&gt;" style="text;html=1;align=center;verticalAlign=middle;strokeColor=none;fillColor=none;fontSize=18;fontColor=#333333;" vertex="1" parent="1">
+          <mxGeometry x="250" y="5" width="500" height="30" as="geometry"/>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

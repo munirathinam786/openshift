@@ -1,0 +1,133 @@
+apiVersion: v1
+baseDomain: ${base_domain}
+metadata:
+  name: ${cluster_name}
+networking:
+  networkType: OVNKubernetes
+  machineNetwork:
+    - cidr: ${machine_network_cidr}
+  clusterNetwork:
+    - cidr: ${cluster_network_cidr}
+      hostPrefix: ${cluster_network_host_prefix}
+  serviceNetwork:
+    - ${service_network_cidr}
+compute:
+  - name: worker
+    replicas: ${length(worker_nodes)}
+controlPlane:
+  name: master
+  replicas: ${length(master_nodes)}
+platform:
+  baremetal:
+    apiVIP: ${api_vip}
+    ingressVIP: ${ingress_vip}
+    provisioningNetwork: "Disabled"
+    bootstrapOSImage: ${bootstrap_os_image_url}
+    hosts:
+%{ for node in master_nodes ~}
+      - name: ${node.name}
+        role: master
+        bmc:
+          address: ${node.bmc_address}
+          username: '${node.bmc_username}'
+          password: '${node.bmc_password}'
+          disableCertificateVerification: true
+        bootMACAddress: ${node.boot_mac_address}
+        bootMode: ${node.boot_mode}
+        rootDeviceHints:
+          minSizeGigabytes: ${node.root_disk_min_gb}
+        networkConfig:
+          interfaces:
+            - name: bond0
+              type: bond
+              state: up
+              mtu: 9000
+              ipv4:
+                address:
+                  - ip: ${node.ip}
+                    prefix-length: ${split("/", machine_network_cidr)[1]}
+                enabled: true
+                dhcp: false
+              link-aggregation:
+                mode: 802.3ad
+                options:
+                  miimon: '100'
+                  lacp_rate: fast
+                  updelay: '1000'
+                port:
+%{ for iface in node.bond_interfaces ~}
+                  - ${iface}
+%{ endfor ~}
+          dns-resolver:
+            config:
+              server:
+%{ for dns in dns_servers ~}
+                - ${dns}
+%{ endfor ~}
+          routes:
+            config:
+              - destination: 0.0.0.0/0
+                next-hop-address: ${gateway}
+                next-hop-interface: bond0
+%{ endfor ~}
+%{ for node in worker_nodes ~}
+      - name: ${node.name}
+        role: worker
+        bmc:
+          address: ${node.bmc_address}
+          username: '${node.bmc_username}'
+          password: '${node.bmc_password}'
+          disableCertificateVerification: true
+        bootMACAddress: ${node.boot_mac_address}
+        bootMode: ${node.boot_mode}
+        rootDeviceHints:
+          minSizeGigabytes: ${node.root_disk_min_gb}
+        networkConfig:
+          interfaces:
+            - name: bond0
+              type: bond
+              state: up
+              mtu: 9000
+              ipv4:
+                address:
+                  - ip: ${node.ip}
+                    prefix-length: ${split("/", machine_network_cidr)[1]}
+                enabled: true
+                dhcp: false
+              link-aggregation:
+                mode: 802.3ad
+                options:
+                  miimon: '100'
+                  lacp_rate: fast
+                  updelay: '1000'
+                port:
+%{ for iface in node.bond_interfaces ~}
+                  - ${iface}
+%{ endfor ~}
+          dns-resolver:
+            config:
+              server:
+%{ for dns in dns_servers ~}
+                - ${dns}
+%{ endfor ~}
+          routes:
+            config:
+              - destination: 0.0.0.0/0
+                next-hop-address: ${gateway}
+                next-hop-interface: bond0
+%{ endfor ~}
+%{ if mirror_registry != "" ~}
+imageContentSources:
+  - mirrors:
+      - ${mirror_registry}/ocp4/openshift4
+    source: quay.io/openshift-release-dev/ocp-release
+  - mirrors:
+      - ${mirror_registry}/ocp4/openshift4
+    source: quay.io/openshift-release-dev/ocp-v4.0-art-dev
+%{ endif ~}
+%{ if additional_trust_bundle != "" ~}
+additionalTrustBundle: |
+  ${indent(2, additional_trust_bundle)}
+%{ endif ~}
+pullSecret: '${pull_secret}'
+sshKey: '${ssh_public_key}'

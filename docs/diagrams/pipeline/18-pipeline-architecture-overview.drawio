@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="app.diagrams.net" modified="2026-04-07T00:00:00.000Z" agent="GitHub Copilot" version="24.0.0" type="device">
+  <diagram id="d1" name="Pipeline Architecture">
+    <mxGraphModel dx="1422" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="940" pageHeight="460" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+        <mxCell id="ado" value="&lt;b&gt;Azure DevOps&lt;/b&gt;" style="swimlane;startSize=35;fillColor=#1A237E;fontColor=#FFFFFF;strokeColor=#1A237E;rounded=1;fontSize=13;fontStyle=1;whiteSpace=wrap;html=1;container=1;collapsible=0;" vertex="1" parent="1">
+          <mxGeometry x="40" y="60" width="300" height="180" as="geometry"/>
+        </mxCell>
+        <mxCell id="p1" value="azure-pipelines.yml
+(IPI Full Deploy)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#333333;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="ado">
+          <mxGeometry x="15" y="50" width="260" height="35" as="geometry"/>
+        </mxCell>
+        <mxCell id="p2" value="azure-pipelines-day2.yml
+(Day-2 Operations)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#333333;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="ado">
+          <mxGeometry x="15" y="95" width="260" height="35" as="geometry"/>
+        </mxCell>
+        <mxCell id="p3" value="azure-pipelines-acm-import.yml" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#333333;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="ado">
+          <mxGeometry x="15" y="140" width="260" height="25" as="geometry"/>
+        </mxCell>
+        <mxCell id="addon" value="&lt;b&gt;Add-on Pipelines&lt;/b&gt;" style="swimlane;startSize=35;fillColor=#607D8B;fontColor=#FFFFFF;strokeColor=#607D8B;rounded=1;fontSize=13;fontStyle=1;whiteSpace=wrap;html=1;container=1;collapsible=0;" vertex="1" parent="1">
+          <mxGeometry x="40" y="280" width="300" height="140" as="geometry"/>
+        </mxCell>
+        <mxCell id="a1" value="azure-pipelines-cnv.yml" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#333333;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="addon">
+          <mxGeometry x="15" y="50" width="260" height="25" as="geometry"/>
+        </mxCell>
+        <mxCell id="a2" value="azure-pipelines-vm-migration.yml" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#333333;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="addon">
+          <mxGeometry x="15" y="80" width="260" height="25" as="geometry"/>
+        </mxCell>
+        <mxCell id="a3" value="azure-pipelines-mtc.yml" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#333333;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="addon">
+          <mxGeometry x="15" y="110" width="260" height="25" as="geometry"/>
+        </mxCell>
+        <mxCell id="upi" value="&lt;b&gt;UPI Pipelines&lt;/b&gt;" style="swimlane;startSize=35;fillColor=#2E7D32;fontColor=#FFFFFF;strokeColor=#2E7D32;rounded=1;fontSize=13;fontStyle=1;whiteSpace=wrap;html=1;container=1;collapsible=0;" vertex="1" parent="1">
+          <mxGeometry x="400" y="60" width="300" height="130" as="geometry"/>
+        </mxCell>
+        <mxCell id="u1" value="azure-pipelines-upi.yml
+(UPI Full Deploy)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#333333;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="upi">
+          <mxGeometry x="15" y="50" width="260" height="35" as="geometry"/>
+        </mxCell>
+        <mxCell id="u2" value="azure-pipelines-day2-upi.yml
+(UPI Day-2)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#333333;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="upi">
+          <mxGeometry x="15" y="95" width="260" height="25" as="geometry"/>
+        </mxCell>
+        <mxCell id="dr" value="&lt;b&gt;DR Pipelines&lt;/b&gt;" style="swimlane;startSize=35;fillColor=#C62828;fontColor=#FFFFFF;strokeColor=#C62828;rounded=1;fontSize=13;fontStyle=1;whiteSpace=wrap;html=1;container=1;collapsible=0;" vertex="1" parent="1">
+          <mxGeometry x="400" y="230" width="300" height="100" as="geometry"/>
+        </mxCell>
+        <mxCell id="d1" value="azure-pipelines-acm-dr.yml
+(Failover/Failback)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#333333;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="dr">
+          <mxGeometry x="15" y="50" width="260" height="35" as="geometry"/>
+        </mxCell>
+        <mxCell id="tfvars" value="Terraform
+.tfvars files" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F5E9;strokeColor=#2E7D32;fontSize=11;fontStyle=1;fontColor=#333333;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="760" y="120" width="120" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="cluster" value="OCP Clusters
+(4 clusters)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EE0000;strokeColor=#CC0000;fontSize=11;fontStyle=1;fontColor=#FFFFFF;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="760" y="240" width="120" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="e1" value="references" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#333333;fontSize=10;fontColor=#333333;labelBackgroundColor=#FFFFFF;strokeWidth=2;" edge="1" source="ado" target="tfvars" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e2" value="references" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#333333;fontSize=10;fontColor=#333333;labelBackgroundColor=#FFFFFF;strokeWidth=2;" edge="1" source="upi" target="tfvars" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e3" value="deploys" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#2E7D32;fontSize=10;fontColor=#2E7D32;labelBackgroundColor=#FFFFFF;strokeWidth=2;" edge="1" source="tfvars" target="cluster" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="t" value="&lt;b&gt;Pipeline Architecture Overview&lt;/b&gt;" style="text;html=1;align=center;verticalAlign=middle;strokeColor=none;fillColor=none;fontSize=18;fontColor=#333333;" vertex="1" parent="1">
+          <mxGeometry x="250" y="15" width="350" height="30" as="geometry"/>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

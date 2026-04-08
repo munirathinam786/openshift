@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="app.diagrams.net" modified="2026-04-07T00:00:00.000Z" agent="GitHub Copilot" version="24.0.0" type="device">
+  <diagram id="d1" name="CNV Workflow">
+    <mxGraphModel dx="1422" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="740" pageHeight="390" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+        <mxCell id="op" value="Operator" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#333333;strokeColor=#333333;fontSize=11;fontStyle=1;fontColor=#FFFFFF;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="40" y="45" width="100" height="30" as="geometry"/>
+        </mxCell>
+        <mxCell id="ado" value="Azure DevOps" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1A237E;strokeColor=#1A237E;fontSize=11;fontStyle=1;fontColor=#FFFFFF;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="200" y="45" width="120" height="30" as="geometry"/>
+        </mxCell>
+        <mxCell id="dc" value="DC Primary" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#2E7D32;strokeColor=#2E7D32;fontSize=11;fontStyle=1;fontColor=#FFFFFF;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="380" y="45" width="120" height="30" as="geometry"/>
+        </mxCell>
+        <mxCell id="dr" value="DR Secondary" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1565C0;strokeColor=#1565C0;fontSize=11;fontStyle=1;fontColor=#FFFFFF;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="560" y="45" width="120" height="30" as="geometry"/>
+        </mxCell>
+        <mxCell id="s1" value="&lt;b&gt;Stage 1 — DC Primary CNV&lt;/b&gt;" style="swimlane;startSize=35;fillColor=#2E7D32;fontColor=#FFFFFF;strokeColor=#2E7D32;rounded=1;fontSize=13;fontStyle=1;whiteSpace=wrap;html=1;container=1;collapsible=0;" vertex="1" parent="1">
+          <mxGeometry x="180" y="100" width="510" height="140" as="geometry"/>
+        </mxCell>
+        <mxCell id="s1a" value="terraform apply
+-var-file=openshift-virtualization.tfvars" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#333333;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="s1">
+          <mxGeometry x="15" y="45" width="240" height="30" as="geometry"/>
+        </mxCell>
+        <mxCell id="s1b" value="Subscribe kubevirt-hyperconverged" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#333333;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="s1">
+          <mxGeometry x="15" y="80" width="200" height="25" as="geometry"/>
+        </mxCell>
+        <mxCell id="s1c" value="Create HyperConverged CR" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#333333;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="s1">
+          <mxGeometry x="230" y="80" width="170" height="25" as="geometry"/>
+        </mxCell>
+        <mxCell id="s1d" value="Label worker nodes" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#333333;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="s1">
+          <mxGeometry x="15" y="110" width="150" height="25" as="geometry"/>
+        </mxCell>
+        <mxCell id="s1e" value="Deploy PrometheusRule" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#333333;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="s1">
+          <mxGeometry x="180" y="110" width="170" height="25" as="geometry"/>
+        </mxCell>
+        <mxCell id="s2" value="&lt;b&gt;Stage 2 — DR Secondary CNV&lt;/b&gt;" style="swimlane;startSize=35;fillColor=#1565C0;fontColor=#FFFFFF;strokeColor=#1565C0;rounded=1;fontSize=13;fontStyle=1;whiteSpace=wrap;html=1;container=1;collapsible=0;" vertex="1" parent="1">
+          <mxGeometry x="180" y="260" width="510" height="100" as="geometry"/>
+        </mxCell>
+        <mxCell id="s2a" value="terraform apply
+-var-file=openshift-virtualization.tfvars" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#333333;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="s2">
+          <mxGeometry x="15" y="45" width="240" height="30" as="geometry"/>
+        </mxCell>
+        <mxCell id="s2b" value="Subscribe + HyperConverged CR" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#333333;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="s2">
+          <mxGeometry x="280" y="45" width="200" height="30" as="geometry"/>
+        </mxCell>
+        <mxCell id="t" value="&lt;b&gt;CNV Deployment Workflow&lt;/b&gt;" style="text;html=1;align=center;verticalAlign=middle;strokeColor=none;fillColor=none;fontSize=18;fontColor=#333333;" vertex="1" parent="1">
+          <mxGeometry x="240" y="10" width="300" height="25" as="geometry"/>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

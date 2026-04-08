@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="app.diagrams.net" modified="2026-04-07T00:00:00.000Z" agent="GitHub Copilot" version="24.0.0" type="device">
+  <diagram id="d1" name="IPI vs UPI">
+    <mxGraphModel dx="1422" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="900" pageHeight="440" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+        <mxCell id="ipi_box" value="&lt;b&gt;IPI Method&lt;/b&gt;&lt;br&gt;&lt;i&gt;Installer Provisioned Infrastructure&lt;/i&gt;" style="swimlane;startSize=35;fillColor=#2E7D32;fontColor=#FFFFFF;strokeColor=#2E7D32;rounded=1;fontSize=13;fontStyle=1;whiteSpace=wrap;html=1;container=1;collapsible=0;" vertex="1" parent="1">
+          <mxGeometry x="40" y="60" width="380" height="350" as="geometry"/>
+        </mxCell>
+        <mxCell id="ipi1" value="Bastion Host: Optional" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F5E9;strokeColor=#2E7D32;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="ipi_box">
+          <mxGeometry x="20" y="50" width="340" height="35" as="geometry"/>
+        </mxCell>
+        <mxCell id="ipi2" value="Bootstrap: Managed by installer, auto-removed" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F5E9;strokeColor=#2E7D32;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="ipi_box">
+          <mxGeometry x="20" y="95" width="340" height="35" as="geometry"/>
+        </mxCell>
+        <mxCell id="ipi3" value="Load Balancer: Installer-managed keepalived VIPs" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F5E9;strokeColor=#2E7D32;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="ipi_box">
+          <mxGeometry x="20" y="140" width="340" height="35" as="geometry"/>
+        </mxCell>
+        <mxCell id="ipi4" value="Node Boot: Automated via BMC/iDRAC virtual media" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F5E9;strokeColor=#2E7D32;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="ipi_box">
+          <mxGeometry x="20" y="185" width="340" height="35" as="geometry"/>
+        </mxCell>
+        <mxCell id="ipi5" value="CSR Approval: Automatic" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F5E9;strokeColor=#2E7D32;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="ipi_box">
+          <mxGeometry x="20" y="230" width="340" height="35" as="geometry"/>
+        </mxCell>
+        <mxCell id="ipi6" value="install-config: platform: baremetal + BMC creds" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F5E9;strokeColor=#2E7D32;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="ipi_box">
+          <mxGeometry x="20" y="275" width="340" height="35" as="geometry"/>
+        </mxCell>
+        <mxCell id="upi_box" value="&lt;b&gt;UPI Method&lt;/b&gt;&lt;br&gt;&lt;i&gt;User Provisioned Infrastructure&lt;/i&gt;" style="swimlane;startSize=35;fillColor=#1565C0;fontColor=#FFFFFF;strokeColor=#1565C0;rounded=1;fontSize=13;fontStyle=1;whiteSpace=wrap;html=1;container=1;collapsible=0;" vertex="1" parent="1">
+          <mxGeometry x="480" y="60" width="380" height="350" as="geometry"/>
+        </mxCell>
+        <mxCell id="upi1" value="Bastion Host: REQUIRED — runs installer, serves ignition" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E3F2FD;strokeColor=#1565C0;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="upi_box">
+          <mxGeometry x="20" y="50" width="340" height="35" as="geometry"/>
+        </mxCell>
+        <mxCell id="upi2" value="Bootstrap: Operator-provisioned, explicit cleanup" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E3F2FD;strokeColor=#1565C0;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="upi_box">
+          <mxGeometry x="20" y="95" width="340" height="35" as="geometry"/>
+        </mxCell>
+        <mxCell id="upi3" value="Load Balancer: External HAProxy — must be pre-configured" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E3F2FD;strokeColor=#1565C0;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="upi_box">
+          <mxGeometry x="20" y="140" width="340" height="35" as="geometry"/>
+        </mxCell>
+        <mxCell id="upi4" value="Node Boot: Manual: PXE, ISO, or operator-driven" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E3F2FD;strokeColor=#1565C0;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="upi_box">
+          <mxGeometry x="20" y="185" width="340" height="35" as="geometry"/>
+        </mxCell>
+        <mxCell id="upi5" value="CSR Approval: Explicit — oc adm certificate approve" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E3F2FD;strokeColor=#1565C0;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="upi_box">
+          <mxGeometry x="20" y="230" width="340" height="35" as="geometry"/>
+        </mxCell>
+        <mxCell id="upi6" value="install-config: platform: none — no hardware mgmt" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E3F2FD;strokeColor=#1565C0;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="upi_box">
+          <mxGeometry x="20" y="275" width="340" height="35" as="geometry"/>
+        </mxCell>
+        <mxCell id="t" value="&lt;b&gt;IPI vs UPI — Infrastructure Comparison&lt;/b&gt;" style="text;html=1;align=center;verticalAlign=middle;strokeColor=none;fillColor=none;fontSize=18;fontColor=#333333;" vertex="1" parent="1">
+          <mxGeometry x="220" y="15" width="500" height="30" as="geometry"/>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

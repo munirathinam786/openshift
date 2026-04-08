@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="app.diagrams.net" modified="2026-04-07T00:00:00.000Z" agent="GitHub Copilot" version="24.0.0" type="device">
+  <diagram id="d1" name="DR Failover Workflow">
+    <mxGraphModel dx="1422" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1080" pageHeight="470" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+        <mxCell id="op" value="&lt;b&gt;Operations Team&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1A237E;strokeColor=#1A237E;fontSize=11;fontStyle=1;fontColor=#FFFFFF;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="40" y="40" width="140" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="ado" value="&lt;b&gt;Azure DevOps&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1A237E;strokeColor=#1A237E;fontSize=11;fontStyle=1;fontColor=#FFFFFF;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="220" y="40" width="140" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="mdc_a" value="&lt;b&gt;Mgmt DC&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EF6C00;strokeColor=#EF6C00;fontSize=11;fontStyle=1;fontColor=#FFFFFF;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="400" y="40" width="120" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="mdr_a" value="&lt;b&gt;Mgmt DR&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EF6C00;strokeColor=#EF6C00;fontSize=11;fontStyle=1;fontColor=#FFFFFF;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="560" y="40" width="120" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="dc_a" value="&lt;b&gt;DC Primary&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#2E7D32;strokeColor=#2E7D32;fontSize=11;fontStyle=1;fontColor=#FFFFFF;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="720" y="40" width="120" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="dr_a" value="&lt;b&gt;DR Secondary&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1565C0;strokeColor=#1565C0;fontSize=11;fontStyle=1;fontColor=#FFFFFF;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="880" y="40" width="120" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="fail" value="❌ DC Site Failure" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FCE4EC;strokeColor=#C62828;fontSize=11;fontStyle=1;fontColor=#C62828;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="680" y="100" width="200" height="30" as="geometry"/>
+        </mxCell>
+        <mxCell id="ph1" value="&lt;b&gt;Failover Actions&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FCE4EC;strokeColor=#C62828;dashed=1;dashPattern=8 4;fontSize=12;fontStyle=1;fontColor=#C62828;verticalAlign=top;align=left;spacingTop=5;container=1;collapsible=0;" vertex="1" parent="1">
+          <mxGeometry x="180" y="150" width="780" height="120" as="geometry"/>
+        </mxCell>
+        <mxCell id="s1" value="Trigger DR failover pipeline" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#333333;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="ph1">
+          <mxGeometry x="20" y="35" width="230" height="30" as="geometry"/>
+        </mxCell>
+        <mxCell id="s2" value="Promote ACM Standby → Active Hub" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#EF6C00;fontSize=11;fontStyle=1;fontColor=#333333;arcSize=10;" vertex="1" parent="ph1">
+          <mxGeometry x="280" y="35" width="240" height="30" as="geometry"/>
+        </mxCell>
+        <mxCell id="s3" value="Activate DR workloads" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E3F2FD;strokeColor=#1565C0;fontSize=11;fontStyle=1;fontColor=#333333;arcSize=10;" vertex="1" parent="ph1">
+          <mxGeometry x="550" y="35" width="180" height="30" as="geometry"/>
+        </mxCell>
+        <mxCell id="s4" value="Switch ODF MirrorPeer to primary" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E0F2F1;strokeColor=#00695C;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="ph1">
+          <mxGeometry x="280" y="75" width="240" height="30" as="geometry"/>
+        </mxCell>
+        <mxCell id="fe1" value="1" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#333333;fontSize=10;fontColor=#333333;labelBackgroundColor=#FFFFFF;strokeWidth=2;" edge="1" source="op" target="s1" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="fe2" value="2" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#EF6C00;fontSize=10;fontColor=#EF6C00;labelBackgroundColor=#FFFFFF;strokeWidth=2;" edge="1" source="s1" target="s2" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="fe3" value="3" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#1565C0;fontSize=10;fontColor=#1565C0;labelBackgroundColor=#FFFFFF;strokeWidth=2;" edge="1" source="s2" target="s3" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="active" value="✅ DR is now Active" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F5E9;strokeColor=#2E7D32;fontSize=11;fontStyle=1;fontColor=#2E7D32;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="780" y="290" width="180" height="30" as="geometry"/>
+        </mxCell>
+        <mxCell id="ph2" value="&lt;b&gt;DC Recovery&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F5E9;strokeColor=#2E7D32;dashed=1;dashPattern=8 4;fontSize=12;fontStyle=1;fontColor=#2E7D32;verticalAlign=top;align=left;spacingTop=5;container=1;collapsible=0;" vertex="1" parent="1">
+          <mxGeometry x="180" y="340" width="780" height="100" as="geometry"/>
+        </mxCell>
+        <mxCell id="r1" value="Trigger DC recovery pipeline" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#333333;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="ph2">
+          <mxGeometry x="20" y="35" width="230" height="30" as="geometry"/>
+        </mxCell>
+        <mxCell id="r2" value="Rebuild / Restore DC cluster" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F5E9;strokeColor=#2E7D32;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="ph2">
+          <mxGeometry x="280" y="35" width="220" height="30" as="geometry"/>
+        </mxCell>
+        <mxCell id="r3" value="Re-enable ODF mirroring (reverse)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E0F2F1;strokeColor=#00695C;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="ph2">
+          <mxGeometry x="280" y="75" width="230" height="30" as="geometry"/>
+        </mxCell>
+        <mxCell id="r4" value="Restore ACM Hub as primary" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#EF6C00;fontSize=11;fontStyle=1;fontColor=#333333;arcSize=10;" vertex="1" parent="ph2">
+          <mxGeometry x="550" y="35" width="200" height="30" as="geometry"/>
+        </mxCell>
+        <mxCell id="t" value="&lt;b&gt;Disaster Recovery Failover Workflow&lt;/b&gt;" style="text;html=1;align=center;verticalAlign=middle;strokeColor=none;fillColor=none;fontSize=18;fontColor=#333333;" vertex="1" parent="1">
+          <mxGeometry x="280" y="5" width="500" height="30" as="geometry"/>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

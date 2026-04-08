@@ -1,0 +1,192 @@
+# =============================================================================
+# Azure DevOps Pipeline — VM Migration (UPI Method)
+# Migrates VMs from VMware/RHV/OpenStack to OpenShift Virtualization (UPI clusters)
+# =============================================================================
+
+trigger: none
+
+parameters:
+  - name: deploymentScope
+    displayName: "Target Cluster"
+    type: string
+    default: "dc-only"
+    values:
+      - dc-only
+      - dr-only
+
+  - name: sourceProviderType
+    displayName: "Source Virtualization Platform"
+    type: string
+    default: "vsphere"
+    values:
+      - vsphere
+      - ovirt
+      - openstack
+
+  - name: sourceProviderName
+    displayName: "Source Provider Name"
+    type: string
+    default: "vmware-datacenter"
+
+  - name: sourceProviderUrl
+    displayName: "Source Provider URL"
+    type: string
+    default: ""
+
+  - name: migrationType
+    displayName: "Migration Type"
+    type: string
+    default: "cold"
+    values:
+      - cold
+      - warm
+
+  - name: migrationStartImmediately
+    displayName: "Start Migration Immediately"
+    type: boolean
+    default: false
+
+  - name: migrationCutoverDatetime
+    displayName: "Warm Migration Cutover (ISO 8601)"
+    type: string
+    default: ""
+
+  - name: preserveStaticIPs
+    displayName: "Preserve Source VM Static IPs"
+    type: boolean
+    default: true
+
+  - name: preserveMACAddresses
+    displayName: "Preserve Source VM MAC Addresses"
+    type: boolean
+    default: false
+
+  - name: maxConcurrentVMs
+    displayName: "Max Concurrent VM Migrations"
+    type: number
+    default: 10
+
+  - name: maxConcurrentDisksPerVM
+    displayName: "Max Concurrent Disk Transfers per VM"
+    type: number
+    default: 2
+
+  - name: terraformAction
+    displayName: "Terraform Action"
+    type: string
+    default: "plan"
+    values:
+      - plan
+      - apply
+      - destroy
+
+  - name: variableGroup
+    displayName: "ADO Variable Group (for secrets)"
+    type: string
+    default: "ocp-vm-migration-secrets"
+
+variables:
+  - group: ${{ parameters.variableGroup }}
+  - name: TF_IN_AUTOMATION
+    value: "true"
+  - name: TF_INPUT
+    value: "false"
+
+stages:
+  - stage: Migration_DC_Primary
+    displayName: "VM Migration — UPI DC Primary"
+    condition: |
+      and(
+        succeeded(),
+        eq('${{ parameters.deploymentScope }}', 'dc-only')
+      )
+    jobs:
+      - job: MigrationDCPrimary
+        displayName: "Terraform VM Migration — UPI DC Primary"
+        pool:
+          name: "self-hosted-linux"
+        steps:
+          - checkout: self
+
+          - task: TerraformInstaller@1
+            displayName: "Install Terraform"
+            inputs:
+              terraformVersion: "latest"
+
+          - script: |
+              cd openshiftbaremetal
+              terraform init -input=false
+            displayName: "Terraform Init — UPI DC Primary"
+
+          - script: |
+              cd openshiftbaremetal
+              terraform ${{ parameters.terraformAction }} \
+                -var-file=terraform.tfvars \
+                -var-file=vm-migration.tfvars \
+                -var enable_vm_migration=true \
+                -var source_provider_type=${{ parameters.sourceProviderType }} \
+                -var source_provider_name=${{ parameters.sourceProviderName }} \
+                -var source_provider_url="${{ parameters.sourceProviderUrl }}" \
+                -var migration_type=${{ parameters.migrationType }} \
+                -var migration_start_immediately=${{ parameters.migrationStartImmediately }} \
+                -var migration_cutover_datetime="${{ parameters.migrationCutoverDatetime }}" \
+                -var migration_preserve_static_ips=${{ parameters.preserveStaticIPs }} \
+                -var migration_preserve_mac_addresses=${{ parameters.preserveMACAddresses }} \
+                -var migration_max_concurrent_vms=${{ parameters.maxConcurrentVMs }} \
+                -var migration_max_concurrent_disks_per_vm=${{ parameters.maxConcurrentDisksPerVM }} \
+                -input=false \
+                $(if [ "${{ parameters.terraformAction }}" = "apply" ] || [ "${{ parameters.terraformAction }}" = "destroy" ]; then echo "-auto-approve"; fi)
+            displayName: "Terraform ${{ parameters.terraformAction }} — UPI DC Primary Migration"
+            env:
+              TF_VAR_source_provider_username: $(source-provider-username)
+              TF_VAR_source_provider_password: $(source-provider-password)
+              TF_VAR_source_provider_thumbprint: $(source-provider-thumbprint)
+
+  - stage: Migration_DR_Secondary
+    displayName: "VM Migration — UPI DR Secondary"
+    condition: |
+      and(
+        succeeded(),
+        eq('${{ parameters.deploymentScope }}', 'dr-only')
+      )
+    jobs:
+      - job: MigrationDRSecondary
+        displayName: "Terraform VM Migration — UPI DR Secondary"
+        pool:
+          name: "self-hosted-linux"
+        steps:
+          - checkout: self
+
+          - task: TerraformInstaller@1
+            displayName: "Install Terraform"
+            inputs:
+              terraformVersion: "latest"
+
+          - script: |
+              cd openshiftbaremetal-dr
+              terraform init -input=false
+            displayName: "Terraform Init — UPI DR Secondary"
+
+          - script: |
+              cd openshiftbaremetal-dr
+              terraform ${{ parameters.terraformAction }} \
+                -var-file=terraform.tfvars \
+                -var-file=vm-migration.tfvars \
+                -var enable_vm_migration=true \
+                -var source_provider_type=${{ parameters.sourceProviderType }} \
+                -var source_provider_name=${{ parameters.sourceProviderName }} \
+                -var source_provider_url="${{ parameters.sourceProviderUrl }}" \
+                -var migration_type=${{ parameters.migrationType }} \
+                -var migration_start_immediately=${{ parameters.migrationStartImmediately }} \
+                -var migration_cutover_datetime="${{ parameters.migrationCutoverDatetime }}" \
+                -var migration_preserve_static_ips=${{ parameters.preserveStaticIPs }} \
+                -var migration_preserve_mac_addresses=${{ parameters.preserveMACAddresses }} \
+                -var migration_max_concurrent_vms=${{ parameters.maxConcurrentVMs }} \
+                -var migration_max_concurrent_disks_per_vm=${{ parameters.maxConcurrentDisksPerVM }} \
+                -input=false \
+                $(if [ "${{ parameters.terraformAction }}" = "apply" ] || [ "${{ parameters.terraformAction }}" = "destroy" ]; then echo "-auto-approve"; fi)
+            displayName: "Terraform ${{ parameters.terraformAction }} — UPI DR Secondary Migration"
+            env:
+              TF_VAR_source_provider_username: $(source-provider-username)
+              TF_VAR_source_provider_password: $(source-provider-password)
+              TF_VAR_source_provider_thumbprint: $(source-provider-thumbprint)

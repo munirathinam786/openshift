@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="app.diagrams.net" modified="2026-04-07T00:00:00.000Z" agent="GitHub Copilot" version="24.0.0" type="device">
+  <diagram id="d1" name="Mgmt DR Connectivity">
+    <mxGraphModel dx="1422" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="680" pageHeight="430" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+        <mxCell id="mdr_f" value="&lt;b&gt;Mgmt DR — Standby Operations Hub&lt;/b&gt;" style="swimlane;startSize=35;fillColor=#EF6C00;fontColor=#FFFFFF;strokeColor=#EF6C00;rounded=1;fontSize=13;fontStyle=1;whiteSpace=wrap;html=1;container=1;collapsible=0;" vertex="1" parent="1">
+          <mxGeometry x="40" y="60" width="350" height="160" as="geometry"/>
+        </mxCell>
+        <mxCell id="acm_s" value="ACM Standby
+Passive MultiClusterHub" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#EF6C00;fontSize=11;fontStyle=1;fontColor=#333333;arcSize=10;" vertex="1" parent="mdr_f">
+          <mxGeometry x="15" y="50" width="170" height="45" as="geometry"/>
+        </mxCell>
+        <mxCell id="acs_sens" value="ACS SecuredCluster
+Sensor + Collector" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FCE4EC;strokeColor=#C62828;fontSize=11;fontStyle=1;fontColor=#333333;arcSize=10;" vertex="1" parent="mdr_f">
+          <mxGeometry x="200" y="50" width="135" height="45" as="geometry"/>
+        </mxCell>
+        <mxCell id="quay_r" value="Quay Enterprise
+Geo-Replicated" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8EAF6;strokeColor=#3F51B5;fontSize=11;fontStyle=1;fontColor=#333333;arcSize=10;" vertex="1" parent="mdr_f">
+          <mxGeometry x="15" y="110" width="170" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="mdc_b" value="&lt;b&gt;Mgmt DC (Active Hub)&lt;/b&gt;" style="swimlane;startSize=35;fillColor=#2E7D32;fontColor=#FFFFFF;strokeColor=#2E7D32;rounded=1;fontSize=13;fontStyle=1;whiteSpace=wrap;html=1;container=1;collapsible=0;" vertex="1" parent="1">
+          <mxGeometry x="40" y="270" width="350" height="120" as="geometry"/>
+        </mxCell>
+        <mxCell id="acm_a" value="ACM Hub Active" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EE0000;strokeColor=#CC0000;fontSize=11;fontStyle=1;fontColor=#FFFFFF;arcSize=10;" vertex="1" parent="mdc_b">
+          <mxGeometry x="15" y="45" width="140" height="30" as="geometry"/>
+        </mxCell>
+        <mxCell id="acs_cdc" value="ACS Central
+:443 gRPC" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FCE4EC;strokeColor=#C62828;fontSize=11;fontStyle=1;fontColor=#333333;arcSize=10;" vertex="1" parent="mdc_b">
+          <mxGeometry x="170" y="45" width="140" height="35" as="geometry"/>
+        </mxCell>
+        <mxCell id="quay_p" value="Quay Enterprise
+Primary" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8EAF6;strokeColor=#3F51B5;fontSize=11;fontStyle=1;fontColor=#333333;arcSize=10;" vertex="1" parent="mdc_b">
+          <mxGeometry x="15" y="85" width="140" height="30" as="geometry"/>
+        </mxCell>
+        <mxCell id="wl" value="&lt;b&gt;Workload Clusters&lt;/b&gt;" style="swimlane;startSize=35;fillColor=#7B1FA2;fontColor=#FFFFFF;strokeColor=#7B1FA2;rounded=1;fontSize=13;fontStyle=1;whiteSpace=wrap;html=1;container=1;collapsible=0;" vertex="1" parent="1">
+          <mxGeometry x="440" y="120" width="170" height="130" as="geometry"/>
+        </mxCell>
+        <mxCell id="dc_cl" value="DC Primary" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F5E9;strokeColor=#2E7D32;fontSize=11;fontStyle=1;fontColor=#333333;arcSize=10;" vertex="1" parent="wl">
+          <mxGeometry x="15" y="45" width="140" height="35" as="geometry"/>
+        </mxCell>
+        <mxCell id="dr_cl" value="DR Secondary" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E3F2FD;strokeColor=#1565C0;fontSize=11;fontStyle=1;fontColor=#333333;arcSize=10;" vertex="1" parent="wl">
+          <mxGeometry x="15" y="90" width="140" height="35" as="geometry"/>
+        </mxCell>
+        <mxCell id="c1" value="① gRPC Sensor Stream
+TCP 443" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#C62828;fontSize=10;fontColor=#C62828;labelBackgroundColor=#FFFFFF;strokeWidth=2;" edge="1" source="acs_sens" target="acs_cdc" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="c2" value="② Geo-Replication
+S3 API TCP 443" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#3F51B5;fontSize=10;fontColor=#3F51B5;dashed=1;dashPattern=8 4;labelBackgroundColor=#FFFFFF;strokeWidth=2;" edge="1" source="quay_p" target="quay_r" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="c3" value="③ Failover Promotion
+(manual trigger)" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#EF6C00;fontSize=10;fontColor=#EF6C00;dashed=1;dashPattern=8 4;labelBackgroundColor=#FFFFFF;strokeWidth=2;" edge="1" source="acm_a" target="acm_s" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="c4" value="④ After failover:
+Import + manage" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#EF6C00;fontSize=10;fontColor=#EF6C00;dashed=1;dashPattern=8 4;labelBackgroundColor=#FFFFFF;strokeWidth=2;" edge="1" source="acm_s" target="dc_cl" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="c5" value="⑤ After failover:
+Import + manage" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#EF6C00;fontSize=10;fontColor=#EF6C00;dashed=1;dashPattern=8 4;labelBackgroundColor=#FFFFFF;strokeWidth=2;" edge="1" source="acm_s" target="dr_cl" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="t" value="&lt;b&gt;Inter-Cluster Connectivity — Mgmt DR&lt;/b&gt;" style="text;html=1;align=center;verticalAlign=middle;strokeColor=none;fillColor=none;fontSize=18;fontColor=#333333;" vertex="1" parent="1">
+          <mxGeometry x="130" y="15" width="500" height="30" as="geometry"/>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

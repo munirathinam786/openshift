@@ -1,0 +1,212 @@
+# =============================================================================
+# Azure DevOps Pipeline — OpenShift Virtualization (UPI Method)
+# Deploys OpenShift Virtualization to UPI workload clusters (DC Primary & DR Secondary)
+# =============================================================================
+
+trigger: none
+
+parameters:
+  - name: deploymentScope
+    displayName: "Target Cluster(s)"
+    type: string
+    default: "dc-only"
+    values:
+      - dc-only
+      - dr-only
+      - dc-and-dr
+
+  - name: cnvChannel
+    displayName: "CNV Operator Channel"
+    type: string
+    default: "stable"
+
+  - name: cnvCpuModel
+    displayName: "Default CPU Model"
+    type: string
+    default: "host-model"
+    values:
+      - host-passthrough
+      - host-model
+      - Skylake-Server
+      - Cascadelake-Server
+      - Icelake-Server
+      - Sapphire-Rapids
+
+  - name: cnvDefaultNetworkInterface
+    displayName: "Default Network Interface"
+    type: string
+    default: "masquerade"
+    values:
+      - masquerade
+      - bridge
+      - sr-iov
+
+  - name: cnvEnableBridgeBinding
+    displayName: "Enable Linux Bridge Binding"
+    type: boolean
+    default: true
+
+  - name: cnvLiveMigrationBandwidth
+    displayName: "Live Migration Bandwidth per Migration"
+    type: string
+    default: "64Mi"
+
+  - name: cnvLiveMigrationParallelPerCluster
+    displayName: "Max Parallel Migrations per Cluster"
+    type: number
+    default: 5
+
+  - name: cnvLiveMigrationParallelOutbound
+    displayName: "Max Parallel Outbound per Node"
+    type: number
+    default: 2
+
+  - name: cnvLiveMigrationAutoConverge
+    displayName: "Allow Auto-Converge"
+    type: boolean
+    default: true
+
+  - name: cnvLiveMigrationPostCopy
+    displayName: "Allow Post-Copy"
+    type: boolean
+    default: false
+
+  - name: cnvDefaultStorageClass
+    displayName: "Default Storage Class for VM Disks"
+    type: string
+    default: "ocs-storagecluster-ceph-rbd-virtualization"
+
+  - name: cnvCommonBootImageImport
+    displayName: "Auto-Import Common OS Boot Images"
+    type: boolean
+    default: true
+
+  - name: cnvEnableMonitoringAlerts
+    displayName: "Enable PrometheusRule Alerts"
+    type: boolean
+    default: true
+
+  - name: terraformAction
+    displayName: "Terraform Action"
+    type: string
+    default: "plan"
+    values:
+      - plan
+      - apply
+      - destroy
+
+  - name: variableGroup
+    displayName: "ADO Variable Group (for secrets)"
+    type: string
+    default: "ocp-virtualization-secrets"
+
+variables:
+  - group: ${{ parameters.variableGroup }}
+  - name: TF_IN_AUTOMATION
+    value: "true"
+  - name: TF_INPUT
+    value: "false"
+
+stages:
+  - stage: CNV_DC_Primary
+    displayName: "OpenShift Virtualization — UPI DC Primary"
+    condition: |
+      and(
+        succeeded(),
+        or(
+          eq('${{ parameters.deploymentScope }}', 'dc-only'),
+          eq('${{ parameters.deploymentScope }}', 'dc-and-dr')
+        )
+      )
+    jobs:
+      - job: CNVDCPrimary
+        displayName: "Terraform OpenShift Virtualization — UPI DC Primary"
+        pool:
+          name: "self-hosted-linux"
+        steps:
+          - checkout: self
+
+          - task: TerraformInstaller@1
+            displayName: "Install Terraform"
+            inputs:
+              terraformVersion: "latest"
+
+          - script: |
+              cd openshiftbaremetal
+              terraform init -input=false
+            displayName: "Terraform Init — UPI DC Primary"
+
+          - script: |
+              cd openshiftbaremetal
+              terraform ${{ parameters.terraformAction }} \
+                -var-file=terraform.tfvars \
+                -var-file=openshift-virtualization.tfvars \
+                -var enable_openshift_virtualization=true \
+                -var cnv_channel=${{ parameters.cnvChannel }} \
+                -var cnv_cpu_model=${{ parameters.cnvCpuModel }} \
+                -var cnv_default_network_interface=${{ parameters.cnvDefaultNetworkInterface }} \
+                -var cnv_enable_bridge_binding=${{ parameters.cnvEnableBridgeBinding }} \
+                -var cnv_live_migration_bandwidth_per_migration=${{ parameters.cnvLiveMigrationBandwidth }} \
+                -var cnv_live_migration_parallel_migrations_per_cluster=${{ parameters.cnvLiveMigrationParallelPerCluster }} \
+                -var cnv_live_migration_parallel_outbound_per_node=${{ parameters.cnvLiveMigrationParallelOutbound }} \
+                -var cnv_live_migration_allow_auto_converge=${{ parameters.cnvLiveMigrationAutoConverge }} \
+                -var cnv_live_migration_allow_post_copy=${{ parameters.cnvLiveMigrationPostCopy }} \
+                -var cnv_default_storage_class=${{ parameters.cnvDefaultStorageClass }} \
+                -var cnv_common_boot_image_import=${{ parameters.cnvCommonBootImageImport }} \
+                -var cnv_enable_monitoring_alerts=${{ parameters.cnvEnableMonitoringAlerts }} \
+                -input=false \
+                $(if [ "${{ parameters.terraformAction }}" = "apply" ] || [ "${{ parameters.terraformAction }}" = "destroy" ]; then echo "-auto-approve"; fi)
+            displayName: "Terraform ${{ parameters.terraformAction }} — UPI DC Primary CNV"
+
+  - stage: CNV_DR_Secondary
+    displayName: "OpenShift Virtualization — UPI DR Secondary"
+    condition: |
+      and(
+        succeeded(),
+        or(
+          eq('${{ parameters.deploymentScope }}', 'dr-only'),
+          eq('${{ parameters.deploymentScope }}', 'dc-and-dr')
+        )
+      )
+    dependsOn:
+      - ${{ if eq(parameters.deploymentScope, 'dc-and-dr') }}:
+          - CNV_DC_Primary
+    jobs:
+      - job: CNVDRSecondary
+        displayName: "Terraform OpenShift Virtualization — UPI DR Secondary"
+        pool:
+          name: "self-hosted-linux"
+        steps:
+          - checkout: self
+
+          - task: TerraformInstaller@1
+            displayName: "Install Terraform"
+            inputs:
+              terraformVersion: "latest"
+
+          - script: |
+              cd openshiftbaremetal-dr
+              terraform init -input=false
+            displayName: "Terraform Init — UPI DR Secondary"
+
+          - script: |
+              cd openshiftbaremetal-dr
+              terraform ${{ parameters.terraformAction }} \
+                -var-file=terraform.tfvars \
+                -var-file=openshift-virtualization.tfvars \
+                -var enable_openshift_virtualization=true \
+                -var cnv_channel=${{ parameters.cnvChannel }} \
+                -var cnv_cpu_model=${{ parameters.cnvCpuModel }} \
+                -var cnv_default_network_interface=${{ parameters.cnvDefaultNetworkInterface }} \
+                -var cnv_enable_bridge_binding=${{ parameters.cnvEnableBridgeBinding }} \
+                -var cnv_live_migration_bandwidth_per_migration=${{ parameters.cnvLiveMigrationBandwidth }} \
+                -var cnv_live_migration_parallel_migrations_per_cluster=${{ parameters.cnvLiveMigrationParallelPerCluster }} \
+                -var cnv_live_migration_parallel_outbound_per_node=${{ parameters.cnvLiveMigrationParallelOutbound }} \
+                -var cnv_live_migration_allow_auto_converge=${{ parameters.cnvLiveMigrationAutoConverge }} \
+                -var cnv_live_migration_allow_post_copy=${{ parameters.cnvLiveMigrationPostCopy }} \
+                -var cnv_default_storage_class=${{ parameters.cnvDefaultStorageClass }} \
+                -var cnv_common_boot_image_import=${{ parameters.cnvCommonBootImageImport }} \
+                -var cnv_enable_monitoring_alerts=${{ parameters.cnvEnableMonitoringAlerts }} \
+                -input=false \
+                $(if [ "${{ parameters.terraformAction }}" = "apply" ] || [ "${{ parameters.terraformAction }}" = "destroy" ]; then echo "-auto-approve"; fi)
+            displayName: "Terraform ${{ parameters.terraformAction }} — UPI DR Secondary CNV"

@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="app.diagrams.net" modified="2026-04-07T00:00:00.000Z" agent="GitHub Copilot" version="24.0.0" type="device">
+  <diagram id="d1" name="ACM Import &amp; DR">
+    <mxGraphModel dx="1422" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="740" pageHeight="460" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+        <mxCell id="acm_ops" value="&lt;b&gt;ACM Hub Operations&lt;/b&gt;" style="swimlane;startSize=35;fillColor=#EF6C00;fontColor=#FFFFFF;strokeColor=#EF6C00;rounded=1;fontSize=13;fontStyle=1;whiteSpace=wrap;html=1;container=1;collapsible=0;" vertex="1" parent="1">
+          <mxGeometry x="40" y="60" width="400" height="180" as="geometry"/>
+        </mxCell>
+        <mxCell id="import" value="&lt;b&gt;ACM Cluster Import&lt;/b&gt;&lt;br&gt;ManagedCluster&lt;br&gt;KlusterletAddonConfig&lt;br&gt;ManagedClusterSet" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#EF6C00;fontSize=11;fontStyle=1;fontColor=#333333;arcSize=10;" vertex="1" parent="acm_ops">
+          <mxGeometry x="15" y="45" width="180" height="90" as="geometry"/>
+        </mxCell>
+        <mxCell id="dr_ops" value="&lt;b&gt;ACM DR Applications&lt;/b&gt;&lt;br&gt;DRPolicy&lt;br&gt;DRPlacementControl&lt;br&gt;ODR Hub Operator" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#EF6C00;fontSize=11;fontStyle=1;fontColor=#333333;arcSize=10;" vertex="1" parent="acm_ops">
+          <mxGeometry x="210" y="45" width="175" height="90" as="geometry"/>
+        </mxCell>
+        <mxCell id="pipes" value="&lt;b&gt;Dedicated Pipelines&lt;/b&gt;" style="swimlane;startSize=35;fillColor=#2E7D32;fontColor=#FFFFFF;strokeColor=#2E7D32;rounded=1;fontSize=13;fontStyle=1;whiteSpace=wrap;html=1;container=1;collapsible=0;" vertex="1" parent="1">
+          <mxGeometry x="40" y="290" width="400" height="130" as="geometry"/>
+        </mxCell>
+        <mxCell id="p_imp" value="azure-pipelines-acm-import.yml&lt;br&gt;&lt;i&gt;Import scope, feature toggles&lt;/i&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F5E9;strokeColor=#2E7D32;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="pipes">
+          <mxGeometry x="15" y="45" width="180" height="55" as="geometry"/>
+        </mxCell>
+        <mxCell id="p_dr" value="azure-pipelines-acm-dr.yml&lt;br&gt;&lt;i&gt;Configure / Failover / Failback&lt;/i&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F5E9;strokeColor=#2E7D32;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="pipes">
+          <mxGeometry x="210" y="45" width="175" height="55" as="geometry"/>
+        </mxCell>
+        <mxCell id="targets" value="&lt;b&gt;Target Clusters&lt;/b&gt;" style="swimlane;startSize=35;fillColor=#7B1FA2;fontColor=#FFFFFF;strokeColor=#7B1FA2;rounded=1;fontSize=13;fontStyle=1;whiteSpace=wrap;html=1;container=1;collapsible=0;" vertex="1" parent="1">
+          <mxGeometry x="500" y="150" width="180" height="130" as="geometry"/>
+        </mxCell>
+        <mxCell id="dc_t" value="DC Primary" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F5E9;strokeColor=#2E7D32;fontSize=11;fontStyle=1;fontColor=#333333;arcSize=10;" vertex="1" parent="targets">
+          <mxGeometry x="20" y="45" width="140" height="35" as="geometry"/>
+        </mxCell>
+        <mxCell id="dr_t" value="DR Secondary" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E3F2FD;strokeColor=#1565C0;fontSize=11;fontStyle=1;fontColor=#333333;arcSize=10;" vertex="1" parent="targets">
+          <mxGeometry x="20" y="90" width="140" height="35" as="geometry"/>
+        </mxCell>
+        <mxCell id="ae1" value="terraform apply
+-var-file=acm-import.tfvars" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#2E7D32;fontSize=10;fontColor=#2E7D32;labelBackgroundColor=#FFFFFF;strokeWidth=2;" edge="1" source="p_imp" target="import" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="ae2" value="terraform apply
+-var-file=acm-dr.tfvars" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#2E7D32;fontSize=10;fontColor=#2E7D32;labelBackgroundColor=#FFFFFF;strokeWidth=2;" edge="1" source="p_dr" target="dr_ops" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="ae3" value="Import + Addons" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#EF6C00;fontSize=10;fontColor=#EF6C00;labelBackgroundColor=#FFFFFF;strokeWidth=2;" edge="1" source="import" target="dc_t" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="ae4" value="Import + Addons" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#EF6C00;fontSize=10;fontColor=#EF6C00;labelBackgroundColor=#FFFFFF;strokeWidth=2;" edge="1" source="import" target="dr_t" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="ae5" value="Failover / Failback" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#C62828;fontSize=10;fontColor=#C62828;dashed=1;dashPattern=8 4;labelBackgroundColor=#FFFFFF;strokeWidth=2;" edge="1" source="dr_ops" target="dc_t" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="ae6" value="Failover / Failback" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#C62828;fontSize=10;fontColor=#C62828;dashed=1;dashPattern=8 4;labelBackgroundColor=#FFFFFF;strokeWidth=2;" edge="1" source="dr_ops" target="dr_t" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="t" value="&lt;b&gt;ACM Cluster Import &amp; DR Application Management&lt;/b&gt;" style="text;html=1;align=center;verticalAlign=middle;strokeColor=none;fillColor=none;fontSize=18;fontColor=#333333;" vertex="1" parent="1">
+          <mxGeometry x="80" y="15" width="600" height="30" as="geometry"/>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="app.diagrams.net" modified="2026-04-07T00:00:00.000Z" agent="GitHub Copilot" version="24.0.0" type="device">
+  <diagram id="d1" name="Mgmt DR Architecture">
+    <mxGraphModel dx="1422" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="780" pageHeight="400" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+        <mxCell id="mdr" value="&lt;b&gt;Management Cluster — DR&lt;/b&gt;" style="swimlane;startSize=35;fillColor=#EF6C00;fontColor=#FFFFFF;strokeColor=#EF6C00;rounded=1;fontSize=13;fontStyle=1;whiteSpace=wrap;html=1;container=1;collapsible=0;" vertex="1" parent="1">
+          <mxGeometry x="40" y="60" width="420" height="300" as="geometry"/>
+        </mxCell>
+        <mxCell id="dns" value="DNS" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#333333;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="mdr">
+          <mxGeometry x="15" y="50" width="80" height="30" as="geometry"/>
+        </mxCell>
+        <mxCell id="qm" value="Quay Mirror" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#333333;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="mdr">
+          <mxGeometry x="110" y="50" width="100" height="30" as="geometry"/>
+        </mxCell>
+        <mxCell id="lb" value="HAProxy LB" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#333333;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="mdr">
+          <mxGeometry x="225" y="50" width="90" height="30" as="geometry"/>
+        </mxCell>
+        <mxCell id="ocp" value="OCP Install" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EE0000;strokeColor=#CC0000;fontSize=11;fontStyle=1;fontColor=#FFFFFF;arcSize=10;" vertex="1" parent="mdr">
+          <mxGeometry x="330" y="50" width="80" height="30" as="geometry"/>
+        </mxCell>
+        <mxCell id="odf" value="ODF Storage" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#333333;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="mdr">
+          <mxGeometry x="15" y="100" width="120" height="35" as="geometry"/>
+        </mxCell>
+        <mxCell id="mlb" value="MetalLB" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#333333;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="mdr">
+          <mxGeometry x="150" y="100" width="90" height="35" as="geometry"/>
+        </mxCell>
+        <mxCell id="acm" value="ACM Standby
+Passive Hub" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#EF6C00;fontSize=11;fontStyle=1;fontColor=#333333;arcSize=10;" vertex="1" parent="mdr">
+          <mxGeometry x="15" y="155" width="160" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="acs" value="ACS SecuredCluster
+Sensor + Collector" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FCE4EC;strokeColor=#C62828;fontSize=11;fontStyle=1;fontColor=#333333;arcSize=10;" vertex="1" parent="mdr">
+          <mxGeometry x="190" y="155" width="140" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="quay" value="Quay Enterprise
+Geo-Replicated" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8EAF6;strokeColor=#3F51B5;fontSize=11;fontStyle=1;fontColor=#333333;arcSize=10;" vertex="1" parent="mdr">
+          <mxGeometry x="340" y="155" width="80" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="etcd" value="etcd Backup" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#333333;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="mdr">
+          <mxGeometry x="15" y="225" width="120" height="35" as="geometry"/>
+        </mxCell>
+        <mxCell id="mdc_ref" value="&lt;b&gt;Management DC (Active)&lt;/b&gt;" style="swimlane;startSize=35;fillColor=#2E7D32;fontColor=#FFFFFF;strokeColor=#2E7D32;rounded=1;fontSize=13;fontStyle=1;whiteSpace=wrap;html=1;container=1;collapsible=0;" vertex="1" parent="1">
+          <mxGeometry x="520" y="100" width="200" height="160" as="geometry"/>
+        </mxCell>
+        <mxCell id="acm_hub" value="ACM Hub" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EE0000;strokeColor=#CC0000;fontSize=11;fontStyle=1;fontColor=#FFFFFF;arcSize=10;" vertex="1" parent="mdc_ref">
+          <mxGeometry x="15" y="45" width="170" height="30" as="geometry"/>
+        </mxCell>
+        <mxCell id="acs_c" value="ACS Central" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FCE4EC;strokeColor=#C62828;fontSize=11;fontStyle=1;fontColor=#333333;arcSize=10;" vertex="1" parent="mdc_ref">
+          <mxGeometry x="15" y="85" width="170" height="30" as="geometry"/>
+        </mxCell>
+        <mxCell id="quay_dc" value="Quay Enterprise" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8EAF6;strokeColor=#3F51B5;fontSize=11;fontStyle=1;fontColor=#333333;arcSize=10;" vertex="1" parent="mdc_ref">
+          <mxGeometry x="15" y="125" width="170" height="30" as="geometry"/>
+        </mxCell>
+        <mxCell id="e1" value="DR failover
+promotion" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#EF6C00;fontSize=10;fontColor=#EF6C00;dashed=1;dashPattern=8 4;labelBackgroundColor=#FFFFFF;strokeWidth=2;" edge="1" source="acm_hub" target="acm" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e2" value="Reports to" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#C62828;fontSize=10;fontColor=#C62828;labelBackgroundColor=#FFFFFF;strokeWidth=2;" edge="1" source="acs" target="acs_c" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e3" value="Geo-replication" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#3F51B5;fontSize=10;fontColor=#3F51B5;dashed=1;dashPattern=8 4;labelBackgroundColor=#FFFFFF;strokeWidth=2;" edge="1" source="quay_dc" target="quay" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="t" value="&lt;b&gt;Management DR — Standby Operations Hub&lt;/b&gt;" style="text;html=1;align=center;verticalAlign=middle;strokeColor=none;fillColor=none;fontSize=18;fontColor=#333333;" vertex="1" parent="1">
+          <mxGeometry x="200" y="15" width="450" height="30" as="geometry"/>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

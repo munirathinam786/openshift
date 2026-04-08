@@ -1,0 +1,6077 @@
+<!DOCTYPE html><html lang="en" class="no-js"><head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Terraform Infrastructure as Code documentation for deploying multi-cluster OpenShift environments on bare metal in air-gapped mode with GPU support, disaster recovery, and centralized management.">
+      
+      
+        <meta name="author" content="Sathishkumar Munirathinam (sathishkumar.munirathinam@kyndryl.com)">
+      
+      
+        <link rel="canonical" href="https://example.com/terraform-iac/architecture/terraform-multi-cluster-overview/">
+      
+      
+        <link rel="prev" href="../..">
+      
+      
+        <link rel="next" href="../../clusters/terraform-ocp-baremetal/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>Multi-Cluster Overview - Terraform IaC for OpenShift Multi Cluster AirGapped</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+  
+  
+    
+      
+      
+    
+  
+    
+      
+      
+    
+  
+    
+      
+      
+    
+  
+    
+      
+      
+    
+  
+    
+      
+      
+    
+  
+    
+      
+      
+    
+  
+    
+      
+      
+    
+  
+    
+      
+      
+    
+  
+    
+      
+      
+    
+  
+    
+      
+      
+    
+  
+    
+      
+      
+    
+  
+    
+      
+      
+    
+  
+  
+  <style>:root{--md-admonition-icon--note:url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2016%2016%22%3E%3Cpath%20d%3D%22M1%207.775V2.75C1%201.784%201.784%201%202.75%201h5.025c.464%200%20.91.184%201.238.513l6.25%206.25a1.75%201.75%200%200%201%200%202.474l-5.026%205.026a1.75%201.75%200%200%201-2.474%200l-6.25-6.25A1.75%201.75%200%200%201%201%207.775m1.5%200c0%20.066.026.13.073.177l6.25%206.25a.25.25%200%200%200%20.354%200l5.025-5.025a.25.25%200%200%200%200-.354l-6.25-6.25a.25.25%200%200%200-.177-.073H2.75a.25.25%200%200%200-.25.25ZM6%205a1%201%200%201%201%200%202%201%201%200%200%201%200-2%22/%3E%3C/svg%3E');--md-admonition-icon--abstract:url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2016%2016%22%3E%3Cpath%20d%3D%22M2.5%201.75v11.5c0%20.138.112.25.25.25h3.17a.75.75%200%200%201%200%201.5H2.75A1.75%201.75%200%200%201%201%2013.25V1.75C1%20.784%201.784%200%202.75%200h8.5C12.216%200%2013%20.784%2013%201.75v7.736a.75.75%200%200%201-1.5%200V1.75a.25.25%200%200%200-.25-.25h-8.5a.25.25%200%200%200-.25.25m13.274%209.537zl-4.557%204.45a.75.75%200%200%201-1.055-.008l-1.943-1.95a.75.75%200%200%201%201.062-1.058l1.419%201.425%204.026-3.932a.75.75%200%201%201%201.048%201.074M4.75%204h4.5a.75.75%200%200%201%200%201.5h-4.5a.75.75%200%200%201%200-1.5M4%207.75A.75.75%200%200%201%204.75%207h2a.75.75%200%200%201%200%201.5h-2A.75.75%200%200%201%204%207.75%22/%3E%3C/svg%3E');--md-admonition-icon--info:url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2016%2016%22%3E%3Cpath%20d%3D%22M0%208a8%208%200%201%201%2016%200A8%208%200%200%201%200%208m8-6.5a6.5%206.5%200%201%200%200%2013%206.5%206.5%200%200%200%200-13M6.5%207.75A.75.75%200%200%201%207.25%207h1a.75.75%200%200%201%20.75.75v2.75h.25a.75.75%200%200%201%200%201.5h-2a.75.75%200%200%201%200-1.5h.25v-2h-.25a.75.75%200%200%201-.75-.75M8%206a1%201%200%201%201%200-2%201%201%200%200%201%200%202%22/%3E%3C/svg%3E');--md-admonition-icon--tip:url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2016%2016%22%3E%3Cpath%20d%3D%22M3.499.75a.75.75%200%200%201%201.5%200v.996C5.9%202.903%206.793%203.65%207.662%204.376l.24.202c-.036-.694.055-1.422.426-2.163C9.1.873%2010.794-.045%2012.622.26%2014.408.558%2016%201.94%2016%204.25c0%201.278-.954%202.575-2.44%202.734l.146.508.065.22c.203.701.412%201.455.476%202.226.142%201.707-.4%203.03-1.487%203.898C11.714%2014.671%2010.27%2015%208.75%2015h-6a.75.75%200%200%201%200-1.5h1.376a4.5%204.5%200%200%201-.563-1.191%203.84%203.84%200%200%201-.05-2.063%204.65%204.65%200%200%201-2.025-.293.75.75%200%200%201%20.525-1.406c1.357.507%202.376-.006%202.698-.318l.009-.01a.747.747%200%200%201%201.06%200%20.75.75%200%200%201-.012%201.074c-.912.92-.992%201.835-.768%202.586.221.74.745%201.337%201.196%201.621H8.75c1.343%200%202.398-.296%203.074-.836.635-.507%201.036-1.31.928-2.602-.05-.603-.216-1.224-.422-1.93l-.064-.221c-.12-.407-.246-.84-.353-1.29a2.4%202.4%200%200%201-.507-.441%203.1%203.1%200%200%201-.633-1.248.75.75%200%200%201%201.455-.364c.046.185.144.436.31.627.146.168.353.305.712.305.738%200%201.25-.615%201.25-1.25%200-1.47-.95-2.315-2.123-2.51-1.172-.196-2.227.387-2.706%201.345-.46.92-.27%201.774.019%203.062l.042.19.01.05c.348.443.666.949.94%201.553a.75.75%200%201%201-1.365.62c-.553-1.217-1.32-1.94-2.3-2.768L6.7%205.527c-.814-.68-1.75-1.462-2.692-2.619a3.7%203.7%200%200%200-1.023.88c-.406.495-.663%201.036-.722%201.508.116.122.306.21.591.239.388.038.797-.06%201.032-.19a.75.75%200%200%201%20.728%201.31c-.515.287-1.23.439-1.906.373-.682-.067-1.473-.38-1.879-1.193L.75%205.677V5.5c0-.984.48-1.94%201.077-2.664.46-.559%201.05-1.055%201.673-1.353z%22/%3E%3C/svg%3E');--md-admonition-icon--success:url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2016%2016%22%3E%3Cpath%20d%3D%22M13.78%204.22a.75.75%200%200%201%200%201.06l-7.25%207.25a.75.75%200%200%201-1.06%200L2.22%209.28a.75.75%200%200%201%20.018-1.042.75.75%200%200%201%201.042-.018L6%2010.94l6.72-6.72a.75.75%200%200%201%201.06%200%22/%3E%3C/svg%3E');--md-admonition-icon--question:url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2016%2016%22%3E%3Cpath%20d%3D%22M0%208a8%208%200%201%201%2016%200A8%208%200%200%201%200%208m8-6.5a6.5%206.5%200%201%200%200%2013%206.5%206.5%200%200%200%200-13M6.92%206.085h.001a.749.749%200%201%201-1.342-.67c.169-.339.436-.701.849-.977C6.845%204.16%207.369%204%208%204a2.76%202.76%200%200%201%201.637.525c.503.377.863.965.863%201.725%200%20.448-.115.83-.329%201.15-.205.307-.47.513-.692.662-.109.072-.22.138-.313.195l-.006.004a6%206%200%200%200-.26.16%201%201%200%200%200-.276.245.75.75%200%200%201-1.248-.832c.184-.264.42-.489.692-.661q.154-.1.313-.195l.007-.004c.1-.061.182-.11.258-.161a1%201%200%200%200%20.277-.245C8.96%206.514%209%206.427%209%206.25a.61.61%200%200%200-.262-.525A1.27%201.27%200%200%200%208%205.5c-.369%200-.595.09-.74.187a1%201%200%200%200-.34.398M9%2011a1%201%200%201%201-2%200%201%201%200%200%201%202%200%22/%3E%3C/svg%3E');--md-admonition-icon--warning:url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2016%2016%22%3E%3Cpath%20d%3D%22M6.457%201.047c.659-1.234%202.427-1.234%203.086%200l6.082%2011.378A1.75%201.75%200%200%201%2014.082%2015H1.918a1.75%201.75%200%200%201-1.543-2.575Zm1.763.707a.25.25%200%200%200-.44%200L1.698%2013.132a.25.25%200%200%200%20.22.368h12.164a.25.25%200%200%200%20.22-.368Zm.53%203.996v2.5a.75.75%200%200%201-1.5%200v-2.5a.75.75%200%200%201%201.5%200M9%2011a1%201%200%201%201-2%200%201%201%200%200%201%202%200%22/%3E%3C/svg%3E');--md-admonition-icon--failure:url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2016%2016%22%3E%3Cpath%20d%3D%22M2.344%202.343za8%208%200%200%201%2011.314%2011.314A8.002%208.002%200%200%201%20.234%2010.089a8%208%200%200%201%202.11-7.746m1.06%2010.253a6.5%206.5%200%201%200%209.108-9.275%206.5%206.5%200%200%200-9.108%209.275M6.03%204.97%208%206.94l1.97-1.97a.749.749%200%200%201%201.275.326.75.75%200%200%201-.215.734L9.06%208l1.97%201.97a.749.749%200%200%201-.326%201.275.75.75%200%200%201-.734-.215L8%209.06l-1.97%201.97a.749.749%200%200%201-1.275-.326.75.75%200%200%201%20.215-.734L6.94%208%204.97%206.03a.75.75%200%200%201%20.018-1.042.75.75%200%200%201%201.042-.018%22/%3E%3C/svg%3E');--md-admonition-icon--danger:url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2016%2016%22%3E%3Cpath%20d%3D%22M9.504.43a1.516%201.516%200%200%201%202.437%201.713L10.415%205.5h2.123c1.57%200%202.346%201.909%201.22%203.004l-7.34%207.142a1.25%201.25%200%200%201-.871.354h-.302a1.25%201.25%200%200%201-1.157-1.723L5.633%2010.5H3.462c-1.57%200-2.346-1.909-1.22-3.004zm1.047%201.074L3.286%208.571A.25.25%200%200%200%203.462%209H6.75a.75.75%200%200%201%20.694%201.034l-1.713%204.188%206.982-6.793A.25.25%200%200%200%2012.538%207H9.25a.75.75%200%200%201-.683-1.06l2.008-4.418.003-.006-.004-.009-.006-.006-.008-.001q-.005%200-.009.004%22/%3E%3C/svg%3E');--md-admonition-icon--bug:url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2016%2016%22%3E%3Cpath%20d%3D%22M4.72.22a.75.75%200%200%201%201.06%200l1%20.999a3.5%203.5%200%200%201%202.441%200l.999-1a.748.748%200%200%201%201.265.332.75.75%200%200%201-.205.729l-.775.776c.616.63.995%201.493.995%202.444v.327q0%20.15-.025.292c.408.14.764.392%201.029.722l1.968-.787a.75.75%200%200%201%20.556%201.392L13%207.258V9h2.25a.75.75%200%200%201%200%201.5H13v.5q-.002.615-.141%201.186l2.17.868a.75.75%200%200%201-.557%201.392l-2.184-.873A5%205%200%200%201%208%2016a5%205%200%200%201-4.288-2.427l-2.183.873a.75.75%200%200%201-.558-1.392l2.17-.868A5%205%200%200%201%203%2011v-.5H.75a.75.75%200%200%201%200-1.5H3V7.258L.971%206.446a.75.75%200%200%201%20.558-1.392l1.967.787c.265-.33.62-.583%201.03-.722a1.7%201.7%200%200%201-.026-.292V4.5c0-.951.38-1.814.995-2.444L4.72%201.28a.75.75%200%200%201%200-1.06m.53%206.28a.75.75%200%200%200-.75.75V11a3.5%203.5%200%201%200%207%200V7.25a.75.75%200%200%200-.75-.75ZM6.173%205h3.654A.17.17%200%200%200%2010%204.827V4.5a2%202%200%201%200-4%200v.327c0%20.096.077.173.173.173%22/%3E%3C/svg%3E');--md-admonition-icon--example:url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2016%2016%22%3E%3Cpath%20d%3D%22M5%205.782V2.5h-.25a.75.75%200%200%201%200-1.5h6.5a.75.75%200%200%201%200%201.5H11v3.282l3.666%205.76C15.619%2013.04%2014.543%2015%2012.767%2015H3.233c-1.776%200-2.852-1.96-1.899-3.458Zm-2.4%206.565a.75.75%200%200%200%20.633%201.153h9.534a.75.75%200%200%200%20.633-1.153L12.225%2010.5h-8.45ZM9.5%202.5h-3V6c0%20.143-.04.283-.117.403L4.73%209h6.54L9.617%206.403A.75.75%200%200%201%209.5%206Z%22/%3E%3C/svg%3E');--md-admonition-icon--quote:url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2016%2016%22%3E%3Cpath%20d%3D%22M1.75%202.5h10.5a.75.75%200%200%201%200%201.5H1.75a.75.75%200%200%201%200-1.5m4%205h8.5a.75.75%200%200%201%200%201.5h-8.5a.75.75%200%200%201%200-1.5m0%205h8.5a.75.75%200%200%201%200%201.5h-8.5a.75.75%200%200%201%200-1.5M2.5%207.75v6a.75.75%200%200%201-1.5%200v-6a.75.75%200%200%201%201.5%200%22/%3E%3C/svg%3E');}</style>
+
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&amp;display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  <link href="../../assets/stylesheets/glightbox.min.css" rel="stylesheet"><script src="../../assets/javascripts/glightbox.min.js"></script><style id="glightbox-style">
+            html.glightbox-open { overflow: initial; height: 100%; }
+            .gslide-title { margin-top: 0px; user-select: text; }
+            .gslide-desc { color: #666; user-select: text; }
+            .gslide-image img { background: white; }
+            .gscrollbar-fixer { padding-right: 15px; }
+            .gdesc-inner { font-size: 0.75rem; }
+            body[data-md-color-scheme="slate"] .gdesc-inner { background: var(--md-default-bg-color); }
+            body[data-md-color-scheme="slate"] .gslide-title { color: var(--md-default-fg-color); }
+            body[data-md-color-scheme="slate"] .gslide-desc { color: var(--md-default-fg-color); }
+        </style></head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="custom" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#multi-cluster-architecture-overview" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="Terraform IaC for OpenShift Multi Cluster AirGapped" class="md-header__button md-logo" aria-label="Terraform IaC for OpenShift Multi Cluster AirGapped" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"></path></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"></path></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Terraform IaC for OpenShift Multi Cluster AirGapped
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Multi-Cluster Overview
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"></path></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required="">
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"></path></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M9.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L77.3 256l137.3-137.4c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"></path></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Share" aria-label="Share" data-clipboard="" data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"></path></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"></path></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix="">
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+    
+      
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="./" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Architecture
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../clusters/terraform-ocp-baremetal/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Cluster Environments
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../diagrams/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Draw.io Diagrams
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../pipeline/terraform-ado-pipeline/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  CI/CD Pipeline
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../code/ipi-method/openshiftbaremetal/main/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Terraform Code
+
+        </a>
+      </li>
+    
+  
+
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+    
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation">
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+  
+
+<nav class="md-nav md-nav--primary md-nav--lifted md-nav--integrated" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Terraform IaC for OpenShift Multi Cluster AirGapped" class="md-nav__button md-logo" aria-label="Terraform IaC for OpenShift Multi Cluster AirGapped" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"></path></svg>
+
+    </a>
+    Terraform IaC for OpenShift Multi Cluster AirGapped
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix="">
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked="">
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Architecture
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix="">
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Multi-Cluster Overview
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Multi-Cluster Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix="">
+      
+        <li class="md-nav__item">
+  <a href="#high-level-architecture" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        High-Level Architecture
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#upi-architecture-variant" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        UPI Architecture Variant
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="UPI Architecture Variant">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#upi-install-flow-per-cluster" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        UPI Install Flow Per Cluster
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ipi-vs-upi-infrastructure-comparison" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        IPI vs UPI — Infrastructure Comparison
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#how-it-works" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How It Works
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="How It Works">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-deployment-flow-ipi" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Deployment Flow — IPI
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#1b-deployment-flow-upi" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1b. Deployment Flow — UPI
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-submariner-cross-cluster-networking" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Submariner Cross-Cluster Networking
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-odf-disaster-recovery-replication" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. ODF Disaster Recovery Replication
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-management-cluster-architecture" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Management Cluster Architecture
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4b-acm-cluster-import-dr-application-management" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4b. ACM Cluster Import &amp; DR Application Management
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-disaster-recovery-failover-workflow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Disaster Recovery Failover Workflow
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#folder-structure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Folder Structure
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Folder Structure">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#ipi-method" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        IPI Method
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#upi-method" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        UPI Method
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#key-upi-module-differences" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key UPI Module Differences
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#quick-start-full-multi-cluster-deployment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Quick Start — Full Multi-Cluster Deployment
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Quick Start — Full Multi-Cluster Deployment">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#step-1-configure-each-cluster" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 1: Configure Each Cluster
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-2-deploy-via-ado-pipeline" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 2: Deploy via ADO Pipeline
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-3-verify-deployment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 3: Verify Deployment
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#complete-inter-cluster-connection-map" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Complete Inter-Cluster Connection Map
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Complete Inter-Cluster Connection Map">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#connection-details" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Connection Details
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#firewall-rules-required" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Firewall Rules Required
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#endpoints-summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Endpoints Summary
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3">
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Cluster Environments
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Cluster Environments
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix="">
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../clusters/terraform-ocp-baremetal/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    DC Primary — OCP + OpenShift AI (IPI)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../clusters/terraform-upi-baremetal/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    UPI Baremetal — OCP + OpenShift AI
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../clusters/terraform-dr-secondary/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    DR Secondary
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../clusters/terraform-mgmt-dc/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Management DC
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../clusters/terraform-mgmt-dr/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Management DR
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../diagrams/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Draw.io Diagrams
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5">
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CI/CD Pipeline
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    CI/CD Pipeline
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix="">
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../pipeline/terraform-ado-pipeline/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ADO Pipeline (IPI — Day 1)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../pipeline/terraform-ado-pipeline-day2/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ADO Pipeline (IPI — Day 2)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../pipeline/terraform-upi-ado-pipeline/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ADO Pipeline (UPI — Day 1)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../pipeline/terraform-upi-ado-pipeline-day2/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ADO Pipeline (UPI — Day 2)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../pipeline/terraform-acm-import-pipeline/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ACM Cluster Import Pipeline
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../pipeline/terraform-acm-dr-pipeline/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ACM DR Failover/Failback Pipeline
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../pipeline/terraform-cnv-pipeline/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    OpenShift Virtualization Pipeline
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../pipeline/terraform-vm-migration-pipeline/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    VM Migration Pipeline
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../pipeline/terraform-mtc-pipeline/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    MTC Container Migration Pipeline
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6">
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Terraform Code
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Terraform Code
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix="">
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6_1">
+        
+          
+          <label class="md-nav__link" for="__nav_6_1" id="__nav_6_1_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    IPI DC Primary (ipi-method/openshiftbaremetal)
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6_1">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    IPI DC Primary (ipi-method/openshiftbaremetal)
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix="">
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../code/ipi-method/openshiftbaremetal/main/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    main.tf
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../code/ipi-method/openshiftbaremetal/variables/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    variables.tf
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../code/ipi-method/openshiftbaremetal/tfvars/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    terraform.tfvars (Day 1)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../code/ipi-method/openshiftbaremetal/day2-tfvars/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    day2-terraform.tfvars (Day 2)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../code/ipi-method/openshiftbaremetal/outputs/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    outputs.tf
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../code/ipi-method/openshiftbaremetal/versions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    versions.tf
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../code/ipi-method/openshiftbaremetal/openshift-virtualization-tfvars/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    openshift-virtualization.tfvars
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../code/ipi-method/openshiftbaremetal/vm-migration-tfvars/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    vm-migration.tfvars
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../code/ipi-method/openshiftbaremetal/mtc-tfvars/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    mtc.tfvars
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6_2">
+        
+          
+          <label class="md-nav__link" for="__nav_6_2" id="__nav_6_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    IPI DR Secondary (ipi-method/openshiftbaremetal-dr)
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    IPI DR Secondary (ipi-method/openshiftbaremetal-dr)
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix="">
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../code/ipi-method/openshiftbaremetal-dr/main/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    main.tf
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../code/ipi-method/openshiftbaremetal-dr/variables/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    variables.tf
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../code/ipi-method/openshiftbaremetal-dr/tfvars/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    terraform.tfvars (Day 1)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../code/ipi-method/openshiftbaremetal-dr/day2-tfvars/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    day2-terraform.tfvars (Day 2)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../code/ipi-method/openshiftbaremetal-dr/outputs/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    outputs.tf
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../code/ipi-method/openshiftbaremetal-dr/versions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    versions.tf
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../code/ipi-method/openshiftbaremetal-dr/openshift-virtualization-tfvars/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    openshift-virtualization.tfvars
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../code/ipi-method/openshiftbaremetal-dr/vm-migration-tfvars/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    vm-migration.tfvars
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../code/ipi-method/openshiftbaremetal-dr/mtc-tfvars/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    mtc.tfvars
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6_3">
+        
+          
+          <label class="md-nav__link" for="__nav_6_3" id="__nav_6_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    IPI Management DC (ipi-method/mgmt-dc)
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    IPI Management DC (ipi-method/mgmt-dc)
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix="">
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../code/ipi-method/mgmt-dc/main/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    main.tf
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../code/ipi-method/mgmt-dc/variables/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    variables.tf
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../code/ipi-method/mgmt-dc/tfvars/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    terraform.tfvars (Day 1)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../code/ipi-method/mgmt-dc/day2-tfvars/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    day2-terraform.tfvars (Day 2)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../code/ipi-method/mgmt-dc/acm-import-tfvars/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    acm-import.tfvars (ACM Import)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../code/ipi-method/mgmt-dc/acm-dr-tfvars/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    acm-dr.tfvars (ACM DR)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../code/ipi-method/mgmt-dc/outputs/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    outputs.tf
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../code/ipi-method/mgmt-dc/versions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    versions.tf
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6_4">
+        
+          
+          <label class="md-nav__link" for="__nav_6_4" id="__nav_6_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    IPI Management DR (ipi-method/mgmt-dr)
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    IPI Management DR (ipi-method/mgmt-dr)
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix="">
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../code/ipi-method/mgmt-dr/main/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    main.tf
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../code/ipi-method/mgmt-dr/variables/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    variables.tf
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../code/ipi-method/mgmt-dr/tfvars/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    terraform.tfvars (Day 1)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../code/ipi-method/mgmt-dr/day2-tfvars/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    day2-terraform.tfvars (Day 2)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../code/ipi-method/mgmt-dr/acm-import-tfvars/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    acm-import.tfvars (ACM Import)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../code/ipi-method/mgmt-dr/acm-dr-tfvars/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    acm-dr.tfvars (ACM DR)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../code/ipi-method/mgmt-dr/outputs/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    outputs.tf
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../code/ipi-method/mgmt-dr/versions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    versions.tf
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6_5">
+        
+          
+          <label class="md-nav__link" for="__nav_6_5" id="__nav_6_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    IPI Azure DevOps Pipeline
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    IPI Azure DevOps Pipeline
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix="">
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../code/ipi-method/pipeline/azure-pipelines/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    azure-pipelines.yml (Day 1)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../code/ipi-method/pipeline/azure-pipelines-day2/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    azure-pipelines-day2.yml (Day 2)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../code/ipi-method/pipeline/azure-pipelines-acm-import/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    azure-pipelines-acm-import.yml (ACM Import)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../code/ipi-method/pipeline/azure-pipelines-acm-dr/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    azure-pipelines-acm-dr.yml (ACM DR)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../code/ipi-method/pipeline/azure-pipelines-cnv/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    azure-pipelines-cnv.yml (CNV)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../code/ipi-method/pipeline/azure-pipelines-vm-migration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    azure-pipelines-vm-migration.yml (VM Migration)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../code/ipi-method/pipeline/azure-pipelines-mtc/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    azure-pipelines-mtc.yml (MTC)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6_6">
+        
+          
+          <label class="md-nav__link" for="__nav_6_6" id="__nav_6_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    UPI DC Primary (upi-method/openshiftbaremetal)
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    UPI DC Primary (upi-method/openshiftbaremetal)
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix="">
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../code/upi-method/main/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    main.tf
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../code/upi-method/variables/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    variables.tf
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../code/upi-method/tfvars/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    terraform.tfvars (Day 1)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../code/upi-method/day2-tfvars/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    day2-terraform.tfvars (Day 2)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../code/upi-method/outputs/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    outputs.tf
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../code/upi-method/versions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    versions.tf
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../code/upi-method/openshift-virtualization-tfvars/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    openshift-virtualization.tfvars
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../code/upi-method/vm-migration-tfvars/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    vm-migration.tfvars
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../code/upi-method/mtc-tfvars/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    mtc.tfvars
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../code/upi-method/azure-pipelines-upi/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    azure-pipelines-upi.yml (Day 1)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../code/upi-method/azure-pipelines-day2-upi/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    azure-pipelines-day2-upi.yml (Day 2)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../code/upi-method/azure-pipelines-acm-import/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    azure-pipelines-acm-import.yml (ACM Import)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../code/upi-method/azure-pipelines-acm-dr/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    azure-pipelines-acm-dr.yml (ACM DR)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../code/upi-method/azure-pipelines-cnv/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    azure-pipelines-cnv.yml (CNV)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../code/upi-method/azure-pipelines-vm-migration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    azure-pipelines-vm-migration.yml (VM Migration)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../code/upi-method/azure-pipelines-mtc/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    azure-pipelines-mtc.yml (MTC)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6_7">
+        
+          
+          <label class="md-nav__link" for="__nav_6_7" id="__nav_6_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    UPI DR Secondary (upi-method/openshiftbaremetal-dr)
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    UPI DR Secondary (upi-method/openshiftbaremetal-dr)
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix="">
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../code/upi-method/openshiftbaremetal-dr/main/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    main.tf
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../code/upi-method/openshiftbaremetal-dr/variables/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    variables.tf
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../code/upi-method/openshiftbaremetal-dr/tfvars/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    terraform.tfvars (Day 1)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../code/upi-method/openshiftbaremetal-dr/day2-tfvars/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    day2-terraform.tfvars (Day 2)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../code/upi-method/openshiftbaremetal-dr/outputs/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    outputs.tf
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../code/upi-method/openshiftbaremetal-dr/versions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    versions.tf
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../code/upi-method/openshiftbaremetal-dr/openshift-virtualization-tfvars/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    openshift-virtualization.tfvars
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../code/upi-method/openshiftbaremetal-dr/vm-migration-tfvars/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    vm-migration.tfvars
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../code/upi-method/openshiftbaremetal-dr/mtc-tfvars/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    mtc.tfvars
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6_8">
+        
+          
+          <label class="md-nav__link" for="__nav_6_8" id="__nav_6_8_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    UPI Management DC (upi-method/mgmt-dc)
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    UPI Management DC (upi-method/mgmt-dc)
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix="">
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../code/upi-method/mgmt-dc/main/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    main.tf
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../code/upi-method/mgmt-dc/variables/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    variables.tf
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../code/upi-method/mgmt-dc/tfvars/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    terraform.tfvars (Day 1)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../code/upi-method/mgmt-dc/day2-tfvars/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    day2-terraform.tfvars (Day 2)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../code/upi-method/mgmt-dc/acm-import-tfvars/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    acm-import.tfvars (ACM Import)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../code/upi-method/mgmt-dc/acm-dr-tfvars/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    acm-dr.tfvars (ACM DR)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../code/upi-method/mgmt-dc/outputs/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    outputs.tf
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../code/upi-method/mgmt-dc/versions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    versions.tf
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6_9">
+        
+          
+          <label class="md-nav__link" for="__nav_6_9" id="__nav_6_9_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    UPI Management DR (upi-method/mgmt-dr)
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6_9">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    UPI Management DR (upi-method/mgmt-dr)
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix="">
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../code/upi-method/mgmt-dr/main/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    main.tf
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../code/upi-method/mgmt-dr/variables/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    variables.tf
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../code/upi-method/mgmt-dr/tfvars/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    terraform.tfvars (Day 1)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../code/upi-method/mgmt-dr/day2-tfvars/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    day2-terraform.tfvars (Day 2)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../code/upi-method/mgmt-dr/acm-import-tfvars/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    acm-import.tfvars (ACM Import)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../code/upi-method/mgmt-dr/acm-dr-tfvars/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    acm-dr.tfvars (ACM DR)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../code/upi-method/mgmt-dr/outputs/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    outputs.tf
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../code/upi-method/mgmt-dr/versions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    versions.tf
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="multi-cluster-architecture-overview">Multi-Cluster Architecture — Overview<a class="headerlink" href="#multi-cluster-architecture-overview" title="Permanent link">¶</a></h1>
+<p>This section covers the <strong>complete multi-cluster OpenShift deployment</strong> spanning DC and DR sites with dedicated management clusters, automated via Terraform and Azure DevOps.</p>
+<h2 id="high-level-architecture">High-Level Architecture<a class="headerlink" href="#high-level-architecture" title="Permanent link">¶</a></h2>
+<p><a class="glightbox" data-type="image" data-width="auto" data-height="auto" href="../../diagrams/architecture/01-high-level-architecture-ipi.svg" data-desc-position="bottom"><img alt="High-Level Architecture (IPI)" class="drawio-diagram" src="../../diagrams/architecture/01-high-level-architecture-ipi.svg"></a></p>
+<details class="note" open="open">
+<summary>Draw.io Source: High-Level Architecture (IPI)</summary>
+<p><a class="md-button" href="../../diagrams/architecture/01-high-level-architecture-ipi.drawio"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M5 20h14v-2H5m14-9h-4V3H9v6H5l7 7z"></path></svg></span> Download .drawio file</a> — Open in <a href="https://app.diagrams.net">draw.io</a> for interactive editing.</p>
+<p></p><details>
+<summary>View original Mermaid source</summary><p></p>
+<p>```mermaid</p>
+</details>
+<p>graph TB
+    subgraph DC["<b>Data Center (DC)</b>"]
+        direction TB
+        subgraph MGMT_DC["Management Cluster — DC"]
+            ACM_HUB["ACM Hub<br><i>Multi-Cluster Manager</i>"]
+            ACS_CENTRAL["ACS Central<br><i>Security Policies</i>"]
+            QUAY_DC["Quay Enterprise<br><i>Container Registry</i>"]
+            ODF_MGMT_DC["ODF Storage"]
+        end
+        subgraph PROD_DC["Workload Cluster — DC Primary"]
+            OCP_DC["OCP 4.15 Baremetal"]
+            RHOAI_DC["OpenShift AI"]
+            GPU_DC["NVIDIA GPU Stack<br><i>NFD → GPU Operator</i>"]
+            ODF_DC["ODF Ceph Storage"]
+            SM_DC["Service Mesh + Serverless"]
+            SUB_BROKER["Submariner<br><b>Broker</b>"]
+        end
+    end</p>
+<div class="highlight"><pre><span></span><code>subgraph DR["&lt;b&gt;Disaster Recovery (DR)&lt;/b&gt;"]
+    direction TB
+    subgraph MGMT_DR["Management Cluster — DR"]
+        ACM_STANDBY["ACM Standby&lt;br/&gt;&lt;i&gt;Passive Hub&lt;/i&gt;"]
+        ACS_SECURED["ACS SecuredCluster&lt;br/&gt;&lt;i&gt;Sensor + Collector&lt;/i&gt;"]
+        QUAY_DR["Quay Enterprise&lt;br/&gt;&lt;i&gt;Container Registry&lt;/i&gt;"]
+        ODF_MGMT_DR["ODF Storage"]
+    end
+    subgraph PROD_DR["Workload Cluster — DR Secondary"]
+        OCP_DR["OCP 4.15 Baremetal"]
+        RHOAI_DR["OpenShift AI"]
+        GPU_DR["NVIDIA GPU Stack&lt;br/&gt;&lt;i&gt;NFD → GPU Operator&lt;/i&gt;"]
+        ODF_DR["ODF Ceph Storage"]
+        SM_DR["Service Mesh + Serverless"]
+        SUB_AGENT["Submariner&lt;br/&gt;&lt;b&gt;Agent&lt;/b&gt;"]
+    end
+end
+
+%% Cross-site connections
+SUB_BROKER &lt;--&gt;|"IPsec Tunnel&lt;br/&gt;Service Discovery"| SUB_AGENT
+ODF_DC &lt;--&gt;|"RBD Mirroring&lt;br/&gt;(async / sync)"| ODF_DR
+ACM_HUB --&gt;|"Manages"| OCP_DC
+ACM_HUB --&gt;|"Manages"| OCP_DR
+ACM_HUB -.-&gt;|"Failover"| ACM_STANDBY
+ACS_CENTRAL --&gt;|"Policies"| ACS_SECURED
+QUAY_DC -.-&gt;|"Geo-Replication"| QUAY_DR
+
+style DC fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+style DR fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
+style MGMT_DC fill:#fff3e0,stroke:#ef6c00
+style MGMT_DR fill:#fff3e0,stroke:#ef6c00
+style PROD_DC fill:#f3e5f5,stroke:#7b1fa2
+style PROD_DR fill:#f3e5f5,stroke:#7b1fa2
+</code></pre></div>
+<p>```
+
+    </p></details>
+
+<p></p>
+<h2 id="upi-architecture-variant">UPI Architecture Variant<a class="headerlink" href="#upi-architecture-variant" title="Permanent link">¶</a></h2>
+<p>The same 4-cluster architecture is also available via <strong>UPI (User Provisioned Infrastructure)</strong>. UPI adds a <strong>bastion host</strong>, <strong>external HAProxy load balancer</strong>, and a <strong>temporary bootstrap VM</strong> to each cluster — the operator controls node lifecycle instead of BMC/iDRAC automation.
+
+<a class="glightbox" data-type="image" data-width="auto" data-height="auto" href="../../diagrams/architecture/02-upi-architecture-variant.svg" data-desc-position="bottom"><img alt="UPI Architecture Variant" class="drawio-diagram" src="../../diagrams/architecture/02-upi-architecture-variant.svg"></a>
+</p>
+<details class="note" open="open">
+<summary>Draw.io Source: UPI Architecture Variant</summary>
+<p><a class="md-button" href="../../diagrams/architecture/02-upi-architecture-variant.drawio"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M5 20h14v-2H5m14-9h-4V3H9v6H5l7 7z"></path></svg></span> Download .drawio file</a> — Open in <a href="https://app.diagrams.net">draw.io</a> for interactive editing.</p>
+<p></p><details>
+<summary>View original Mermaid source</summary><p></p>
+<p>```mermaid</p>
+</details>
+<p>graph TB
+    subgraph DC_UPI["<b>Data Center (DC) — UPI</b>"]
+        direction TB
+        subgraph INFRA_DC["Infrastructure Layer"]
+            BASTION_DC["<b>Bastion Host</b><br><i>openshift-install<br>HTTP ignition server<br>PXE/TFTP (optional)</i>"]
+            HAPROXY_DC["<b>HAProxy LB</b><br><i>api:6443 → masters<br><em>.apps:443 → workers</em></i><em>"]
+            BOOT_DC["<b>Bootstrap VM</b><br><i>Temporary — removed<br>after control plane up</i>"]
+        end
+        subgraph PROD_DC_UPI["Workload Cluster — DC Primary"]
+            CP_DC["3× Control Plane<br><i>PXE/ISO boot</i>"]
+            WK_DC["N× Workers<br><i>GPU + ODF + AI</i>"]
+            SUB_B_UPI["Submariner<br><b>Broker</b>"]
+        end
+        subgraph MGMT_DC_UPI["Management Cluster — DC"]
+            ACM_H_UPI["ACM Hub"]
+            ACS_C_UPI["ACS Central"]
+            QUAY_DC_UPI["Quay Enterprise"]
+        end
+    end
+
+    subgraph DR_UPI["<b>Disaster Recovery (DR) — UPI</b>"]
+        direction TB
+        subgraph INFRA_DR["Infrastructure Layer"]
+            BASTION_DR["<b>Bastion Host</b><br><i>openshift-install<br>HTTP ignition server</i>"]
+            HAPROXY_DR["<b>HAProxy LB</b><br><i>api:6443 → masters<br></i></em><i>.apps:443 → workers</i>"]
+            BOOT_DR["<b>Bootstrap VM</b><br><i>Temporary — removed<br>after control plane up</i>"]
+        end
+        subgraph PROD_DR_UPI["Workload Cluster — DR Secondary"]
+            CP_DR["3× Control Plane<br><i>PXE/ISO boot</i>"]
+            WK_DR["N× Workers<br><i>GPU + ODF + AI</i>"]
+            SUB_A_UPI["Submariner<br><b>Agent</b>"]
+        end
+        subgraph MGMT_DR_UPI["Management Cluster — DR"]
+            ACM_S_UPI["ACM Standby"]
+            ACS_S_UPI["ACS SecuredCluster"]
+            QUAY_DR_UPI["Quay Enterprise"]
+        end
+    end
+
+    %% Bastion → nodes
+    BASTION_DC →|"Ignition configs<br>HTTP :8080"| CP_DC
+    BASTION_DC →|"Ignition configs"| WK_DC
+    BASTION_DC →|"bootstrap.ign"| BOOT_DC
+    BASTION_DR →|"Ignition configs<br>HTTP :8080"| CP_DR
+    BASTION_DR →|"Ignition configs"| WK_DR
+    BASTION_DR →|"bootstrap.ign"| BOOT_DR
+
+    %% HAProxy → nodes
+    HAPROXY_DC →|"LB traffic"| CP_DC
+    HAPROXY_DC →|"LB traffic"| WK_DC
+    HAPROXY_DR →|"LB traffic"| CP_DR
+    HAPROXY_DR →|"LB traffic"| WK_DR
+
+    %% Bootstrap cleanup
+    BOOT_DC -.-&gt;|"Removed after<br>bootstrap_complete"| HAPROXY_DC
+    BOOT_DR -.-&gt;|"Removed after<br>bootstrap_complete"| HAPROXY_DR
+
+    %% Cross-site
+    SUB_B_UPI ↔|"IPsec Tunnel"| SUB_A_UPI
+    ACM_H_UPI -.-&gt;|"Failover"| ACM_S_UPI
+    ACS_C_UPI →|"Policies"| ACS_S_UPI
+    QUAY_DC_UPI -.-&gt;|"Geo-Replication"| QUAY_DR_UPI
+
+    style DC_UPI fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    style DR_UPI fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
+    style INFRA_DC fill:#fce4ec,stroke:#c62828
+    style INFRA_DR fill:#fce4ec,stroke:#c62828
+    style PROD_DC_UPI fill:#f3e5f5,stroke:#7b1fa2
+    style PROD_DR_UPI fill:#f3e5f5,stroke:#7b1fa2
+    style MGMT_DC_UPI fill:#fff3e0,stroke:#ef6c00
+    style MGMT_DR_UPI fill:#fff3e0,stroke:#ef6c00
+```</p>
+<div class="highlight"><pre><span></span><code>&lt;/details&gt;
+</code></pre></div>
+<h3 id="upi-install-flow-per-cluster">UPI Install Flow Per Cluster<a class="headerlink" href="#upi-install-flow-per-cluster" title="Permanent link">¶</a></h3>
+<p>Each UPI cluster follows this phased install sequence. The <strong>bootstrap node is a temporary VM</strong> that is automatically cleaned up once the control plane becomes self-hosted:</p>
+<p><a class="glightbox" data-type="image" data-width="auto" data-height="auto" href="../../diagrams/architecture/03-upi-install-flow.svg" data-desc-position="bottom"><img alt="UPI Install Flow" class="drawio-diagram" src="../../diagrams/architecture/03-upi-install-flow.svg"></a></p>
+<details class="note" open="open">
+<summary>Draw.io Source: UPI Install Flow</summary>
+<p><a class="md-button" href="../../diagrams/architecture/03-upi-install-flow.drawio"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M5 20h14v-2H5m14-9h-4V3H9v6H5l7 7z"></path></svg></span> Download .drawio file</a> — Open in <a href="https://app.diagrams.net">draw.io</a> for interactive editing.</p>
+<p></p><details>
+<summary>View original Mermaid source</summary><p></p>
+<p>```mermaid</p>
+</details>
+<p>graph TB
+    subgraph PHASE1["Phase 1: Prerequisites"]
+        DNS["DNS Records"]
+        LB["HAProxy LB Config<br><i>Bootstrap backend included</i>"]
+        QM["Quay Mirror<br><i>(disconnected only)</i>"]
+    end</p>
+<div class="highlight"><pre><span></span><code>subgraph PHASE2["Phase 2: Ignition"]
+    IC["install-config.yaml&lt;br/&gt;&lt;i&gt;platform: none&lt;/i&gt;"]
+    IGN["openshift-install&lt;br/&gt;create ignition-configs"]
+    HTTP["Bastion HTTP Server&lt;br/&gt;&lt;i&gt;Serve *.ign on :8080&lt;/i&gt;"]
+end
+
+subgraph PHASE3["Phase 3: Bootstrap + Control Plane"]
+    BOOT["Boot Bootstrap VM&lt;br/&gt;&lt;i&gt;Fetch bootstrap.ign&lt;/i&gt;"]
+    CP["Boot 3 Masters&lt;br/&gt;&lt;i&gt;Fetch master.ign&lt;/i&gt;"]
+    BW["bootstrap_complete&lt;br/&gt;&lt;i&gt;Control plane self-hosted&lt;/i&gt;"]
+    BC["bootstrap_cleanup&lt;br/&gt;&lt;i&gt;Remove from HAProxy&lt;br/&gt;Power off VM&lt;/i&gt;"]
+end
+
+subgraph PHASE4["Phase 4: Workers + CSRs"]
+    WK["Boot Workers&lt;br/&gt;&lt;i&gt;Fetch worker.ign&lt;/i&gt;"]
+    CSR["Approve CSRs"]
+    CC["cluster_complete"]
+end
+
+subgraph PHASE5["Phase 5: Day-2 Operators"]
+    D2["NFD, GPU, ODF, AI,&lt;br/&gt;ServiceMesh, Serverless,&lt;br/&gt;Submariner, ACM, ACS, Quay&lt;br/&gt;&lt;i&gt;(per cluster role)&lt;/i&gt;"]
+end
+
+PHASE1 --&gt; PHASE2 --&gt; PHASE3 --&gt; PHASE4 --&gt; PHASE5
+
+style PHASE1 fill:#e3f2fd,stroke:#1565c0
+style PHASE2 fill:#fff3e0,stroke:#ef6c00
+style PHASE3 fill:#fce4ec,stroke:#c62828
+style PHASE4 fill:#e8f5e9,stroke:#2e7d32
+style PHASE5 fill:#f3e5f5,stroke:#7b1fa2
+style BC fill:#ff8a80,stroke:#d50000,stroke-width:2px
+</code></pre></div>
+<p>```
+
+    </p></details>
+
+<p></p>
+<h3 id="ipi-vs-upi-infrastructure-comparison">IPI vs UPI — Infrastructure Comparison<a class="headerlink" href="#ipi-vs-upi-infrastructure-comparison" title="Permanent link">¶</a></h3>
+<table>
+<thead>
+<tr>
+<th>Component</th>
+<th>IPI</th>
+<th>UPI</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Bastion Host</strong></td>
+<td>Optional (convenience)</td>
+<td><strong>Required</strong> — runs <code>openshift-install</code>, serves ignition, PXE/TFTP</td>
+</tr>
+<tr>
+<td><strong>Bootstrap VM</strong></td>
+<td>Managed by installer, auto-removed</td>
+<td><strong>Operator-provisioned</strong> — explicit <code>bootstrap_cleanup</code> module</td>
+</tr>
+<tr>
+<td><strong>Load Balancer</strong></td>
+<td>Installer-managed keepalived VIPs</td>
+<td><strong>External HAProxy</strong> — must be pre-configured</td>
+</tr>
+<tr>
+<td><strong>Node Boot</strong></td>
+<td>Automated via BMC/iDRAC virtual media</td>
+<td>Manual: PXE, ISO, or operator-driven boot</td>
+</tr>
+<tr>
+<td><strong>CSR Approval</strong></td>
+<td>Automatic</td>
+<td><strong>Explicit</strong> — <code>oc adm certificate approve</code></td>
+</tr>
+<tr>
+<td><strong>install-config</strong></td>
+<td><code>platform: baremetal</code> + BMC credentials</td>
+<td><code>platform: none</code> — no hardware management</td>
+</tr>
+<tr>
+<td><strong>Installer Binary</strong></td>
+<td><code>openshift-baremetal-install</code></td>
+<td><code>openshift-install</code></td>
+</tr>
+<tr>
+<td><strong>Node Definitions</strong></td>
+<td>Include BMC address, user, password</td>
+<td><strong>No BMC fields</strong> — only name, MAC, IP</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>## Cluster Roles &amp; Responsibilities</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Cluster</td>
+<td>IPI Folder</td>
+<td>UPI Folder</td>
+</tr>
+<tr>
+<td>---------</td>
+<td>-----------</td>
+<td>-----------</td>
+</tr>
+<tr>
+<td><strong>DC Primary</strong></td>
+<td><code>ipi-method/openshiftbaremetal/</code></td>
+<td><code>upi-method/openshiftbaremetal/</code></td>
+</tr>
+<tr>
+<td><strong>DR Secondary</strong></td>
+<td><code>ipi-method/openshiftbaremetal-dr/</code></td>
+<td><code>upi-method/openshiftbaremetal-dr/</code></td>
+</tr>
+<tr>
+<td><strong>Management DC</strong></td>
+<td><code>ipi-method/mgmt-dc/</code></td>
+<td><code>upi-method/mgmt-dc/</code></td>
+</tr>
+<tr>
+<td><strong>Management DR</strong></td>
+<td><code>ipi-method/mgmt-dr/</code></td>
+<td><code>upi-method/mgmt-dr/</code></td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>## Network Architecture</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Each cluster uses <strong>non-overlapping CIDRs</strong> to support Submariner cross-cluster routing without Globalnet:</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><a class="glightbox" data-type="image" data-width="auto" data-height="auto" href="../../diagrams/architecture/04-network-architecture.svg" data-desc-position="bottom"><img alt="Network Architecture" class="drawio-diagram" src="../../diagrams/architecture/04-network-architecture.svg"></a></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<details class="note" open="open">
+<summary>Draw.io Source: Network Architecture</summary>
+<p><a class="md-button" href="../../diagrams/architecture/04-network-architecture.drawio"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M5 20h14v-2H5m14-9h-4V3H9v6H5l7 7z"></path></svg></span> Download .drawio file</a> — Open in <a href="https://app.diagrams.net">draw.io</a> for interactive editing.</p>
+<p></p><details>
+<summary>View original Mermaid source</summary><p></p>
+<p>```mermaid</p>
+</details>
+<p>graph LR
+    subgraph DC_NETS["DC Site Networks"]
+        DC_MACHINE["Machine<br>10.142.41.0/24"]
+        DC_POD["Pod<br>10.128.0.0/14"]
+        DC_SVC["Service<br>172.30.0.0/16"]
+        MGMT_DC_MACHINE["Mgmt Machine<br>10.142.42.0/24"]
+        MGMT_DC_POD["Mgmt Pod<br>10.136.0.0/14"]
+        MGMT_DC_SVC["Mgmt Service<br>172.28.0.0/16"]
+    end
+
+    subgraph DR_NETS["DR Site Networks"]
+        DR_MACHINE["Machine<br>10.143.41.0/24"]
+        DR_POD["Pod<br>10.132.0.0/14"]
+        DR_SVC["Service<br>172.31.0.0/16"]
+        MGMT_DR_MACHINE["Mgmt Machine<br>10.143.42.0/24"]
+        MGMT_DR_POD["Mgmt Pod<br>10.140.0.0/14"]
+        MGMT_DR_SVC["Mgmt Service<br>172.29.0.0/16"]
+    end
+
+    DC_NETS ↔|"L3 / WAN"| DR_NETS
+
+    style DC_NETS fill:#e8f5e9,stroke:#2e7d32
+    style DR_NETS fill:#e3f2fd,stroke:#1565c0
+```</p>
+<div class="highlight"><pre><span></span><code>&lt;/details&gt;
+</code></pre></div>
+<h2 id="how-it-works">How It Works<a class="headerlink" href="#how-it-works" title="Permanent link">¶</a></h2>
+<h3 id="1-deployment-flow-ipi">1. Deployment Flow — IPI<a class="headerlink" href="#1-deployment-flow-ipi" title="Permanent link">¶</a></h3>
+<p>The IPI ADO pipeline deploys clusters in dependency order (installer manages node lifecycle via BMC):</p>
+<p><a class="glightbox" data-type="image" data-width="auto" data-height="auto" href="../../diagrams/architecture/05-submariner-networking.svg" data-desc-position="bottom"><img alt="Submariner Cross-Cluster Networking" class="drawio-diagram" src="../../diagrams/architecture/05-submariner-networking.svg"></a></p>
+<details class="note" open="open">
+<summary>Draw.io Source: Submariner Cross-Cluster Networking</summary>
+<p><a class="md-button" href="../../diagrams/architecture/05-submariner-networking.drawio"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M5 20h14v-2H5m14-9h-4V3H9v6H5l7 7z"></path></svg></span> Download .drawio file</a> — Open in <a href="https://app.diagrams.net">draw.io</a> for interactive editing.</p>
+<p></p><details>
+<summary>View original Mermaid source</summary><p></p>
+<p>```mermaid</p>
+</details>
+<p>sequenceDiagram
+    participant ADO as Azure DevOps
+    participant DC as DC Primary
+    participant DR as DR Secondary
+    participant MDC as Mgmt DC
+    participant MDR as Mgmt DR</p>
+<div class="highlight"><pre><span></span><code>Note over ADO: User selects deployment scope
+
+rect rgb(232, 245, 233)
+    Note over ADO,DC: Stage 1 — DC Primary
+    ADO-&gt;&gt;DC: terraform init + apply
+    DC--&gt;&gt;DC: DNS → Quay Mirror → OCP Install (BMC/iDRAC)
+    DC--&gt;&gt;DC: NFD → GPU → ODF → AI Stack
+    DC--&gt;&gt;DC: Submariner Broker (if enabled)
+end
+
+rect rgb(227, 242, 253)
+    Note over ADO,DR: Stage 2 — DR Secondary
+    ADO-&gt;&gt;DR: terraform init + apply
+    DR--&gt;&gt;DR: DNS → Quay Mirror → OCP Install (BMC/iDRAC)
+    DR--&gt;&gt;DR: NFD → GPU → ODF → AI Stack
+    DR--&gt;&gt;DR: Submariner Agent → connects to DC Broker
+    DR--&gt;&gt;DR: ODF DR Replication (if enabled)
+end
+
+rect rgb(255, 243, 224)
+    Note over ADO,MDC: Stage 3 — Management DC
+    ADO-&gt;&gt;MDC: terraform init + apply
+    MDC--&gt;&gt;MDC: OCP Install → ODF
+    MDC--&gt;&gt;MDC: ACM Hub → ACS Central → Quay
+    MDC-&gt;&gt;DC: Import cluster into ACM
+    MDC-&gt;&gt;DR: Import cluster into ACM
+end
+
+rect rgb(255, 243, 224)
+    Note over ADO,MDR: Stage 4 — Management DR
+    ADO-&gt;&gt;MDR: terraform init + apply
+    MDR--&gt;&gt;MDR: OCP Install → ODF
+    MDR--&gt;&gt;MDR: ACM Standby → ACS Secured → Quay
+end
+</code></pre></div>
+<p>```
+
+    </p></details>
+
+<p></p>
+<h3 id="1b-deployment-flow-upi">1b. Deployment Flow — UPI<a class="headerlink" href="#1b-deployment-flow-upi" title="Permanent link">¶</a></h3>
+<p>The UPI ADO pipeline adds <strong>bastion-driven ignition</strong>, <strong>manual/PXE/ISO node boot</strong>, and <strong>bootstrap cleanup</strong> phases:
+
+<a class="glightbox" data-type="image" data-width="auto" data-height="auto" href="../../diagrams/architecture/06-odf-dr-replication.svg" data-desc-position="bottom"><img alt="ODF DR Replication" class="drawio-diagram" src="../../diagrams/architecture/06-odf-dr-replication.svg"></a>
+</p>
+<details class="note" open="open">
+<summary>Draw.io Source: ODF DR Replication</summary>
+<p><a class="md-button" href="../../diagrams/architecture/06-odf-dr-replication.drawio"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M5 20h14v-2H5m14-9h-4V3H9v6H5l7 7z"></path></svg></span> Download .drawio file</a> — Open in <a href="https://app.diagrams.net">draw.io</a> for interactive editing.</p>
+<p></p><details>
+<summary>View original Mermaid source</summary><p></p>
+<p>```mermaid</p>
+</details>
+<p>sequenceDiagram
+    participant ADO as Azure DevOps
+    participant BAS as Bastion Host
+    participant DC as DC Primary
+    participant DR as DR Secondary
+    participant MDC as Mgmt DC
+    participant MDR as Mgmt DR
+
+    Note over ADO: User selects deployment scope + boot method
+
+    rect rgb(232, 245, 233)
+        Note over ADO,DC: Stage 1 — DC Primary (UPI)
+        ADO-&gt;&gt;BAS: Prerequisites: DNS + HAProxy + Quay Mirror
+        ADO-&gt;&gt;BAS: Generate ignition configs (platform: none)
+        BAS-&gt;&gt;BAS: Serve *.ign via HTTP :8080
+        BAS-&gt;&gt;DC: Boot bootstrap VM → control plane nodes
+        Note right of DC: PXE / ISO / Manual boot
+        BAS-&gt;&gt;BAS: wait-for bootstrap-complete
+        BAS-&gt;&gt;BAS: bootstrap_cleanup (remove VM + LB backend)
+        BAS-&gt;&gt;DC: Boot worker nodes → approve CSRs
+        DC→&gt;DC: NFD → GPU → ODF → AI → Submariner Broker
+    end
+
+    rect rgb(227, 242, 253)
+        Note over ADO,DR: Stage 2 — DR Secondary (UPI)
+        ADO-&gt;&gt;BAS: Same UPI phases (ignition → boot → cleanup)
+        DR→&gt;DR: Submariner Agent → ODF DR Replication
+    end
+
+    rect rgb(255, 243, 224)
+        Note over ADO,MDC: Stage 3 — Mgmt DC (UPI)
+        ADO-&gt;&gt;BAS: Same UPI phases
+        MDC→&gt;MDC: ACM Hub → ACS Central → Quay
+    end
+
+    rect rgb(255, 243, 224)
+        Note over ADO,MDR: Stage 4 — Mgmt DR (UPI)
+        ADO-&gt;&gt;BAS: Same UPI phases
+        MDR→&gt;MDR: ACM Standby → ACS Secured → Quay
+    end
+```</p>
+<div class="highlight"><pre><span></span><code>&lt;/details&gt;
+</code></pre></div>
+<h3 id="2-submariner-cross-cluster-networking">2. Submariner Cross-Cluster Networking<a class="headerlink" href="#2-submariner-cross-cluster-networking" title="Permanent link">¶</a></h3>
+<p>Submariner establishes an encrypted IPsec tunnel between DC and DR for <strong>pod-to-pod</strong> and <strong>service-to-service</strong> communication:</p>
+<p><a class="glightbox" data-type="image" data-width="auto" data-height="auto" href="../../diagrams/architecture/07-management-cluster-architecture.svg" data-desc-position="bottom"><img alt="Management Cluster Architecture" class="drawio-diagram" src="../../diagrams/architecture/07-management-cluster-architecture.svg"></a></p>
+<details class="note" open="open">
+<summary>Draw.io Source: Management Cluster Architecture</summary>
+<p><a class="md-button" href="../../diagrams/architecture/07-management-cluster-architecture.drawio"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M5 20h14v-2H5m14-9h-4V3H9v6H5l7 7z"></path></svg></span> Download .drawio file</a> — Open in <a href="https://app.diagrams.net">draw.io</a> for interactive editing.</p>
+<p></p><details>
+<summary>View original Mermaid source</summary><p></p>
+<p>```mermaid</p>
+</details>
+<p>graph LR
+    subgraph DC_CLUSTER["DC Primary"]
+        GW_DC["Gateway Node<br><i>submariner.io/gateway=true</i>"]
+        POD_DC["AI Workload Pod<br>10.128.x.x"]
+        SVC_DC["ClusterIP Service"]
+    end</p>
+<div class="highlight"><pre><span></span><code>subgraph DR_CLUSTER["DR Secondary"]
+    GW_DR["Gateway Node&lt;br/&gt;&lt;i&gt;submariner.io/gateway=true&lt;/i&gt;"]
+    POD_DR["AI Workload Pod&lt;br/&gt;10.132.x.x"]
+    SVC_DR["ClusterIP Service"]
+end
+
+POD_DC --&gt; SVC_DC
+SVC_DC --&gt; GW_DC
+GW_DC &lt;--&gt;|"IPsec / Libreswan&lt;br/&gt;Cable Driver"| GW_DR
+GW_DR --&gt; SVC_DR
+SVC_DR --&gt; POD_DR
+
+style DC_CLUSTER fill:#e8f5e9,stroke:#2e7d32
+style DR_CLUSTER fill:#e3f2fd,stroke:#1565c0
+</code></pre></div>
+<p><code>``
+
+    &lt;/details&gt;
+
+
+**How it works:**
+
+1. DC Primary deploys Submariner as **broker** — creates the</code>Broker<code>CR and</code>Submariner<code>CR
+2. DR Secondary deploys Submariner as **agent** — connects to DC broker using API URL + token
+3. Gateway nodes on each side establish IPsec tunnels using the configured cable driver (</code>libreswan<code>,</code>wireguard<code>, or</code>vxlan<code>)
+4.</code>ServiceDiscovery<code>enables DNS-based cross-cluster service resolution (</code><svc>.<ns>.svc.clusterset.local`)
+</ns></svc></p>
+<h3 id="3-odf-disaster-recovery-replication">3. ODF Disaster Recovery Replication<a class="headerlink" href="#3-odf-disaster-recovery-replication" title="Permanent link">¶</a></h3>
+<p>ODF DR enables <strong>Ceph RBD mirroring</strong> between the DC and DR storage clusters:
+
+<a class="glightbox" data-type="image" data-width="auto" data-height="auto" href="../../diagrams/architecture/08-acm-import-dr-management.svg" data-desc-position="bottom"><img alt="ACM Import/DR Management" class="drawio-diagram" src="../../diagrams/architecture/08-acm-import-dr-management.svg"></a>
+</p>
+<details class="note" open="open">
+<summary>Draw.io Source: ACM Import/DR Management</summary>
+<p><a class="md-button" href="../../diagrams/architecture/08-acm-import-dr-management.drawio"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M5 20h14v-2H5m14-9h-4V3H9v6H5l7 7z"></path></svg></span> Download .drawio file</a> — Open in <a href="https://app.diagrams.net">draw.io</a> for interactive editing.</p>
+<p></p><details>
+<summary>View original Mermaid source</summary><p></p>
+<p>```mermaid</p>
+</details>
+<p>graph TB
+    subgraph DC_STORAGE["DC Primary — ODF"]
+        SC_DC["StorageCluster<br>ocs-storagecluster"]
+        POOL_DC["CephBlockPool<br><i>mirroring: enabled</i>"]
+        PVC_DC["PVCs<br>(AI Models, Datasets)"]
+    end
+
+    subgraph DR_STORAGE["DR Secondary — ODF"]
+        SC_DR["StorageCluster<br>ocs-storagecluster"]
+        POOL_DR["CephBlockPool<br><i>mirroring: enabled</i>"]
+        PVC_DR["PVCs<br>(Replicated Data)"]
+    end
+
+    subgraph CONTROL["DR Control Plane"]
+        ODR_OP["ODF DR Operator"]
+        MIRROR_PEER["MirrorPeer CR"]
+        S3_META["S3 Metadata Store"]
+    end
+
+    PVC_DC →|"Write"| POOL_DC
+    POOL_DC ↔|"RBD Mirror Daemon<br>async: */5 * * * *<br>sync: real-time"| POOL_DR
+    POOL_DR → PVC_DR
+    ODR_OP → MIRROR_PEER
+    MIRROR_PEER → POOL_DC
+    MIRROR_PEER → POOL_DR
+    ODR_OP → S3_META
+
+    style DC_STORAGE fill:#e8f5e9,stroke:#2e7d32
+    style DR_STORAGE fill:#e3f2fd,stroke:#1565c0
+    style CONTROL fill:#fff3e0,stroke:#ef6c00
+```</p>
+<div class="highlight"><pre><span></span><code>&lt;/details&gt;
+</code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Mode</th>
+<th>Replication</th>
+<th>RPO</th>
+<th>Latency Requirement</th>
+<th>Use Case</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Regional DR</strong> (async)</td>
+<td>Scheduled (cron)</td>
+<td>Minutes</td>
+<td>Tolerant (cross-DC WAN)</td>
+<td>Multi-datacenter, 100+ km apart</td>
+</tr>
+<tr>
+<td><strong>Metro DR</strong> (sync)</td>
+<td>Real-time</td>
+<td>Zero</td>
+<td>&lt; 10ms RTT (metro-area)</td>
+<td>Same metro region, &lt; 100 km</td>
+</tr>
+</tbody>
+</table>
+<h3 id="4-management-cluster-architecture">4. Management Cluster Architecture<a class="headerlink" href="#4-management-cluster-architecture" title="Permanent link">¶</a></h3>
+<p>The management clusters provide centralized operations across all workload clusters:</p>
+<p><a class="glightbox" data-type="image" data-width="auto" data-height="auto" href="../../diagrams/architecture/09-dr-failover-workflow.svg" data-desc-position="bottom"><img alt="DR Failover Workflow" class="drawio-diagram" src="../../diagrams/architecture/09-dr-failover-workflow.svg"></a></p>
+<details class="note" open="open">
+<summary>Draw.io Source: DR Failover Workflow</summary>
+<p><a class="md-button" href="../../diagrams/architecture/09-dr-failover-workflow.drawio"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M5 20h14v-2H5m14-9h-4V3H9v6H5l7 7z"></path></svg></span> Download .drawio file</a> — Open in <a href="https://app.diagrams.net">draw.io</a> for interactive editing.</p>
+<p></p><details>
+<summary>View original Mermaid source</summary><p></p>
+<p>```mermaid</p>
+</details>
+<p>graph TB
+    subgraph MGMT_DC_DETAIL["Management DC"]
+        ACM_HUB2["<b>ACM Hub</b><br>MultiClusterHub CR"]
+        ACS_C["<b>ACS Central</b><br>Vulnerability Scanning<br>Policy Enforcement<br>Risk Profiling"]
+        QUAY_C["<b>Quay Enterprise</b><br>Image Registry<br>Clair Scanning<br>Mirror Sync"]
+        OBS["ACM Observability<br><i>(optional)</i>"]
+    end</p>
+<div class="highlight"><pre><span></span><code>subgraph MGMT_DR_DETAIL["Management DR"]
+    ACM_S["&lt;b&gt;ACM Standby&lt;/b&gt;&lt;br/&gt;Passive Hub&lt;br/&gt;&lt;i&gt;Promotable on failover&lt;/i&gt;"]
+    ACS_S["&lt;b&gt;ACS Secured&lt;/b&gt;&lt;br/&gt;Sensor + Collector&lt;br/&gt;&lt;i&gt;Reports to DC Central&lt;/i&gt;"]
+    QUAY_S["&lt;b&gt;Quay Enterprise&lt;/b&gt;&lt;br/&gt;Geo-Replicated"]
+end
+
+subgraph WORKLOADS["Managed Workload Clusters"]
+    W_DC["DC Primary"]
+    W_DR["DR Secondary"]
+end
+
+ACM_HUB2 --&gt;|"Cluster lifecycle&lt;br/&gt;Policy, Governance"| W_DC
+ACM_HUB2 --&gt;|"Cluster lifecycle&lt;br/&gt;Policy, Governance"| W_DR
+ACS_C --&gt;|"Security policies"| W_DC
+ACS_C --&gt;|"Security policies"| W_DR
+ACS_C --&gt;|"Central endpoint"| ACS_S
+ACM_HUB2 -.-&gt;|"DR failover&lt;br/&gt;promotion"| ACM_S
+QUAY_C -.-&gt;|"Geo-replication"| QUAY_S
+
+style MGMT_DC_DETAIL fill:#fff3e0,stroke:#ef6c00
+style MGMT_DR_DETAIL fill:#fff3e0,stroke:#ef6c00
+style WORKLOADS fill:#f3e5f5,stroke:#7b1fa2
+</code></pre></div>
+<p>```
+
+    </p></details>
+
+
+<strong>Management DC</strong> runs:
+
+- <strong>ACM Hub</strong> — imports and manages all clusters, deploys policies, handles governance
+- <strong>ACS Central</strong> — centralized security scanning, vulnerability management, compliance reporting
+- <strong>Quay Enterprise</strong> — on-cluster container registry with Clair image scanning
+
+<strong>Management DR</strong> runs:
+
+- <strong>ACM Standby</strong> — passive MultiClusterHub, promotable to active during DC failure
+- <strong>ACS SecuredCluster</strong> — sensor + collector only, reports back to ACS Central in DC
+- <strong>Quay Enterprise</strong> — geo-replicated registry for DR availability
+<p></p>
+<h3 id="4b-acm-cluster-import-dr-application-management">4b. ACM Cluster Import &amp; DR Application Management<a class="headerlink" href="#4b-acm-cluster-import-dr-application-management" title="Permanent link">¶</a></h3>
+<p>In addition to the core management services, two dedicated modules and pipelines handle <strong>workload cluster import</strong> and <strong>application-level DR</strong>:
+
+<a class="glightbox" data-type="image" data-width="auto" data-height="auto" href="../../diagrams/architecture/10-inter-cluster-connection-map.svg" data-desc-position="bottom"><img alt="Inter-Cluster Connection Map" class="drawio-diagram" src="../../diagrams/architecture/10-inter-cluster-connection-map.svg"></a>
+</p>
+<details class="note" open="open">
+<summary>Draw.io Source: Inter-Cluster Connection Map</summary>
+<p><a class="md-button" href="../../diagrams/architecture/10-inter-cluster-connection-map.drawio"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M5 20h14v-2H5m14-9h-4V3H9v6H5l7 7z"></path></svg></span> Download .drawio file</a> — Open in <a href="https://app.diagrams.net">draw.io</a> for interactive editing.</p>
+<p></p><details>
+<summary>View original Mermaid source</summary><p></p>
+<p>```mermaid</p>
+</details>
+<p>graph TB
+    subgraph ACM_OPS["ACM Hub Operations"]
+        IMPORT["<b>ACM Cluster Import</b><br>ManagedCluster<br>KlusterletAddonConfig<br>ManagedClusterSet"]
+        DR_OPS["<b>ACM DR Applications</b><br>DRPolicy<br>DRPlacementControl<br>ODR Hub Operator"]
+    end
+
+    subgraph PIPELINES["Dedicated Pipelines"]
+        P_IMPORT["azure-pipelines-acm-import.yml<br><i>Import scope, feature toggles</i>"]
+        P_DR["azure-pipelines-acm-dr.yml<br><i>Configure / Failover / Failback</i>"]
+    end
+
+    subgraph TARGETS["Target Clusters"]
+        DC_T["DC Primary"]
+        DR_T["DR Secondary"]
+    end
+
+    P_IMPORT →|"terraform apply<br>-var-file=acm-import.tfvars"| IMPORT
+    P_DR →|"terraform apply<br>-var-file=acm-dr.tfvars"| DR_OPS
+    IMPORT →|"Import + Addons"| DC_T
+    IMPORT →|"Import + Addons"| DR_T
+    DR_OPS →|"Failover / Failback"| DC_T
+    DR_OPS →|"Failover / Failback"| DR_T
+
+    style ACM_OPS fill:#fff3e0,stroke:#ef6c00
+    style PIPELINES fill:#e8f5e9,stroke:#2e7d32
+    style TARGETS fill:#f3e5f5,stroke:#7b1fa2
+```</p>
+<div class="highlight"><pre><span></span><code>&lt;/details&gt;
+</code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Capability</th>
+<th>Module</th>
+<th>Var File</th>
+<th>Pipeline</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Cluster Import</strong></td>
+<td><code>acm-cluster-import</code></td>
+<td><code>acm-import.tfvars</code></td>
+<td><code>azure-pipelines-acm-import.yml</code></td>
+<td>Import workload clusters into ACM Hub</td>
+</tr>
+<tr>
+<td><strong>DR Applications</strong></td>
+<td><code>acm-dr-applications</code></td>
+<td><code>acm-dr.tfvars</code></td>
+<td><code>azure-pipelines-acm-dr.yml</code></td>
+<td>DRPolicy + failover/failback/relocate</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="admonition-title">Mirror Operators</p>
+<p>The <code>odr-hub-operator</code> (stable-4.16) has been added to <code>mirror_operators</code> in all management cluster <code>terraform.tfvars</code> files to support disconnected ODR Hub deployment.</p>
+</div>
+<h3 id="5-disaster-recovery-failover-workflow">5. Disaster Recovery Failover Workflow<a class="headerlink" href="#5-disaster-recovery-failover-workflow" title="Permanent link">¶</a></h3>
+<p><a class="glightbox" data-type="image" data-width="auto" data-height="auto" href="../../diagrams/architecture/11-ado-pipeline-scope.svg" data-desc-position="bottom"><img alt="ADO Pipeline Scope" class="drawio-diagram" src="../../diagrams/architecture/11-ado-pipeline-scope.svg"></a></p>
+<details class="note" open="open">
+<summary>Draw.io Source: ADO Pipeline Scope</summary>
+<p><a class="md-button" href="../../diagrams/architecture/11-ado-pipeline-scope.drawio"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M5 20h14v-2H5m14-9h-4V3H9v6H5l7 7z"></path></svg></span> Download .drawio file</a> — Open in <a href="https://app.diagrams.net">draw.io</a> for interactive editing.</p>
+<p></p><details>
+<summary>View original Mermaid source</summary><p></p>
+<p>```mermaid</p>
+</details>
+<p>sequenceDiagram
+    participant OP as Operations Team
+    participant ADO as Azure DevOps
+    participant MDC as Mgmt DC
+    participant MDR as Mgmt DR
+    participant DC as DC Primary
+    participant DR as DR Secondary</p>
+<div class="highlight"><pre><span></span><code>Note over DC: ❌ DC Site Failure
+
+OP-&gt;&gt;ADO: Trigger DR failover pipeline
+ADO-&gt;&gt;MDR: Promote ACM Standby → Active Hub
+
+rect rgb(255, 235, 238)
+    Note over MDR,DR: Failover Actions
+    MDR-&gt;&gt;DR: Activate DR workloads
+    MDR-&gt;&gt;DR: Switch ODF MirrorPeer to primary
+    DR--&gt;&gt;DR: PVCs become read-write
+    DR--&gt;&gt;DR: AI workloads resume on DR
+end
+
+Note over DR: ✅ DR is now Active
+
+rect rgb(232, 245, 233)
+    Note over DC: DC Recovery
+    OP-&gt;&gt;ADO: Trigger DC recovery pipeline
+    ADO-&gt;&gt;DC: Rebuild / Restore DC cluster
+    ADO-&gt;&gt;DC: Re-enable ODF mirroring (reverse)
+    ADO-&gt;&gt;MDC: Restore ACM Hub as primary
+end
+</code></pre></div>
+<p>```
+
+    </p></details>
+
+<p></p>
+<h2 id="folder-structure">Folder Structure<a class="headerlink" href="#folder-structure" title="Permanent link">¶</a></h2>
+<h3 id="ipi-method">IPI Method<a class="headerlink" href="#ipi-method" title="Permanent link">¶</a></h3>
+<p><code>ipi-method/
+├── openshiftbaremetal/           # DC Primary — workload cluster
+│   ├── main.tf
+│   ├── variables.tf
+│   ├── terraform.tfvars
+│   ├── outputs.tf
+│   ├── versions.tf
+│   └── modules/                  # Shared modules (referenced by all clusters)
+│       ├── dns/
+│       ├── haproxy/
+│       ├── quay-mirror/
+│       ├── ocp-baremetal/
+│       ├── nfd-operator/
+│       ├── gpu-operator/
+│       ├── odf-operator/
+│       ├── servicemesh/
+│       ├── serverless/
+│       ├── openshift-ai/
+│       ├── gpu-monitoring/
+│       ├── metallb-operator/
+│       ├── sriov-operator/
+│       ├── cluster-autoscaler/
+│       ├── etcd-backup/
+│       ├── submariner/
+│       ├── odf-dr/
+│       ├── acm/
+│       ├── acs/
+│       └── quay-enterprise/
+│
+├── openshiftbaremetal-dr/        # DR Secondary — workload cluster
+│   ├── main.tf                   # References ../openshiftbaremetal/modules/
+│   ├── variables.tf
+│   ├── terraform.tfvars
+│   ├── outputs.tf
+│   └── versions.tf
+│
+├── mgmt-dc/                     # Management DC — ACM Hub + ACS Central + Quay
+│   ├── main.tf
+│   ├── variables.tf
+│   ├── terraform.tfvars
+│   ├── outputs.tf
+│   └── versions.tf
+│
+├── mgmt-dr/                     # Management DR — ACM Standby + ACS Secured + Quay
+│   ├── main.tf
+│   ├── variables.tf
+│   ├── terraform.tfvars
+│   ├── outputs.tf
+│   └── versions.tf
+│
+└── azure-pipelines.yml           # ADO pipeline with deployment scope selection</code>
+</p>
+<h3 id="upi-method">UPI Method<a class="headerlink" href="#upi-method" title="Permanent link">¶</a></h3>
+<p><code>upi-method/
+├── openshiftbaremetal/           # DC Primary — workload cluster (UPI)
+│   ├── main.tf                   # UPI phases: ignition → bootstrap → cleanup → workers
+│   ├── variables.tf              # No BMC fields — boot_method, bootstrap_ip/mac
+│   ├── terraform.tfvars
+│   ├── outputs.tf
+│   ├── versions.tf
+│   └── modules/                  # Shared UPI modules (referenced by all UPI clusters)
+│       ├── dns/
+│       ├── haproxy/              # External HAProxy LB (required for UPI)
+│       ├── quay-mirror/
+│       ├── install-config/       # platform: none
+│       ├── ignition/             # openshift-install create ignition-configs
+│       ├── ignition-server/      # HTTP server on bastion :8080
+│       ├── bootstrap/            # Boot temporary bootstrap VM
+│       ├── control-plane/        # PXE/ISO/manual boot masters
+│       ├── bootstrap-complete/   # wait-for bootstrap-complete
+│       ├── bootstrap-cleanup/    # Remove bootstrap from LB + power off
+│       ├── compute-nodes/        # PXE/ISO/manual boot workers
+│       ├── cluster-complete/     # CSR approval + wait-for install-complete
+│       ├── nfd-operator/
+│       ├── gpu-operator/
+│       ├── odf-operator/
+│       ├── servicemesh/
+│       ├── serverless/
+│       ├── openshift-ai/
+│       ├── gpu-monitoring/
+│       ├── metallb-operator/
+│       ├── sriov-operator/
+│       ├── cluster-autoscaler/
+│       ├── etcd-backup/
+│       ├── submariner/
+│       ├── odf-dr/
+│       ├── acm/
+│       ├── acs/
+│       └── quay-enterprise/
+│
+├── openshiftbaremetal-dr/        # DR Secondary (UPI)
+│   ├── main.tf                   # References ../openshiftbaremetal/modules/
+│   ├── variables.tf
+│   ├── terraform.tfvars
+│   ├── outputs.tf
+│   └── versions.tf
+│
+├── mgmt-dc/                     # Management DC (UPI)
+│   ├── main.tf
+│   ├── variables.tf
+│   ├── terraform.tfvars
+│   ├── outputs.tf
+│   └── versions.tf
+│
+├── mgmt-dr/                     # Management DR (UPI)
+│   ├── main.tf
+│   ├── variables.tf
+│   ├── terraform.tfvars
+│   ├── outputs.tf
+│   └── versions.tf
+│
+└── azure-pipelines-upi.yml      # ADO pipeline with UPI phases + deployment scope</code>
+</p>
+<h3 id="key-upi-module-differences">Key UPI Module Differences<a class="headerlink" href="#key-upi-module-differences" title="Permanent link">¶</a></h3>
+<table>
+<thead>
+<tr>
+<th>IPI Module</th>
+<th>UPI Equivalent</th>
+<th>Difference</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ocp-baremetal/</code></td>
+<td><code>install-config/</code> + <code>ignition/</code> + <code>ignition-server/</code> + <code>bootstrap/</code> + <code>control-plane/</code> + <code>bootstrap-complete/</code> + <code>bootstrap-cleanup/</code> + <code>compute-nodes/</code> + <code>cluster-complete/</code></td>
+<td>Single IPI module → 9 UPI modules for phased install</td>
+</tr>
+<tr>
+<td>(none)</td>
+<td><code>bootstrap-cleanup/</code></td>
+<td>New — removes temporary bootstrap VM after control plane is self-hosted</td>
+</tr>
+<tr>
+<td><code>haproxy/</code> (optional)</td>
+<td><code>haproxy/</code> (<strong>required</strong>)</td>
+<td>HAProxy is mandatory in UPI as there's no installer-managed keepalived</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>## ADO Pipeline — Deployment Scope Selection</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>The Azure DevOps pipeline provides granular control over which clusters to deploy:</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><a class="glightbox" data-type="image" data-width="auto" data-height="auto" href="../../diagrams/architecture/12-ipi-vs-upi-comparison.svg" data-desc-position="bottom"><img alt="IPI vs UPI Comparison" class="drawio-diagram" src="../../diagrams/architecture/12-ipi-vs-upi-comparison.svg"></a></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<details class="note" open="open">
+<summary>Draw.io Source: IPI vs UPI Comparison</summary>
+<p><a class="md-button" href="../../diagrams/architecture/12-ipi-vs-upi-comparison.drawio"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M5 20h14v-2H5m14-9h-4V3H9v6H5l7 7z"></path></svg></span> Download .drawio file</a> — Open in <a href="https://app.diagrams.net">draw.io</a> for interactive editing.</p>
+<p></p><details>
+<summary>View original Mermaid source</summary><p></p>
+<p>```mermaid</p>
+</details>
+<p>graph TD
+    START["ADO Pipeline Trigger"] → SCOPE{"Deployment Scope?"}
+
+    SCOPE →|dc-only| S1["Stage: DC Primary"]
+    SCOPE →|dr-only| S2["Stage: DR Secondary"]
+    SCOPE →|dc-and-dr| S1 → S2
+    SCOPE →|mgmt-dc-only| S3["Stage: Mgmt DC"]
+    SCOPE →|mgmt-dr-only| S4["Stage: Mgmt DR"]
+    SCOPE →|mgmt-clusters| S3 → S4
+    SCOPE →|all-dc| S1_2["DC Primary"] → S3_2["Mgmt DC"]
+    SCOPE →|all-dr| S2_2["DR Secondary"] → S4_2["Mgmt DR"]
+    SCOPE →|all| ALL["DC → DR → Mgmt DC → Mgmt DR"]
+
+    OPTIONS["Optional Toggles"]
+    OPTIONS → OPT1["☐ Enable Submariner"]
+    OPTIONS → OPT2["☐ Enable ODF Replication"]
+    OPTIONS → OPT3["ODF DR Mode:<br>regional-dr / metro-dr"]
+    OPTIONS → OPT4["Terraform Action:<br>plan / apply / destroy"]
+
+    style START fill:#1a237e,stroke:#1a237e,color:#fff
+    style SCOPE fill:#ff8f00,stroke:#ff8f00,color:#fff
+```</p>
+<div class="highlight"><pre><span></span><code>&lt;/details&gt;
+</code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Values</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>deploymentScope</code></td>
+<td><code>dc-only</code>, <code>dr-only</code>, <code>dc-and-dr</code>, <code>mgmt-dc-only</code>, <code>mgmt-dr-only</code>, <code>mgmt-clusters</code>, <code>all-dc</code>, <code>all-dr</code>, <code>all</code></td>
+<td>Which clusters to deploy</td>
+</tr>
+<tr>
+<td><code>enableSubmariner</code></td>
+<td><code>true</code> / <code>false</code></td>
+<td>Enable Submariner cross-cluster networking</td>
+</tr>
+<tr>
+<td><code>enableOdfReplication</code></td>
+<td><code>true</code> / <code>false</code></td>
+<td>Enable ODF storage replication</td>
+</tr>
+<tr>
+<td><code>odfDrMode</code></td>
+<td><code>regional-dr</code> / <code>metro-dr</code></td>
+<td>Async (RPO: minutes) or sync (RPO: zero)</td>
+</tr>
+<tr>
+<td><code>terraformAction</code></td>
+<td><code>plan</code> / <code>apply</code> / <code>destroy</code></td>
+<td>Terraform operation to run</td>
+</tr>
+</tbody>
+</table>
+<h2 id="quick-start-full-multi-cluster-deployment">Quick Start — Full Multi-Cluster Deployment<a class="headerlink" href="#quick-start-full-multi-cluster-deployment" title="Permanent link">¶</a></h2>
+<h3 id="step-1-configure-each-cluster">Step 1: Configure Each Cluster<a class="headerlink" href="#step-1-configure-each-cluster" title="Permanent link">¶</a></h3>
+<p>Edit the <code>terraform.tfvars</code> in each folder:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="c1"># IPI Method</span>
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="c1"># DC Primary (workload)</span>
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>vi<span class="w"> </span>ipi-method/openshiftbaremetal/terraform.tfvars
+<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>
+<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a><span class="c1"># DR Secondary (workload)</span>
+<a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a>vi<span class="w"> </span>ipi-method/openshiftbaremetal-dr/terraform.tfvars
+<a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a>
+<a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a><span class="c1"># Management DC (ACM + ACS + Quay)</span>
+<a id="__codelineno-8-9" name="__codelineno-8-9" href="#__codelineno-8-9"></a>vi<span class="w"> </span>ipi-method/mgmt-dc/terraform.tfvars
+<a id="__codelineno-8-10" name="__codelineno-8-10" href="#__codelineno-8-10"></a>
+<a id="__codelineno-8-11" name="__codelineno-8-11" href="#__codelineno-8-11"></a><span class="c1"># Management DR (ACM standby + ACS secured + Quay)</span>
+<a id="__codelineno-8-12" name="__codelineno-8-12" href="#__codelineno-8-12"></a>vi<span class="w"> </span>ipi-method/mgmt-dr/terraform.tfvars
+<a id="__codelineno-8-13" name="__codelineno-8-13" href="#__codelineno-8-13"></a>
+<a id="__codelineno-8-14" name="__codelineno-8-14" href="#__codelineno-8-14"></a><span class="c1"># UPI Method</span>
+<a id="__codelineno-8-15" name="__codelineno-8-15" href="#__codelineno-8-15"></a>vi<span class="w"> </span>upi-method/openshiftbaremetal/terraform.tfvars
+<a id="__codelineno-8-16" name="__codelineno-8-16" href="#__codelineno-8-16"></a>vi<span class="w"> </span>upi-method/openshiftbaremetal-dr/terraform.tfvars
+<a id="__codelineno-8-17" name="__codelineno-8-17" href="#__codelineno-8-17"></a>vi<span class="w"> </span>upi-method/mgmt-dc/terraform.tfvars
+<a id="__codelineno-8-18" name="__codelineno-8-18" href="#__codelineno-8-18"></a>vi<span class="w"> </span>upi-method/mgmt-dr/terraform.tfvars
+</code></pre></div>
+<h3 id="step-2-deploy-via-ado-pipeline">Step 2: Deploy via ADO Pipeline<a class="headerlink" href="#step-2-deploy-via-ado-pipeline" title="Permanent link">¶</a></h3>
+<ol>
+<li>Navigate to <strong>Azure DevOps → Pipelines</strong></li>
+<li>Select <strong>OpenShift Multi-Cluster Deployment</strong></li>
+<li>Click <strong>Run pipeline</strong></li>
+<li>
+<p>Choose your parameters:</p>
+<table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>Recommended for Full Deploy</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Deployment Scope</td>
+<td><code>all</code></td>
+</tr>
+<tr>
+<td>Enable Submariner</td>
+<td><code>true</code></td>
+</tr>
+<tr>
+<td>Enable ODF Replication</td>
+<td><code>true</code></td>
+</tr>
+<tr>
+<td>ODF DR Mode</td>
+<td><code>regional-dr</code></td>
+</tr>
+<tr>
+<td>Terraform Action</td>
+<td><code>plan</code> (review first, then <code>apply</code>)</td>
+</tr>
+</tbody>
+</table>
+</li>
+</ol>
+<h3 id="step-3-verify-deployment">Step 3: Verify Deployment<a class="headerlink" href="#step-3-verify-deployment" title="Permanent link">¶</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="c1"># DC Primary</span>
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="nb">export</span><span class="w"> </span><span class="nv">KUBECONFIG</span><span class="o">=</span>ipi-method/openshiftbaremetal/modules/ocp-baremetal/generated/kubeconfig
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>oc<span class="w"> </span>get<span class="w"> </span>nodes
+<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a>oc<span class="w"> </span>get<span class="w"> </span>csv<span class="w"> </span>-A<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-E<span class="w"> </span><span class="s2">"gpu|odf|rhods|submariner"</span>
+<a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a>
+<a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a><span class="c1"># DR Secondary</span>
+<a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a><span class="nb">export</span><span class="w"> </span><span class="nv">KUBECONFIG</span><span class="o">=</span>ipi-method/openshiftbaremetal-dr/modules/ocp-baremetal/generated/kubeconfig
+<a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a>oc<span class="w"> </span>get<span class="w"> </span>gateways.submariner.io<span class="w"> </span>-n<span class="w"> </span>submariner-operator<span class="w">    </span><span class="c1"># Submariner status</span>
+<a id="__codelineno-9-9" name="__codelineno-9-9" href="#__codelineno-9-9"></a>oc<span class="w"> </span>get<span class="w"> </span>mirrorpeer<span class="w"> </span>-A<span class="w">                                     </span><span class="c1"># ODF DR status</span>
+<a id="__codelineno-9-10" name="__codelineno-9-10" href="#__codelineno-9-10"></a>
+<a id="__codelineno-9-11" name="__codelineno-9-11" href="#__codelineno-9-11"></a><span class="c1"># Management DC</span>
+<a id="__codelineno-9-12" name="__codelineno-9-12" href="#__codelineno-9-12"></a><span class="nb">export</span><span class="w"> </span><span class="nv">KUBECONFIG</span><span class="o">=</span>ipi-method/mgmt-dc/modules/ocp-baremetal/generated/kubeconfig
+<a id="__codelineno-9-13" name="__codelineno-9-13" href="#__codelineno-9-13"></a>oc<span class="w"> </span>get<span class="w"> </span>multiclusterhub<span class="w"> </span>-n<span class="w"> </span>open-cluster-management<span class="w">       </span><span class="c1"># ACM status</span>
+<a id="__codelineno-9-14" name="__codelineno-9-14" href="#__codelineno-9-14"></a>oc<span class="w"> </span>get<span class="w"> </span>central<span class="w"> </span>-n<span class="w"> </span>stackrox<span class="w">                               </span><span class="c1"># ACS status</span>
+<a id="__codelineno-9-15" name="__codelineno-9-15" href="#__codelineno-9-15"></a>oc<span class="w"> </span>get<span class="w"> </span>quayregistry<span class="w"> </span>-n<span class="w"> </span>quay-enterprise<span class="w">                   </span><span class="c1"># Quay status</span>
+</code></pre></div>
+<h2 id="complete-inter-cluster-connection-map">Complete Inter-Cluster Connection Map<a class="headerlink" href="#complete-inter-cluster-connection-map" title="Permanent link">¶</a></h2>
+<p>Every connection between all four clusters at the protocol and port level:</p>
+<p><a class="glightbox" data-type="image" data-width="auto" data-height="auto" href="../diagrams/architecture/13-protocol-port-map.svg" data-desc-position="bottom"><img src="../diagrams/architecture/13-protocol-port-map.svg" alt="13-protocol-port-map" class="drawio-diagram"></a></p>
+<details><summary>📥 Download draw.io source</summary>
+
+[⬇ 13-protocol-port-map.drawio](../diagrams/architecture/13-protocol-port-map.drawio)
+
+</details>
+
+<details><summary>📝 Original Mermaid source</summary>
+
+<pre class="mermaid"><code>graph TB
+    subgraph DC_SITE["DC Site"]
+        subgraph DC_WL["DC Primary Workload"]
+            DC_API["API Server&lt;br/&gt;:6443"]
+            DC_BROKER["Submariner Broker&lt;br/&gt;:8443"]
+            DC_GW["Submariner Gateway&lt;br/&gt;:4500/UDP (IPsec)"]
+            DC_ODF["ODF Ceph&lt;br/&gt;RBD Mirror Daemon"]
+            DC_APPS["*.apps Route&lt;br/&gt;:443"]
+        end
+        subgraph MGMT_DC_C["Mgmt DC"]
+            ACM_API["ACM Hub API&lt;br/&gt;:443"]
+            ACS_CENT["ACS Central&lt;br/&gt;:443 gRPC"]
+            QUAY_P["Quay Enterprise&lt;br/&gt;:443"]
+            ACM_OBS["ACM Observability&lt;br/&gt;Thanos Receive :10902"]
+        end
+    end
+
+    subgraph DR_SITE["DR Site"]
+        subgraph DR_WL["DR Secondary Workload"]
+            DR_API["API Server&lt;br/&gt;:6443"]
+            DR_GW["Submariner Gateway&lt;br/&gt;:4500/UDP (IPsec)"]
+            DR_ODF["ODF Ceph&lt;br/&gt;RBD Mirror Daemon"]
+            DR_APPS["*.apps Route&lt;br/&gt;:443"]
+        end
+        subgraph MGMT_DR_C["Mgmt DR"]
+            ACM_S["ACM Standby&lt;br/&gt;:443"]
+            ACS_SC["ACS SecuredCluster&lt;br/&gt;Sensor :443"]
+            QUAY_S["Quay Enterprise&lt;br/&gt;:443"]
+        end
+    end
+
+    %% Submariner tunnel
+    DC_GW &lt;--&gt;|"1 IPsec Tunnel&lt;br/&gt;UDP 4500 + 500&lt;br/&gt;ESP Protocol"| DR_GW
+
+    %% ODF replication
+    DC_ODF &lt;--&gt;|"2 RBD Mirroring&lt;br/&gt;TCP 6789, 3300&lt;br/&gt;Ceph Messenger v2"| DR_ODF
+
+    %% ACM → managed clusters
+    ACM_API --&gt;|"3 Cluster Import&lt;br/&gt;Klusterlet Agent&lt;br/&gt;TCP 443"| DC_API
+    ACM_API --&gt;|"4 Cluster Import&lt;br/&gt;Klusterlet Agent&lt;br/&gt;TCP 443"| DR_API
+
+    %% ACS Central → SecuredCluster
+    ACS_SC --&gt;|"5 gRPC Stream&lt;br/&gt;TCP 443"| ACS_CENT
+
+    %% Quay geo-replication
+    QUAY_P &lt;-.-&gt;|"6 Geo-Replication&lt;br/&gt;TCP 443 (S3 API)"| QUAY_S
+
+    %% ACM failover
+    ACM_API -.-&gt;|"7 Failover&lt;br/&gt;Promotion"| ACM_S
+
+    %% Submariner broker
+    DR_GW --&gt;|"8 Broker Registration&lt;br/&gt;TCP 6443"| DC_BROKER
+
+    style DC_SITE fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    style DR_SITE fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
+    style DC_WL fill:#c8e6c9,stroke:#388e3c
+    style DR_WL fill:#bbdefb,stroke:#1976d2
+    style MGMT_DC_C fill:#fff3e0,stroke:#ef6c00
+    style MGMT_DR_C fill:#fff3e0,stroke:#ef6c00</code></pre>
+
+</details>
+
+<h3 id="connection-details">Connection Details<a class="headerlink" href="#connection-details" title="Permanent link">¶</a></h3>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Source</th>
+<th>Destination</th>
+<th>Protocol / Port</th>
+<th>Purpose</th>
+<th>Direction</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>DC Gateway Node</td>
+<td>DR Gateway Node</td>
+<td>UDP 4500, 500 + ESP</td>
+<td>Submariner IPsec tunnel for pod-to-pod and service-to-service traffic</td>
+<td>Bidirectional</td>
+</tr>
+<tr>
+<td>2</td>
+<td>DC ODF Ceph</td>
+<td>DR ODF Ceph</td>
+<td>TCP 6789, 3300</td>
+<td>Ceph RBD mirroring (async every 5 min or sync real-time)</td>
+<td>Bidirectional</td>
+</tr>
+<tr>
+<td>3</td>
+<td>ACM Hub (Mgmt DC)</td>
+<td>DC Primary API</td>
+<td>TCP 443 → 6443</td>
+<td>Klusterlet agent import, policy delivery, observability metrics</td>
+<td>Hub → Managed</td>
+</tr>
+<tr>
+<td>4</td>
+<td>ACM Hub (Mgmt DC)</td>
+<td>DR Secondary API</td>
+<td>TCP 443 → 6443</td>
+<td>Klusterlet agent import, policy delivery, observability metrics</td>
+<td>Hub → Managed</td>
+</tr>
+<tr>
+<td>5</td>
+<td>ACS SecuredCluster (Mgmt DR)</td>
+<td>ACS Central (Mgmt DC)</td>
+<td>TCP 443 (gRPC)</td>
+<td>Sensor telemetry, vulnerability reports, compliance results</td>
+<td>Sensor → Central</td>
+</tr>
+<tr>
+<td>6</td>
+<td>Quay Enterprise (Mgmt DC)</td>
+<td>Quay Enterprise (Mgmt DR)</td>
+<td>TCP 443 (S3 API)</td>
+<td>Image geo-replication via shared S3 backend</td>
+<td>Bidirectional</td>
+</tr>
+<tr>
+<td>7</td>
+<td>ACM Hub (Mgmt DC)</td>
+<td>ACM Standby (Mgmt DR)</td>
+<td>TCP 443</td>
+<td>DR failover promotion (manual trigger)</td>
+<td>Failover</td>
+</tr>
+<tr>
+<td>8</td>
+<td>DR Submariner Agent</td>
+<td>DC Submariner Broker</td>
+<td>TCP 6443</td>
+<td>Agent registration, tunnel negotiation, service discovery sync</td>
+<td>Agent → Broker</td>
+</tr>
+</tbody>
+</table>
+<h3 id="firewall-rules-required">Firewall Rules Required<a class="headerlink" href="#firewall-rules-required" title="Permanent link">¶</a></h3>
+<table>
+<thead>
+<tr>
+<th>From</th>
+<th>To</th>
+<th>Ports</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>DC Gateway Nodes</td>
+<td>DR Gateway Nodes</td>
+<td>UDP 4500, 500 + ESP</td>
+<td>Submariner IPsec — both directions</td>
+</tr>
+<tr>
+<td>DC Ceph MON/OSD</td>
+<td>DR Ceph MON/OSD</td>
+<td>TCP 6789, 3300</td>
+<td>RBD mirroring — both directions</td>
+</tr>
+<tr>
+<td>Mgmt DC</td>
+<td>DC Primary API VIP</td>
+<td>TCP 6443</td>
+<td>ACM Klusterlet</td>
+</tr>
+<tr>
+<td>Mgmt DC</td>
+<td>DR Secondary API VIP</td>
+<td>TCP 6443</td>
+<td>ACM Klusterlet</td>
+</tr>
+<tr>
+<td>Mgmt DR</td>
+<td>Mgmt DC ACS Route</td>
+<td>TCP 443</td>
+<td>ACS Sensor → Central</td>
+</tr>
+<tr>
+<td>Mgmt DC Quay</td>
+<td>Mgmt DR Quay</td>
+<td>TCP 443</td>
+<td>Geo-replication S3 sync</td>
+</tr>
+<tr>
+<td>DR Gateway Nodes</td>
+<td>DC API VIP</td>
+<td>TCP 6443</td>
+<td>Submariner broker registration</td>
+</tr>
+<tr>
+<td>Local Quay (internet)</td>
+<td>cdn.redhat.com / quay.io</td>
+<td>TCP 443</td>
+<td>Pull operators from Red Hat CDN</td>
+</tr>
+<tr>
+<td>Bastion</td>
+<td>Local Quay</td>
+<td>TCP 8443</td>
+<td><code>oc mirror</code> push and pull mirrored images</td>
+</tr>
+<tr>
+<td>Bastion</td>
+<td>Mgmt DC Quay Enterprise Route</td>
+<td>TCP 443</td>
+<td>Replicate mirrored content to DC Quay Enterprise</td>
+</tr>
+<tr>
+<td>Bastion</td>
+<td>Mgmt DR Quay Enterprise Route</td>
+<td>TCP 443</td>
+<td>Replicate mirrored content to DR Quay Enterprise</td>
+</tr>
+<tr>
+<td>All Cluster Nodes</td>
+<td>Local Quay / Quay Enterprise</td>
+<td>TCP 443/8443</td>
+<td>Pull container images</td>
+</tr>
+<tr>
+<td>All Nodes</td>
+<td>DNS Server</td>
+<td>TCP/UDP 53</td>
+<td>DNS resolution</td>
+</tr>
+<tr>
+<td>All Nodes</td>
+<td>NTP Server</td>
+<td>UDP 123</td>
+<td>Time synchronization</td>
+</tr>
+<tr>
+<td>Bastion</td>
+<td>All BMC (iDRAC/iLO/XCC)</td>
+<td>TCP 443</td>
+<td>Redfish API bare metal provisioning</td>
+</tr>
+<tr>
+<td>Submariner Gateway DC</td>
+<td>Submariner Gateway DR</td>
+<td>UDP 4800</td>
+<td>VXLAN tunnel</td>
+</tr>
+</tbody>
+</table>
+<h2 id="endpoints-summary">Endpoints Summary<a class="headerlink" href="#endpoints-summary" title="Permanent link">¶</a></h2>
+<table>
+<thead>
+<tr>
+<th>Cluster</th>
+<th>Endpoint</th>
+<th>URL</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>DC Primary</td>
+<td>Console</td>
+<td><code>https://console-openshift-console.apps.ocp-ai.example.com</code></td>
+</tr>
+<tr>
+<td>DC Primary</td>
+<td>OpenShift AI</td>
+<td><code>https://rhods-dashboard-redhat-ods-applications.apps.ocp-ai.example.com</code></td>
+</tr>
+<tr>
+<td>DR Secondary</td>
+<td>Console</td>
+<td><code>https://console-openshift-console.apps.ocp-ai-dr.dr.example.com</code></td>
+</tr>
+<tr>
+<td>DR Secondary</td>
+<td>OpenShift AI</td>
+<td><code>https://rhods-dashboard-redhat-ods-applications.apps.ocp-ai-dr.dr.example.com</code></td>
+</tr>
+<tr>
+<td>Mgmt DC</td>
+<td>ACM Hub</td>
+<td><code>https://multicloud-console.apps.mgmt-dc.example.com</code></td>
+</tr>
+<tr>
+<td>Mgmt DC</td>
+<td>ACS Central</td>
+<td><code>https://central-stackrox.apps.mgmt-dc.example.com</code></td>
+</tr>
+<tr>
+<td>Mgmt DC</td>
+<td>Quay</td>
+<td><code>https://central-quay-quay-enterprise.apps.mgmt-dc.example.com</code></td>
+</tr>
+<tr>
+<td>Mgmt DR</td>
+<td>ACM Standby</td>
+<td><code>https://multicloud-console.apps.mgmt-dr.dr.example.com</code></td>
+</tr>
+<tr>
+<td>Mgmt DR</td>
+<td>Quay</td>
+<td><code>https://central-quay-quay-enterprise.apps.mgmt-dr.dr.example.com</code></td>
+</tr>
+</tbody>
+</table></details></details></details></details></details></details></details>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden="">
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"></path></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright © 2026 — Terraform IaC for OpenShift Multi Cluster AirGapped<br> <strong>Author:</strong> Sathishkumar Munirathinam &nbsp;|&nbsp; <a href="mailto:sathishkumar.munirathinam@kyndryl.com">sathishkumar.munirathinam@kyndryl.com</a>
+    </div>
+  
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+    <a href="mailto:sathishkumar.munirathinam@kyndryl.com" target="_blank" rel="noopener" title="Sathishkumar Munirathinam" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M48 64C21.5 64 0 85.5 0 112c0 15.1 7.1 29.3 19.2 38.4l208 156a48 48 0 0 0 57.6 0l208-156c12.1-9.1 19.2-23.3 19.2-38.4 0-26.5-21.5-48-48-48zM0 196v188c0 35.3 28.7 64 64 64h384c35.3 0 64-28.7 64-64V196L313.6 344.8c-34.1 25.6-81.1 25.6-115.2 0z"></path></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+      <div class="md-progress" data-md-component="progress" role="progressbar"></div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["announce.dismiss", "content.code.annotate", "content.code.copy", "content.tabs.link", "content.tooltips", "header.autohide", "navigation.expand", "navigation.indexes", "navigation.instant", "navigation.instant.progress", "navigation.tabs", "navigation.tabs.sticky", "navigation.top", "navigation.tracking", "search.highlight", "search.share", "search.suggest", "toc.integrate"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+        <script src="https://unpkg.com/tablesort@5.3.0/dist/tablesort.min.js"></script>
+      
+    
+  
+<script id="init-glightbox">const lightbox = GLightbox({"touchNavigation": true, "loop": false, "zoomable": true, "draggable": true, "openEffect": "zoom", "closeEffect": "zoom", "slideEffect": "slide"});
+document$.subscribe(()=>{ lightbox.reload(); });
+</script></body></html>

@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="app.diagrams.net" modified="2026-04-07T00:00:00.000Z" agent="GitHub Copilot" version="24.0.0" type="device">
+  <diagram id="d1" name="DC Primary Connectivity">
+    <mxGraphModel dx="1422" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="680" pageHeight="450" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+        <mxCell id="dc" value="&lt;b&gt;DC Primary Workload Cluster&lt;/b&gt;" style="swimlane;startSize=35;fillColor=#2E7D32;fontColor=#FFFFFF;strokeColor=#2E7D32;rounded=1;fontSize=13;fontStyle=1;whiteSpace=wrap;html=1;container=1;collapsible=0;" vertex="1" parent="1">
+          <mxGeometry x="40" y="60" width="350" height="280" as="geometry"/>
+        </mxCell>
+        <mxCell id="ocp_dc" value="OCP 4.15 Baremetal" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EE0000;strokeColor=#CC0000;fontSize=11;fontStyle=1;fontColor=#FFFFFF;arcSize=10;" vertex="1" parent="dc">
+          <mxGeometry x="20" y="50" width="150" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="sb" value="Submariner Broker
+:6443 / :8443" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E3F2FD;strokeColor=#326CE5;fontSize=11;fontStyle=1;fontColor=#326CE5;arcSize=10;" vertex="1" parent="dc">
+          <mxGeometry x="20" y="105" width="160" height="45" as="geometry"/>
+        </mxCell>
+        <mxCell id="sgw" value="Submariner Gateway
+:4500 UDP" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E3F2FD;strokeColor=#326CE5;fontSize=11;fontStyle=1;fontColor=#326CE5;arcSize=10;" vertex="1" parent="dc">
+          <mxGeometry x="20" y="165" width="160" height="45" as="geometry"/>
+        </mxCell>
+        <mxCell id="odf_c" value="ODF Ceph Storage
+RBD Mirror
+:6789 / :3300" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E0F2F1;strokeColor=#00695C;fontSize=11;fontStyle=1;fontColor=#333333;arcSize=10;" vertex="1" parent="dc">
+          <mxGeometry x="20" y="225" width="170" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="dr" value="&lt;b&gt;DR Secondary&lt;/b&gt;" style="swimlane;startSize=35;fillColor=#1565C0;fontColor=#FFFFFF;strokeColor=#1565C0;rounded=1;fontSize=13;fontStyle=1;whiteSpace=wrap;html=1;container=1;collapsible=0;" vertex="1" parent="1">
+          <mxGeometry x="440" y="60" width="180" height="130" as="geometry"/>
+        </mxCell>
+        <mxCell id="dr_gw" value="Submariner Agent
+Gateway" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E3F2FD;strokeColor=#326CE5;fontSize=11;fontStyle=1;fontColor=#326CE5;arcSize=10;" vertex="1" parent="dr">
+          <mxGeometry x="15" y="45" width="150" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="dr_odf" value="ODF Ceph
+RBD Mirror" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E0F2F1;strokeColor=#00695C;fontSize=11;fontStyle=1;fontColor=#333333;arcSize=10;" vertex="1" parent="dr">
+          <mxGeometry x="15" y="95" width="150" height="35" as="geometry"/>
+        </mxCell>
+        <mxCell id="mdc" value="&lt;b&gt;Mgmt DC&lt;/b&gt;" style="swimlane;startSize=35;fillColor=#EF6C00;fontColor=#FFFFFF;strokeColor=#EF6C00;rounded=1;fontSize=13;fontStyle=1;whiteSpace=wrap;html=1;container=1;collapsible=0;" vertex="1" parent="1">
+          <mxGeometry x="440" y="220" width="180" height="110" as="geometry"/>
+        </mxCell>
+        <mxCell id="acm" value="ACM Hub
+Klusterlet Agent" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EE0000;strokeColor=#CC0000;fontSize=11;fontStyle=1;fontColor=#FFFFFF;arcSize=10;" vertex="1" parent="mdc">
+          <mxGeometry x="15" y="45" width="150" height="35" as="geometry"/>
+        </mxCell>
+        <mxCell id="acs" value="ACS Central
+Sensor deployed" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FCE4EC;strokeColor=#C62828;fontSize=11;fontStyle=1;fontColor=#333333;arcSize=10;" vertex="1" parent="mdc">
+          <mxGeometry x="15" y="90" width="150" height="30" as="geometry"/>
+        </mxCell>
+        <mxCell id="mdr" value="&lt;b&gt;Mgmt DR&lt;/b&gt;" style="swimlane;startSize=35;fillColor=#EF6C00;fontColor=#FFFFFF;strokeColor=#EF6C00;rounded=1;fontSize=13;fontStyle=1;whiteSpace=wrap;html=1;container=1;collapsible=0;" vertex="1" parent="1">
+          <mxGeometry x="440" y="360" width="180" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="acm_dr" value="ACM Standby" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#EF6C00;fontSize=11;fontStyle=1;fontColor=#333333;arcSize=10;" vertex="1" parent="mdr">
+          <mxGeometry x="15" y="35" width="150" height="25" as="geometry"/>
+        </mxCell>
+        <mxCell id="ce1" value="① Broker Registration
+TCP 6443" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#326CE5;fontSize=10;fontColor=#326CE5;labelBackgroundColor=#FFFFFF;strokeWidth=2;" edge="1" source="dr_gw" target="sb" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="ce2" value="② IPsec Tunnel
+UDP 4500 + ESP" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#326CE5;fontSize=10;fontColor=#326CE5;labelBackgroundColor=#FFFFFF;strokeWidth=2;" edge="1" source="sgw" target="dr_gw" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="ce3" value="③ RBD Mirroring
+TCP 6789, 3300" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#00695C;fontSize=10;fontColor=#00695C;labelBackgroundColor=#FFFFFF;strokeWidth=2;" edge="1" source="odf_c" target="dr_odf" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="ce4" value="④ Klusterlet Import
+TCP 6443" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#EF6C00;fontSize=10;fontColor=#EF6C00;labelBackgroundColor=#FFFFFF;strokeWidth=2;" edge="1" source="acm" target="ocp_dc" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="ce5" value="⑤ SecuredCluster
+Sensor deployed" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#C62828;fontSize=10;fontColor=#C62828;labelBackgroundColor=#FFFFFF;strokeWidth=2;" edge="1" source="acs" target="ocp_dc" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="t" value="&lt;b&gt;Cross-Cluster Connectivity — DC Primary&lt;/b&gt;" style="text;html=1;align=center;verticalAlign=middle;strokeColor=none;fillColor=none;fontSize=18;fontColor=#333333;" vertex="1" parent="1">
+          <mxGeometry x="120" y="15" width="500" height="30" as="geometry"/>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

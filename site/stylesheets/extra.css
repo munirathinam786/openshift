@@ -1,0 +1,221 @@
+/* This is to maximize the website screen utilization */
+.md-grid {
+  max-width: 100%;
+}
+
+.md-typeset__table {
+  min-width: 100%;
+}
+
+.md-typeset table:not([class]) {
+  display: table;
+}
+
+aside.md-annotation {
+  position: absolute;
+}
+
+aside.md-annotation .md-tooltip--active {
+  position: absolute;
+  z-index: 1;
+  top: 45%;
+  left: -2000%;
+}
+
+.highlighttable {
+  max-height: 660px;
+  overflow-y: scroll;
+}
+
+.pull-right {
+  float: right !important;
+}
+
+.pull-left {
+  float: left !important;
+}
+
+.md-nav__link--header {
+  font-weight: bold;
+  font-weight: 500;
+  background: #3d8888 !important;
+}
+
+:root {
+  --md-primary-fg-color:        #a92525;
+  --md-primary-fg-color--light: #ECB7B7;
+  --md-primary-fg-color--dark:  #90030C;
+  --md-hue: 210;
+}
+
+/* =========================================================================
+   Mermaid Diagram Enhancements — 3D Nodes + Animated Data-Flow Arrows
+   ========================================================================= */
+
+/* --- Animated flowing-dash keyframes --- */
+@keyframes mermaid-flow {
+  to { stroke-dashoffset: -40; }
+}
+
+@keyframes mermaid-flow-reverse {
+  to { stroke-dashoffset: 40; }
+}
+
+@keyframes mermaid-pulse {
+  0%, 100% { opacity: 0.6; }
+  50%      { opacity: 1; }
+}
+
+/* --- 3D effect on ALL flowchart nodes (rect-based) --- */
+.mermaid .node rect,
+.mermaid .node circle,
+.mermaid .node polygon,
+.mermaid .node ellipse {
+  filter: drop-shadow(3px 4px 6px rgba(0, 0, 0, 0.35));
+  stroke-width: 1.5px;
+  rx: 8;
+  ry: 8;
+}
+
+/* Slight inner bevel via top-highlight gradient overlay */
+.mermaid .node rect {
+  paint-order: stroke fill;
+}
+
+/* --- 3D depth on subgraphs --- */
+.mermaid .cluster rect {
+  filter: drop-shadow(2px 3px 5px rgba(0, 0, 0, 0.25));
+  rx: 10;
+  ry: 10;
+}
+
+/* --- Animated arrows: flowchart edges --- */
+.mermaid .flowchart-link,
+.mermaid .edge-pattern-dotted,
+.mermaid path.path {
+  stroke-dasharray: 8 5;
+  animation: mermaid-flow 1.2s linear infinite;
+  stroke-width: 2.2px;
+}
+
+/* Solid thick edges for non-dashed arrows */
+.mermaid .edge-pattern-solid {
+  stroke-dasharray: none;
+  animation: none;
+  stroke-width: 2px;
+  filter: drop-shadow(1px 1px 2px rgba(0, 0, 0, 0.2));
+}
+
+/* --- Arrow markers (▶ heads) get a subtle shadow --- */
+.mermaid marker path {
+  filter: drop-shadow(1px 1px 1px rgba(0, 0, 0, 0.3));
+}
+
+/* --- Edge labels --- */
+.mermaid .edgeLabel {
+  filter: drop-shadow(1px 1px 2px rgba(0, 0, 0, 0.15));
+}
+
+.mermaid .edgeLabel rect {
+  rx: 4;
+  ry: 4;
+  opacity: 0.92;
+}
+
+/* --- Sequence diagram enhancements --- */
+
+/* Actor boxes — 3D raised look */
+.mermaid .actor {
+  filter: drop-shadow(3px 4px 6px rgba(0, 0, 0, 0.35));
+  rx: 8;
+  ry: 8;
+}
+
+/* Sequence messages — animated flow */
+.mermaid .messageLine0,
+.mermaid .messageLine1 {
+  stroke-dasharray: 8 5;
+  animation: mermaid-flow 1.2s linear infinite;
+  stroke-width: 2px;
+}
+
+/* Activation bars — subtle 3D */
+.mermaid .activation0,
+.mermaid .activation1,
+.mermaid .activation2 {
+  filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.25));
+}
+
+/* Sequence notes — raised card look */
+.mermaid .note {
+  filter: drop-shadow(2px 3px 5px rgba(0, 0, 0, 0.25));
+  rx: 6;
+  ry: 6;
+}
+
+/* Sequence loop/alt/opt boxes */
+.mermaid .loopLine {
+  stroke-dasharray: 6 4;
+  animation: mermaid-flow 1.5s linear infinite;
+}
+
+/* --- Container for all Mermaid diagrams — subtle card effect --- */
+.mermaid {
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.03) 0%,
+    rgba(0, 0, 0, 0.015) 100%
+  );
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.08),
+    0 1px 2px rgba(0, 0, 0, 0.06);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+/* --- Dark mode adjustments --- */
+[data-md-color-scheme="slate"] .mermaid {
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.02) 0%,
+    rgba(0, 0, 0, 0.05) 100%
+  );
+  box-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.3),
+    0 1px 2px rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+[data-md-color-scheme="slate"] .mermaid .node rect,
+[data-md-color-scheme="slate"] .mermaid .node circle,
+[data-md-color-scheme="slate"] .mermaid .node polygon,
+[data-md-color-scheme="slate"] .mermaid .node ellipse,
+[data-md-color-scheme="slate"] .mermaid .actor {
+  filter: drop-shadow(3px 4px 8px rgba(0, 0, 0, 0.6));
+}
+
+[data-md-color-scheme="slate"] .mermaid .cluster rect {
+  filter: drop-shadow(2px 3px 6px rgba(0, 0, 0, 0.5));
+}
+
+/* =========================================================================
+   Draw.io SVG Diagram Styling
+   ========================================================================= */
+img.drawio-diagram {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 1.2em auto;
+  border: 1px solid var(--md-default-fg-color--lightest);
+  border-radius: 8px;
+  padding: 12px;
+  background: #ffffff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+}
+
+[data-md-color-scheme="slate"] img.drawio-diagram {
+  background: #1e1e1e;
+  border-color: #444;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}

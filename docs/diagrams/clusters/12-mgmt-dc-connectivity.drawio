@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="app.diagrams.net" modified="2026-04-07T00:00:00.000Z" agent="GitHub Copilot" version="24.0.0" type="device">
+  <diagram id="d1" name="Mgmt DC Connectivity">
+    <mxGraphModel dx="1422" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="760" pageHeight="480" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+        <mxCell id="mdc_f" value="&lt;b&gt;Mgmt DC — Central Operations Hub&lt;/b&gt;" style="swimlane;startSize=35;fillColor=#EF6C00;fontColor=#FFFFFF;strokeColor=#EF6C00;rounded=1;fontSize=13;fontStyle=1;whiteSpace=wrap;html=1;container=1;collapsible=0;" vertex="1" parent="1">
+          <mxGeometry x="40" y="60" width="380" height="200" as="geometry"/>
+        </mxCell>
+        <mxCell id="acm_h" value="ACM Hub
+Klusterlet Controller" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EE0000;strokeColor=#CC0000;fontSize=11;fontStyle=1;fontColor=#FFFFFF;arcSize=10;" vertex="1" parent="mdc_f">
+          <mxGeometry x="15" y="50" width="160" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="acs_c" value="ACS Central
+:443 gRPC" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FCE4EC;strokeColor=#C62828;fontSize=11;fontStyle=1;fontColor=#333333;arcSize=10;" vertex="1" parent="mdc_f">
+          <mxGeometry x="190" y="50" width="130" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="quay_c" value="Quay Enterprise
+:443" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8EAF6;strokeColor=#3F51B5;fontSize=11;fontStyle=1;fontColor=#333333;arcSize=10;" vertex="1" parent="mdc_f">
+          <mxGeometry x="15" y="105" width="130" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="obs" value="ACM Observability
+Thanos :10902" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF8E1;strokeColor=#F57F17;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="mdc_f">
+          <mxGeometry x="190" y="105" width="150" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="dc_wl" value="&lt;b&gt;DC Primary Workload&lt;/b&gt;" style="swimlane;startSize=35;fillColor=#2E7D32;fontColor=#FFFFFF;strokeColor=#2E7D32;rounded=1;fontSize=13;fontStyle=1;whiteSpace=wrap;html=1;container=1;collapsible=0;" vertex="1" parent="1">
+          <mxGeometry x="480" y="60" width="220" height="160" as="geometry"/>
+        </mxCell>
+        <mxCell id="dc_api" value="API Server :6443" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#333333;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="dc_wl">
+          <mxGeometry x="15" y="45" width="130" height="30" as="geometry"/>
+        </mxCell>
+        <mxCell id="dc_kl" value="Klusterlet Agent" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#333333;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="dc_wl">
+          <mxGeometry x="15" y="85" width="130" height="25" as="geometry"/>
+        </mxCell>
+        <mxCell id="dc_sens" value="ACS Sensor" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FCE4EC;strokeColor=#C62828;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="dc_wl">
+          <mxGeometry x="15" y="120" width="100" height="25" as="geometry"/>
+        </mxCell>
+        <mxCell id="dr_wl" value="&lt;b&gt;DR Secondary Workload&lt;/b&gt;" style="swimlane;startSize=35;fillColor=#1565C0;fontColor=#FFFFFF;strokeColor=#1565C0;rounded=1;fontSize=13;fontStyle=1;whiteSpace=wrap;html=1;container=1;collapsible=0;" vertex="1" parent="1">
+          <mxGeometry x="480" y="250" width="220" height="160" as="geometry"/>
+        </mxCell>
+        <mxCell id="dr_api" value="API Server :6443" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#333333;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="dr_wl">
+          <mxGeometry x="15" y="45" width="130" height="30" as="geometry"/>
+        </mxCell>
+        <mxCell id="dr_kl" value="Klusterlet Agent" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#333333;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="dr_wl">
+          <mxGeometry x="15" y="85" width="130" height="25" as="geometry"/>
+        </mxCell>
+        <mxCell id="dr_sens" value="ACS Sensor" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FCE4EC;strokeColor=#C62828;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="dr_wl">
+          <mxGeometry x="15" y="120" width="100" height="25" as="geometry"/>
+        </mxCell>
+        <mxCell id="mdr_b" value="&lt;b&gt;Mgmt DR (Standby)&lt;/b&gt;" style="swimlane;startSize=35;fillColor=#C62828;fontColor=#FFFFFF;strokeColor=#C62828;rounded=1;fontSize=13;fontStyle=1;whiteSpace=wrap;html=1;container=1;collapsible=0;" vertex="1" parent="1">
+          <mxGeometry x="40" y="310" width="380" height="130" as="geometry"/>
+        </mxCell>
+        <mxCell id="acm_s" value="ACM Standby" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#EF6C00;fontSize=11;fontStyle=1;fontColor=#333333;arcSize=10;" vertex="1" parent="mdr_b">
+          <mxGeometry x="15" y="45" width="120" height="30" as="geometry"/>
+        </mxCell>
+        <mxCell id="acs_sc" value="ACS SecuredCluster
+Sensor :443" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FCE4EC;strokeColor=#C62828;fontSize=11;fontStyle=1;fontColor=#333333;arcSize=10;" vertex="1" parent="mdr_b">
+          <mxGeometry x="150" y="45" width="140" height="35" as="geometry"/>
+        </mxCell>
+        <mxCell id="quay_s" value="Quay Enterprise
+(Geo-Replicated)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8EAF6;strokeColor=#3F51B5;fontSize=11;fontStyle=1;fontColor=#333333;arcSize=10;" vertex="1" parent="mdr_b">
+          <mxGeometry x="15" y="90" width="160" height="30" as="geometry"/>
+        </mxCell>
+        <mxCell id="c1" value="① Import+Policies TCP 6443" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#EF6C00;fontSize=10;fontColor=#EF6C00;labelBackgroundColor=#FFFFFF;strokeWidth=2;" edge="1" source="acm_h" target="dc_api" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="c2" value="② Import+Policies TCP 6443" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#EF6C00;fontSize=10;fontColor=#EF6C00;labelBackgroundColor=#FFFFFF;strokeWidth=2;" edge="1" source="acm_h" target="dr_api" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="c3" value="③ Status Reports TCP 443" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#333333;fontSize=10;fontColor=#333333;labelBackgroundColor=#FFFFFF;strokeWidth=2;" edge="1" source="dc_kl" target="acm_h" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="c4" value="④ Status Reports" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#333333;fontSize=10;fontColor=#333333;labelBackgroundColor=#FFFFFF;strokeWidth=2;" edge="1" source="dr_kl" target="acm_h" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="c7" value="⑦ gRPC Telemetry TCP 443" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#C62828;fontSize=10;fontColor=#C62828;labelBackgroundColor=#FFFFFF;strokeWidth=2;" edge="1" source="dc_sens" target="acs_c" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="c8" value="⑧ gRPC Telemetry" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#C62828;fontSize=10;fontColor=#C62828;labelBackgroundColor=#FFFFFF;strokeWidth=2;" edge="1" source="dr_sens" target="acs_c" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="c9" value="⑨ gRPC Telemetry" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#C62828;fontSize=10;fontColor=#C62828;labelBackgroundColor=#FFFFFF;strokeWidth=2;" edge="1" source="acs_sc" target="acs_c" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="c10" value="⑩ Geo-Replication S3 :443" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#3F51B5;fontSize=10;fontColor=#3F51B5;dashed=1;dashPattern=8 4;labelBackgroundColor=#FFFFFF;strokeWidth=2;" edge="1" source="quay_c" target="quay_s" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="c11" value="⑪ DR Failover Promotion" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#EF6C00;fontSize=10;fontColor=#EF6C00;dashed=1;dashPattern=8 4;labelBackgroundColor=#FFFFFF;strokeWidth=2;" edge="1" source="acm_h" target="acm_s" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="t" value="&lt;b&gt;Inter-Cluster Connectivity — Mgmt DC (11 Connections)&lt;/b&gt;" style="text;html=1;align=center;verticalAlign=middle;strokeColor=none;fillColor=none;fontSize=18;fontColor=#333333;" vertex="1" parent="1">
+          <mxGeometry x="150" y="15" width="550" height="30" as="geometry"/>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

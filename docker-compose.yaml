@@ -1,0 +1,18 @@
+# Run with podman-compose
+# podman-compose build --no-cache
+# podman-compose up -d --build
+
+services:
+  terraform-iac-docs:
+    restart: always
+    image: "terraform-iac-docs:local.1.0.0"
+    build:
+      context: ./
+      dockerfile: ./Containerfile
+    hostname: terraform-iac-docs
+    container_name: terraform-iac-docs
+    tty: true
+    volumes:
+      - ./:/docs
+    ports:
+      - "8000:8000"

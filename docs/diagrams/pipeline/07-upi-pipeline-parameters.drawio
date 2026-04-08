@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="app.diagrams.net" modified="2026-04-07T00:00:00.000Z" agent="GitHub Copilot" version="24.0.0" type="device">
+  <diagram id="d1" name="UPI Pipeline Parameters">
+    <mxGraphModel dx="1422" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="720" pageHeight="230" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+        <mxCell id="p1" value="bootMethod
+pxe | iso | manual" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#EF6C00;fontSize=11;fontStyle=0;fontColor=#EF6C00;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="40" y="60" width="180" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="p2" value="deploymentPhase
+prerequisites | ignition |
+bootstrap | compute |
+day2-operators | full" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#326CE5;fontSize=11;fontStyle=0;fontColor=#326CE5;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="240" y="60" width="220" height="80" as="geometry"/>
+        </mxCell>
+        <mxCell id="p3" value="terraformAction
+plan / apply / destroy" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#C62828;fontSize=11;fontStyle=0;fontColor=#C62828;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="480" y="60" width="180" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="p4" value="enableSubmariner
+true / false" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#326CE5;fontSize=11;fontStyle=0;fontColor=#326CE5;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="40" y="150" width="180" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="p5" value="enableOdfReplication
+true / false" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#00695C;fontSize=11;fontStyle=0;fontColor=#00695C;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="240" y="150" width="200" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="t" value="&lt;b&gt;UPI ADO Pipeline — Parameters&lt;/b&gt;" style="text;html=1;align=center;verticalAlign=middle;strokeColor=none;fillColor=none;fontSize=18;fontColor=#333333;" vertex="1" parent="1">
+          <mxGeometry x="180" y="15" width="400" height="25" as="geometry"/>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

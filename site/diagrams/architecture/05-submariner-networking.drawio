@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="app.diagrams.net" modified="2026-04-07T00:00:00.000Z" agent="GitHub Copilot" version="24.0.0" type="device">
+  <diagram id="d1" name="Submariner Networking">
+    <mxGraphModel dx="1422" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1020" pageHeight="430" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+        <mxCell id="dc_cl" value="&lt;b&gt;DC Primary&lt;/b&gt;" style="swimlane;startSize=35;fillColor=#2E7D32;fontColor=#FFFFFF;strokeColor=#2E7D32;rounded=1;fontSize=13;fontStyle=1;whiteSpace=wrap;html=1;container=1;collapsible=0;" vertex="1" parent="1">
+          <mxGeometry x="40" y="60" width="380" height="280" as="geometry"/>
+        </mxCell>
+        <mxCell id="gw_dc" value="&lt;b&gt;Gateway Node&lt;/b&gt;&lt;br&gt;&lt;i&gt;submariner.io/gateway=true&lt;/i&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E3F2FD;strokeColor=#326CE5;fontSize=11;fontStyle=1;fontColor=#326CE5;arcSize=10;" vertex="1" parent="dc_cl">
+          <mxGeometry x="20" y="50" width="200" height="55" as="geometry"/>
+        </mxCell>
+        <mxCell id="pod_dc" value="AI Workload Pod&lt;br&gt;10.128.x.x" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#333333;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="dc_cl">
+          <mxGeometry x="20" y="125" width="160" height="45" as="geometry"/>
+        </mxCell>
+        <mxCell id="svc_dc" value="ClusterIP Service" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#333333;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="dc_cl">
+          <mxGeometry x="200" y="125" width="150" height="45" as="geometry"/>
+        </mxCell>
+        <mxCell id="broker_info" value="&lt;b&gt;Broker API :8443&lt;/b&gt;&lt;br&gt;ServiceDiscovery CR" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F5E9;strokeColor=#2E7D32;fontSize=11;fontStyle=1;fontColor=#333333;arcSize=10;" vertex="1" parent="dc_cl">
+          <mxGeometry x="20" y="190" width="200" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="dr_cl" value="&lt;b&gt;DR Secondary&lt;/b&gt;" style="swimlane;startSize=35;fillColor=#1565C0;fontColor=#FFFFFF;strokeColor=#1565C0;rounded=1;fontSize=13;fontStyle=1;whiteSpace=wrap;html=1;container=1;collapsible=0;" vertex="1" parent="1">
+          <mxGeometry x="580" y="60" width="380" height="280" as="geometry"/>
+        </mxCell>
+        <mxCell id="gw_dr" value="&lt;b&gt;Gateway Node&lt;/b&gt;&lt;br&gt;&lt;i&gt;submariner.io/gateway=true&lt;/i&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E3F2FD;strokeColor=#326CE5;fontSize=11;fontStyle=1;fontColor=#326CE5;arcSize=10;" vertex="1" parent="dr_cl">
+          <mxGeometry x="20" y="50" width="200" height="55" as="geometry"/>
+        </mxCell>
+        <mxCell id="pod_dr" value="AI Workload Pod&lt;br&gt;10.132.x.x" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#333333;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="dr_cl">
+          <mxGeometry x="20" y="125" width="160" height="45" as="geometry"/>
+        </mxCell>
+        <mxCell id="svc_dr" value="ClusterIP Service" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#333333;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="dr_cl">
+          <mxGeometry x="200" y="125" width="150" height="45" as="geometry"/>
+        </mxCell>
+        <mxCell id="ipsec" value="&lt;b&gt;IPsec / Libreswan&lt;/b&gt;&lt;br&gt;Cable Driver&lt;br&gt;UDP 4500 + ESP" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8EAF6;strokeColor=#3F51B5;fontSize=11;fontStyle=1;fontColor=#3F51B5;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="430" y="120" width="140" height="70" as="geometry"/>
+        </mxCell>
+        <mxCell id="se1" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#333333;fontSize=10;fontColor=#333333;labelBackgroundColor=#FFFFFF;strokeWidth=2;" edge="1" source="pod_dc" target="svc_dc" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="se2" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#326CE5;fontSize=10;fontColor=#326CE5;labelBackgroundColor=#FFFFFF;strokeWidth=2;" edge="1" source="svc_dc" target="gw_dc" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="se3" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#326CE5;fontSize=10;fontColor=#326CE5;labelBackgroundColor=#FFFFFF;strokeWidth=2;" edge="1" source="gw_dc" target="ipsec" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="se4" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#326CE5;fontSize=10;fontColor=#326CE5;labelBackgroundColor=#FFFFFF;strokeWidth=2;" edge="1" source="ipsec" target="gw_dr" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="se5" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#326CE5;fontSize=10;fontColor=#326CE5;labelBackgroundColor=#FFFFFF;strokeWidth=2;" edge="1" source="gw_dr" target="svc_dr" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="se6" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#333333;fontSize=10;fontColor=#333333;labelBackgroundColor=#FFFFFF;strokeWidth=2;" edge="1" source="svc_dr" target="pod_dr" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="sd_note" value="&lt;i&gt;&amp;lt;svc&amp;gt;.&amp;lt;ns&amp;gt;.svc.clusterset.local&lt;/i&gt;&lt;br&gt;DNS-based cross-cluster service resolution" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF8E1;strokeColor=#F57F17;fontSize=11;fontStyle=0;fontColor=#F57F17;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="280" y="370" width="440" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="t5" value="&lt;b&gt;Submariner Cross-Cluster Networking&lt;/b&gt;" style="text;html=1;align=center;strokeColor=none;fillColor=none;fontSize=18;fontColor=#333333;" vertex="1" parent="1">
+          <mxGeometry x="250" y="10" width="500" height="30" as="geometry"/>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

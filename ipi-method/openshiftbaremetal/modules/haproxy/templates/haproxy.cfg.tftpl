@@ -1,0 +1,70 @@
+global
+    log         127.0.0.1 local2
+    chroot      /var/lib/haproxy
+    pidfile     /var/run/haproxy.pid
+    maxconn     4000
+    user        haproxy
+    group       haproxy
+    daemon
+    stats socket /var/lib/haproxy/stats
+
+defaults
+    mode                    tcp
+    log                     global
+    option                  tcplog
+    option                  dontlognull
+    option                  redispatch
+    retries                 3
+    timeout queue           1m
+    timeout connect         10s
+    timeout client          1m
+    timeout server          1m
+    timeout check           10s
+    maxconn                 3000
+
+# --- Kubernetes API (6443) ---
+frontend api-server
+    bind *:6443
+    default_backend api-server-backend
+
+backend api-server-backend
+    balance roundrobin
+    option httpchk GET /readyz HTTP/1.0
+    option log-health-checks
+    default-server inter 10s downinter 5s rise 2 fall 3
+%{ for node in master_nodes ~}
+    server ${node.name} ${node.ip}:6443 check
+%{ endfor ~}
+
+# --- Machine Config Server (22623) ---
+frontend machine-config
+    bind *:22623
+    default_backend machine-config-backend
+
+backend machine-config-backend
+    balance roundrobin
+%{ for node in master_nodes ~}
+    server ${node.name} ${node.ip}:22623 check
+%{ endfor ~}
+
+# --- Ingress HTTPS (443) ---
+frontend ingress-https
+    bind *:443
+    default_backend ingress-https-backend
+
+backend ingress-https-backend
+    balance roundrobin
+%{ for node in worker_nodes ~}
+    server ${node.name} ${node.ip}:443 check
+%{ endfor ~}
+
+# --- Ingress HTTP (80) ---
+frontend ingress-http
+    bind *:80
+    default_backend ingress-http-backend
+
+backend ingress-http-backend
+    balance roundrobin
+%{ for node in worker_nodes ~}
+    server ${node.name} ${node.ip}:80 check
+%{ endfor ~}

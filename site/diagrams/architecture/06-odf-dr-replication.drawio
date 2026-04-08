@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="app.diagrams.net" modified="2026-04-07T00:00:00.000Z" agent="GitHub Copilot" version="24.0.0" type="device">
+  <diagram id="d1" name="ODF DR Replication">
+    <mxGraphModel dx="1422" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1020" pageHeight="580" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+        <mxCell id="dc_st" value="&lt;b&gt;DC Primary — ODF&lt;/b&gt;" style="swimlane;startSize=35;fillColor=#2E7D32;fontColor=#FFFFFF;strokeColor=#2E7D32;rounded=1;fontSize=13;fontStyle=1;whiteSpace=wrap;html=1;container=1;collapsible=0;" vertex="1" parent="1">
+          <mxGeometry x="40" y="60" width="320" height="240" as="geometry"/>
+        </mxCell>
+        <mxCell id="sc_dc" value="StorageCluster&lt;br&gt;ocs-storagecluster" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E0F2F1;strokeColor=#00695C;fontSize=11;fontStyle=1;fontColor=#333333;arcSize=10;" vertex="1" parent="dc_st">
+          <mxGeometry x="20" y="50" width="180" height="45" as="geometry"/>
+        </mxCell>
+        <mxCell id="pool_dc" value="CephBlockPool&lt;br&gt;&lt;i&gt;mirroring: enabled&lt;/i&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E0F2F1;strokeColor=#00695C;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="dc_st">
+          <mxGeometry x="20" y="110" width="180" height="45" as="geometry"/>
+        </mxCell>
+        <mxCell id="pvc_dc" value="PVCs&lt;br&gt;(AI Models, Datasets)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#333333;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="dc_st">
+          <mxGeometry x="20" y="170" width="180" height="45" as="geometry"/>
+        </mxCell>
+        <mxCell id="dr_st" value="&lt;b&gt;DR Secondary — ODF&lt;/b&gt;" style="swimlane;startSize=35;fillColor=#1565C0;fontColor=#FFFFFF;strokeColor=#1565C0;rounded=1;fontSize=13;fontStyle=1;whiteSpace=wrap;html=1;container=1;collapsible=0;" vertex="1" parent="1">
+          <mxGeometry x="640" y="60" width="320" height="240" as="geometry"/>
+        </mxCell>
+        <mxCell id="sc_dr" value="StorageCluster&lt;br&gt;ocs-storagecluster" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E0F2F1;strokeColor=#00695C;fontSize=11;fontStyle=1;fontColor=#333333;arcSize=10;" vertex="1" parent="dr_st">
+          <mxGeometry x="20" y="50" width="180" height="45" as="geometry"/>
+        </mxCell>
+        <mxCell id="pool_dr" value="CephBlockPool&lt;br&gt;&lt;i&gt;mirroring: enabled&lt;/i&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E0F2F1;strokeColor=#00695C;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="dr_st">
+          <mxGeometry x="20" y="110" width="180" height="45" as="geometry"/>
+        </mxCell>
+        <mxCell id="pvc_dr" value="PVCs&lt;br&gt;(Replicated Data)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#333333;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="dr_st">
+          <mxGeometry x="20" y="170" width="180" height="45" as="geometry"/>
+        </mxCell>
+        <mxCell id="ctrl" value="&lt;b&gt;DR Control Plane&lt;/b&gt;" style="swimlane;startSize=35;fillColor=#EF6C00;fontColor=#FFFFFF;strokeColor=#EF6C00;rounded=1;fontSize=13;fontStyle=1;whiteSpace=wrap;html=1;container=1;collapsible=0;" vertex="1" parent="1">
+          <mxGeometry x="300" y="340" width="400" height="140" as="geometry"/>
+        </mxCell>
+        <mxCell id="odr_op" value="ODF DR Operator" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#EF6C00;fontSize=11;fontStyle=1;fontColor=#333333;arcSize=10;" vertex="1" parent="ctrl">
+          <mxGeometry x="20" y="45" width="160" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="mirror_peer" value="MirrorPeer CR" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#EF6C00;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="ctrl">
+          <mxGeometry x="200" y="45" width="160" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="s3_meta" value="S3 Metadata Store" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#333333;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="ctrl">
+          <mxGeometry x="100" y="95" width="160" height="35" as="geometry"/>
+        </mxCell>
+        <mxCell id="oe1" value="Write" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#333333;fontSize=10;fontColor=#333333;labelBackgroundColor=#FFFFFF;strokeWidth=2;" edge="1" source="pvc_dc" target="pool_dc" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="oe2" value="RBD Mirror Daemon
+async: */5 * * * *
+sync: real-time" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#00695C;fontSize=10;fontColor=#00695C;labelBackgroundColor=#FFFFFF;strokeWidth=2;" edge="1" source="pool_dc" target="pool_dr" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="oe3" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#333333;fontSize=10;fontColor=#333333;labelBackgroundColor=#FFFFFF;strokeWidth=2;" edge="1" source="pool_dr" target="pvc_dr" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="oe4" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#EF6C00;fontSize=10;fontColor=#EF6C00;labelBackgroundColor=#FFFFFF;strokeWidth=2;" edge="1" source="odr_op" target="mirror_peer" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="oe5" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#EF6C00;fontSize=10;fontColor=#EF6C00;dashed=1;dashPattern=8 4;labelBackgroundColor=#FFFFFF;strokeWidth=2;" edge="1" source="mirror_peer" target="pool_dc" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="oe6" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#EF6C00;fontSize=10;fontColor=#EF6C00;dashed=1;dashPattern=8 4;labelBackgroundColor=#FFFFFF;strokeWidth=2;" edge="1" source="mirror_peer" target="pool_dr" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="oe7" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#EF6C00;fontSize=10;fontColor=#EF6C00;labelBackgroundColor=#FFFFFF;strokeWidth=2;" edge="1" source="odr_op" target="s3_meta" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="mode_tbl" value="&lt;b&gt;Regional DR&lt;/b&gt; (async) — RPO: Minutes — Cross-DC WAN
+&lt;b&gt;Metro DR&lt;/b&gt; (sync) — RPO: Zero — &amp;lt; 10ms RTT" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF8E1;strokeColor=#F57F17;fontSize=11;fontStyle=0;fontColor=#F57F17;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="200" y="505" width="580" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="t6" value="&lt;b&gt;ODF Disaster Recovery Replication&lt;/b&gt;" style="text;html=1;align=center;strokeColor=none;fillColor=none;fontSize=18;fontColor=#333333;" vertex="1" parent="1">
+          <mxGeometry x="280" y="10" width="450" height="30" as="geometry"/>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

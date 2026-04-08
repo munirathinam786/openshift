@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="app.diagrams.net" modified="2026-04-07T00:00:00.000Z" agent="GitHub Copilot" version="24.0.0" type="device">
+  <diagram id="d1" name="Network Architecture">
+    <mxGraphModel dx="1422" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1080" pageHeight="430" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+        <mxCell id="dc_nets" value="&lt;b&gt;DC Site Networks&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;dashed=1;dashPattern=12 8;fillColor=none;fontSize=16;fontStyle=1;verticalAlign=top;align=left;spacingTop=8;spacingLeft=12;container=1;collapsible=0;strokeWidth=3;strokeColor=#2E7D32;" vertex="1" parent="1">
+          <mxGeometry x="40" y="40" width="440" height="360" as="geometry"/>
+        </mxCell>
+        <mxCell id="dc_m" value="&lt;b&gt;DC Primary&lt;/b&gt;&lt;br&gt;Machine: 10.142.41.0/24" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#2E7D32;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="dc_nets">
+          <mxGeometry x="25" y="50" width="190" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="dc_p" value="&lt;b&gt;DC Primary&lt;/b&gt;&lt;br&gt;Pod: 10.128.0.0/14" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#2E7D32;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="dc_nets">
+          <mxGeometry x="25" y="115" width="190" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="dc_s" value="&lt;b&gt;DC Primary&lt;/b&gt;&lt;br&gt;Service: 172.30.0.0/16" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#2E7D32;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="dc_nets">
+          <mxGeometry x="25" y="180" width="190" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="mgmt_dc_m" value="&lt;b&gt;Mgmt DC&lt;/b&gt;&lt;br&gt;Machine: 10.142.42.0/24" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#EF6C00;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="dc_nets">
+          <mxGeometry x="230" y="50" width="190" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="mgmt_dc_p" value="&lt;b&gt;Mgmt DC&lt;/b&gt;&lt;br&gt;Pod: 10.136.0.0/14" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#EF6C00;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="dc_nets">
+          <mxGeometry x="230" y="115" width="190" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="mgmt_dc_s" value="&lt;b&gt;Mgmt DC&lt;/b&gt;&lt;br&gt;Service: 172.28.0.0/16" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#EF6C00;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="dc_nets">
+          <mxGeometry x="230" y="180" width="190" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="dr_nets" value="&lt;b&gt;DR Site Networks&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;dashed=1;dashPattern=12 8;fillColor=none;fontSize=16;fontStyle=1;verticalAlign=top;align=left;spacingTop=8;spacingLeft=12;container=1;collapsible=0;strokeWidth=3;strokeColor=#1565C0;" vertex="1" parent="1">
+          <mxGeometry x="580" y="40" width="440" height="360" as="geometry"/>
+        </mxCell>
+        <mxCell id="dr_m" value="&lt;b&gt;DR Secondary&lt;/b&gt;&lt;br&gt;Machine: 10.143.41.0/24" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#1565C0;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="dr_nets">
+          <mxGeometry x="25" y="50" width="190" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="dr_p" value="&lt;b&gt;DR Secondary&lt;/b&gt;&lt;br&gt;Pod: 10.132.0.0/14" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#1565C0;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="dr_nets">
+          <mxGeometry x="25" y="115" width="190" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="dr_s" value="&lt;b&gt;DR Secondary&lt;/b&gt;&lt;br&gt;Service: 172.31.0.0/16" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#1565C0;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="dr_nets">
+          <mxGeometry x="25" y="180" width="190" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="mgmt_dr_m" value="&lt;b&gt;Mgmt DR&lt;/b&gt;&lt;br&gt;Machine: 10.143.42.0/24" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#EF6C00;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="dr_nets">
+          <mxGeometry x="230" y="50" width="190" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="mgmt_dr_p" value="&lt;b&gt;Mgmt DR&lt;/b&gt;&lt;br&gt;Pod: 10.140.0.0/14" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#EF6C00;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="dr_nets">
+          <mxGeometry x="230" y="115" width="190" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="mgmt_dr_s" value="&lt;b&gt;Mgmt DR&lt;/b&gt;&lt;br&gt;Service: 172.29.0.0/16" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#EF6C00;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="dr_nets">
+          <mxGeometry x="230" y="180" width="190" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="wan" value="&lt;b&gt;L3 / WAN Link&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF8E1;strokeColor=#F57F17;fontSize=11;fontStyle=1;fontColor=#F57F17;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="490" y="180" width="80" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="nw1" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#F57F17;fontSize=10;fontColor=#F57F17;labelBackgroundColor=#FFFFFF;strokeWidth=2;" edge="1" source="dc_nets" target="wan" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="nw2" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#F57F17;fontSize=10;fontColor=#F57F17;labelBackgroundColor=#FFFFFF;strokeWidth=2;" edge="1" source="wan" target="dr_nets" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="note" value="&lt;b&gt;Non-overlapping CIDRs&lt;/b&gt; — Required for Submariner cross-cluster routing without Globalnet" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF8E1;strokeColor=#F57F17;fontSize=11;fontStyle=0;fontColor=#F57F17;arcSize=10;" vertex="1" parent="dc_nets">
+          <mxGeometry x="200" y="300" width="660" height="35" as="geometry"/>
+        </mxCell>
+        <mxCell id="t4" value="&lt;b&gt;Network Architecture — Non-Overlapping CIDRs&lt;/b&gt;" style="text;html=1;align=center;strokeColor=none;fillColor=none;fontSize=18;fontColor=#333333;" vertex="1" parent="1">
+          <mxGeometry x="250" y="5" width="600" height="30" as="geometry"/>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

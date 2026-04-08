@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="app.diagrams.net" modified="2026-04-07T00:00:00.000Z" agent="GitHub Copilot" version="24.0.0" type="device">
+  <diagram id="d1" name="UPI Architecture Variant">
+    <mxGraphModel dx="1422" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1700" pageHeight="860" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+        <mxCell id="dc_upi" value="&lt;b&gt;Data Center (DC) — UPI&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;dashed=1;dashPattern=12 8;fillColor=none;fontSize=16;fontStyle=1;verticalAlign=top;align=left;spacingTop=8;spacingLeft=12;container=1;collapsible=0;strokeWidth=3;strokeColor=#2E7D32;" vertex="1" parent="1">
+          <mxGeometry x="20" y="20" width="780" height="780" as="geometry"/>
+        </mxCell>
+        <mxCell id="infra_dc" value="&lt;b&gt;Infrastructure Layer&lt;/b&gt;" style="swimlane;startSize=35;fillColor=#C62828;fontColor=#FFFFFF;strokeColor=#C62828;rounded=1;fontSize=13;fontStyle=1;whiteSpace=wrap;html=1;container=1;collapsible=0;" vertex="1" parent="dc_upi">
+          <mxGeometry x="20" y="50" width="350" height="200" as="geometry"/>
+        </mxCell>
+        <mxCell id="bastion_dc" value="&lt;b&gt;Bastion Host&lt;/b&gt;&lt;br&gt;&lt;i&gt;openshift-install&lt;/i&gt;&lt;br&gt;&lt;i&gt;HTTP ignition :8080&lt;/i&gt;&lt;br&gt;&lt;i&gt;PXE/TFTP (optional)&lt;/i&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#EF6C00;fontSize=11;fontStyle=1;fontColor=#333333;arcSize=10;" vertex="1" parent="infra_dc">
+          <mxGeometry x="15" y="45" width="155" height="90" as="geometry"/>
+        </mxCell>
+        <mxCell id="haproxy_dc" value="&lt;b&gt;HAProxy LB&lt;/b&gt;&lt;br&gt;&lt;i&gt;api:6443 → masters&lt;/i&gt;&lt;br&gt;&lt;i&gt;*.apps:443 → workers&lt;/i&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E3F2FD;strokeColor=#1565C0;fontSize=11;fontStyle=1;fontColor=#333333;arcSize=10;" vertex="1" parent="infra_dc">
+          <mxGeometry x="185" y="45" width="145" height="90" as="geometry"/>
+        </mxCell>
+        <mxCell id="boot_dc" value="&lt;b&gt;Bootstrap VM&lt;/b&gt;&lt;br&gt;&lt;i&gt;Temporary&lt;/i&gt;&lt;br&gt;&lt;i&gt;Removed after CP up&lt;/i&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FCE4EC;strokeColor=#C62828;fontSize=11;fontStyle=1;fontColor=#C62828;arcSize=10;" vertex="1" parent="infra_dc">
+          <mxGeometry x="65" y="145" width="145" height="45" as="geometry"/>
+        </mxCell>
+        <mxCell id="prod_dc_upi" value="&lt;b&gt;Workload Cluster — DC Primary&lt;/b&gt;" style="swimlane;startSize=35;fillColor=#7B1FA2;fontColor=#FFFFFF;strokeColor=#7B1FA2;rounded=1;fontSize=13;fontStyle=1;whiteSpace=wrap;html=1;container=1;collapsible=0;" vertex="1" parent="dc_upi">
+          <mxGeometry x="20" y="270" width="350" height="200" as="geometry"/>
+        </mxCell>
+        <mxCell id="cp_dc" value="3× Control Plane&lt;br&gt;&lt;i&gt;PXE/ISO boot&lt;/i&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EE0000;strokeColor=#CC0000;fontSize=11;fontStyle=1;fontColor=#FFFFFF;arcSize=10;" vertex="1" parent="prod_dc_upi">
+          <mxGeometry x="15" y="45" width="150" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="wk_dc" value="N× Workers&lt;br&gt;&lt;i&gt;GPU + ODF + AI&lt;/i&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#333333;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="prod_dc_upi">
+          <mxGeometry x="180" y="45" width="150" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="sub_b_upi" value="&lt;b&gt;Submariner&lt;/b&gt;&lt;br&gt;&lt;b&gt;Broker&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E3F2FD;strokeColor=#326CE5;fontSize=11;fontStyle=1;fontColor=#326CE5;arcSize=10;" vertex="1" parent="prod_dc_upi">
+          <mxGeometry x="15" y="110" width="150" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="mgmt_dc_upi" value="&lt;b&gt;Management Cluster — DC&lt;/b&gt;" style="swimlane;startSize=35;fillColor=#EF6C00;fontColor=#FFFFFF;strokeColor=#EF6C00;rounded=1;fontSize=13;fontStyle=1;whiteSpace=wrap;html=1;container=1;collapsible=0;" vertex="1" parent="dc_upi">
+          <mxGeometry x="20" y="490" width="350" height="160" as="geometry"/>
+        </mxCell>
+        <mxCell id="acm_h_upi" value="ACM Hub" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EE0000;strokeColor=#CC0000;fontSize=11;fontStyle=1;fontColor=#FFFFFF;arcSize=10;" vertex="1" parent="mgmt_dc_upi">
+          <mxGeometry x="15" y="45" width="95" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="acs_c_upi" value="ACS Central" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FCE4EC;strokeColor=#C62828;fontSize=11;fontStyle=1;fontColor=#333333;arcSize=10;" vertex="1" parent="mgmt_dc_upi">
+          <mxGeometry x="125" y="45" width="95" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="quay_dc_upi" value="Quay Enterprise" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8EAF6;strokeColor=#3F51B5;fontSize=11;fontStyle=1;fontColor=#333333;arcSize=10;" vertex="1" parent="mgmt_dc_upi">
+          <mxGeometry x="235" y="45" width="95" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="dr_upi" value="&lt;b&gt;Disaster Recovery (DR) — UPI&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;dashed=1;dashPattern=12 8;fillColor=none;fontSize=16;fontStyle=1;verticalAlign=top;align=left;spacingTop=8;spacingLeft=12;container=1;collapsible=0;strokeWidth=3;strokeColor=#1565C0;" vertex="1" parent="1">
+          <mxGeometry x="860" y="20" width="780" height="780" as="geometry"/>
+        </mxCell>
+        <mxCell id="infra_dr" value="&lt;b&gt;Infrastructure Layer&lt;/b&gt;" style="swimlane;startSize=35;fillColor=#C62828;fontColor=#FFFFFF;strokeColor=#C62828;rounded=1;fontSize=13;fontStyle=1;whiteSpace=wrap;html=1;container=1;collapsible=0;" vertex="1" parent="dr_upi">
+          <mxGeometry x="20" y="50" width="350" height="200" as="geometry"/>
+        </mxCell>
+        <mxCell id="bastion_dr" value="&lt;b&gt;Bastion Host&lt;/b&gt;&lt;br&gt;&lt;i&gt;openshift-install&lt;/i&gt;&lt;br&gt;&lt;i&gt;HTTP ignition :8080&lt;/i&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#EF6C00;fontSize=11;fontStyle=1;fontColor=#333333;arcSize=10;" vertex="1" parent="infra_dr">
+          <mxGeometry x="15" y="45" width="155" height="90" as="geometry"/>
+        </mxCell>
+        <mxCell id="haproxy_dr" value="&lt;b&gt;HAProxy LB&lt;/b&gt;&lt;br&gt;&lt;i&gt;api:6443 → masters&lt;/i&gt;&lt;br&gt;&lt;i&gt;*.apps:443 → workers&lt;/i&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E3F2FD;strokeColor=#1565C0;fontSize=11;fontStyle=1;fontColor=#333333;arcSize=10;" vertex="1" parent="infra_dr">
+          <mxGeometry x="185" y="45" width="145" height="90" as="geometry"/>
+        </mxCell>
+        <mxCell id="boot_dr" value="&lt;b&gt;Bootstrap VM&lt;/b&gt;&lt;br&gt;&lt;i&gt;Temporary&lt;/i&gt;&lt;br&gt;&lt;i&gt;Removed after CP up&lt;/i&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FCE4EC;strokeColor=#C62828;fontSize=11;fontStyle=1;fontColor=#C62828;arcSize=10;" vertex="1" parent="infra_dr">
+          <mxGeometry x="65" y="145" width="145" height="45" as="geometry"/>
+        </mxCell>
+        <mxCell id="prod_dr_upi" value="&lt;b&gt;Workload Cluster — DR Secondary&lt;/b&gt;" style="swimlane;startSize=35;fillColor=#7B1FA2;fontColor=#FFFFFF;strokeColor=#7B1FA2;rounded=1;fontSize=13;fontStyle=1;whiteSpace=wrap;html=1;container=1;collapsible=0;" vertex="1" parent="dr_upi">
+          <mxGeometry x="20" y="270" width="350" height="200" as="geometry"/>
+        </mxCell>
+        <mxCell id="cp_dr" value="3× Control Plane&lt;br&gt;&lt;i&gt;PXE/ISO boot&lt;/i&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EE0000;strokeColor=#CC0000;fontSize=11;fontStyle=1;fontColor=#FFFFFF;arcSize=10;" vertex="1" parent="prod_dr_upi">
+          <mxGeometry x="15" y="45" width="150" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="wk_dr" value="N× Workers&lt;br&gt;&lt;i&gt;GPU + ODF + AI&lt;/i&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#333333;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="prod_dr_upi">
+          <mxGeometry x="180" y="45" width="150" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="sub_a_upi" value="&lt;b&gt;Submariner&lt;/b&gt;&lt;br&gt;&lt;b&gt;Agent&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E3F2FD;strokeColor=#326CE5;fontSize=11;fontStyle=1;fontColor=#326CE5;arcSize=10;" vertex="1" parent="prod_dr_upi">
+          <mxGeometry x="15" y="110" width="150" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="mgmt_dr_upi" value="&lt;b&gt;Management Cluster — DR&lt;/b&gt;" style="swimlane;startSize=35;fillColor=#EF6C00;fontColor=#FFFFFF;strokeColor=#EF6C00;rounded=1;fontSize=13;fontStyle=1;whiteSpace=wrap;html=1;container=1;collapsible=0;" vertex="1" parent="dr_upi">
+          <mxGeometry x="20" y="490" width="350" height="160" as="geometry"/>
+        </mxCell>
+        <mxCell id="acm_s_upi" value="ACM Standby" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#EF6C00;fontSize=11;fontStyle=1;fontColor=#333333;arcSize=10;" vertex="1" parent="mgmt_dr_upi">
+          <mxGeometry x="15" y="45" width="95" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="acs_s_upi" value="ACS SecuredCluster" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FCE4EC;strokeColor=#C62828;fontSize=11;fontStyle=1;fontColor=#333333;arcSize=10;" vertex="1" parent="mgmt_dr_upi">
+          <mxGeometry x="125" y="45" width="115" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="quay_dr_upi" value="Quay Enterprise" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8EAF6;strokeColor=#3F51B5;fontSize=11;fontStyle=1;fontColor=#333333;arcSize=10;" vertex="1" parent="mgmt_dr_upi">
+          <mxGeometry x="255" y="45" width="95" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="ue1" value="Ignition configs
+HTTP :8080" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#EF6C00;fontSize=10;fontColor=#EF6C00;labelBackgroundColor=#FFFFFF;strokeWidth=2;" edge="1" source="bastion_dc" target="cp_dc" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="ue2" value="Ignition configs" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#EF6C00;fontSize=10;fontColor=#EF6C00;labelBackgroundColor=#FFFFFF;strokeWidth=2;" edge="1" source="bastion_dc" target="wk_dc" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="ue3" value="bootstrap.ign" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#C62828;fontSize=10;fontColor=#C62828;labelBackgroundColor=#FFFFFF;strokeWidth=2;" edge="1" source="bastion_dc" target="boot_dc" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="ue4" value="LB traffic" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#1565C0;fontSize=10;fontColor=#1565C0;labelBackgroundColor=#FFFFFF;strokeWidth=2;" edge="1" source="haproxy_dc" target="cp_dc" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="ue5" value="LB traffic" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#1565C0;fontSize=10;fontColor=#1565C0;labelBackgroundColor=#FFFFFF;strokeWidth=2;" edge="1" source="haproxy_dc" target="wk_dc" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="ue6" value="IPsec Tunnel" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#326CE5;fontSize=10;fontColor=#326CE5;labelBackgroundColor=#FFFFFF;strokeWidth=2;" edge="1" source="sub_b_upi" target="sub_a_upi" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="ue7" value="Failover" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#EF6C00;fontSize=10;fontColor=#EF6C00;dashed=1;dashPattern=8 4;labelBackgroundColor=#FFFFFF;strokeWidth=2;" edge="1" source="acm_h_upi" target="acm_s_upi" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="ue8" value="Policies" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#C62828;fontSize=10;fontColor=#C62828;labelBackgroundColor=#FFFFFF;strokeWidth=2;" edge="1" source="acs_c_upi" target="acs_s_upi" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="ue9" value="Geo-Replication" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#3F51B5;fontSize=10;fontColor=#3F51B5;dashed=1;dashPattern=8 4;labelBackgroundColor=#FFFFFF;strokeWidth=2;" edge="1" source="quay_dc_upi" target="quay_dr_upi" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="title2" value="&lt;b&gt;Multi-Cluster OpenShift Architecture — UPI Method&lt;/b&gt;&lt;br&gt;&lt;i&gt;Bastion-driven install with HAProxy LB and Bootstrap VMs&lt;/i&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=18;fontColor=#333333;" vertex="1" parent="1">
+          <mxGeometry x="350" y="-40" width="1000" height="50" as="geometry"/>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
