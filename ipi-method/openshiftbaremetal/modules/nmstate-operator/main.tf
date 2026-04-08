@@ -1,3 +1,5 @@
+# Author: Sathishkumar Munirathinam
+
 # =============================================================================
 # Module: NMState Operator — Declarative Node Network Configuration
 # =============================================================================

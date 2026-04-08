@@ -1,3 +1,5 @@
+# Author: Sathishkumar Munirathinam
+
 # =============================================================================
 # Azure DevOps Pipeline — ACM Cluster Import
 # Imports workload clusters into ACM Hub as managed clusters and creates

@@ -1,3 +1,5 @@
+# Author: Sathishkumar Munirathinam
+
 # =============================================================================
 # Module: Compliance Operator — OpenSCAP Scanning
 # Deploys CIS, NIST, PCI-DSS compliance profiles with auto-remediation

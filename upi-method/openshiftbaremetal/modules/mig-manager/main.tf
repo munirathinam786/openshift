@@ -1,3 +1,5 @@
+# Author: Sathishkumar Munirathinam
+
 # =============================================================================
 # Module: MIG Manager — NVIDIA Multi-Instance GPU partitioning
 # =============================================================================

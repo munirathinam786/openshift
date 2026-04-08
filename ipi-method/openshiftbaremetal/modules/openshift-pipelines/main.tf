@@ -1,3 +1,5 @@
+# Author: Sathishkumar Munirathinam
+
 # =============================================================================
 # OpenShift Pipelines (Tekton) — Operator + TektonConfig + ClusterTasks
 # Installs the OpenShift Pipelines operator and configures the TektonConfig CR

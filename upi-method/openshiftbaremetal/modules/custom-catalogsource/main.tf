@@ -1,3 +1,5 @@
+# Author: Sathishkumar Munirathinam
+
 # =============================================================================
 # Module: Custom CatalogSource — Private/mirror operator catalogs
 # =============================================================================

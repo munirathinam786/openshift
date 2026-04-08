@@ -1,3 +1,5 @@
+# Author: Sathishkumar Munirathinam
+
 # =============================================================================
 # Azure DevOps Pipeline — OpenShift UPI Baremetal Deployment
 # UPI-specific: multi-phase install with manual node boot steps

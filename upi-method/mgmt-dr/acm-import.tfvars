@@ -1,3 +1,5 @@
+# Author: Sathishkumar Munirathinam
+
 # =============================================================================
 # ACM Cluster Import — Variable Values (Management DR — Standby Hub)
 # Import workload clusters into ACM Hub (when promoted from standby)

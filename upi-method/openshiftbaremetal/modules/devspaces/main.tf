@@ -1,3 +1,5 @@
+# Author: Sathishkumar Munirathinam
+
 # =============================================================================
 # Module: DevSpaces — Red Hat OpenShift Dev Spaces (Eclipse Che)
 # =============================================================================

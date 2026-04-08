@@ -1,3 +1,5 @@
+# Author: Sathishkumar Munirathinam
+
 # =============================================================================
 # OADP — OpenShift API for Data Protection (Backup & Restore)
 # Deploys OADP operator + DataProtectionApplication with S3 BSL

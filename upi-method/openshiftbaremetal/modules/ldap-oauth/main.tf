@@ -1,3 +1,5 @@
+# Author: Sathishkumar Munirathinam
+
 # =============================================================================
 # OpenShift LDAP Identity Provider — OAuth + Group Sync + RBAC
 # Configures LDAP authentication, automatic group synchronisation, and

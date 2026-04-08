@@ -1,3 +1,5 @@
+# Author: Sathishkumar Munirathinam
+
 # =============================================================================
 # ACM DR Applications — Variable Values (Management DC)
 # DRPolicy + DRPlacementControl for application failover/failback

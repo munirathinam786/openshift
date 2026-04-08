@@ -1,3 +1,5 @@
+# Author: Sathishkumar Munirathinam
+
 # =============================================================================
 # Azure DevOps Pipeline — Day 2 Operations (Post-Install)
 # Cluster Logging, OADP Backup/Restore, LDAP/OAuth, GitOps (ArgoCD), Pipelines (Tekton)

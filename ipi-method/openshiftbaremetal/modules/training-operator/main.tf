@@ -1,3 +1,5 @@
+# Author: Sathishkumar Munirathinam
+
 # =============================================================================
 # Module: Training Operator — Kubeflow Training Operator for distributed ML
 # =============================================================================

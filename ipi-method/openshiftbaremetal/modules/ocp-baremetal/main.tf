@@ -1,3 +1,5 @@
+# Author: Sathishkumar Munirathinam
+
 # =============================================================================
 # Module: OCP Baremetal Install
 # Generates install-config.yaml, runs openshift-baremetal-install on bastion

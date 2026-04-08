@@ -1,3 +1,5 @@
+# Author: Sathishkumar Munirathinam
+
 # =============================================================================
 # Module: Custom Grafana Dashboards
 # Deploys cluster capacity, namespace usage, GPU utilization dashboards

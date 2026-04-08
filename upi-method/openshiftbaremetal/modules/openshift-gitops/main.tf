@@ -1,3 +1,5 @@
+# Author: Sathishkumar Munirathinam
+
 # =============================================================================
 # OpenShift GitOps (Argo CD) — Operator + ArgoCD Instance + RBAC
 # Installs the OpenShift GitOps operator and configures an ArgoCD instance

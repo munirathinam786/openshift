@@ -1,3 +1,5 @@
+# Author: Sathishkumar Munirathinam
+
 # =============================================================================
 # Module: File Integrity Operator — AIDE-based file monitoring
 # =============================================================================

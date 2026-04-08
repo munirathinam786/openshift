@@ -1,3 +1,5 @@
+# Author: Sathishkumar Munirathinam
+
 # =============================================================================
 # Module: NVIDIA DCGM Exporter Dashboard (GPU Monitoring)
 # =============================================================================

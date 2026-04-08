@@ -1,3 +1,5 @@
+# Author: Sathishkumar Munirathinam
+
 variable "kubeconfig" {
   description = "Path to kubeconfig on bastion"
   type        = string

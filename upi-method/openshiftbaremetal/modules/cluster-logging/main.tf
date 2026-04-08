@@ -1,3 +1,5 @@
+# Author: Sathishkumar Munirathinam
+
 # =============================================================================
 # OpenShift Cluster Logging — ClusterLogging + ClusterLogForwarder
 # Deploys Logging stack with optional S3 log forwarding (ODF-backed)

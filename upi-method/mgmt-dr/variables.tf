@@ -1,3 +1,5 @@
+# Author: Sathishkumar Munirathinam
+
 # =============================================================================
 # Variables — Management Cluster DR (UPI)
 # ACM Standby + ACS SecuredCluster (no Central) + Quay Enterprise

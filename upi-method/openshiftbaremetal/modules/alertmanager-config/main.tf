@@ -1,3 +1,5 @@
+# Author: Sathishkumar Munirathinam
+
 # =============================================================================
 # Module: Alertmanager Config — Alert Routing (PagerDuty, Slack, Email)
 # =============================================================================

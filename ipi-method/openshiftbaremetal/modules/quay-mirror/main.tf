@@ -1,3 +1,5 @@
+# Author: Sathishkumar Munirathinam
+
 # =============================================================================
 # Module: Local Quay Mirror Registry
 # Sets up oc-mirror against a dedicated local Quay server for disconnected

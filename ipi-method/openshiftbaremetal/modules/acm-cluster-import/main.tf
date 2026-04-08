@@ -1,3 +1,5 @@
+# Author: Sathishkumar Munirathinam
+
 # =============================================================================
 # ACM Cluster Import — Import Managed Clusters into ACM Hub
 # Creates ManagedCluster + KlusterletAddonConfig + auto-import Secret

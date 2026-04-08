@@ -1,3 +1,5 @@
+# Author: Sathishkumar Munirathinam
+
 # =============================================================================
 # Module: OpenTelemetry Collector — Distributed Tracing
 # =============================================================================

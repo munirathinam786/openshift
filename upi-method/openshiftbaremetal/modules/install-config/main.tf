@@ -1,3 +1,5 @@
+# Author: Sathishkumar Munirathinam
+
 # =============================================================================
 # UPI — Install Config Generation (platform: none)
 # Generates install-config.yaml for UPI bare metal deployment

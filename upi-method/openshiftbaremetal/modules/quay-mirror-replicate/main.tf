@@ -1,3 +1,5 @@
+# Author: Sathishkumar Munirathinam
+
 # =============================================================================
 # Module: Quay Mirror Replication
 # Replicates operator images and OCP release content from the internet-facing

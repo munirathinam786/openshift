@@ -1,3 +1,5 @@
+# Author: Sathishkumar Munirathinam
+
 # =============================================================================
 # OpenShift Baremetal DR Secondary — Variables
 # Same variables as DC Primary + Submariner agent + ODF-DR

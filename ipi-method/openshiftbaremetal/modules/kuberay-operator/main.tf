@@ -1,3 +1,5 @@
+# Author: Sathishkumar Munirathinam
+
 # =============================================================================
 # Module: KubeRay Operator — Ray cluster orchestration for distributed ML
 # =============================================================================

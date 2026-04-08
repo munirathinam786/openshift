@@ -1,3 +1,5 @@
+# Author: Sathishkumar Munirathinam
+
 # =============================================================================
 # OpenShift Baremetal UPI + OpenShift AI — Main Orchestration
 # =============================================================================

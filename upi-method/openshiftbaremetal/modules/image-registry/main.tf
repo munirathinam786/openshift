@@ -1,3 +1,5 @@
+# Author: Sathishkumar Munirathinam
+
 # =============================================================================
 # Module: Image Registry — Internal Registry Configuration
 # =============================================================================

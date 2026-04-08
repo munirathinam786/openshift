@@ -1,3 +1,5 @@
+# Author: Sathishkumar Munirathinam
+
 # =============================================================================
 # OpenShift Baremetal + OpenShift AI — Terraform Variables
 # =============================================================================

@@ -1,3 +1,5 @@
+# Author: Sathishkumar Munirathinam
+
 # =============================================================================
 # ACM DR Applications — DRPolicy + Application Failover/Failback
 # Configures Disaster Recovery policies and protected applications on the

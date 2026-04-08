@@ -1,3 +1,5 @@
+# Author: Sathishkumar Munirathinam
+
 # =============================================================================
 # Module: Velero Schedule — Automated backup schedules for namespaces
 # =============================================================================

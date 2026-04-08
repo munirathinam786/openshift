@@ -1,3 +1,5 @@
+# Author: Sathishkumar Munirathinam
+
 # =============================================================================
 # Module: Model Registry — ML Model versioning and serving registry
 # =============================================================================

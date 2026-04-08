@@ -1,3 +1,5 @@
+# Author: Sathishkumar Munirathinam
+
 # =============================================================================
 # OpenShift Baremetal UPI DR Secondary + OpenShift AI — Terraform Variables
 # =============================================================================
