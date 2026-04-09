@@ -56,15 +56,15 @@ dr_action = "none"
 # ---- Protected Applications ----
 dr_applications = [
   {
-    name              = "sample-app"
-    namespace         = "sample-app-ns"
-    placement_name    = "sample-app-placement"
+    name              = "agent-builder"
+    namespace         = "agent-builder"
+    placement_name    = "agent-builder-placement"
     preferred_cluster = "dc-primary"
     failover_cluster  = "dr-secondary"
     pvc_selector = {
-      app = "sample-app"
+      app = "agent-builder"
     }
-    kubeobject_protection = false
+    kubeobject_protection = true
     s3_profile_name       = "s3-profile"
   },
 ]

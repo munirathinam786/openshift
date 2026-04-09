@@ -33,7 +33,7 @@ Used with the [ACM DR Failover/Failback Pipeline](../../../pipeline/terraform-ac
 
 | Application | Namespace | Preferred Cluster | Failover Cluster | PVC Selector |
 |-------------|-----------|-------------------|------------------|--------------|
-| `sample-app` | `sample-app-ns` | `dc-primary` | `dr-secondary` | `app=sample-app` |
+| `agent-builder` | `agent-builder` | `dc-primary` | `dr-secondary` | `app=agent-builder` |
 
 ## Source Code
 
@@ -77,15 +77,15 @@ dr_action = "none"
 #   - pvc_selector:      Labels to match PVCs for replication
 dr_applications = [
   {
-    name              = "sample-app"
-    namespace         = "sample-app-ns"
-    placement_name    = "sample-app-placement"
+    name              = "agent-builder"
+    namespace         = "agent-builder"
+    placement_name    = "agent-builder-placement"
     preferred_cluster = "dc-primary"
     failover_cluster  = "dr-secondary"
     pvc_selector = {
-      app = "sample-app"
+      app = "agent-builder"
     }
-    kubeobject_protection = false
+    kubeobject_protection = true
     s3_profile_name       = "s3-profile"
   },
   # Uncomment and configure additional applications:
