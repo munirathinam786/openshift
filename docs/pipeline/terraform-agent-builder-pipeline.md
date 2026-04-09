@@ -3,7 +3,8 @@
 This page documents the **Azure DevOps pipeline** for deploying the Agent Builder Factory platform on OpenShift Baremetal.
 
 !!! info "Pipeline File"
-    **Source:** `ipi-method/azure-pipelines-agent-builder.yml`
+    **IPI Source:** `ipi-method/azure-pipelines-agent-builder.yml`
+    **UPI Source:** `upi-method/azure-pipelines-agent-builder.yml`
     See also: [Day 2 Operations Pipeline](terraform-agent-builder-pipeline-day2.md) | [Agent Builder Deployment](../clusters/terraform-agent-builder.md)
 
 ## Pipeline Overview
@@ -123,7 +124,7 @@ The pipeline uses the `agent-builder-secrets` variable group:
 | **Pool** | `self-hosted-linux` |
 | **Agent** | Bastion node with SSH access |
 | **Tools** | Terraform >= 1.5.0, oc CLI, podman |
-| **Working Directory** | `ipi-method/agent-builder/` |
+| **Working Directory** | `ipi-method/agent-builder/` (IPI) or `upi-method/agent-builder/` (UPI) |
 | **Pattern** | `null_resource` + SSH `remote-exec` |
 
 ## Prerequisites

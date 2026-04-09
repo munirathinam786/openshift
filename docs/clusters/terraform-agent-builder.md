@@ -16,29 +16,85 @@ The platform deploys 14 microservices on OpenShift using Terraform via `null_res
 
 ## Project Structure
 
-```
-ipi-method/agent-builder/
-├── main.tf                       # Main orchestration — module wiring & dependencies
-├── variables.tf                  # All variable declarations with types & defaults
-├── terraform.tfvars              # Environment-specific values (edit this)
-├── outputs.tf                    # Service URLs, endpoints
-├── versions.tf                   # Provider version constraints (null, local, tls)
-└── modules/
-    ├── namespace/                # OpenShift namespace with labels/annotations
-    ├── postgresql/               # PostgreSQL 15 StatefulSet (4 databases)
-    ├── mongodb/                  # MongoDB 6 StatefulSet (agent metadata)
-    ├── redis/                    # Redis 7 StatefulSet (LLM response cache)
-    ├── temporal/                 # Temporal Server v1.28.1 + UI v2.39.0
-    ├── ollama/                   # Ollama local LLM (Llama3, optional GPU)
-    ├── litellm/                  # LiteLLM Proxy v1.75.5 (multi-model gateway)
-    ├── temporal-workers/         # Python Temporal workflow workers
-    ├── agent-builder-api/        # FastAPI backend (core API)
-    ├── agent-builder-ui/         # React + Vite frontend
-    ├── tool-catalog/             # MCP Tool Catalog server
-    ├── agent-deployment-service/ # Agent container build & deploy service
-    ├── agent-registry/           # Agent metadata registry (MongoDB + PostgreSQL)
-    └── a2a-gateway/              # Agent-to-Agent protocol gateway
-```
+The Agent Builder Factory is deployed across 4 environments — IPI DC, IPI DR, UPI DC, and UPI DR:
+
+=== "IPI DC Primary"
+
+    ```
+    ipi-method/agent-builder/
+    ├── main.tf                       # Main orchestration — module wiring & dependencies
+    ├── variables.tf                  # All variable declarations with types & defaults
+    ├── terraform.tfvars              # Environment-specific values (edit this)
+    ├── outputs.tf                    # Service URLs, endpoints
+    ├── versions.tf                   # Provider version constraints (null, local, tls)
+    └── modules/
+        ├── namespace/                # OpenShift namespace with labels/annotations
+        ├── postgresql/               # PostgreSQL 15 StatefulSet (4 databases)
+        ├── mongodb/                  # MongoDB 6 StatefulSet (agent metadata)
+        ├── redis/                    # Redis 7 StatefulSet (LLM response cache)
+        ├── temporal/                 # Temporal Server v1.28.1 + UI v2.39.0
+        ├── ollama/                   # Ollama local LLM (Llama3, optional GPU)
+        ├── litellm/                  # LiteLLM Proxy v1.75.5 (multi-model gateway)
+        ├── temporal-workers/         # Python Temporal workflow workers
+        ├── agent-builder-api/        # FastAPI backend (core API)
+        ├── agent-builder-ui/         # React + Vite frontend
+        ├── tool-catalog/             # MCP Tool Catalog server
+        ├── agent-deployment-service/ # Agent container build & deploy service
+        ├── agent-registry/           # Agent metadata registry (MongoDB + PostgreSQL)
+        └── a2a-gateway/              # Agent-to-Agent protocol gateway
+    ```
+
+=== "IPI DR Secondary"
+
+    ```
+    ipi-method/agent-builder-dr/
+    ├── main.tf                       # DR orchestration — same modules, DR values
+    ├── variables.tf                  # Same variable declarations
+    ├── terraform.tfvars              # DR values: bastion=10.143.41.10, cluster=ocp-ai-dr
+    ├── outputs.tf                    # Service URLs (DR domain)
+    ├── versions.tf                   # Provider version constraints
+    └── modules/                      # Same 14 modules as DC primary
+    ```
+
+=== "UPI DC Primary"
+
+    ```
+    upi-method/agent-builder/
+    ├── main.tf                       # UPI DC orchestration
+    ├── variables.tf                  # Same variable declarations
+    ├── terraform.tfvars              # UPI DC values: cluster=ocp-ai-upi
+    ├── outputs.tf                    # Service URLs (UPI domain)
+    ├── versions.tf                   # Provider version constraints
+    └── modules/                      # Same 14 modules
+    ```
+
+=== "UPI DR Secondary"
+
+    ```
+    upi-method/agent-builder-dr/
+    ├── main.tf                       # UPI DR orchestration
+    ├── variables.tf                  # Same variable declarations
+    ├── terraform.tfvars              # UPI DR values: bastion=10.143.41.10, cluster=ocp-ai-upi-dr
+    ├── outputs.tf                    # Service URLs (UPI DR domain)
+    ├── versions.tf                   # Provider version constraints
+    └── modules/                      # Same 14 modules
+    ```
+
+### Environment Summary
+
+| Environment | Directory | Cluster | Bastion IP | Domain |
+|-------------|-----------|---------|------------|--------|
+| **IPI DC Primary** | `ipi-method/agent-builder/` | `ocp-ai` | `10.142.41.10` | `example.com` |
+| **IPI DR Secondary** | `ipi-method/agent-builder-dr/` | `ocp-ai-dr` | `10.143.41.10` | `dr.example.com` |
+| **UPI DC Primary** | `upi-method/agent-builder/` | `ocp-ai-upi` | `10.142.41.10` | `example.com` |
+| **UPI DR Secondary** | `upi-method/agent-builder-dr/` | `ocp-ai-upi-dr` | `10.143.41.10` | `dr.example.com` |
+
+### Pipeline Files
+
+| Pipeline | IPI | UPI |
+|----------|-----|-----|
+| **Day 1 Deployment** | `ipi-method/azure-pipelines-agent-builder.yml` | `upi-method/azure-pipelines-agent-builder.yml` |
+| **Day 2 Operations** | `ipi-method/azure-pipelines-agent-builder-day2.yml` | `upi-method/azure-pipelines-agent-builder-day2.yml` |
 
 ## Service Components
 
@@ -266,26 +322,61 @@ The following images must be accessible from the cluster (pulled from Red Hat / 
 
 ## Quick Start
 
-```bash
-# Navigate to agent-builder directory
-cd ipi-method/agent-builder/
+=== "IPI DC Primary"
 
-# Edit your variables
-cp terraform.tfvars terraform.tfvars.local
-vim terraform.tfvars.local
+    ```bash
+    cd ipi-method/agent-builder/
+    cp terraform.tfvars terraform.tfvars.local
+    vim terraform.tfvars.local
+    terraform init
+    terraform plan -var-file=terraform.tfvars.local
+    terraform apply -target=module.namespace
+    terraform apply -target=module.postgresql -target=module.mongodb -target=module.redis
+    terraform apply -target=module.temporal -target=module.litellm -target=module.ollama
+    terraform apply  # Everything else
+    ```
 
-# Initialize Terraform
-terraform init
+=== "IPI DR Secondary"
 
-# Plan the deployment
-terraform plan -var-file=terraform.tfvars.local
+    ```bash
+    cd ipi-method/agent-builder-dr/
+    cp terraform.tfvars terraform.tfvars.local
+    vim terraform.tfvars.local
+    terraform init
+    terraform plan -var-file=terraform.tfvars.local
+    terraform apply -target=module.namespace
+    terraform apply -target=module.postgresql -target=module.mongodb -target=module.redis
+    terraform apply -target=module.temporal -target=module.litellm -target=module.ollama
+    terraform apply  # Everything else
+    ```
 
-# Deploy (staged approach recommended)
-terraform apply -target=module.namespace
-terraform apply -target=module.postgresql -target=module.mongodb -target=module.redis
-terraform apply -target=module.temporal -target=module.litellm -target=module.ollama
-terraform apply  # Everything else
-```
+=== "UPI DC Primary"
+
+    ```bash
+    cd upi-method/agent-builder/
+    cp terraform.tfvars terraform.tfvars.local
+    vim terraform.tfvars.local
+    terraform init
+    terraform plan -var-file=terraform.tfvars.local
+    terraform apply -target=module.namespace
+    terraform apply -target=module.postgresql -target=module.mongodb -target=module.redis
+    terraform apply -target=module.temporal -target=module.litellm -target=module.ollama
+    terraform apply  # Everything else
+    ```
+
+=== "UPI DR Secondary"
+
+    ```bash
+    cd upi-method/agent-builder-dr/
+    cp terraform.tfvars terraform.tfvars.local
+    vim terraform.tfvars.local
+    terraform init
+    terraform plan -var-file=terraform.tfvars.local
+    terraform apply -target=module.namespace
+    terraform apply -target=module.postgresql -target=module.mongodb -target=module.redis
+    terraform apply -target=module.temporal -target=module.litellm -target=module.ollama
+    terraform apply  # Everything else
+    ```
 
 !!! warning "Sensitive Variables"
     Never commit secrets to git. Use ADO variable groups or Terraform Cloud for sensitive values like `postgres_password`, `mongodb_root_password`, `litellm_master_key`, and LLM API keys.

@@ -3,7 +3,8 @@
 This page documents the **Day 2 operations pipeline** for managing the Agent Builder Factory after initial deployment.
 
 !!! info "Pipeline File"
-    **Source:** `ipi-method/azure-pipelines-agent-builder-day2.yml`
+    **IPI Source:** `ipi-method/azure-pipelines-agent-builder-day2.yml`
+    **UPI Source:** `upi-method/azure-pipelines-agent-builder-day2.yml`
     See also: [Day 1 Deployment Pipeline](terraform-agent-builder-pipeline.md) | [Agent Builder Deployment](../clusters/terraform-agent-builder.md)
 
 ## Day 2 Operations

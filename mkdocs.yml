@@ -123,7 +123,7 @@ nav:
       - acm-dr.tfvars (ACM DR): "code/ipi-method/mgmt-dr/acm-dr-tfvars.md"
       - outputs.tf: "code/ipi-method/mgmt-dr/outputs.md"
       - versions.tf: "code/ipi-method/mgmt-dr/versions.md"
-    - IPI Agent Builder (ipi-method/agent-builder):
+    - IPI Agent Builder DC (ipi-method/agent-builder):
       - main.tf: "code/ipi-method/agent-builder/main.md"
       - variables.tf: "code/ipi-method/agent-builder/variables.md"
       - terraform.tfvars: "code/ipi-method/agent-builder/tfvars.md"
@@ -131,6 +131,12 @@ nav:
       - versions.tf: "code/ipi-method/agent-builder/versions.md"
       - azure-pipelines-agent-builder.yml (Day 1): "code/ipi-method/agent-builder/azure-pipelines-agent-builder.md"
       - azure-pipelines-agent-builder-day2.yml (Day 2): "code/ipi-method/agent-builder/azure-pipelines-agent-builder-day2.md"
+    - IPI Agent Builder DR (ipi-method/agent-builder-dr):
+      - main.tf: "code/ipi-method/agent-builder-dr/main.md"
+      - variables.tf: "code/ipi-method/agent-builder-dr/variables.md"
+      - terraform.tfvars: "code/ipi-method/agent-builder-dr/tfvars.md"
+      - outputs.tf: "code/ipi-method/agent-builder-dr/outputs.md"
+      - versions.tf: "code/ipi-method/agent-builder-dr/versions.md"
     - IPI Azure DevOps Pipeline:
       - azure-pipelines.yml (Day 1): "code/ipi-method/pipeline/azure-pipelines.md"
       - azure-pipelines-day2.yml (Day 2): "code/ipi-method/pipeline/azure-pipelines-day2.md"
@@ -166,6 +172,20 @@ nav:
       - openshift-virtualization.tfvars: "code/upi-method/openshiftbaremetal-dr/openshift-virtualization-tfvars.md"
       - vm-migration.tfvars: "code/upi-method/openshiftbaremetal-dr/vm-migration-tfvars.md"
       - mtc.tfvars: "code/upi-method/openshiftbaremetal-dr/mtc-tfvars.md"
+    - UPI Agent Builder DC (upi-method/agent-builder):
+      - main.tf: "code/upi-method/agent-builder/main.md"
+      - variables.tf: "code/upi-method/agent-builder/variables.md"
+      - terraform.tfvars: "code/upi-method/agent-builder/tfvars.md"
+      - outputs.tf: "code/upi-method/agent-builder/outputs.md"
+      - versions.tf: "code/upi-method/agent-builder/versions.md"
+      - azure-pipelines-agent-builder.yml (Day 1): "code/upi-method/agent-builder/azure-pipelines-agent-builder.md"
+      - azure-pipelines-agent-builder-day2.yml (Day 2): "code/upi-method/agent-builder/azure-pipelines-agent-builder-day2.md"
+    - UPI Agent Builder DR (upi-method/agent-builder-dr):
+      - main.tf: "code/upi-method/agent-builder-dr/main.md"
+      - variables.tf: "code/upi-method/agent-builder-dr/variables.md"
+      - terraform.tfvars: "code/upi-method/agent-builder-dr/tfvars.md"
+      - outputs.tf: "code/upi-method/agent-builder-dr/outputs.md"
+      - versions.tf: "code/upi-method/agent-builder-dr/versions.md"
     - UPI Management DC (upi-method/mgmt-dc):
       - main.tf: "code/upi-method/mgmt-dc/main.md"
       - variables.tf: "code/upi-method/mgmt-dc/variables.md"
