@@ -13,6 +13,13 @@ UPI uses a **multi-phase** approach instead of a single `create cluster` command
 4. Boot nodes manually (PXE/ISO)
 5. Approve CSRs for worker nodes
 
+## Module Dependencies
+
+![UPI DC Module Dependencies](../../diagrams/code/03-upi-dc-module-deps.svg){: .drawio-diagram }
+
+???+ note "Draw.io Source: UPI DC Module Dependencies"
+    [:material-download: Download .drawio file](../../diagrams/code/03-upi-dc-module-deps.drawio){ .md-button } — Open in [draw.io](https://app.diagrams.net) for interactive editing.
+
 ## Module Dependency Chain
 
 ![Upi Dc Dep Chain](../../diagrams/code/10-upi-dc-dep-chain.svg){: .drawio-diagram }

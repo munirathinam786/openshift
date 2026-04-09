@@ -1,12 +1,126 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<mxfile host="app.diagrams.net" modified="2026-04-09" agent="" etag="" version="24.0.0" type="device">
+<mxfile host="app.diagrams.net" modified="2026-04-09T00:00:00.000Z" agent="GitHub Copilot" version="24.0.0" type="device">
   <diagram id="agent-builder-pipeline" name="Agent Builder ADO Pipeline">
     <mxGraphModel dx="1400" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1400" pageHeight="900" math="0" shadow="0">
       <root>
-        <mxCell id="0" />
-        <mxCell id="1" parent="0" />
-        <mxCell id="title" value="&lt;b&gt;Agent Builder Factory — ADO Pipeline (Day 1 Deployment)&lt;/b&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontSize=18;fontColor=#1a1a2e;" vertex="1" parent="1">
-          <mxGeometry x="350" y="10" width="500" height="30" as="geometry" />
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+        <mxCell id="title" value="&lt;b&gt;Agent Builder — Azure DevOps Pipeline Stages&lt;/b&gt;&lt;br&gt;&lt;i&gt;Day 1 deployment: Build → Data → Infrastructure → Application → Validate&lt;/i&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=18;fontColor=#333333;" vertex="1" parent="1">
+          <mxGeometry x="200" y="10" width="1000" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="ado" value="&lt;b&gt;Azure DevOps Pipeline: azure-pipelines-agent-builder.yml&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;dashed=1;dashPattern=12 8;fillColor=none;fontSize=16;fontStyle=1;verticalAlign=top;align=left;spacingTop=8;spacingLeft=12;container=1;collapsible=0;strokeWidth=3;strokeColor=#1565C0;" vertex="1" parent="1">
+          <mxGeometry x="20" y="70" width="1360" height="780" as="geometry"/>
+        </mxCell>
+        <mxCell id="s1" value="&lt;b&gt;Stage 1: Build Container Images&lt;/b&gt;" style="swimlane;startSize=35;fillColor=#EF6C00;fontColor=#FFFFFF;strokeColor=#EF6C00;rounded=1;fontSize=13;fontStyle=1;whiteSpace=wrap;html=1;container=1;collapsible=0;" vertex="1" parent="ado">
+          <mxGeometry x="30" y="60" width="400" height="200" as="geometry"/>
+        </mxCell>
+        <mxCell id="s1a" value="&lt;b&gt;Podman Build&lt;/b&gt;&lt;br&gt;14 Containerfiles" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#EF6C00;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="s1">
+          <mxGeometry x="15" y="45" width="175" height="45" as="geometry"/>
+        </mxCell>
+        <mxCell id="s1b" value="&lt;b&gt;Podman Push&lt;/b&gt;&lt;br&gt;Internal Registry" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#EF6C00;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="s1">
+          <mxGeometry x="205" y="45" width="175" height="45" as="geometry"/>
+        </mxCell>
+        <mxCell id="s1c" value="Images: agent-builder-api, agent-builder-ui,&lt;br&gt;temporal-workers, litellm-proxy, ollama,&lt;br&gt;tool-catalog, agent-deploy, agent-registry,&lt;br&gt;a2a-gateway, temporal-server, temporal-ui" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#333333;fontSize=10;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="s1">
+          <mxGeometry x="15" y="100" width="365" height="75" as="geometry"/>
+        </mxCell>
+        <mxCell id="s2" value="&lt;b&gt;Stage 2: Data Layer&lt;/b&gt;" style="swimlane;startSize=35;fillColor=#F57F17;fontColor=#FFFFFF;strokeColor=#F57F17;rounded=1;fontSize=13;fontStyle=1;whiteSpace=wrap;html=1;container=1;collapsible=0;" vertex="1" parent="ado">
+          <mxGeometry x="30" y="290" width="400" height="200" as="geometry"/>
+        </mxCell>
+        <mxCell id="s2a" value="&lt;b&gt;terraform init + plan + apply&lt;/b&gt;&lt;br&gt;PostgreSQL 15 Deployment" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF8E1;strokeColor=#F57F17;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="s2">
+          <mxGeometry x="15" y="45" width="175" height="55" as="geometry"/>
+        </mxCell>
+        <mxCell id="s2b" value="&lt;b&gt;terraform init + plan + apply&lt;/b&gt;&lt;br&gt;MongoDB 6 Deployment" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF8E1;strokeColor=#F57F17;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="s2">
+          <mxGeometry x="205" y="45" width="175" height="55" as="geometry"/>
+        </mxCell>
+        <mxCell id="s2c" value="&lt;b&gt;terraform init + plan + apply&lt;/b&gt;&lt;br&gt;Redis 7 Deployment" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF8E1;strokeColor=#F57F17;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="s2">
+          <mxGeometry x="15" y="115" width="175" height="55" as="geometry"/>
+        </mxCell>
+        <mxCell id="s2d" value="&lt;b&gt;PVC Creation&lt;/b&gt;&lt;br&gt;50Gi (PG) + 50Gi (Mongo)&lt;br&gt;10Gi (Redis) + 100Gi (Ollama)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF8E1;strokeColor=#F57F17;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="s2">
+          <mxGeometry x="205" y="115" width="175" height="65" as="geometry"/>
+        </mxCell>
+        <mxCell id="s3" value="&lt;b&gt;Stage 3: Infra Layer&lt;/b&gt;" style="swimlane;startSize=35;fillColor=#7B1FA2;fontColor=#FFFFFF;strokeColor=#7B1FA2;rounded=1;fontSize=13;fontStyle=1;whiteSpace=wrap;html=1;container=1;collapsible=0;" vertex="1" parent="ado">
+          <mxGeometry x="480" y="60" width="400" height="200" as="geometry"/>
+        </mxCell>
+        <mxCell id="s3a" value="&lt;b&gt;Temporal Server&lt;/b&gt;&lt;br&gt;Deployment + Service" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F3E5F5;strokeColor=#7B1FA2;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="s3">
+          <mxGeometry x="15" y="45" width="175" height="45" as="geometry"/>
+        </mxCell>
+        <mxCell id="s3b" value="&lt;b&gt;Temporal UI&lt;/b&gt;&lt;br&gt;Deployment + Route" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F3E5F5;strokeColor=#7B1FA2;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="s3">
+          <mxGeometry x="205" y="45" width="175" height="45" as="geometry"/>
+        </mxCell>
+        <mxCell id="s3c" value="&lt;b&gt;Ollama Server&lt;/b&gt;&lt;br&gt;StatefulSet + GPU Pod" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F3E5F5;strokeColor=#7B1FA2;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="s3">
+          <mxGeometry x="15" y="105" width="175" height="45" as="geometry"/>
+        </mxCell>
+        <mxCell id="s3d" value="&lt;b&gt;LiteLLM Proxy&lt;/b&gt;&lt;br&gt;Deployment + ConfigMap" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F3E5F5;strokeColor=#7B1FA2;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="s3">
+          <mxGeometry x="205" y="105" width="175" height="45" as="geometry"/>
+        </mxCell>
+        <mxCell id="s3e" value="Namespace, ServiceAccount,&lt;br&gt;NetworkPolicies, Secrets" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#333333;fontSize=10;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="s3">
+          <mxGeometry x="15" y="160" width="365" height="30" as="geometry"/>
+        </mxCell>
+        <mxCell id="s4" value="&lt;b&gt;Stage 4: App Layer&lt;/b&gt;" style="swimlane;startSize=35;fillColor=#1565C0;fontColor=#FFFFFF;strokeColor=#1565C0;rounded=1;fontSize=13;fontStyle=1;whiteSpace=wrap;html=1;container=1;collapsible=0;" vertex="1" parent="ado">
+          <mxGeometry x="480" y="290" width="400" height="200" as="geometry"/>
+        </mxCell>
+        <mxCell id="s4a" value="&lt;b&gt;Agent Builder API+UI&lt;/b&gt;&lt;br&gt;Deployment + Route" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E3F2FD;strokeColor=#1565C0;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="s4">
+          <mxGeometry x="15" y="45" width="175" height="45" as="geometry"/>
+        </mxCell>
+        <mxCell id="s4b" value="&lt;b&gt;Tool Catalog&lt;/b&gt;&lt;br&gt;MCP Server Deploy" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E3F2FD;strokeColor=#1565C0;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="s4">
+          <mxGeometry x="205" y="45" width="175" height="45" as="geometry"/>
+        </mxCell>
+        <mxCell id="s4c" value="&lt;b&gt;Agent Registry&lt;/b&gt;&lt;br&gt;Node.js Deploy" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E3F2FD;strokeColor=#1565C0;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="s4">
+          <mxGeometry x="15" y="105" width="175" height="45" as="geometry"/>
+        </mxCell>
+        <mxCell id="s4d" value="&lt;b&gt;Deploy Service + A2A&lt;/b&gt;&lt;br&gt;+Temporal Workers" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E3F2FD;strokeColor=#1565C0;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="s4">
+          <mxGeometry x="205" y="105" width="175" height="45" as="geometry"/>
+        </mxCell>
+        <mxCell id="s4e" value="OpenShift Routes, Services,&lt;br&gt;Environment Variables" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#333333;fontSize=10;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="s4">
+          <mxGeometry x="15" y="160" width="365" height="30" as="geometry"/>
+        </mxCell>
+        <mxCell id="s5" value="&lt;b&gt;Stage 5: Validate&lt;/b&gt;" style="swimlane;startSize=35;fillColor=#2E7D32;fontColor=#FFFFFF;strokeColor=#2E7D32;rounded=1;fontSize=13;fontStyle=1;whiteSpace=wrap;html=1;container=1;collapsible=0;" vertex="1" parent="ado">
+          <mxGeometry x="930" y="60" width="400" height="200" as="geometry"/>
+        </mxCell>
+        <mxCell id="s5a" value="&lt;b&gt;Health Checks&lt;/b&gt;&lt;br&gt;All 14 pods running" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F5E9;strokeColor=#2E7D32;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="s5">
+          <mxGeometry x="15" y="45" width="175" height="45" as="geometry"/>
+        </mxCell>
+        <mxCell id="s5b" value="&lt;b&gt;Route Validation&lt;/b&gt;&lt;br&gt;HTTPS endpoints live" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F5E9;strokeColor=#2E7D32;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="s5">
+          <mxGeometry x="205" y="45" width="175" height="45" as="geometry"/>
+        </mxCell>
+        <mxCell id="s5c" value="&lt;b&gt;DB Connectivity&lt;/b&gt;&lt;br&gt;PG, Mongo, Redis OK" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F5E9;strokeColor=#2E7D32;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="s5">
+          <mxGeometry x="15" y="105" width="175" height="45" as="geometry"/>
+        </mxCell>
+        <mxCell id="s5d" value="&lt;b&gt;LLM Test&lt;/b&gt;&lt;br&gt;LiteLLM → Ollama OK" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F5E9;strokeColor=#2E7D32;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="s5">
+          <mxGeometry x="205" y="105" width="175" height="45" as="geometry"/>
+        </mxCell>
+        <mxCell id="s5e" value="oc get pods -n agent-builder | grep Running" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#333333;fontSize=10;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="s5">
+          <mxGeometry x="15" y="160" width="365" height="30" as="geometry"/>
+        </mxCell>
+        <mxCell id="s6" value="&lt;b&gt;Stage 6: Summary&lt;/b&gt;" style="swimlane;startSize=35;fillColor=#EE0000;fontColor=#FFFFFF;strokeColor=#CC0000;rounded=1;fontSize=13;fontStyle=1;whiteSpace=wrap;html=1;container=1;collapsible=0;" vertex="1" parent="ado">
+          <mxGeometry x="930" y="290" width="400" height="200" as="geometry"/>
+        </mxCell>
+        <mxCell id="s6a" value="&lt;b&gt;Pipeline Summary&lt;/b&gt;&lt;br&gt;All stages status report" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFCDD2;strokeColor=#C62828;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="s6">
+          <mxGeometry x="15" y="45" width="175" height="45" as="geometry"/>
+        </mxCell>
+        <mxCell id="s6b" value="&lt;b&gt;Deployment URLs&lt;/b&gt;&lt;br&gt;Route endpoints listed" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFCDD2;strokeColor=#C62828;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="s6">
+          <mxGeometry x="205" y="45" width="175" height="45" as="geometry"/>
+        </mxCell>
+        <mxCell id="s6c" value="Outputs: terraform console output,&lt;br&gt;route URLs, pod status, duration" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#333333;fontSize=10;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="s6">
+          <mxGeometry x="15" y="105" width="365" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="ep1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#333333;strokeWidth=3;fontSize=12;fontStyle=1;fontColor=#333333;labelBackgroundColor=#FFFFFF;" edge="1" source="s1" target="s2" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="ep2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#333333;strokeWidth=3;fontSize=12;fontStyle=1;fontColor=#333333;labelBackgroundColor=#FFFFFF;" edge="1" source="s1" target="s3" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="ep3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#333333;strokeWidth=3;fontSize=12;fontStyle=1;fontColor=#333333;labelBackgroundColor=#FFFFFF;" edge="1" source="s2" target="s4" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="ep4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#333333;strokeWidth=3;fontSize=12;fontStyle=1;fontColor=#333333;labelBackgroundColor=#FFFFFF;" edge="1" source="s3" target="s4" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="ep5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#333333;strokeWidth=3;fontSize=12;fontStyle=1;fontColor=#333333;labelBackgroundColor=#FFFFFF;" edge="1" source="s4" target="s5" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="ep6" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#333333;strokeWidth=3;fontSize=12;fontStyle=1;fontColor=#333333;labelBackgroundColor=#FFFFFF;" edge="1" source="s5" target="s6" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
         </mxCell>
       </root>
     </mxGraphModel>

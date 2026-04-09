@@ -82,6 +82,11 @@ The UPI ADO pipeline adds **bastion-driven ignition**, **manual/PXE/ISO node boo
 
 Submariner establishes an encrypted IPsec tunnel between DC and DR for **pod-to-pod** and **service-to-service** communication:
 
+![Submariner Pipeline](../diagrams/pipeline/14-submariner-pipeline.svg){: .drawio-diagram }
+
+???+ note "Draw.io Source: Submariner Pipeline"
+    [:material-download: Download .drawio file](../diagrams/pipeline/14-submariner-pipeline.drawio){ .md-button } — Open in [draw.io](https://app.diagrams.net) for interactive editing.
+
 ![Management Cluster Architecture](../diagrams/architecture/07-management-cluster-architecture.svg){: .drawio-diagram }
 
 ???+ note "Draw.io Source: Management Cluster Architecture"
@@ -97,6 +102,11 @@ Submariner establishes an encrypted IPsec tunnel between DC and DR for **pod-to-
 ### 3. ODF Disaster Recovery Replication
 
 ODF DR enables **Ceph RBD mirroring** between the DC and DR storage clusters:
+
+![ODF Replication Pipeline](../diagrams/pipeline/15-odf-replication-pipeline.svg){: .drawio-diagram }
+
+???+ note "Draw.io Source: ODF Replication Pipeline"
+    [:material-download: Download .drawio file](../diagrams/pipeline/15-odf-replication-pipeline.drawio){ .md-button } — Open in [draw.io](https://app.diagrams.net) for interactive editing.
 
 ![ACM Import/DR Management](../diagrams/architecture/08-acm-import-dr-management.svg){: .drawio-diagram }
 
@@ -154,6 +164,11 @@ In addition to the core management services, two dedicated modules and pipelines
     [:material-download: Download .drawio file](../diagrams/architecture/11-ado-pipeline-scope.drawio){ .md-button } — Open in [draw.io](https://app.diagrams.net) for interactive editing.
 
 ## Folder Structure
+
+![Terraform File Structure](../diagrams/code/06-terraform-file-structure.svg){: .drawio-diagram }
+
+???+ note "Draw.io Source: Terraform File Structure"
+    [:material-download: Download .drawio file](../diagrams/code/06-terraform-file-structure.drawio){ .md-button } — Open in [draw.io](https://app.diagrams.net) for interactive editing.
 
 ### IPI Method
 

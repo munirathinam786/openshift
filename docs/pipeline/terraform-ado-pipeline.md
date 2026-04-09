@@ -1,5 +1,10 @@
 # Azure DevOps Pipeline — Multi-Cluster Deployment
 
+![Pipeline Architecture Overview](../diagrams/pipeline/18-pipeline-architecture-overview.svg){: .drawio-diagram }
+
+???+ note "Draw.io Source: Pipeline Architecture Overview"
+    [:material-download: Download .drawio file](../diagrams/pipeline/18-pipeline-architecture-overview.drawio){ .md-button } — Open in [draw.io](https://app.diagrams.net) for interactive editing.
+
 The ADO pipeline provides **selective deployment** of any combination of the four cluster environments with optional Submariner networking and ODF DR replication.
 
 !!! info "Multi-Cluster Architecture"

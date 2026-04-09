@@ -4,6 +4,13 @@ Main orchestration for the Management DR cluster (`mgmt-dr/`).
 Deploys ACM **Standby** (can be promoted to Hub), ACS **SecuredCluster** only
 (Central is in mgmt-dc), and Quay Enterprise.
 
+## Module Dependencies
+
+![Management Module Dependencies](../../../diagrams/code/05-mgmt-module-deps.svg){: .drawio-diagram }
+
+???+ note "Draw.io Source: Management Module Dependencies"
+    [:material-download: Download .drawio file](../../../diagrams/code/05-mgmt-module-deps.drawio){ .md-button } — Open in [draw.io](https://app.diagrams.net) for interactive editing.
+
 ## Source Code
 
 ```hcl

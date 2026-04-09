@@ -13,7 +13,7 @@ This section provides the **Terraform IaC** for the **DC Primary** workload clus
 
 The Terraform project automates the full deployment lifecycle:
 
-![DC Primary Deployment Overview](../diagrams/clusters/01-dc-primary-deployment-overview.drawio.svg){: .drawio-diagram }
+![DC Primary Deployment Overview](../diagrams/clusters/01-dc-primary-deployment-overview.svg){: .drawio-diagram }
 
 ???+ note "Draw.io Source: DC Primary Deployment Overview"
     [:material-download: Download .drawio file](../diagrams/clusters/01-dc-primary-deployment-overview.drawio){ .md-button } — Open in [draw.io](https://app.diagrams.net) for interactive editing.

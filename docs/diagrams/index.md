@@ -23,6 +23,7 @@ All architecture, cluster, pipeline, and code diagrams are available as interact
 | 10 | ![](architecture/10-inter-cluster-connection-map.svg){: style="max-width:200px" } | [:material-download: .drawio](architecture/10-inter-cluster-connection-map.drawio) |
 | 11 | ![](architecture/11-ado-pipeline-scope.svg){: style="max-width:200px" } | [:material-download: .drawio](architecture/11-ado-pipeline-scope.drawio) |
 | 12 | ![](architecture/12-ipi-vs-upi-comparison.svg){: style="max-width:200px" } | [:material-download: .drawio](architecture/12-ipi-vs-upi-comparison.drawio) |
+| 13 | ![](architecture/13-protocol-port-map.svg){: style="max-width:200px" } | [:material-download: .drawio](architecture/13-protocol-port-map.drawio) |
 | 20 | ![](architecture/20-agent-builder-architecture.svg){: style="max-width:200px" } | [:material-download: .drawio](architecture/20-agent-builder-architecture.drawio) |
 | 21 | ![](architecture/21-agent-builder-llm-connectivity.svg){: style="max-width:200px" } | [:material-download: .drawio](architecture/21-agent-builder-llm-connectivity.drawio) |
 | 22 | ![](architecture/22-agent-builder-data-flow.svg){: style="max-width:200px" } | [:material-download: .drawio](architecture/22-agent-builder-data-flow.drawio) |
@@ -54,6 +55,10 @@ All architecture, cluster, pipeline, and code diagrams are available as interact
 | 20 | ![](clusters/20-quay-geo-replication-failover.svg){: style="max-width:200px" } | [:material-download: .drawio](clusters/20-quay-geo-replication-failover.drawio) |
 | 21 | ![](clusters/21-quay-geo-replication-flow.svg){: style="max-width:200px" } | [:material-download: .drawio](clusters/21-quay-geo-replication-flow.drawio) |
 | 22 | ![](clusters/22-acm-dr-applications.svg){: style="max-width:200px" } | [:material-download: .drawio](clusters/22-acm-dr-applications.drawio) |
+| 23 | ![](clusters/23-acm-import-topology.svg){: style="max-width:200px" } | [:material-download: .drawio](clusters/23-acm-import-topology.drawio) |
+| 24 | ![](clusters/24-acm-dr-application-failover.svg){: style="max-width:200px" } | [:material-download: .drawio](clusters/24-acm-dr-application-failover.drawio) |
+| 25 | ![](clusters/25-quay-failover-behavior.svg){: style="max-width:200px" } | [:material-download: .drawio](clusters/25-quay-failover-behavior.drawio) |
+| 26 | ![](clusters/26-acm-post-failover-reimport.svg){: style="max-width:200px" } | [:material-download: .drawio](clusters/26-acm-post-failover-reimport.drawio) |
 
 ## Pipeline Diagrams
 
@@ -77,6 +82,15 @@ All architecture, cluster, pipeline, and code diagrams are available as interact
 | 16 | ![](pipeline/16-ipi-pipeline-scope.svg){: style="max-width:200px" } | [:material-download: .drawio](pipeline/16-ipi-pipeline-scope.drawio) |
 | 17 | ![](pipeline/17-pipeline-secrets-flow.svg){: style="max-width:200px" } | [:material-download: .drawio](pipeline/17-pipeline-secrets-flow.drawio) |
 | 18 | ![](pipeline/18-pipeline-architecture-overview.svg){: style="max-width:200px" } | [:material-download: .drawio](pipeline/18-pipeline-architecture-overview.drawio) |
+| 19 | ![](pipeline/19-ado-deploy-topology.svg){: style="max-width:200px" } | [:material-download: .drawio](pipeline/19-ado-deploy-topology.drawio) |
+| 20 | ![](pipeline/20-full-deployment-sequence.svg){: style="max-width:200px" } | [:material-download: .drawio](pipeline/20-full-deployment-sequence.drawio) |
+| 21 | ![](pipeline/21-acm-import-workflow.svg){: style="max-width:200px" } | [:material-download: .drawio](pipeline/21-acm-import-workflow.drawio) |
+| 22 | ![](pipeline/22-acm-dr-stages.svg){: style="max-width:200px" } | [:material-download: .drawio](pipeline/22-acm-dr-stages.drawio) |
+| 23 | ![](pipeline/23-acm-dr-failover-workflow.svg){: style="max-width:200px" } | [:material-download: .drawio](pipeline/23-acm-dr-failover-workflow.drawio) |
+| 24 | ![](pipeline/24-cnv-deploy-workflow.svg){: style="max-width:200px" } | [:material-download: .drawio](pipeline/24-cnv-deploy-workflow.drawio) |
+| 25 | ![](pipeline/25-vm-migration-workflow.svg){: style="max-width:200px" } | [:material-download: .drawio](pipeline/25-vm-migration-workflow.drawio) |
+| 26 | ![](pipeline/26-upi-boot-gate.svg){: style="max-width:200px" } | [:material-download: .drawio](pipeline/26-upi-boot-gate.drawio) |
+| 27 | ![](pipeline/27-ado-prerequisites.svg){: style="max-width:200px" } | [:material-download: .drawio](pipeline/27-ado-prerequisites.drawio) |
 | 30 | ![](pipeline/30-agent-builder-pipeline.svg){: style="max-width:200px" } | [:material-download: .drawio](pipeline/30-agent-builder-pipeline.drawio) |
 
 ## Code / Module Dependency Diagrams
@@ -89,3 +103,8 @@ All architecture, cluster, pipeline, and code diagrams are available as interact
 | 4 | ![](code/04-upi-dr-module-deps.svg){: style="max-width:200px" } | [:material-download: .drawio](code/04-upi-dr-module-deps.drawio) |
 | 5 | ![](code/05-mgmt-module-deps.svg){: style="max-width:200px" } | [:material-download: .drawio](code/05-mgmt-module-deps.drawio) |
 | 6 | ![](code/06-terraform-file-structure.svg){: style="max-width:200px" } | [:material-download: .drawio](code/06-terraform-file-structure.drawio) |
+| 7 | ![](code/07-ipi-dc-dep-chain.svg){: style="max-width:200px" } | [:material-download: .drawio](code/07-ipi-dc-dep-chain.drawio) |
+| 8 | ![](code/08-ipi-dr-dep-chain.svg){: style="max-width:200px" } | [:material-download: .drawio](code/08-ipi-dr-dep-chain.drawio) |
+| 9 | ![](code/09-ipi-pipeline-stage-order.svg){: style="max-width:200px" } | [:material-download: .drawio](code/09-ipi-pipeline-stage-order.drawio) |
+| 10 | ![](code/10-upi-dc-dep-chain.svg){: style="max-width:200px" } | [:material-download: .drawio](code/10-upi-dc-dep-chain.drawio) |
+| 11 | ![](code/11-upi-dr-dep-chain.svg){: style="max-width:200px" } | [:material-download: .drawio](code/11-upi-dr-dep-chain.drawio) |

@@ -3,6 +3,13 @@
 Main orchestration file for the DC Primary workload cluster (`openshiftbaremetal/`).
 Deploys OCP 4.15 on bare metal with OpenShift AI, NVIDIA GPU, ODF, Submariner broker, and ODF DR.
 
+## Module Dependencies
+
+![IPI DC Module Dependencies](../../../diagrams/code/01-ipi-dc-module-deps.svg){: .drawio-diagram }
+
+???+ note "Draw.io Source: IPI DC Module Dependencies"
+    [:material-download: Download .drawio file](../../../diagrams/code/01-ipi-dc-module-deps.drawio){ .md-button } — Open in [draw.io](https://app.diagrams.net) for interactive editing.
+
 ## Module Dependency Chain
 
 ![Ipi Dc Dep Chain](../../../diagrams/code/07-ipi-dc-dep-chain.svg){: .drawio-diagram }

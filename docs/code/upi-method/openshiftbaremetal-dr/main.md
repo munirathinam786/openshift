@@ -9,6 +9,13 @@ Deploys OCP 4.15 on bare metal using **UPI** at the DR site with OpenShift AI, G
     - **CIDRs**: Non-overlapping with DC — `10.132.0.0/14` (pod), `172.31.0.0/16` (service)
     - **Modules**: References `../openshiftbaremetal/modules/` (shared with DC Primary)
 
+## Module Dependencies
+
+![UPI DR Module Dependencies](../../../diagrams/code/04-upi-dr-module-deps.svg){: .drawio-diagram }
+
+???+ note "Draw.io Source: UPI DR Module Dependencies"
+    [:material-download: Download .drawio file](../../../diagrams/code/04-upi-dr-module-deps.drawio){ .md-button } — Open in [draw.io](https://app.diagrams.net) for interactive editing.
+
 ## Module Dependency Chain
 
 ![Upi Dr Dep Chain](../../../diagrams/code/11-upi-dr-dep-chain.svg){: .drawio-diagram }

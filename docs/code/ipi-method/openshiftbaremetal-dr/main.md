@@ -4,6 +4,13 @@ Main orchestration file for the DR Secondary workload cluster (`openshiftbaremet
 Shares modules with DC Primary via relative paths (`../openshiftbaremetal/modules/`).
 Submariner runs as **agent** (connects back to DC broker), and ODF DR replicates storage.
 
+## Module Dependencies
+
+![IPI DR Module Dependencies](../../../diagrams/code/02-ipi-dr-module-deps.svg){: .drawio-diagram }
+
+???+ note "Draw.io Source: IPI DR Module Dependencies"
+    [:material-download: Download .drawio file](../../../diagrams/code/02-ipi-dr-module-deps.drawio){ .md-button } — Open in [draw.io](https://app.diagrams.net) for interactive editing.
+
 ## Module Dependency Chain
 
 ![Ipi Dr Dep Chain](../../../diagrams/code/08-ipi-dr-dep-chain.svg){: .drawio-diagram }

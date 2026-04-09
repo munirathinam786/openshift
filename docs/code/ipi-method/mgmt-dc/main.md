@@ -4,6 +4,13 @@ Main orchestration for the Management DC cluster (`mgmt-dc/`).
 Deploys ACM Hub, ACS Central + SecuredCluster, and Quay Enterprise registry
 on top of OCP bare metal with ODF storage.
 
+## Module Dependencies
+
+![Management Module Dependencies](../../../diagrams/code/05-mgmt-module-deps.svg){: .drawio-diagram }
+
+???+ note "Draw.io Source: Management Module Dependencies"
+    [:material-download: Download .drawio file](../../../diagrams/code/05-mgmt-module-deps.drawio){ .md-button } — Open in [draw.io](https://app.diagrams.net) for interactive editing.
+
 ## Source Code
 
 ```hcl
