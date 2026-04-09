@@ -68,6 +68,7 @@ nav:
     - DR Secondary: "clusters/terraform-dr-secondary.md"
     - Management DC: "clusters/terraform-mgmt-dc.md"
     - Management DR: "clusters/terraform-mgmt-dr.md"
+    - Agent Builder Factory: "clusters/terraform-agent-builder.md"
   - Draw.io Diagrams: "diagrams/index.md"
   - CI/CD Pipeline:
     - ADO Pipeline (IPI — Day 1): "pipeline/terraform-ado-pipeline.md"
@@ -79,6 +80,8 @@ nav:
     - OpenShift Virtualization Pipeline: "pipeline/terraform-cnv-pipeline.md"
     - VM Migration Pipeline: "pipeline/terraform-vm-migration-pipeline.md"
     - MTC Container Migration Pipeline: "pipeline/terraform-mtc-pipeline.md"
+    - Agent Builder Pipeline (Day 1): "pipeline/terraform-agent-builder-pipeline.md"
+    - Agent Builder Pipeline (Day 2): "pipeline/terraform-agent-builder-pipeline-day2.md"
   - Terraform Code:
     - IPI DC Primary (ipi-method/openshiftbaremetal):
       - main.tf: "code/ipi-method/openshiftbaremetal/main.md"

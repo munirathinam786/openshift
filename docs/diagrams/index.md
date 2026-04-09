@@ -23,6 +23,10 @@ All architecture, cluster, pipeline, and code diagrams are available as interact
 | 10 | ![](architecture/10-inter-cluster-connection-map.svg){: style="max-width:200px" } | [:material-download: .drawio](architecture/10-inter-cluster-connection-map.drawio) |
 | 11 | ![](architecture/11-ado-pipeline-scope.svg){: style="max-width:200px" } | [:material-download: .drawio](architecture/11-ado-pipeline-scope.drawio) |
 | 12 | ![](architecture/12-ipi-vs-upi-comparison.svg){: style="max-width:200px" } | [:material-download: .drawio](architecture/12-ipi-vs-upi-comparison.drawio) |
+| 20 | ![](architecture/20-agent-builder-architecture.svg){: style="max-width:200px" } | [:material-download: .drawio](architecture/20-agent-builder-architecture.drawio) |
+| 21 | ![](architecture/21-agent-builder-llm-connectivity.svg){: style="max-width:200px" } | [:material-download: .drawio](architecture/21-agent-builder-llm-connectivity.drawio) |
+| 22 | ![](architecture/22-agent-builder-data-flow.svg){: style="max-width:200px" } | [:material-download: .drawio](architecture/22-agent-builder-data-flow.drawio) |
+| 23 | ![](architecture/23-agent-builder-service-map.svg){: style="max-width:200px" } | [:material-download: .drawio](architecture/23-agent-builder-service-map.drawio) |
 
 ## Cluster Diagrams
 
@@ -73,6 +77,7 @@ All architecture, cluster, pipeline, and code diagrams are available as interact
 | 16 | ![](pipeline/16-ipi-pipeline-scope.svg){: style="max-width:200px" } | [:material-download: .drawio](pipeline/16-ipi-pipeline-scope.drawio) |
 | 17 | ![](pipeline/17-pipeline-secrets-flow.svg){: style="max-width:200px" } | [:material-download: .drawio](pipeline/17-pipeline-secrets-flow.drawio) |
 | 18 | ![](pipeline/18-pipeline-architecture-overview.svg){: style="max-width:200px" } | [:material-download: .drawio](pipeline/18-pipeline-architecture-overview.drawio) |
+| 30 | ![](pipeline/30-agent-builder-pipeline.svg){: style="max-width:200px" } | [:material-download: .drawio](pipeline/30-agent-builder-pipeline.drawio) |
 
 ## Code / Module Dependency Diagrams
 
