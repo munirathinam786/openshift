@@ -1,0 +1,466 @@
+# Agent Builder Factory — Azure DevOps Pipeline (Day 1)
+
+Azure DevOps Pipeline for Day 1 deployment of the Agent Builder Factory platform. Features 6 stages: container image build, data layer (PostgreSQL/MongoDB/Redis), infrastructure (Temporal/Ollama/LiteLLM), application services, validation, and summary.
+
+## Source Code
+
+```yaml
+# Author: Sathishkumar Munirathinam
+# Azure DevOps Pipeline — Agent Builder Factory (Day 1 Deployment)
+# Deploys the complete Agent Builder platform on OpenShift Baremetal
+
+trigger:
+  branches:
+    include:
+      - main
+  paths:
+    include:
+      - ipi-method/agent-builder/**
+
+parameters:
+  - name: deploymentScope
+    displayName: "Deployment Scope"
+    type: string
+    default: "full-platform"
+    values:
+      - full-platform
+      - data-layer-only
+      - app-layer-only
+      - ollama-only
+      - litellm-only
+
+  - name: terraformAction
+    displayName: "Terraform Action"
+    type: string
+    default: "plan"
+    values:
+      - plan
+      - apply
+      - destroy
+
+  - name: targetCluster
+    displayName: "Target OpenShift Cluster"
+    type: string
+    default: "dc-primary"
+    values:
+      - dc-primary
+      - dr-secondary
+
+  - name: variableGroup
+    displayName: "ADO Variable Group"
+    type: string
+    default: "agent-builder-secrets"
+
+  # ---- Feature Toggles ----
+  - name: enableOllama
+    displayName: "Deploy Ollama (In-Cluster Llama3)"
+    type: boolean
+    default: true
+
+  - name: enableLocalLLMLaptop
+    displayName: "Enable Laptop Ollama Connection"
+    type: boolean
+    default: false
+
+  - name: localLLMLaptopUrl
+    displayName: "Laptop Ollama URL (e.g., http://192.168.1.100:11434)"
+    type: string
+    default: ""
+
+  - name: ollamaModel
+    displayName: "Ollama Model"
+    type: string
+    default: "llama3"
+    values:
+      - llama3
+      - "llama3:70b"
+      - mistral
+      - codellama
+      - "llama3:8b"
+
+  - name: ollamaGpuEnabled
+    displayName: "Enable GPU for Ollama"
+    type: boolean
+    default: false
+
+  - name: imageTag
+    displayName: "Container Image Tag"
+    type: string
+    default: "latest"
+
+  - name: enableOIDC
+    displayName: "Enable OIDC Authentication"
+    type: boolean
+    default: false
+
+variables:
+  - group: ${{ parameters.variableGroup }}
+  - name: TF_IN_AUTOMATION
+    value: "true"
+  - name: TF_INPUT
+    value: "false"
+  - name: WORKING_DIR
+    value: "ipi-method/agent-builder"
+
+stages:
+  # ============================================================================
+  # Stage 1: Build & Push Container Images
+  # ============================================================================
+  - stage: Build_Images
+    displayName: "Build — Container Images"
+    condition: |
+      and(
+        succeeded(),
+        or(
+          eq('${{ parameters.deploymentScope }}', 'full-platform'),
+          eq('${{ parameters.deploymentScope }}', 'app-layer-only')
+        )
+      )
+    jobs:
+      - job: BuildImages
+        displayName: "Build Agent Builder Images"
+        pool:
+          name: "self-hosted-linux"
+        steps:
+          - checkout: self
+
+          - script: |
+              echo "=== Building Agent Builder Container Images ==="
+              echo "Image tag: ${{ parameters.imageTag }}"
+
+              REGISTRY=$(grep 'container_registry' $(WORKING_DIR)/terraform.tfvars | cut -d'"' -f2)
+              TAG="${{ parameters.imageTag }}"
+
+              # Build API image
+              echo "Building agent-builder-api..."
+              podman build -t ${REGISTRY}/agent-builder-api:${TAG} \
+                -f packages/agent-builder-api/Dockerfile \
+                packages/agent-builder-api/ || echo "API image build skipped (source not present)"
+
+              # Build UI image
+              echo "Building agent-builder-ui..."
+              podman build -t ${REGISTRY}/agent-builder-ui:${TAG} \
+                -f packages/agent-builder-ui/Dockerfile \
+                packages/agent-builder-ui/ || echo "UI image build skipped (source not present)"
+
+              # Build Temporal Workers image
+              echo "Building agent-builder-temporal-workers..."
+              podman build -t ${REGISTRY}/agent-builder-temporal-workers:${TAG} \
+                -f packages/agent-builder-temporal-workers/Dockerfile \
+                packages/agent-builder-temporal-workers/ || echo "Workers image build skipped (source not present)"
+
+              # Build Tool Catalog image
+              echo "Building agent-builder-tool-catalog..."
+              podman build -t ${REGISTRY}/agent-builder-tool-catalog:${TAG} \
+                -f packages/tool-catalog/Dockerfile \
+                packages/tool-catalog/ || echo "Tool Catalog image build skipped (source not present)"
+
+              # Build Agent Deployment Service image
+              echo "Building agent-deployment-service..."
+              podman build -t ${REGISTRY}/agent-deployment-service:${TAG} \
+                -f packages/agent-deployment-service/Dockerfile \
+                packages/agent-deployment-service/ || echo "Deploy Service image build skipped (source not present)"
+
+              # Build Agent Registry image
+              echo "Building agent-builder-registry..."
+              podman build -t ${REGISTRY}/agent-builder-registry:${TAG} \
+                -f packages/agent-registry/Dockerfile \
+                packages/agent-registry/ || echo "Registry image build skipped (source not present)"
+
+              # Build A2A Gateway image
+              echo "Building agent-builder-a2a-gateway..."
+              podman build -t ${REGISTRY}/agent-builder-a2a-gateway:${TAG} \
+                -f packages/a2a-gateway/Dockerfile \
+                packages/a2a-gateway/ || echo "A2A Gateway image build skipped (source not present)"
+
+              echo "=== Push images to registry ==="
+              podman push --tls-verify=false ${REGISTRY}/agent-builder-api:${TAG} || true
+              podman push --tls-verify=false ${REGISTRY}/agent-builder-ui:${TAG} || true
+              podman push --tls-verify=false ${REGISTRY}/agent-builder-temporal-workers:${TAG} || true
+              podman push --tls-verify=false ${REGISTRY}/agent-builder-tool-catalog:${TAG} || true
+              podman push --tls-verify=false ${REGISTRY}/agent-deployment-service:${TAG} || true
+              podman push --tls-verify=false ${REGISTRY}/agent-builder-registry:${TAG} || true
+              podman push --tls-verify=false ${REGISTRY}/agent-builder-a2a-gateway:${TAG} || true
+
+              echo "=== Image build and push complete ==="
+            displayName: "Build & Push Container Images"
+
+  # ============================================================================
+  # Stage 2: Data Layer (PostgreSQL, MongoDB, Redis)
+  # ============================================================================
+  - stage: Deploy_Data_Layer
+    displayName: "Deploy — Data Layer (PostgreSQL + MongoDB + Redis)"
+    condition: |
+      and(
+        succeeded(),
+        or(
+          eq('${{ parameters.deploymentScope }}', 'full-platform'),
+          eq('${{ parameters.deploymentScope }}', 'data-layer-only')
+        )
+      )
+    dependsOn: []
+    jobs:
+      - job: TerraformDataLayer
+        displayName: "Terraform — Data Layer"
+        pool:
+          name: "self-hosted-linux"
+        steps:
+          - checkout: self
+
+          - task: TerraformInstaller@1
+            displayName: "Install Terraform"
+            inputs:
+              terraformVersion: "latest"
+
+          - script: |
+              cd $(WORKING_DIR)
+              terraform init -input=false
+            displayName: "Terraform Init"
+
+          - script: |
+              cd $(WORKING_DIR)
+              terraform ${{ parameters.terraformAction }} \
+                -var-file=terraform.tfvars \
+                -var image_tag=${{ parameters.imageTag }} \
+                -target=module.namespace \
+                -target=module.postgresql \
+                -target=module.mongodb \
+                -target=module.redis \
+                -input=false \
+                $(if [ "${{ parameters.terraformAction }}" = "apply" ] || [ "${{ parameters.terraformAction }}" = "destroy" ]; then echo "-auto-approve"; fi)
+            displayName: "Terraform ${{ parameters.terraformAction }} — Data Layer"
+            env:
+              TF_VAR_postgres_password: $(postgres-password)
+              TF_VAR_mongodb_root_password: $(mongodb-root-password)
+              TF_VAR_redis_password: $(redis-password)
+
+  # ============================================================================
+  # Stage 3: Temporal + Ollama + LiteLLM
+  # ============================================================================
+  - stage: Deploy_Infrastructure
+    displayName: "Deploy — Temporal + LiteLLM + Ollama"
+    condition: |
+      and(
+        succeeded(),
+        or(
+          eq('${{ parameters.deploymentScope }}', 'full-platform'),
+          eq('${{ parameters.deploymentScope }}', 'ollama-only'),
+          eq('${{ parameters.deploymentScope }}', 'litellm-only')
+        )
+      )
+    dependsOn:
+      - Deploy_Data_Layer
+    jobs:
+      - job: TerraformInfra
+        displayName: "Terraform — Infrastructure Services"
+        pool:
+          name: "self-hosted-linux"
+        steps:
+          - checkout: self
+
+          - task: TerraformInstaller@1
+            displayName: "Install Terraform"
+            inputs:
+              terraformVersion: "latest"
+
+          - script: |
+              cd $(WORKING_DIR)
+              terraform init -input=false
+            displayName: "Terraform Init"
+
+          - script: |
+              cd $(WORKING_DIR)
+              TARGETS="-target=module.temporal"
+
+              if [ "${{ parameters.enableOllama }}" = "True" ]; then
+                TARGETS="$TARGETS -target=module.ollama"
+              fi
+
+              TARGETS="$TARGETS -target=module.litellm"
+
+              EXTRA_ARGS=""
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_ollama=${{ parameters.enableOllama }}"
+              EXTRA_ARGS="$EXTRA_ARGS -var ollama_model=${{ parameters.ollamaModel }}"
+              EXTRA_ARGS="$EXTRA_ARGS -var ollama_gpu_enabled=${{ parameters.ollamaGpuEnabled }}"
+
+              if [ "${{ parameters.enableLocalLLMLaptop }}" = "True" ]; then
+                EXTRA_ARGS="$EXTRA_ARGS -var enable_local_llm_laptop=true"
+                EXTRA_ARGS="$EXTRA_ARGS -var local_llm_laptop_url=${{ parameters.localLLMLaptopUrl }}"
+              fi
+
+              terraform ${{ parameters.terraformAction }} \
+                -var-file=terraform.tfvars \
+                -var image_tag=${{ parameters.imageTag }} \
+                $TARGETS \
+                $EXTRA_ARGS \
+                -input=false \
+                $(if [ "${{ parameters.terraformAction }}" = "apply" ] || [ "${{ parameters.terraformAction }}" = "destroy" ]; then echo "-auto-approve"; fi)
+            displayName: "Terraform ${{ parameters.terraformAction }} — Temporal + LiteLLM + Ollama"
+            env:
+              TF_VAR_postgres_password: $(postgres-password)
+              TF_VAR_mongodb_root_password: $(mongodb-root-password)
+              TF_VAR_redis_password: $(redis-password)
+              TF_VAR_litellm_master_key: $(litellm-master-key)
+              TF_VAR_anthropic_api_key: $(anthropic-api-key)
+              TF_VAR_azure_openai_key: $(azure-openai-key)
+              TF_VAR_openai_api_key: $(openai-api-key)
+
+  # ============================================================================
+  # Stage 4: Application Layer
+  # ============================================================================
+  - stage: Deploy_App_Layer
+    displayName: "Deploy — Application Services"
+    condition: |
+      and(
+        succeeded(),
+        or(
+          eq('${{ parameters.deploymentScope }}', 'full-platform'),
+          eq('${{ parameters.deploymentScope }}', 'app-layer-only')
+        )
+      )
+    dependsOn:
+      - Deploy_Infrastructure
+    jobs:
+      - job: TerraformAppLayer
+        displayName: "Terraform — Application Services"
+        pool:
+          name: "self-hosted-linux"
+        steps:
+          - checkout: self
+
+          - task: TerraformInstaller@1
+            displayName: "Install Terraform"
+            inputs:
+              terraformVersion: "latest"
+
+          - script: |
+              cd $(WORKING_DIR)
+              terraform init -input=false
+            displayName: "Terraform Init"
+
+          - script: |
+              cd $(WORKING_DIR)
+              EXTRA_ARGS=""
+              EXTRA_ARGS="$EXTRA_ARGS -var enable_ollama=${{ parameters.enableOllama }}"
+              EXTRA_ARGS="$EXTRA_ARGS -var ollama_model=${{ parameters.ollamaModel }}"
+
+              if [ "${{ parameters.enableLocalLLMLaptop }}" = "True" ]; then
+                EXTRA_ARGS="$EXTRA_ARGS -var enable_local_llm_laptop=true"
+                EXTRA_ARGS="$EXTRA_ARGS -var local_llm_laptop_url=${{ parameters.localLLMLaptopUrl }}"
+              fi
+
+              terraform ${{ parameters.terraformAction }} \
+                -var-file=terraform.tfvars \
+                -var image_tag=${{ parameters.imageTag }} \
+                -target=module.temporal_workers \
+                -target=module.agent_builder_api \
+                -target=module.agent_builder_ui \
+                -target=module.tool_catalog \
+                -target=module.agent_deployment_service \
+                -target=module.agent_registry \
+                -target=module.a2a_gateway \
+                $EXTRA_ARGS \
+                -input=false \
+                $(if [ "${{ parameters.terraformAction }}" = "apply" ] || [ "${{ parameters.terraformAction }}" = "destroy" ]; then echo "-auto-approve"; fi)
+            displayName: "Terraform ${{ parameters.terraformAction }} — Application Services"
+            env:
+              TF_VAR_postgres_password: $(postgres-password)
+              TF_VAR_mongodb_root_password: $(mongodb-root-password)
+              TF_VAR_redis_password: $(redis-password)
+              TF_VAR_litellm_master_key: $(litellm-master-key)
+              TF_VAR_anthropic_api_key: $(anthropic-api-key)
+              TF_VAR_azure_openai_key: $(azure-openai-key)
+              TF_VAR_openai_api_key: $(openai-api-key)
+              TF_VAR_github_token: $(github-token)
+
+  # ============================================================================
+  # Stage 5: Validation
+  # ============================================================================
+  - stage: Validate
+    displayName: "Validate — Platform Health"
+    dependsOn:
+      - Deploy_App_Layer
+    condition: and(succeeded(), eq('${{ parameters.terraformAction }}', 'apply'))
+    jobs:
+      - job: ValidatePlatform
+        displayName: "Validate Agent Builder Platform"
+        pool:
+          name: "self-hosted-linux"
+        steps:
+          - script: |
+              BASTION=$(grep 'bastion_host' $(WORKING_DIR)/terraform.tfvars | cut -d'"' -f2)
+              CLUSTER=$(grep 'cluster_name' $(WORKING_DIR)/terraform.tfvars | cut -d'"' -f2)
+              NS=$(grep 'agent_builder_namespace' $(WORKING_DIR)/terraform.tfvars | cut -d'"' -f2)
+
+              echo "=== Agent Builder Platform Health Check ==="
+              echo ""
+
+              ssh -o StrictHostKeyChecking=no kni@${BASTION} "
+                export KUBECONFIG=/home/kni/ocp/${CLUSTER}/auth/kubeconfig
+
+                echo '--- Pods ---'
+                oc get pods -n ${NS} -o wide
+
+                echo ''
+                echo '--- Services ---'
+                oc get svc -n ${NS}
+
+                echo ''
+                echo '--- Routes ---'
+                oc get routes -n ${NS}
+
+                echo ''
+                echo '--- PVCs ---'
+                oc get pvc -n ${NS}
+
+                echo ''
+                echo '--- Pod Health ---'
+                TOTAL=\$(oc get pods -n ${NS} --no-headers | wc -l)
+                RUNNING=\$(oc get pods -n ${NS} --no-headers | grep -c Running || echo 0)
+                echo \"Total Pods: \${TOTAL}\"
+                echo \"Running Pods: \${RUNNING}\"
+
+                if [ \"\${TOTAL}\" -eq \"\${RUNNING}\" ] && [ \"\${TOTAL}\" -gt 0 ]; then
+                  echo '✅ All pods are running'
+                else
+                  echo '⚠️  Some pods are not ready — check above for details'
+                fi
+              "
+            displayName: "Validate Platform Health"
+
+  # ============================================================================
+  # Stage 6: Summary
+  # ============================================================================
+  - stage: Summary
+    displayName: "Summary"
+    dependsOn:
+      - Build_Images
+      - Deploy_Data_Layer
+      - Deploy_Infrastructure
+      - Deploy_App_Layer
+      - Validate
+    condition: always()
+    jobs:
+      - job: PipelineSummary
+        displayName: "Pipeline Summary"
+        pool:
+          name: "self-hosted-linux"
+        steps:
+          - script: |
+              echo "============================================="
+              echo "  Agent Builder Factory — Pipeline Summary"
+              echo "============================================="
+              echo ""
+              echo "Action:           ${{ parameters.terraformAction }}"
+              echo "Scope:            ${{ parameters.deploymentScope }}"
+              echo "Target Cluster:   ${{ parameters.targetCluster }}"
+              echo "Image Tag:        ${{ parameters.imageTag }}"
+              echo "Ollama Enabled:   ${{ parameters.enableOllama }}"
+              echo "Ollama Model:     ${{ parameters.ollamaModel }}"
+              echo "GPU Enabled:      ${{ parameters.ollamaGpuEnabled }}"
+              echo "Laptop LLM:      ${{ parameters.enableLocalLLMLaptop }}"
+              echo "OIDC Enabled:     ${{ parameters.enableOIDC }}"
+              echo ""
+              echo "============================================="
+            displayName: "Pipeline Summary"
+```

@@ -324,6 +324,28 @@
   
   
   
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../clusters/terraform-agent-builder/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Agent Builder Factory
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
     <li class="md-tabs__item">
       <a href="../../diagrams/" class="md-tabs__link">
         
@@ -770,6 +792,157 @@
   
   
   
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4">
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Agent Builder Factory
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Agent Builder Factory
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix="">
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../clusters/terraform-agent-builder/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Deployment Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../terraform-agent-builder-pipeline/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Pipeline (Day 1)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../terraform-agent-builder-pipeline-day2/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Pipeline (Day 2)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
     <li class="md-nav__item">
       <a href="../../diagrams/" class="md-nav__link">
         
@@ -834,10 +1007,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" checked="">
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" checked="">
         
           
-          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="">
             
   
   
@@ -855,8 +1028,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="true">
-          <label class="md-nav__title" for="__nav_5">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_6">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -931,6 +1104,172 @@
       Table of contents
     </label>
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix="">
+      
+        <li class="md-nav__item">
+  <a href="#ado-prerequisites" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ADO Prerequisites
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="ADO Prerequisites">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-self-hosted-agent-pool" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Self-Hosted Agent Pool
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-terraform-extension-marketplace" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Terraform Extension (Marketplace)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-ado-variable-groups" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. ADO Variable Groups
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-secret-variables-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Secret Variables Reference
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. Secret Variables Reference">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#quay-gpu-secrets" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Quay &amp; GPU Secrets
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#submariner-odf-dr-secrets" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Submariner &amp; ODF DR Secrets
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#acs-acm-secrets" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ACS &amp; ACM Secrets
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ldap-authentication-secrets" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        LDAP &amp; Authentication Secrets
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#log-forwarding-backup-s3-secrets" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Log Forwarding &amp; Backup (S3) Secrets
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#argocd-pipelines-as-code-secrets" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ArgoCD &amp; Pipelines-as-Code Secrets
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#acm-dr-secrets" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ACM DR Secrets
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mtc-migration-secrets" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        MTC Migration Secrets
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#vm-migration-secrets" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        VM Migration Secrets
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
       
         <li class="md-nav__item">
   <a href="#pipeline-parameters" class="md-nav__link">
@@ -1360,6 +1699,8 @@
       
         
       
+        
+      
     
     
     
@@ -1373,10 +1714,10 @@
         
           
         
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6">
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_7">
         
           
-          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
             
   
   
@@ -1394,8 +1735,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_6">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -1445,10 +1786,10 @@
         
           
         
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6_1">
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_7_1">
         
           
-          <label class="md-nav__link" for="__nav_6_1" id="__nav_6_1_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_7_1" id="__nav_7_1_label" tabindex="0">
             
   
   
@@ -1466,8 +1807,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_1_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_6_1">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_7_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7_1">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -1777,10 +2118,10 @@
         
           
         
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6_2">
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_7_2">
         
           
-          <label class="md-nav__link" for="__nav_6_2" id="__nav_6_2_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_7_2" id="__nav_7_2_label" tabindex="0">
             
   
   
@@ -1798,8 +2139,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_2_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_6_2">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_7_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7_2">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -2107,10 +2448,10 @@
         
           
         
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6_3">
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_7_3">
         
           
-          <label class="md-nav__link" for="__nav_6_3" id="__nav_6_3_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_7_3" id="__nav_7_3_label" tabindex="0">
             
   
   
@@ -2128,8 +2469,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_3_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_6_3">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_7_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7_3">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -2409,10 +2750,10 @@
         
           
         
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6_4">
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_7_4">
         
           
-          <label class="md-nav__link" for="__nav_6_4" id="__nav_6_4_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_7_4" id="__nav_7_4_label" tabindex="0">
             
   
   
@@ -2430,8 +2771,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_4_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_6_4">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_7_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7_4">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -2709,10 +3050,282 @@
         
           
         
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6_5">
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_7_5">
         
           
-          <label class="md-nav__link" for="__nav_6_5" id="__nav_6_5_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_7_5" id="__nav_7_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    IPI Agent Builder (ipi-method/agent-builder)
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_7_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    IPI Agent Builder (ipi-method/agent-builder)
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix="">
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../code/ipi-method/agent-builder/main/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    main.tf
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../code/ipi-method/agent-builder/variables/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    variables.tf
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../code/ipi-method/agent-builder/tfvars/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    terraform.tfvars
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../code/ipi-method/agent-builder/outputs/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    outputs.tf
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../code/ipi-method/agent-builder/versions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    versions.tf
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../code/ipi-method/agent-builder/azure-pipelines-agent-builder/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    azure-pipelines-agent-builder.yml (Day 1)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../code/ipi-method/agent-builder/azure-pipelines-agent-builder-day2/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    azure-pipelines-agent-builder-day2.yml (Day 2)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_7_6">
+        
+          
+          <label class="md-nav__link" for="__nav_7_6" id="__nav_7_6_label" tabindex="0">
             
   
   
@@ -2730,8 +3343,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_5_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_6_5">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_7_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7_6">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -2999,10 +3612,10 @@
         
           
         
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6_6">
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_7_7">
         
           
-          <label class="md-nav__link" for="__nav_6_6" id="__nav_6_6_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_7_7" id="__nav_7_7_label" tabindex="0">
             
   
   
@@ -3020,8 +3633,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_6_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_6_6">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_7_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7_7">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -3527,10 +4140,10 @@
         
           
         
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6_7">
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_7_8">
         
           
-          <label class="md-nav__link" for="__nav_6_7" id="__nav_6_7_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_7_8" id="__nav_7_8_label" tabindex="0">
             
   
   
@@ -3548,8 +4161,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_7_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_6_7">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_7_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7_8">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -3857,10 +4470,10 @@
         
           
         
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6_8">
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_7_9">
         
           
-          <label class="md-nav__link" for="__nav_6_8" id="__nav_6_8_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_7_9" id="__nav_7_9_label" tabindex="0">
             
   
   
@@ -3878,8 +4491,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_8_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_6_8">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_7_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7_9">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -4159,10 +4772,10 @@
         
           
         
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6_9">
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_7_10">
         
           
-          <label class="md-nav__link" for="__nav_6_9" id="__nav_6_9_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_7_10" id="__nav_7_10_label" tabindex="0">
             
   
   
@@ -4180,8 +4793,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_6_9_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_6_9">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_7_10_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7_10">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -4458,58 +5071,398 @@
 <a href="../../clusters/terraform-mgmt-dc/">Management DC</a> |
 <a href="../../clusters/terraform-mgmt-dr/">Management DR</a></p>
 </div>
+<h2 id="ado-prerequisites">ADO Prerequisites<a class="headerlink" href="#ado-prerequisites" title="Permanent link">¶</a></h2>
+<p><a class="glightbox" data-type="image" data-width="auto" data-height="auto" href="../../diagrams/pipeline/27-ado-prerequisites.svg" data-desc-position="bottom"><img alt="ADO Prerequisites &amp; Pipeline Execution Flow" class="drawio-diagram" src="../../diagrams/pipeline/27-ado-prerequisites.svg"></a></p>
+<details class="note" open="open">
+<summary>Draw.io Source: ADO Prerequisites &amp; Pipeline Execution Flow</summary>
+<p><a class="md-button" href="../../diagrams/pipeline/27-ado-prerequisites.drawio"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M5 20h14v-2H5m14-9h-4V3H9v6H5l7 7z"></path></svg></span> Download .drawio file</a> — Open in <a href="https://app.diagrams.net">draw.io</a> for interactive editing.</p>
+</details>
+<p>Before creating and running any pipeline, the following must be configured in your Azure DevOps project:</p>
+<h3 id="1-self-hosted-agent-pool">1. Self-Hosted Agent Pool<a class="headerlink" href="#1-self-hosted-agent-pool" title="Permanent link">¶</a></h3>
+<p>All pipelines use a <strong>self-hosted Linux agent pool</strong> named <strong><code>self-hosted-linux</code></strong>.</p>
+<table>
+<thead>
+<tr>
+<th>Requirement</th>
+<th>Details</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Pool Name</td>
+<td><code>self-hosted-linux</code></td>
+</tr>
+<tr>
+<td>OS</td>
+<td>Linux (RHEL 8+/9+ or Ubuntu 20.04+)</td>
+</tr>
+<tr>
+<td>Network Access</td>
+<td>Must reach all bare-metal OpenShift cluster API endpoints (port 6443) and bastion hosts via SSH</td>
+</tr>
+<tr>
+<td>Terraform</td>
+<td>Installed automatically by pipeline via <code>TerraformInstaller@1</code> task</td>
+</tr>
+<tr>
+<td>Tools</td>
+<td><code>oc</code>, <code>kubectl</code>, <code>jq</code>, <code>ssh</code> must be available on the agent</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition tip">
+<p class="admonition-title">Agent Setup</p>
+<p>Go to <strong>Project Settings → Agent Pools → Add Pool</strong> → select <strong>Self-hosted</strong> → name it <code>self-hosted-linux</code>. Then install and register the Azure Pipelines agent on your Linux host.</p>
+</div>
+<h3 id="2-terraform-extension-marketplace">2. Terraform Extension (Marketplace)<a class="headerlink" href="#2-terraform-extension-marketplace" title="Permanent link">¶</a></h3>
+<p>Install the <strong>Terraform</strong> extension from the Azure DevOps Marketplace:</p>
+<table>
+<thead>
+<tr>
+<th>Extension</th>
+<th>Publisher</th>
+<th>Task Used</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="https://marketplace.visualstudio.com/items?itemName=ms-devlabs.custom-terraform-tasks">Terraform</a></td>
+<td>Microsoft DevLabs</td>
+<td><code>TerraformInstaller@1</code></td>
+</tr>
+</tbody>
+</table>
+<div class="admonition warning">
+<p class="admonition-title">Required</p>
+<p>Without this extension, all pipelines will fail at the <strong>Install Terraform</strong> step. Install it from <strong>Organization Settings → Extensions → Browse Marketplace</strong>.</p>
+</div>
+<h3 id="3-ado-variable-groups">3. ADO Variable Groups<a class="headerlink" href="#3-ado-variable-groups" title="Permanent link">¶</a></h3>
+<p>Create the following Variable Groups under <strong>Project Settings → Pipelines → Library → + Variable Group</strong>. Mark all values as <strong>secret</strong> (lock icon).</p>
+<table>
+<thead>
+<tr>
+<th>Variable Group</th>
+<th>Used By Pipeline</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ocp-baremetal-secrets</code></td>
+<td>IPI Multi-Cluster Deployment</td>
+<td>Main deployment secrets (DC, DR, Mgmt)</td>
+</tr>
+<tr>
+<td><code>ocp-baremetal-upi-secrets</code></td>
+<td>UPI Deployment</td>
+<td>UPI main deployment secrets</td>
+</tr>
+<tr>
+<td><code>ocp-baremetal-day2-secrets</code></td>
+<td>IPI Day 2 Operations</td>
+<td>Day 2 operator secrets (LDAP, ArgoCD, OADP, etc.)</td>
+</tr>
+<tr>
+<td><code>ocp-upi-day2-secrets</code></td>
+<td>UPI Day 2 Operations</td>
+<td>UPI Day 2 operator secrets</td>
+</tr>
+<tr>
+<td><code>ocp-baremetal-acm-secrets</code></td>
+<td>ACM Cluster Import</td>
+<td>ACM import kubeconfig paths + secrets</td>
+</tr>
+<tr>
+<td><code>ocp-baremetal-acm-dr-secrets</code></td>
+<td>ACM DR Failover/Failback</td>
+<td>DR policy + failover secrets</td>
+</tr>
+<tr>
+<td><code>ocp-virtualization-secrets</code></td>
+<td>OpenShift Virtualization (CNV)</td>
+<td>CNV-specific secrets</td>
+</tr>
+<tr>
+<td><code>ocp-mtc-secrets</code></td>
+<td>MTC Migration</td>
+<td>Migration Toolkit for Containers secrets</td>
+</tr>
+<tr>
+<td><code>ocp-vm-migration-secrets</code></td>
+<td>VM Migration</td>
+<td>Source provider credentials for VM migration</td>
+</tr>
+</tbody>
+</table>
+<h3 id="4-secret-variables-reference">4. Secret Variables Reference<a class="headerlink" href="#4-secret-variables-reference" title="Permanent link">¶</a></h3>
+<p>The following secrets must be populated across the variable groups above. The <strong>How to Obtain</strong> column provides detailed instructions for sourcing each value.</p>
+<h4 id="quay-gpu-secrets">Quay &amp; GPU Secrets<a class="headerlink" href="#quay-gpu-secrets" title="Permanent link">¶</a></h4>
+<table>
+<thead>
+<tr>
+<th>Secret Variable</th>
+<th>Variable Group(s)</th>
+<th>Description</th>
+<th>How to Obtain</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>quay-admin-password</code></td>
+<td><code>ocp-baremetal-secrets</code>, <code>ocp-baremetal-upi-secrets</code></td>
+<td>Quay mirror registry admin password</td>
+<td>Set during Quay mirror registry installation. If using the bundled Quay mirror, this is the password you configured when running <code>quay-mirror-setup.sh</code> on the bastion host. Retrieve from the bastion at <code>/opt/quay-mirror/config/quay-admin-password</code>. For an existing enterprise Quay instance, obtain from the Quay admin team.</td>
+</tr>
+<tr>
+<td><code>ngc-api-key</code></td>
+<td><code>ocp-baremetal-secrets</code>, <code>ocp-baremetal-upi-secrets</code></td>
+<td>NVIDIA NGC API key for GPU operators</td>
+<td>Generate from the <a href="https://ngc.nvidia.com/">NVIDIA NGC Portal</a>. Log in → navigate to <strong>Setup → API Key → Generate API Key</strong>. This key is required to pull GPU operator images and AI model containers from the NGC registry. Store it immediately — NVIDIA only shows it once.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="submariner-odf-dr-secrets">Submariner &amp; ODF DR Secrets<a class="headerlink" href="#submariner-odf-dr-secrets" title="Permanent link">¶</a></h4>
+<table>
+<thead>
+<tr>
+<th>Secret Variable</th>
+<th>Variable Group(s)</th>
+<th>Description</th>
+<th>How to Obtain</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>submariner-broker-token</code></td>
+<td><code>ocp-baremetal-secrets</code></td>
+<td>Submariner broker ServiceAccount token</td>
+<td>After deploying the Submariner broker on the DC Primary cluster, extract the token: <code>oc -n submariner-k8s-broker get secret -o jsonpath='{.items[?(@.metadata.annotations.kubernetes\.io/service-account\.name=="submariner-k8s-broker-client")].data.token}' \| base64 -d</code>. This token allows the DR cluster to register with the broker for cross-cluster networking.</td>
+</tr>
+<tr>
+<td><code>odf-dr-s3-access-key</code></td>
+<td><code>ocp-baremetal-secrets</code>, <code>ocp-baremetal-upi-secrets</code></td>
+<td>S3 access key for ODF DR metadata</td>
+<td>Create a dedicated S3 bucket (e.g., <code>odf-dr-metadata</code>) on your S3-compatible object store (MinIO, AWS S3, or Ceph RGW). Generate an access key pair with read/write permissions to this bucket. For MinIO: <code>mc admin user svcacct add myminio odf-dr-user</code>. For AWS: create an IAM user with <code>s3:PutObject</code>, <code>s3:GetObject</code>, <code>s3:ListBucket</code> permissions on the DR metadata bucket.</td>
+</tr>
+<tr>
+<td><code>odf-dr-s3-secret-key</code></td>
+<td><code>ocp-baremetal-secrets</code>, <code>ocp-baremetal-upi-secrets</code></td>
+<td>S3 secret key for ODF DR metadata</td>
+<td>The secret key counterpart generated alongside <code>odf-dr-s3-access-key</code> above. For MinIO, it is returned when creating the service account. For AWS, it is shown once when creating the IAM access key — download the CSV immediately.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="acs-acm-secrets">ACS &amp; ACM Secrets<a class="headerlink" href="#acs-acm-secrets" title="Permanent link">¶</a></h4>
+<table>
+<thead>
+<tr>
+<th>Secret Variable</th>
+<th>Variable Group(s)</th>
+<th>Description</th>
+<th>How to Obtain</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>acs-central-admin-password</code></td>
+<td><code>ocp-baremetal-secrets</code></td>
+<td>ACS Central initial admin password</td>
+<td>Choose a strong password (16+ chars, mixed case, numbers, special chars). This becomes the <code>admin</code> user password for the ACS Central console on the Management DC cluster. If ACS Central is already deployed, retrieve it: <code>oc -n stackrox get secret central-htpasswd -o jsonpath='{.data.password}' \| base64 -d</code>.</td>
+</tr>
+<tr>
+<td><code>acm-s3-access-key</code></td>
+<td><code>ocp-baremetal-secrets</code></td>
+<td>S3 access key for ACM Observability</td>
+<td>Create a dedicated S3 bucket (e.g., <code>acm-observability</code>) for ACM multi-cluster observability metrics storage. Generate an S3 access key with read/write permissions. For MinIO: <code>mc admin user svcacct add myminio acm-obs-user</code>. For AWS: create an IAM user with S3 permissions scoped to the observability bucket.</td>
+</tr>
+<tr>
+<td><code>acm-s3-secret-key</code></td>
+<td><code>ocp-baremetal-secrets</code></td>
+<td>S3 secret key for ACM Observability</td>
+<td>The secret key counterpart generated alongside <code>acm-s3-access-key</code>. Stored in the same credential pair from your S3 provider.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="ldap-authentication-secrets">LDAP &amp; Authentication Secrets<a class="headerlink" href="#ldap-authentication-secrets" title="Permanent link">¶</a></h4>
+<table>
+<thead>
+<tr>
+<th>Secret Variable</th>
+<th>Variable Group(s)</th>
+<th>Description</th>
+<th>How to Obtain</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ldap-bind-password</code></td>
+<td><code>ocp-baremetal-day2-secrets</code>, <code>ocp-upi-day2-secrets</code></td>
+<td>LDAP bind password for OAuth</td>
+<td>Obtain from your organization's Active Directory / LDAP administrator. This is the password for the LDAP bind DN (service account) configured in <code>ldap_bind_dn</code> variable (e.g., <code>cn=ocp-ldap-bind,ou=ServiceAccounts,dc=corp,dc=example,dc=com</code>). The bind account needs <strong>read-only</strong> access to search user/group entries in the directory.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="log-forwarding-backup-s3-secrets">Log Forwarding &amp; Backup (S3) Secrets<a class="headerlink" href="#log-forwarding-backup-s3-secrets" title="Permanent link">¶</a></h4>
+<table>
+<thead>
+<tr>
+<th>Secret Variable</th>
+<th>Variable Group(s)</th>
+<th>Description</th>
+<th>How to Obtain</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>log-s3-access-key</code></td>
+<td><code>ocp-baremetal-day2-secrets</code>, <code>ocp-upi-day2-secrets</code></td>
+<td>S3 access key for log forwarding</td>
+<td>Create an S3 bucket for centralized log storage (e.g., <code>ocp-cluster-logs</code>). Generate S3 credentials with <code>s3:PutObject</code> and <code>s3:GetObject</code> permissions. This is used by the ClusterLogForwarder to ship logs from all clusters to the S3 endpoint.</td>
+</tr>
+<tr>
+<td><code>log-s3-secret-key</code></td>
+<td><code>ocp-baremetal-day2-secrets</code>, <code>ocp-upi-day2-secrets</code></td>
+<td>S3 secret key for log forwarding</td>
+<td>The secret key counterpart from the same S3 credential pair created for log forwarding.</td>
+</tr>
+<tr>
+<td><code>oadp-s3-access-key</code></td>
+<td><code>ocp-baremetal-day2-secrets</code>, <code>ocp-upi-day2-secrets</code></td>
+<td>S3 access key for OADP backups</td>
+<td>Create a dedicated S3 bucket for OADP/Velero backups (e.g., <code>ocp-oadp-backups</code>). Generate S3 credentials with full read/write access (<code>s3:*</code> on the bucket). For MinIO: <code>mc admin user svcacct add myminio oadp-user</code>. OADP uses this to store etcd snapshots, PV snapshots, and application backup metadata.</td>
+</tr>
+<tr>
+<td><code>oadp-s3-secret-key</code></td>
+<td><code>ocp-baremetal-day2-secrets</code>, <code>ocp-upi-day2-secrets</code></td>
+<td>S3 secret key for OADP backups</td>
+<td>The secret key counterpart from the OADP S3 credential pair.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="argocd-pipelines-as-code-secrets">ArgoCD &amp; Pipelines-as-Code Secrets<a class="headerlink" href="#argocd-pipelines-as-code-secrets" title="Permanent link">¶</a></h4>
+<table>
+<thead>
+<tr>
+<th>Secret Variable</th>
+<th>Variable Group(s)</th>
+<th>Description</th>
+<th>How to Obtain</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>argocd-repo-token</code></td>
+<td><code>ocp-baremetal-day2-secrets</code>, <code>ocp-upi-day2-secrets</code></td>
+<td>Git token for ArgoCD repo access</td>
+<td>Generate a Personal Access Token (PAT) from your Git provider (GitHub, GitLab, Azure DevOps) with <strong>read</strong> access to the repositories ArgoCD will sync. For GitHub: <strong>Settings → Developer Settings → Personal Access Tokens → Fine-grained → Repository access (read)</strong>. For Azure DevOps: <strong>User Settings → Personal Access Tokens → Code (Read)</strong>. Scope it to only the repos ArgoCD needs.</td>
+</tr>
+<tr>
+<td><code>pac-webhook-secret</code></td>
+<td><code>ocp-baremetal-day2-secrets</code>, <code>ocp-upi-day2-secrets</code></td>
+<td>Pipelines-as-Code webhook secret</td>
+<td>Generate a random secret string: <code>openssl rand -hex 32</code>. This is configured as the webhook secret in your Git provider when setting up the Pipelines-as-Code webhook. In GitHub: <strong>Repo → Settings → Webhooks → Add Webhook → Secret field</strong>. Must match the value stored in this ADO variable.</td>
+</tr>
+<tr>
+<td><code>pac-webhook-shared-secret</code></td>
+<td><code>ocp-baremetal-day2-secrets</code>, <code>ocp-upi-day2-secrets</code></td>
+<td>Pipelines-as-Code shared secret</td>
+<td>Generate a separate random string: <code>openssl rand -hex 32</code>. Used as a shared secret between the Pipelines-as-Code controller and the Git provider for payload validation. This is a second layer of verification beyond the webhook secret.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="acm-dr-secrets">ACM DR Secrets<a class="headerlink" href="#acm-dr-secrets" title="Permanent link">¶</a></h4>
+<table>
+<thead>
+<tr>
+<th>Secret Variable</th>
+<th>Variable Group(s)</th>
+<th>Description</th>
+<th>How to Obtain</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>channel-git-token</code></td>
+<td><code>ocp-baremetal-acm-dr-secrets</code></td>
+<td>Git token for ACM application channels</td>
+<td>Generate a PAT from your Git provider with <strong>read</strong> access to the repositories used as ACM application channels. ACM uses this token to pull application manifests from Git for deploying/relocating workloads during DR failover/failback. Same process as <code>argocd-repo-token</code> but scoped to the ACM channel repos.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="mtc-migration-secrets">MTC Migration Secrets<a class="headerlink" href="#mtc-migration-secrets" title="Permanent link">¶</a></h4>
+<table>
+<thead>
+<tr>
+<th>Secret Variable</th>
+<th>Variable Group(s)</th>
+<th>Description</th>
+<th>How to Obtain</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>mtc-replication-repository-access-key</code></td>
+<td><code>ocp-mtc-secrets</code></td>
+<td>S3 access key for MTC replication</td>
+<td>Create an S3 bucket for MTC migration data (e.g., <code>mtc-replication</code>). Generate S3 credentials with full read/write permissions. MTC uses this bucket as an intermediary to transfer PV data and Kubernetes resource manifests between source and target clusters during migration.</td>
+</tr>
+<tr>
+<td><code>mtc-replication-repository-secret-key</code></td>
+<td><code>ocp-mtc-secrets</code></td>
+<td>S3 secret key for MTC replication</td>
+<td>The secret key counterpart from the MTC S3 credential pair.</td>
+</tr>
+<tr>
+<td><code>mtc-source-cluster-sa-token</code></td>
+<td><code>ocp-mtc-secrets</code></td>
+<td>Source cluster SA token for MTC</td>
+<td>On the <strong>source</strong> cluster (the cluster you are migrating workloads <strong>from</strong>), create the MTC service account and extract its token: <code>oc -n openshift-migration create sa migration-controller</code> then <code>oc -n openshift-migration sa get-token migration-controller</code>. This grants MTC on the target cluster API access to the source cluster for reading namespaces, PVs, and workload resources.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="vm-migration-secrets">VM Migration Secrets<a class="headerlink" href="#vm-migration-secrets" title="Permanent link">¶</a></h4>
+<table>
+<thead>
+<tr>
+<th>Secret Variable</th>
+<th>Variable Group(s)</th>
+<th>Description</th>
+<th>How to Obtain</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>source-provider-username</code></td>
+<td><code>ocp-vm-migration-secrets</code></td>
+<td>Source hypervisor username</td>
+<td>The administrative username for the source virtualization platform (VMware vCenter, RHV, or oVirt). For <strong>VMware</strong>: a vCenter user with at least <code>Read-only</code> role at the datacenter level (e.g., <code>ocp-migration@vsphere.local</code>). For <strong>RHV/oVirt</strong>: a user in the <code>ovirt-administrator</code> role. Obtain from your virtualization admin team.</td>
+</tr>
+<tr>
+<td><code>source-provider-password</code></td>
+<td><code>ocp-vm-migration-secrets</code></td>
+<td>Source hypervisor password</td>
+<td>The password for the source provider username above. For VMware vCenter, this is the vCenter SSO password. For RHV, the admin password from the engine setup.</td>
+</tr>
+<tr>
+<td><code>source-provider-thumbprint</code></td>
+<td><code>ocp-vm-migration-secrets</code></td>
+<td>Source hypervisor SSL thumbprint</td>
+<td>The SHA-256 SSL certificate thumbprint of the source hypervisor. For <strong>VMware vCenter</strong>: <code>echo \| openssl s_client -connect vcenter.example.com:443 2&gt;/dev/null \| openssl x509 -fingerprint -sha256 -noout \| sed 's/://g' \| cut -d= -f2</code>. For <strong>RHV</strong>: <code>echo \| openssl s_client -connect rhv-engine.example.com:443 2&gt;/dev/null \| openssl x509 -fingerprint -sha256 -noout \| sed 's/://g' \| cut -d= -f2</code>. This is used by MTV (Migration Toolkit for Virtualization) to validate the TLS connection to the source provider.</td>
+</tr>
+</tbody>
+</table>
 <h2 id="pipeline-parameters">Pipeline Parameters<a class="headerlink" href="#pipeline-parameters" title="Permanent link">¶</a></h2>
 <p><a class="glightbox" data-type="image" data-width="auto" data-height="auto" href="../../diagrams/pipeline/02-ipi-pipeline-parameters.svg" data-desc-position="bottom"><img alt="IPI Pipeline Parameters" class="drawio-diagram" src="../../diagrams/pipeline/02-ipi-pipeline-parameters.svg"></a></p>
 <details class="note" open="open">
 <summary>Draw.io Source: IPI Pipeline Parameters</summary>
 <p><a class="md-button" href="../../diagrams/pipeline/02-ipi-pipeline-parameters.drawio"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M5 20h14v-2H5m14-9h-4V3H9v6H5l7 7z"></path></svg></span> Download .drawio file</a> — Open in <a href="https://app.diagrams.net">draw.io</a> for interactive editing.</p>
-<p></p><details>
-<summary>View original Mermaid source</summary><p></p>
-<p>```mermaid</p>
 </details>
-<p>graph TD
-    subgraph PARAMS["Pipeline Parameters"]
-        P1["<b>deploymentScope</b><br>Which clusters to deploy"]
-        P2["<b>enableSubmariner</b><br>Cross-cluster networking"]
-        P3["<b>enableOdfReplication</b><br>Storage DR"]
-        P4["<b>odfDrMode</b><br>Async / Sync"]
-        P5["<b>terraformAction</b><br>plan / apply / destroy"]
-    end</p>
-<div class="highlight"><pre><span></span><code>style PARAMS fill:#fff3e0,stroke:#ef6c00
-</code></pre></div>
-<p>```
-
-    </p></details>
-
-<p></p>
 <h3 id="deployment-scope-options">Deployment Scope Options<a class="headerlink" href="#deployment-scope-options" title="Permanent link">¶</a></h3>
-<p><a class="glightbox" data-type="image" data-width="auto" data-height="auto" href="../../diagrams/pipeline/16-ipi-pipeline-scope.svg" data-desc-position="bottom"><img alt="IPI Pipeline Scope Selection" class="drawio-diagram" src="../../diagrams/pipeline/16-ipi-pipeline-scope.svg"></a>
-</p>
+<p><a class="glightbox" data-type="image" data-width="auto" data-height="auto" href="../../diagrams/pipeline/16-ipi-pipeline-scope.svg" data-desc-position="bottom"><img alt="IPI Pipeline Scope Selection" class="drawio-diagram" src="../../diagrams/pipeline/16-ipi-pipeline-scope.svg"></a></p>
 <details class="note" open="open">
 <summary>Draw.io Source: IPI Pipeline Scope Selection</summary>
 <p><a class="md-button" href="../../diagrams/pipeline/16-ipi-pipeline-scope.drawio"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M5 20h14v-2H5m14-9h-4V3H9v6H5l7 7z"></path></svg></span> Download .drawio file</a> — Open in <a href="https://app.diagrams.net">draw.io</a> for interactive editing.</p>
-<p></p><details>
-<summary>View original Mermaid source</summary><p></p>
-<p>```mermaid</p>
 </details>
-<p>graph LR
-    subgraph SCOPES["Deployment Scope Selection"]
-        direction TB
-        S1["<b>dc-only</b><br>DC Primary workload"]
-        S2["<b>dr-only</b><br>DR Secondary workload"]
-        S3["<b>dc-and-dr</b><br>Both workload clusters"]
-        S4["<b>mgmt-dc-only</b><br>Management DC"]
-        S5["<b>mgmt-dr-only</b><br>Management DR"]
-        S6["<b>mgmt-clusters</b><br>Both management clusters"]
-        S7["<b>all-dc</b><br>DC Primary + Mgmt DC"]
-        S8["<b>all-dr</b><br>DR Secondary + Mgmt DR"]
-        S9["<b>all</b><br>Everything"]
-    end
-
-    style SCOPES fill:#e3f2fd,stroke:#1565c0
-```</p>
-<div class="highlight"><pre><span></span><code>&lt;/details&gt;
-</code></pre></div>
 <table>
 <thead>
 <tr>
@@ -4571,66 +5524,14 @@
 <details class="note" open="open">
 <summary>Draw.io Source: IPI Pipeline Stage Execution</summary>
 <p><a class="md-button" href="../../diagrams/pipeline/01-ipi-pipeline-stages.drawio"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M5 20h14v-2H5m14-9h-4V3H9v6H5l7 7z"></path></svg></span> Download .drawio file</a> — Open in <a href="https://app.diagrams.net">draw.io</a> for interactive editing.</p>
-<p></p><details>
-<summary>View original Mermaid source</summary><p></p>
-<p>```mermaid</p>
 </details>
-<p>graph TB
-    subgraph FULL["Deployment Scope: all"]
-        direction TB
-        S1["<b>Stage 1</b><br>DC Primary<br><i>openshiftbaremetal/</i>"]
-        S2["<b>Stage 2</b><br>DR Secondary<br><i>openshiftbaremetal-dr/</i>"]
-        S3["<b>Stage 3</b><br>Mgmt DC<br><i>mgmt-dc/</i>"]
-        S4["<b>Stage 4</b><br>Mgmt DR<br><i>mgmt-dr/</i>"]
-        S5["<b>Stage 5</b><br>Summary"]</p>
-<div class="highlight"><pre><span></span><code>    S1 --&gt; S2
-    S2 --&gt; S3
-    S3 --&gt; S4
-    S4 --&gt; S5
-end
-
-subgraph DC_AND_DR["Scope: dc-and-dr"]
-    D1["DC Primary"] --&gt; D2["DR Secondary"]
-end
-
-subgraph MGMT_ONLY["Scope: mgmt-clusters"]
-    M1["Mgmt DC"] --&gt; M2["Mgmt DR"]
-end
-
-style FULL fill:#e8f5e9,stroke:#2e7d32
-style DC_AND_DR fill:#e3f2fd,stroke:#1565c0
-style MGMT_ONLY fill:#fff3e0,stroke:#ef6c00
-</code></pre></div>
-<p>```
-
-    </p></details>
-
-<p></p>
 <h2 id="how-each-stage-works">How Each Stage Works<a class="headerlink" href="#how-each-stage-works" title="Permanent link">¶</a></h2>
 <h3 id="stage-1-dc-primary">Stage 1 — DC Primary<a class="headerlink" href="#stage-1-dc-primary" title="Permanent link">¶</a></h3>
-<p><a class="glightbox" data-type="image" data-width="auto" data-height="auto" href="../../diagrams/pipeline/03-post-deployment-topology.svg" data-desc-position="bottom"><img alt="Post-Deployment Topology" class="drawio-diagram" src="../../diagrams/pipeline/03-post-deployment-topology.svg"></a>
-</p>
+<p><a class="glightbox" data-type="image" data-width="auto" data-height="auto" href="../../diagrams/pipeline/03-post-deployment-topology.svg" data-desc-position="bottom"><img alt="Post-Deployment Topology" class="drawio-diagram" src="../../diagrams/pipeline/03-post-deployment-topology.svg"></a></p>
 <details class="note" open="open">
 <summary>Draw.io Source: Post-Deployment Topology</summary>
 <p><a class="md-button" href="../../diagrams/pipeline/03-post-deployment-topology.drawio"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M5 20h14v-2H5m14-9h-4V3H9v6H5l7 7z"></path></svg></span> Download .drawio file</a> — Open in <a href="https://app.diagrams.net">draw.io</a> for interactive editing.</p>
-<p></p><details>
-<summary>View original Mermaid source</summary><p></p>
-<p>```mermaid</p>
 </details>
-<p>graph LR
-    INIT1["terraform init"] → PLAN1["terraform plan/apply"]
-    PLAN1 → DC_DONE["DC Primary Ready"]
-
-    subgraph OVERRIDES["Pipeline Overrides"]
-        SUB1["enable_submariner<br>(if selected)"]
-    end
-
-    OVERRIDES -.-&gt; PLAN1
-
-    style OVERRIDES fill:#fff3e0,stroke:#ef6c00
-```</p>
-<div class="highlight"><pre><span></span><code>&lt;/details&gt;
-</code></pre></div>
 <ul>
 <li>Runs in <code>openshiftbaremetal/</code></li>
 <li>Injects <strong><code>enable_submariner=true</code></strong> via <code>-var</code> if Submariner is selected</li>
@@ -4641,122 +5542,31 @@ style MGMT_ONLY fill:#fff3e0,stroke:#ef6c00
 <details class="note" open="open">
 <summary>Draw.io Source: Pipeline Secrets Flow</summary>
 <p><a class="md-button" href="../../diagrams/pipeline/17-pipeline-secrets-flow.drawio"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M5 20h14v-2H5m14-9h-4V3H9v6H5l7 7z"></path></svg></span> Download .drawio file</a> — Open in <a href="https://app.diagrams.net">draw.io</a> for interactive editing.</p>
-<p></p><details>
-<summary>View original Mermaid source</summary><p></p>
-<p>```mermaid</p>
 </details>
-<p>graph LR
-    INIT2["terraform init"] → PLAN2["terraform plan/apply"]
-    PLAN2 → DR_DONE["DR Secondary Ready"]</p>
-<div class="highlight"><pre><span></span><code>subgraph OVERRIDES2["Pipeline Overrides"]
-    SUB2["enable_submariner&lt;br/&gt;(if selected)"]
-    ODR2["enable_odf_dr&lt;br/&gt;(if selected)"]
-    MODE2["odf_dr_mode&lt;br/&gt;regional-dr / metro-dr"]
-end
-
-OVERRIDES2 -.-&gt; PLAN2
-
-style OVERRIDES2 fill:#fff3e0,stroke:#ef6c00
-</code></pre></div>
-<p><code>``
-
-    &lt;/details&gt;
-
-
-- Runs in</code>openshiftbaremetal-dr/<code>- Depends on **Stage 1** (when scope is</code>dc-and-dr<code>or</code>all<code>)
-- Injects Submariner agent + ODF DR settings
-- Additional secrets:</code>submariner-broker-token<code>,</code>odf-dr-s3-access-key<code>,</code>odf-dr-s3-secret-key`
-</p>
+<ul>
+<li>Runs in <code>openshiftbaremetal-dr/</code></li>
+<li>Depends on <strong>Stage 1</strong> (when scope is <code>dc-and-dr</code> or <code>all</code>)</li>
+<li>Injects Submariner agent + ODF DR settings</li>
+<li>Additional secrets: <code>submariner-broker-token</code>, <code>odf-dr-s3-access-key</code>, <code>odf-dr-s3-secret-key</code></li>
+</ul>
 <h3 id="stage-3-management-dc">Stage 3 — Management DC<a class="headerlink" href="#stage-3-management-dc" title="Permanent link">¶</a></h3>
 <ul>
 <li>Runs in <code>mgmt-dc/</code></li>
 <li>Deploys ACM Hub, ACS Central, Quay Enterprise</li>
-<li>Secrets: <code>acs-central-admin-password</code>, <code>acm-s3-access-key</code>, <code>acm-s3-secret-key</code>
-</li>
+<li>Secrets: <code>acs-central-admin-password</code>, <code>acm-s3-access-key</code>, <code>acm-s3-secret-key</code></li>
 </ul>
 <h3 id="stage-4-management-dr">Stage 4 — Management DR<a class="headerlink" href="#stage-4-management-dr" title="Permanent link">¶</a></h3>
 <ul>
 <li>Runs in <code>mgmt-dr/</code></li>
 <li>Depends on <strong>Stage 3</strong> (when scope is <code>mgmt-clusters</code> or <code>all</code>)</li>
-<li>ACS connects to Central endpoint from Stage 3
-</li>
+<li>ACS connects to Central endpoint from Stage 3</li>
 </ul>
 <h2 id="post-deployment-cluster-topology">Post-Deployment Cluster Topology<a class="headerlink" href="#post-deployment-cluster-topology" title="Permanent link">¶</a></h2>
-<p>After the pipeline completes, this is the resulting cluster connectivity:
-
-<a class="glightbox" data-type="image" data-width="auto" data-height="auto" href="../diagrams/pipeline/19-ado-deploy-topology.svg" data-desc-position="bottom"><img src="../diagrams/pipeline/19-ado-deploy-topology.svg" alt="19-ado-deploy-topology" class="drawio-diagram"></a>
-
-</p><details><summary>📥 Download draw.io source</summary>
-
-<a href="../../diagrams/pipeline/19-ado-deploy-topology.drawio">⬇ 19-ado-deploy-topology.drawio</a>
-
-</details>
-
-<details><summary>📝 Original Mermaid source</summary>
-
-<code>mermaid
-graph TB
-    subgraph ADO["Azure DevOps Pipeline"]
-        PIPE["azure-pipelines.yml&lt;br/&gt;&lt;i&gt;terraform apply&lt;/i&gt;"]
-    end
-
-    PIPE --&gt;|"Stage 1"| DC
-    PIPE --&gt;|"Stage 2"| DR
-    PIPE --&gt;|"Stage 3"| MDC
-    PIPE --&gt;|"Stage 4"| MDR
-
-    subgraph DC_SITE["DC Site"]
-        subgraph DC["DC Primary (Workload)"]
-            DC_OCP["OCP 4.15 + OpenShift AI"]
-            DC_SUB["Submariner Broker"]
-            DC_ODF["ODF (RBD Source)"]
-        end
-        subgraph MDC["Mgmt DC"]
-            ACM_H["ACM Hub"]
-            ACS_C["ACS Central"]
-            QUAY_DC["Quay Enterprise"]
-        end
-    end
-
-    subgraph DR_SITE["DR Site"]
-        subgraph DR["DR Secondary (Workload)"]
-            DR_OCP["OCP 4.15 + OpenShift AI"]
-            DR_SUB["Submariner Agent"]
-            DR_ODF["ODF (RBD Target)"]
-        end
-        subgraph MDR["Mgmt DR"]
-            ACM_S["ACM Standby"]
-            ACS_S["ACS Sensor"]
-            QUAY_DR["Quay Enterprise"]
-        end
-    end
-
-    %% Submariner
-    DC_SUB &lt;--&gt;|"IPsec Tunnel&lt;br/&gt;UDP 4500"| DR_SUB
-
-    %% ODF replication
-    DC_ODF --&gt;|"RBD Mirroring&lt;br/&gt;TCP 6789"| DR_ODF
-
-    %% ACM management
-    ACM_H --&gt;|"Klusterlet&lt;br/&gt;TCP 6443"| DC_OCP
-    ACM_H --&gt;|"Klusterlet&lt;br/&gt;TCP 6443"| DR_OCP
-
-    %% ACS
-    ACS_S --&gt;|"gRPC :443"| ACS_C
-
-    %% Quay
-    QUAY_DC &lt;-.-&gt;|"Geo-Repl&lt;br/&gt;S3 :443"| QUAY_DR
-
-    %% Failover
-    ACM_H -.-&gt;|"Failover"| ACM_S
-
-    style ADO fill:#ef6c00,stroke:#e65100,color:#fff
-    style DC_SITE fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
-    style DR_SITE fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
-    style DC fill:#c8e6c9,stroke:#388e3c
-    style DR fill:#bbdefb,stroke:#1976d2
-    style MDC fill:#fff3e0,stroke:#ef6c00
-    style MDR fill:#fff3e0,stroke:#ef6c00</code><p></p>
+<p>After the pipeline completes, this is the resulting cluster connectivity:</p>
+<p><a class="glightbox" data-type="image" data-width="auto" data-height="auto" href="../../diagrams/pipeline/19-ado-deploy-topology.svg" data-desc-position="bottom"><img alt="Ado Deploy Topology" class="drawio-diagram" src="../../diagrams/pipeline/19-ado-deploy-topology.svg"></a></p>
+<details class="note" open="open">
+<summary>Draw.io Source: Ado Deploy Topology</summary>
+<p><a class="md-button" href="../../diagrams/pipeline/19-ado-deploy-topology.drawio"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M5 20h14v-2H5m14-9h-4V3H9v6H5l7 7z"></path></svg></span> Download .drawio file</a> — Open in <a href="https://app.diagrams.net">draw.io</a> for interactive editing.</p>
 </details>
 <h2 id="ado-variable-group">ADO Variable Group<a class="headerlink" href="#ado-variable-group" title="Permanent link">¶</a></h2>
 <p>Create a Variable Group named <strong><code>ocp-baremetal-secrets</code></strong> in ADO with these secrets:</p>
@@ -4812,43 +5622,11 @@ graph TB
 </tbody>
 </table>
 <h2 id="example-full-deployment-run">Example: Full Deployment Run<a class="headerlink" href="#example-full-deployment-run" title="Permanent link">¶</a></h2>
-<p><a class="glightbox" data-type="image" data-width="auto" data-height="auto" href="../diagrams/pipeline/20-full-deployment-sequence.svg" data-desc-position="bottom"><img src="../diagrams/pipeline/20-full-deployment-sequence.svg" alt="20-full-deployment-sequence" class="drawio-diagram"></a></p>
-<details><summary>📥 Download draw.io source</summary>
-
-[⬇ 20-full-deployment-sequence.drawio](../diagrams/pipeline/20-full-deployment-sequence.drawio)
-
+<p><a class="glightbox" data-type="image" data-width="auto" data-height="auto" href="../../diagrams/pipeline/20-full-deployment-sequence.svg" data-desc-position="bottom"><img alt="Full Deployment Sequence" class="drawio-diagram" src="../../diagrams/pipeline/20-full-deployment-sequence.svg"></a></p>
+<details class="note" open="open">
+<summary>Draw.io Source: Full Deployment Sequence</summary>
+<p><a class="md-button" href="../../diagrams/pipeline/20-full-deployment-sequence.drawio"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M5 20h14v-2H5m14-9h-4V3H9v6H5l7 7z"></path></svg></span> Download .drawio file</a> — Open in <a href="https://app.diagrams.net">draw.io</a> for interactive editing.</p>
 </details>
-
-<details><summary>📝 Original Mermaid source</summary>
-
-<pre class="mermaid"><code>sequenceDiagram
-    participant USER as Engineer
-    participant ADO as Azure DevOps
-    participant S1 as Stage: DC Primary
-    participant S2 as Stage: DR Secondary
-    participant S3 as Stage: Mgmt DC
-    participant S4 as Stage: Mgmt DR
-
-    USER-&gt;&gt;ADO: Run Pipeline&lt;br/&gt;scope=all, submariner=true,&lt;br/&gt;odf_replication=true, action=plan
-
-    ADO-&gt;&gt;S1: terraform plan (DC Primary)
-    S1--&gt;&gt;ADO: Plan output ✅
-
-    ADO-&gt;&gt;S2: terraform plan (DR Secondary)
-    S2--&gt;&gt;ADO: Plan output ✅
-
-    ADO-&gt;&gt;S3: terraform plan (Mgmt DC)
-    S3--&gt;&gt;ADO: Plan output ✅
-
-    ADO-&gt;&gt;S4: terraform plan (Mgmt DR)
-    S4--&gt;&gt;ADO: Plan output ✅
-
-    Note over USER: Review all plans
-    USER-&gt;&gt;ADO: Re-run with action=apply
-    Note over ADO: Applies all 4 clusters sequentially</code></pre>
-
-</details>
-
 <h3 id="steps-in-ado-ui">Steps in ADO UI<a class="headerlink" href="#steps-in-ado-ui" title="Permanent link">¶</a></h3>
 <ol>
 <li>Navigate to <strong>Pipelines → OpenShift Multi-Cluster Deployment</strong></li>
@@ -4898,20 +5676,20 @@ graph TB
 </ol>
 <h2 id="pipeline-file">Pipeline File<a class="headerlink" href="#pipeline-file" title="Permanent link">¶</a></h2>
 <p>The pipeline definition is at the repository root:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>azure-pipelines.yml
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>azure-pipelines.yml
 </code></pre></div>
 <p>It triggers on changes to any of the four cluster folders:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="nt">trigger</span><span class="p">:</span>
-<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="w">  </span><span class="nt">branches</span><span class="p">:</span>
-<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="w">    </span><span class="nt">include</span><span class="p">:</span>
-<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">main</span>
-<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="w">  </span><span class="nt">paths</span><span class="p">:</span>
-<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="w">    </span><span class="nt">include</span><span class="p">:</span>
-<a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">openshiftbaremetal/**</span>
-<a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">openshiftbaremetal-dr/**</span>
-<a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mgmt-dc/**</span>
-<a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mgmt-dr/**</span>
-</code></pre></div></details></details></details>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="nt">trigger</span><span class="p">:</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="w">  </span><span class="nt">branches</span><span class="p">:</span>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">    </span><span class="nt">include</span><span class="p">:</span>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">main</span>
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="w">  </span><span class="nt">paths</span><span class="p">:</span>
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="w">    </span><span class="nt">include</span><span class="p">:</span>
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">openshiftbaremetal/**</span>
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">openshiftbaremetal-dr/**</span>
+<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mgmt-dc/**</span>
+<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mgmt-dr/**</span>
+</code></pre></div>
 
 
 

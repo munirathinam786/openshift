@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="app.diagrams.net" modified="2026-04-09" agent="" etag="" version="24.0.0" type="device">
+  <diagram id="agent-builder-architecture" name="Agent Builder Architecture">
+    <mxGraphModel dx="1800" dy="1200" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1200" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- Title -->
+        <mxCell id="title" value="&lt;b&gt;Kyndryl Agent Builder Factory — OpenShift Baremetal Architecture&lt;/b&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontSize=18;fontColor=#1a1a2e;" vertex="1" parent="1">
+          <mxGeometry x="300" y="20" width="700" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- User Layer -->
+        <mxCell id="user-layer" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e8f5e9;strokeColor=#2e7d32;dashed=1;" vertex="1" parent="1">
+          <mxGeometry x="40" y="80" width="1520" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="user-label" value="&lt;b&gt;Users &amp; Clients&lt;/b&gt;" style="text;html=1;fillColor=none;strokeColor=none;fontSize=12;fontColor=#2e7d32;" vertex="1" parent="1">
+          <mxGeometry x="50" y="85" width="150" height="25" as="geometry" />
+        </mxCell>
+        <mxCell id="user1" value="&lt;b&gt;Web Browser&lt;/b&gt;&lt;br/&gt;Agent Builder UI" style="shape=mxgraph.basic.layered_rect;dx=10;fillColor=#c8e6c9;strokeColor=#2e7d32;rounded=1;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="120" y="95" width="160" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="user2" value="&lt;b&gt;CLI&lt;/b&gt;&lt;br/&gt;Agent Builder CLI" style="shape=mxgraph.basic.layered_rect;dx=10;fillColor=#c8e6c9;strokeColor=#2e7d32;rounded=1;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="320" y="95" width="160" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="user3" value="&lt;b&gt;Chat Interface&lt;/b&gt;&lt;br/&gt;AskConsult" style="shape=mxgraph.basic.layered_rect;dx=10;fillColor=#c8e6c9;strokeColor=#2e7d32;rounded=1;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="520" y="95" width="160" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="user4" value="&lt;b&gt;A2A Clients&lt;/b&gt;&lt;br/&gt;Agent-to-Agent" style="shape=mxgraph.basic.layered_rect;dx=10;fillColor=#c8e6c9;strokeColor=#2e7d32;rounded=1;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="720" y="95" width="160" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="user5" value="&lt;b&gt;Temporal UI&lt;/b&gt;&lt;br/&gt;Workflow Monitor" style="shape=mxgraph.basic.layered_rect;dx=10;fillColor=#c8e6c9;strokeColor=#2e7d32;rounded=1;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="920" y="95" width="160" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- OpenShift Routes Layer -->
+        <mxCell id="route-layer" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff3e0;strokeColor=#ef6c00;dashed=1;" vertex="1" parent="1">
+          <mxGeometry x="40" y="190" width="1520" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="route-label" value="&lt;b&gt;OpenShift Routes (TLS Edge)&lt;/b&gt;" style="text;html=1;fillColor=none;strokeColor=none;fontSize=12;fontColor=#ef6c00;" vertex="1" parent="1">
+          <mxGeometry x="50" y="195" width="250" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="r1" value="ui.agent-builder.*" style="rounded=1;fillColor=#ffe0b2;strokeColor=#ef6c00;fontSize=9;" vertex="1" parent="1">
+          <mxGeometry x="100" y="215" width="130" height="25" as="geometry" />
+        </mxCell>
+        <mxCell id="r2" value="api.agent-builder.*" style="rounded=1;fillColor=#ffe0b2;strokeColor=#ef6c00;fontSize=9;" vertex="1" parent="1">
+          <mxGeometry x="250" y="215" width="130" height="25" as="geometry" />
+        </mxCell>
+        <mxCell id="r3" value="litellm.agent-builder.*" style="rounded=1;fillColor=#ffe0b2;strokeColor=#ef6c00;fontSize=9;" vertex="1" parent="1">
+          <mxGeometry x="400" y="215" width="140" height="25" as="geometry" />
+        </mxCell>
+        <mxCell id="r4" value="temporal.agent-builder.*" style="rounded=1;fillColor=#ffe0b2;strokeColor=#ef6c00;fontSize=9;" vertex="1" parent="1">
+          <mxGeometry x="560" y="215" width="150" height="25" as="geometry" />
+        </mxCell>
+        <mxCell id="r5" value="tools.agent-builder.*" style="rounded=1;fillColor=#ffe0b2;strokeColor=#ef6c00;fontSize=9;" vertex="1" parent="1">
+          <mxGeometry x="730" y="215" width="130" height="25" as="geometry" />
+        </mxCell>
+        <mxCell id="r6" value="a2a.agent-builder.*" style="rounded=1;fillColor=#ffe0b2;strokeColor=#ef6c00;fontSize=9;" vertex="1" parent="1">
+          <mxGeometry x="880" y="215" width="130" height="25" as="geometry" />
+        </mxCell>
+        <mxCell id="r7" value="registry.agent-builder.*" style="rounded=1;fillColor=#ffe0b2;strokeColor=#ef6c00;fontSize=9;" vertex="1" parent="1">
+          <mxGeometry x="1030" y="215" width="140" height="25" as="geometry" />
+        </mxCell>
+        <mxCell id="r8" value="deploy.agent-builder.*" style="rounded=1;fillColor=#ffe0b2;strokeColor=#ef6c00;fontSize=9;" vertex="1" parent="1">
+          <mxGeometry x="1190" y="215" width="140" height="25" as="geometry" />
+        </mxCell>
+
+        <!-- Application Services Layer -->
+        <mxCell id="app-layer" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e3f2fd;strokeColor=#1565c0;dashed=1;" vertex="1" parent="1">
+          <mxGeometry x="40" y="280" width="1520" height="180" as="geometry" />
+        </mxCell>
+        <mxCell id="app-label" value="&lt;b&gt;Application Services (Namespace: agent-builder)&lt;/b&gt;" style="text;html=1;fillColor=none;strokeColor=none;fontSize=12;fontColor=#1565c0;" vertex="1" parent="1">
+          <mxGeometry x="50" y="285" width="350" height="20" as="geometry" />
+        </mxCell>
+
+        <mxCell id="ui-svc" value="&lt;b&gt;Agent Builder UI&lt;/b&gt;&lt;br/&gt;React + Vite&lt;br/&gt;Port: 3000&lt;br/&gt;&lt;i&gt;2 replicas&lt;/i&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#bbdefb;strokeColor=#1565c0;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="60" y="310" width="150" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="api-svc" value="&lt;b&gt;Agent Builder API&lt;/b&gt;&lt;br/&gt;FastAPI + Uvicorn&lt;br/&gt;Port: 8000&lt;br/&gt;&lt;i&gt;2 replicas&lt;/i&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#bbdefb;strokeColor=#1565c0;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="230" y="310" width="160" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="tool-svc" value="&lt;b&gt;Tool Catalog&lt;/b&gt;&lt;br/&gt;MCP Server&lt;br/&gt;Port: 8090" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#bbdefb;strokeColor=#1565c0;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="410" y="310" width="140" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="a2a-svc" value="&lt;b&gt;A2A Gateway&lt;/b&gt;&lt;br/&gt;Agent-to-Agent&lt;br/&gt;Port: 8003" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#bbdefb;strokeColor=#1565c0;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="570" y="310" width="140" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="reg-svc" value="&lt;b&gt;Agent Registry&lt;/b&gt;&lt;br/&gt;Node.js/Express&lt;br/&gt;Port: 8002" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#bbdefb;strokeColor=#1565c0;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="730" y="310" width="140" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="deploy-svc" value="&lt;b&gt;Agent Deploy Svc&lt;/b&gt;&lt;br/&gt;FastAPI&lt;br/&gt;Port: 8001" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#bbdefb;strokeColor=#1565c0;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="890" y="310" width="140" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="workers-svc" value="&lt;b&gt;Temporal Workers&lt;/b&gt;&lt;br/&gt;Python&lt;br/&gt;Port: 8000 (health)&lt;br/&gt;&lt;i&gt;2 replicas&lt;/i&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#bbdefb;strokeColor=#1565c0;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="1050" y="310" width="160" height="70" as="geometry" />
+        </mxCell>
+
+        <!-- Deployed Agents -->
+        <mxCell id="agents-box" value="&lt;b&gt;Deployed Agents&lt;/b&gt;&lt;br/&gt;&lt;i&gt;(Runtime Pods)&lt;/i&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#c5cae9;strokeColor=#283593;fontSize=10;dashed=1;" vertex="1" parent="1">
+          <mxGeometry x="1250" y="310" width="290" height="70" as="geometry" />
+        </mxCell>
+
+        <!-- Orchestration + LLM Layer -->
+        <mxCell id="orch-layer" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f3e5f5;strokeColor=#7b1fa2;dashed=1;" vertex="1" parent="1">
+          <mxGeometry x="40" y="490" width="1520" height="150" as="geometry" />
+        </mxCell>
+        <mxCell id="orch-label" value="&lt;b&gt;Orchestration &amp; LLM Layer&lt;/b&gt;" style="text;html=1;fillColor=none;strokeColor=none;fontSize=12;fontColor=#7b1fa2;" vertex="1" parent="1">
+          <mxGeometry x="50" y="495" width="250" height="20" as="geometry" />
+        </mxCell>
+
+        <mxCell id="temporal-svc" value="&lt;b&gt;Temporal Server&lt;/b&gt;&lt;br/&gt;v1.28.1&lt;br/&gt;Port: 7233" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1bee7;strokeColor=#7b1fa2;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="60" y="520" width="160" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="temporal-ui-svc" value="&lt;b&gt;Temporal UI&lt;/b&gt;&lt;br/&gt;v2.39.0&lt;br/&gt;Port: 8080" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1bee7;strokeColor=#7b1fa2;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="240" y="520" width="140" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="litellm-svc" value="&lt;b&gt;LiteLLM Proxy&lt;/b&gt;&lt;br/&gt;v1.75.5&lt;br/&gt;Port: 4000&lt;br/&gt;&lt;i&gt;Multi-model Gateway&lt;/i&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1bee7;strokeColor=#7b1fa2;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="420" y="520" width="170" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="ollama-svc" value="&lt;b&gt;Ollama&lt;/b&gt;&lt;br/&gt;Local LLM (Llama3)&lt;br/&gt;Port: 11434&lt;br/&gt;&lt;i&gt;GPU Optional&lt;/i&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f48fb1;strokeColor=#c2185b;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="620" y="520" width="160" height="70" as="geometry" />
+        </mxCell>
+
+        <!-- External LLM -->
+        <mxCell id="ext-llm-box" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fce4ec;strokeColor=#c62828;dashed=1;" vertex="1" parent="1">
+          <mxGeometry x="830" y="510" width="420" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="ext-llm-label" value="&lt;b&gt;External LLM Providers (via LiteLLM)&lt;/b&gt;" style="text;html=1;fillColor=none;strokeColor=none;fontSize=11;fontColor=#c62828;" vertex="1" parent="1">
+          <mxGeometry x="840" y="515" width="300" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="openai" value="&lt;b&gt;OpenAI&lt;/b&gt;&lt;br/&gt;GPT-4o" style="rounded=1;fillColor=#ffcdd2;strokeColor=#c62828;fontSize=9;" vertex="1" parent="1">
+          <mxGeometry x="845" y="540" width="90" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="anthropic" value="&lt;b&gt;Anthropic&lt;/b&gt;&lt;br/&gt;Claude 3" style="rounded=1;fillColor=#ffcdd2;strokeColor=#c62828;fontSize=9;" vertex="1" parent="1">
+          <mxGeometry x="945" y="540" width="90" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="azure-oai" value="&lt;b&gt;Azure OpenAI&lt;/b&gt;&lt;br/&gt;GPT-4o" style="rounded=1;fillColor=#ffcdd2;strokeColor=#c62828;fontSize=9;" vertex="1" parent="1">
+          <mxGeometry x="1045" y="540" width="90" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="laptop-llm" value="&lt;b&gt;Laptop Ollama&lt;/b&gt;&lt;br/&gt;Llama3/Mistral&lt;br/&gt;&lt;i&gt;(Your Workstation)&lt;/i&gt;" style="rounded=1;fillColor=#ffcdd2;strokeColor=#c62828;fontSize=9;" vertex="1" parent="1">
+          <mxGeometry x="1145" y="540" width="100" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- Data Layer -->
+        <mxCell id="data-layer" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff8e1;strokeColor=#f57f17;dashed=1;" vertex="1" parent="1">
+          <mxGeometry x="40" y="670" width="1520" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="data-label" value="&lt;b&gt;Data &amp; Persistence Layer (PVCs on ODF/Ceph)&lt;/b&gt;" style="text;html=1;fillColor=none;strokeColor=none;fontSize=12;fontColor=#f57f17;" vertex="1" parent="1">
+          <mxGeometry x="50" y="675" width="400" height="20" as="geometry" />
+        </mxCell>
+
+        <mxCell id="pg-svc" value="&lt;b&gt;PostgreSQL 15&lt;/b&gt;&lt;br/&gt;RHEL9 Image&lt;br/&gt;Port: 5432&lt;br/&gt;&lt;i&gt;Temporal + LiteLLM + Registry&lt;/i&gt;" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=8;fillColor=#fff9c4;strokeColor=#f57f17;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="120" y="700" width="200" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="mongo-svc" value="&lt;b&gt;MongoDB 6&lt;/b&gt;&lt;br/&gt;RHEL9 Image&lt;br/&gt;Port: 27017&lt;br/&gt;&lt;i&gt;Agent Metadata + Workflows&lt;/i&gt;" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=8;fillColor=#fff9c4;strokeColor=#f57f17;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="420" y="700" width="200" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="redis-svc" value="&lt;b&gt;Redis 7&lt;/b&gt;&lt;br/&gt;RHEL9 Image&lt;br/&gt;Port: 6379&lt;br/&gt;&lt;i&gt;LLM Cache + Semantic Cache&lt;/i&gt;" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=8;fillColor=#fff9c4;strokeColor=#f57f17;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="720" y="700" width="200" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="ollama-pvc" value="&lt;b&gt;Ollama Models PVC&lt;/b&gt;&lt;br/&gt;100Gi&lt;br/&gt;&lt;i&gt;Llama3 Model Storage&lt;/i&gt;" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=8;fillColor=#fff9c4;strokeColor=#f57f17;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="1020" y="700" width="180" height="80" as="geometry" />
+        </mxCell>
+
+        <!-- Infrastructure Note -->
+        <mxCell id="infra-note" value="&lt;b&gt;OpenShift Baremetal Cluster&lt;/b&gt;&lt;br/&gt;OCP 4.15+ | ODF Storage | GPU Operator (optional)&lt;br/&gt;Terraform IaC via null_resource + SSH remote-exec" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#efebe9;strokeColor=#4e342e;fontSize=10;dashed=1;" vertex="1" parent="1">
+          <mxGeometry x="40" y="820" width="1520" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- Key Connections -->
+        <mxCell id="e1" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#1565c0;" edge="1" parent="1" source="ui-svc" target="api-svc">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e2" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#7b1fa2;" edge="1" parent="1" source="api-svc" target="temporal-svc">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e3" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#7b1fa2;" edge="1" parent="1" source="api-svc" target="litellm-svc">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e4" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#c2185b;" edge="1" parent="1" source="litellm-svc" target="ollama-svc">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e5" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#f57f17;" edge="1" parent="1" source="temporal-svc" target="pg-svc">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e6" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#f57f17;" edge="1" parent="1" source="api-svc" target="mongo-svc">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e7" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#f57f17;" edge="1" parent="1" source="litellm-svc" target="redis-svc">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e8" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#7b1fa2;" edge="1" parent="1" source="workers-svc" target="temporal-svc">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e9" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#1565c0;" edge="1" parent="1" source="deploy-svc" target="agents-box">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e10" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#1565c0;" edge="1" parent="1" source="a2a-svc" target="reg-svc">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

@@ -68,7 +68,10 @@ nav:
     - DR Secondary: "clusters/terraform-dr-secondary.md"
     - Management DC: "clusters/terraform-mgmt-dc.md"
     - Management DR: "clusters/terraform-mgmt-dr.md"
-    - Agent Builder Factory: "clusters/terraform-agent-builder.md"
+  - Agent Builder Factory:
+    - Deployment Guide: "clusters/terraform-agent-builder.md"
+    - Pipeline (Day 1): "pipeline/terraform-agent-builder-pipeline.md"
+    - Pipeline (Day 2): "pipeline/terraform-agent-builder-pipeline-day2.md"
   - Draw.io Diagrams: "diagrams/index.md"
   - CI/CD Pipeline:
     - ADO Pipeline (IPI — Day 1): "pipeline/terraform-ado-pipeline.md"
@@ -80,8 +83,7 @@ nav:
     - OpenShift Virtualization Pipeline: "pipeline/terraform-cnv-pipeline.md"
     - VM Migration Pipeline: "pipeline/terraform-vm-migration-pipeline.md"
     - MTC Container Migration Pipeline: "pipeline/terraform-mtc-pipeline.md"
-    - Agent Builder Pipeline (Day 1): "pipeline/terraform-agent-builder-pipeline.md"
-    - Agent Builder Pipeline (Day 2): "pipeline/terraform-agent-builder-pipeline-day2.md"
+
   - Terraform Code:
     - IPI DC Primary (ipi-method/openshiftbaremetal):
       - main.tf: "code/ipi-method/openshiftbaremetal/main.md"
@@ -121,6 +123,14 @@ nav:
       - acm-dr.tfvars (ACM DR): "code/ipi-method/mgmt-dr/acm-dr-tfvars.md"
       - outputs.tf: "code/ipi-method/mgmt-dr/outputs.md"
       - versions.tf: "code/ipi-method/mgmt-dr/versions.md"
+    - IPI Agent Builder (ipi-method/agent-builder):
+      - main.tf: "code/ipi-method/agent-builder/main.md"
+      - variables.tf: "code/ipi-method/agent-builder/variables.md"
+      - terraform.tfvars: "code/ipi-method/agent-builder/tfvars.md"
+      - outputs.tf: "code/ipi-method/agent-builder/outputs.md"
+      - versions.tf: "code/ipi-method/agent-builder/versions.md"
+      - azure-pipelines-agent-builder.yml (Day 1): "code/ipi-method/agent-builder/azure-pipelines-agent-builder.md"
+      - azure-pipelines-agent-builder-day2.yml (Day 2): "code/ipi-method/agent-builder/azure-pipelines-agent-builder-day2.md"
     - IPI Azure DevOps Pipeline:
       - azure-pipelines.yml (Day 1): "code/ipi-method/pipeline/azure-pipelines.md"
       - azure-pipelines-day2.yml (Day 2): "code/ipi-method/pipeline/azure-pipelines-day2.md"

@@ -1,0 +1,232 @@
+<mxfile host="Electron" agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/29.0.3 Chrome/140.0.7339.249 Electron/38.7.0 Safari/537.36" version="29.0.3">
+  <diagram id="d1" name="ADO Prerequisites &amp; Pipeline Execution Flow">
+    <mxGraphModel dx="1234" dy="812" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1400" pageHeight="900" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="title" value="Azure DevOps — Prerequisites &amp; Pipeline Execution Flow" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=18;fontStyle=1;fontColor=#1A237E;" parent="1" vertex="1">
+          <mxGeometry x="310" y="15" width="500" height="35" as="geometry" />
+        </mxCell>
+        <mxCell id="ado_project" value="&lt;b&gt;Azure DevOps Project&lt;/b&gt;" style="swimlane;startSize=30;fillColor=#E8EAF6;fontColor=#1A237E;strokeColor=#3F51B5;rounded=1;fontSize=14;fontStyle=1;whiteSpace=wrap;html=1;container=1;collapsible=0;swimlaneLine=1;" parent="1" vertex="1">
+          <mxGeometry x="30" y="60" width="620" height="420" as="geometry" />
+        </mxCell>
+        <mxCell id="ext" value="&#xa;Terraform Extension&#xa;(ms-devlabs)&#xa;TerraformInstaller@1" style="shape=mxgraph.azure.cloud_service;whiteSpace=wrap;html=1;fillColor=#E3F2FD;strokeColor=#1565C0;fontSize=10;fontStyle=1;fontColor=#1565C0;arcSize=10;verticalLabelPosition=bottom;verticalAlign=top;align=center;" parent="ado_project" vertex="1">
+          <mxGeometry x="30" y="50" width="50" height="36" as="geometry" />
+        </mxCell>
+        <mxCell id="pipelines_box" value="&lt;b&gt;Pipeline Definitions (YAML)&lt;/b&gt;" style="swimlane;startSize=25;fillColor=#FFFFFF;fontColor=#1A237E;strokeColor=#3F51B5;rounded=1;fontSize=11;fontStyle=1;whiteSpace=wrap;html=1;container=1;collapsible=0;" parent="ado_project" vertex="1">
+          <mxGeometry x="120" y="45" width="230" height="170" as="geometry" />
+        </mxCell>
+        <mxCell id="p1" value="azure-pipelines.yml (IPI Deploy)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#3F51B5;fontSize=9;fontColor=#333333;arcSize=15;" parent="pipelines_box" vertex="1">
+          <mxGeometry x="10" y="30" width="210" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="p2" value="azure-pipelines-day2.yml (Day 2 Ops)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#3F51B5;fontSize=9;fontColor=#333333;arcSize=15;" parent="pipelines_box" vertex="1">
+          <mxGeometry x="10" y="53" width="210" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="p3" value="azure-pipelines-acm-import.yml" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#3F51B5;fontSize=9;fontColor=#333333;arcSize=15;" parent="pipelines_box" vertex="1">
+          <mxGeometry x="10" y="76" width="210" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="p4" value="azure-pipelines-acm-dr.yml" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#3F51B5;fontSize=9;fontColor=#333333;arcSize=15;" parent="pipelines_box" vertex="1">
+          <mxGeometry x="10" y="99" width="210" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="p5" value="azure-pipelines-cnv / mtc / vm-migration" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#3F51B5;fontSize=9;fontColor=#333333;arcSize=15;" parent="pipelines_box" vertex="1">
+          <mxGeometry x="10" y="122" width="210" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="p6" value="UPI equivalents (azure-pipelines-upi.yml …)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#90CAF9;fontSize=9;fontColor=#666666;arcSize=15;dashed=1;" parent="pipelines_box" vertex="1">
+          <mxGeometry x="10" y="145" width="210" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="vargroups_box" value="&lt;b&gt;Variable Groups (Library)&lt;/b&gt;" style="swimlane;startSize=25;fillColor=#FFF3E0;fontColor=#E65100;strokeColor=#EF6C00;rounded=1;fontSize=11;fontStyle=1;whiteSpace=wrap;html=1;container=1;collapsible=0;" parent="ado_project" vertex="1">
+          <mxGeometry x="370" y="45" width="230" height="195" as="geometry" />
+        </mxCell>
+        <mxCell id="vg1" value="🔒 ocp-baremetal-secrets" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#EF6C00;fontSize=9;fontColor=#333333;arcSize=15;" parent="vargroups_box" vertex="1">
+          <mxGeometry x="10" y="30" width="210" height="18" as="geometry" />
+        </mxCell>
+        <mxCell id="vg2" value="🔒 ocp-baremetal-upi-secrets" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#EF6C00;fontSize=9;fontColor=#333333;arcSize=15;" parent="vargroups_box" vertex="1">
+          <mxGeometry x="10" y="51" width="210" height="18" as="geometry" />
+        </mxCell>
+        <mxCell id="vg3" value="🔒 ocp-baremetal-day2-secrets" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#EF6C00;fontSize=9;fontColor=#333333;arcSize=15;" parent="vargroups_box" vertex="1">
+          <mxGeometry x="10" y="72" width="210" height="18" as="geometry" />
+        </mxCell>
+        <mxCell id="vg4" value="🔒 ocp-baremetal-acm-secrets" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#EF6C00;fontSize=9;fontColor=#333333;arcSize=15;" parent="vargroups_box" vertex="1">
+          <mxGeometry x="10" y="93" width="210" height="18" as="geometry" />
+        </mxCell>
+        <mxCell id="vg5" value="🔒 ocp-baremetal-acm-dr-secrets" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#EF6C00;fontSize=9;fontColor=#333333;arcSize=15;" parent="vargroups_box" vertex="1">
+          <mxGeometry x="10" y="114" width="210" height="18" as="geometry" />
+        </mxCell>
+        <mxCell id="vg6" value="🔒 ocp-virtualization / mtc / vm-migration" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#EF6C00;fontSize=9;fontColor=#333333;arcSize=15;" parent="vargroups_box" vertex="1">
+          <mxGeometry x="10" y="135" width="210" height="18" as="geometry" />
+        </mxCell>
+        <mxCell id="vg_note" value="23 secret variables&#xa;(passwords, tokens, S3 keys)" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=0;strokeColor=none;fillColor=none;fontSize=9;fontStyle=2;fontColor=#E65100;" parent="vargroups_box" vertex="1">
+          <mxGeometry x="25" y="158" width="180" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="agent_pool" value="&lt;b&gt;Agent Pool&lt;/b&gt;&#xa;self-hosted-linux" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F5E9;strokeColor=#2E7D32;fontSize=11;fontStyle=0;fontColor=#2E7D32;arcSize=10;" parent="ado_project" vertex="1">
+          <mxGeometry x="180" y="250" width="150" height="45" as="geometry" />
+        </mxCell>
+        <mxCell id="pipeline_run" value="&lt;b&gt;Pipeline Execution&lt;/b&gt;&#xa;① Checkout code&#xa;② Install Terraform&#xa;③ terraform init&#xa;④ terraform plan/apply" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1A237E;strokeColor=#1A237E;fontSize=10;fontStyle=0;fontColor=#FFFFFF;arcSize=10;align=left;spacingLeft=10;" parent="ado_project" vertex="1">
+          <mxGeometry x="170" y="320" width="170" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="e_ext_pipe" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#1565C0;strokeWidth=1.5;dashed=1;dashPattern=5 3;fontSize=9;fontColor=#1565C0;curved=0;" parent="ado_project" source="ext" target="pipelines_box" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_ext_pipe_label" value="provides task" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=8;fontColor=#1565C0;fontStyle=2;" parent="e_ext_pipe" vertex="1" connectable="0">
+          <mxGeometry x="-0.1" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_vg_run" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#EF6C00;strokeWidth=2;fontSize=9;fontColor=#EF6C00;curved=0;" parent="ado_project" source="vargroups_box" target="pipeline_run" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="300" y="220" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_vg_run_label" value="injects secrets&#xa;as env vars" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=8;fontColor=#EF6C00;fontStyle=2;" parent="e_vg_run" vertex="1" connectable="0">
+          <mxGeometry x="0.2" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_pipe_pool" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#2E7D32;strokeWidth=2;fontSize=9;fontColor=#2E7D32;curved=0;" parent="ado_project" source="pipelines_box" target="agent_pool" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_pipe_pool_label" value="dispatches job" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=8;fontColor=#2E7D32;fontStyle=2;" parent="e_pipe_pool" vertex="1" connectable="0">
+          <mxGeometry x="-0.1" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_pool_run" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#2E7D32;strokeWidth=2;fontSize=9;fontColor=#2E7D32;" parent="ado_project" source="agent_pool" target="pipeline_run" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_pool_run_label" value="runs on agent" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=8;fontColor=#2E7D32;fontStyle=2;" parent="e_pool_run" vertex="1" connectable="0">
+          <mxGeometry x="-0.1" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="agent_box" value="&lt;b&gt;Self-Hosted Linux Agent&lt;/b&gt;" style="swimlane;startSize=28;fillColor=#E8F5E9;fontColor=#1B5E20;strokeColor=#2E7D32;rounded=1;fontSize=13;fontStyle=1;whiteSpace=wrap;html=1;container=1;collapsible=0;" parent="1" vertex="1">
+          <mxGeometry x="700" y="160" width="260" height="260" as="geometry" />
+        </mxCell>
+        <mxCell id="tool1" value="📦 Terraform (auto-installed)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#2E7D32;fontSize=10;fontColor=#333333;arcSize=15;" parent="agent_box" vertex="1">
+          <mxGeometry x="15" y="38" width="230" height="25" as="geometry" />
+        </mxCell>
+        <mxCell id="tool2" value="📦 oc / kubectl CLI" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#2E7D32;fontSize=10;fontColor=#333333;arcSize=15;" parent="agent_box" vertex="1">
+          <mxGeometry x="15" y="68" width="230" height="25" as="geometry" />
+        </mxCell>
+        <mxCell id="tool3" value="📦 ssh / jq / openshift-install (UPI)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#2E7D32;fontSize=10;fontColor=#333333;arcSize=15;" parent="agent_box" vertex="1">
+          <mxGeometry x="15" y="98" width="230" height="25" as="geometry" />
+        </mxCell>
+        <mxCell id="tool4" value="🔑 kubeconfig files for each cluster" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#2E7D32;fontSize=10;fontColor=#333333;arcSize=15;" parent="agent_box" vertex="1">
+          <mxGeometry x="15" y="128" width="230" height="25" as="geometry" />
+        </mxCell>
+        <mxCell id="net_label" value="&lt;b&gt;Network Access Required:&lt;/b&gt;&#xa;• SSH to bastion hosts&#xa;• API port 6443 to all clusters&#xa;• DHCP/TFTP for PXE (UPI)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF9C4;strokeColor=#F9A825;fontSize=9;fontColor=#333333;arcSize=10;align=left;spacingLeft=8;" parent="agent_box" vertex="1">
+          <mxGeometry x="15" y="168" width="230" height="75" as="geometry" />
+        </mxCell>
+        <mxCell id="clusters_box" value="&lt;b&gt;Bare Metal OpenShift Clusters&lt;/b&gt;" style="swimlane;startSize=28;fillColor=#FCE4EC;fontColor=#B71C1C;strokeColor=#E53935;rounded=1;fontSize=13;fontStyle=1;whiteSpace=wrap;html=1;container=1;collapsible=0;" parent="1" vertex="1">
+          <mxGeometry x="1020" y="80" width="340" height="420" as="geometry" />
+        </mxCell>
+        <mxCell id="dc_label" value="&lt;b&gt;DC Site&lt;/b&gt;" style="text;html=1;align=left;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=11;fontStyle=1;fontColor=#B71C1C;" parent="clusters_box" vertex="1">
+          <mxGeometry x="15" y="33" width="60" height="25" as="geometry" />
+        </mxCell>
+        <mxCell id="dc_primary" value="DC Primary&#xa;(Workload Cluster)&#xa;OCP + AI + GPU + ODF" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFEBEE;strokeColor=#E53935;fontSize=10;fontColor=#333333;arcSize=10;" parent="clusters_box" vertex="1">
+          <mxGeometry x="15" y="60" width="150" height="55" as="geometry" />
+        </mxCell>
+        <mxCell id="mgmt_dc" value="Management DC&#xa;ACM Hub + ACS&#xa;Central + Quay" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFEBEE;strokeColor=#E53935;fontSize=10;fontColor=#333333;arcSize=10;" parent="clusters_box" vertex="1">
+          <mxGeometry x="177" y="60" width="150" height="55" as="geometry" />
+        </mxCell>
+        <mxCell id="dr_label" value="&lt;b&gt;DR Site&lt;/b&gt;" style="text;html=1;align=left;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=11;fontStyle=1;fontColor=#B71C1C;" parent="clusters_box" vertex="1">
+          <mxGeometry x="15" y="130" width="55" height="25" as="geometry" />
+        </mxCell>
+        <mxCell id="dr_secondary" value="DR Secondary&#xa;(Workload Cluster)&#xa;OCP + AI + GPU + ODF" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFEBEE;strokeColor=#E53935;fontSize=10;fontColor=#333333;arcSize=10;" parent="clusters_box" vertex="1">
+          <mxGeometry x="15" y="157" width="150" height="55" as="geometry" />
+        </mxCell>
+        <mxCell id="mgmt_dr" value="Management DR&#xa;ACM Standby + ACS&#xa;Secured + Quay" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFEBEE;strokeColor=#E53935;fontSize=10;fontColor=#333333;arcSize=10;" parent="clusters_box" vertex="1">
+          <mxGeometry x="177" y="157" width="150" height="55" as="geometry" />
+        </mxCell>
+        <mxCell id="bastion_label" value="&lt;b&gt;Bastion Hosts&lt;/b&gt;" style="text;html=1;align=left;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=11;fontStyle=1;fontColor=#B71C1C;" parent="clusters_box" vertex="1">
+          <mxGeometry x="15" y="228" width="100" height="25" as="geometry" />
+        </mxCell>
+        <mxCell id="bastion_dc" value="🖥 Bastion DC&#xa;(SSH + terraform exec)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F3E5F5;strokeColor=#7B1FA2;fontSize=10;fontColor=#333333;arcSize=10;" parent="clusters_box" vertex="1">
+          <mxGeometry x="15" y="255" width="150" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="bastion_dr" value="🖥 Bastion DR&#xa;(SSH + terraform exec)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F3E5F5;strokeColor=#7B1FA2;fontSize=10;fontColor=#333333;arcSize=10;" parent="clusters_box" vertex="1">
+          <mxGeometry x="177" y="255" width="150" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="submariner" value="Submariner (cross-cluster networking)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E0F7FA;strokeColor=#00838F;fontSize=9;fontStyle=1;fontColor=#00838F;arcSize=10;" parent="clusters_box" vertex="1">
+          <mxGeometry x="55" y="315" width="230" height="28" as="geometry" />
+        </mxCell>
+        <mxCell id="odf_dr" value="ODF DR Replication (Ceph RBD mirroring)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E0F7FA;strokeColor=#00838F;fontSize=9;fontStyle=1;fontColor=#00838F;arcSize=10;" parent="clusters_box" vertex="1">
+          <mxGeometry x="55" y="350" width="230" height="28" as="geometry" />
+        </mxCell>
+        <mxCell id="acm_mgmt" value="ACM Hub manages all clusters" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E0F7FA;strokeColor=#00838F;fontSize=9;fontStyle=1;fontColor=#00838F;arcSize=10;" parent="clusters_box" vertex="1">
+          <mxGeometry x="55" y="383" width="230" height="28" as="geometry" />
+        </mxCell>
+        <mxCell id="e_run_agent" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#1A237E;strokeWidth=2.5;fontSize=10;fontColor=#1A237E;curved=0;" parent="1" source="pipeline_run" target="agent_box" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="535" y="420" />
+              <mxPoint x="535" y="310" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_run_agent_label" value="executes on" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=9;fontColor=#1A237E;fontStyle=1;" parent="e_run_agent" vertex="1" connectable="0">
+          <mxGeometry x="-0.2" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_agent_clusters" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#E53935;strokeWidth=2.5;fontSize=10;fontColor=#E53935;" parent="1" source="agent_box" target="clusters_box" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_agent_clusters_label" value="SSH + API (6443)&#xa;terraform apply" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=9;fontColor=#E53935;fontStyle=1;" parent="e_agent_clusters" vertex="1" connectable="0">
+          <mxGeometry x="-0.1" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="legend_box" value="&lt;b&gt;Legend&lt;/b&gt;" style="swimlane;startSize=22;fillColor=#FAFAFA;fontColor=#333333;strokeColor=#BDBDBD;rounded=1;fontSize=11;fontStyle=1;whiteSpace=wrap;html=1;container=1;collapsible=0;" parent="1" vertex="1">
+          <mxGeometry x="30" y="510" width="620" height="110" as="geometry" />
+        </mxCell>
+        <mxCell id="leg1" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8EAF6;strokeColor=#3F51B5;fontSize=9;" parent="legend_box" vertex="1">
+          <mxGeometry x="15" y="30" width="20" height="15" as="geometry" />
+        </mxCell>
+        <mxCell id="leg1t" value="Azure DevOps (Pipelines + Marketplace Extension)" style="text;html=1;align=left;verticalAlign=middle;resizable=0;points=[];fontSize=9;fontColor=#333333;" parent="legend_box" vertex="1">
+          <mxGeometry x="42" y="30" width="260" height="15" as="geometry" />
+        </mxCell>
+        <mxCell id="leg2" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#EF6C00;fontSize=9;" parent="legend_box" vertex="1">
+          <mxGeometry x="15" y="50" width="20" height="15" as="geometry" />
+        </mxCell>
+        <mxCell id="leg2t" value="ADO Variable Groups (secrets injected as TF_VAR_* env vars)" style="text;html=1;align=left;verticalAlign=middle;resizable=0;points=[];fontSize=9;fontColor=#333333;" parent="legend_box" vertex="1">
+          <mxGeometry x="42" y="50" width="280" height="15" as="geometry" />
+        </mxCell>
+        <mxCell id="leg3" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F5E9;strokeColor=#2E7D32;fontSize=9;" parent="legend_box" vertex="1">
+          <mxGeometry x="15" y="70" width="20" height="15" as="geometry" />
+        </mxCell>
+        <mxCell id="leg3t" value="Self-Hosted Agent (Linux — runs terraform, oc, ssh)" style="text;html=1;align=left;verticalAlign=middle;resizable=0;points=[];fontSize=9;fontColor=#333333;" parent="legend_box" vertex="1">
+          <mxGeometry x="42" y="70" width="260" height="15" as="geometry" />
+        </mxCell>
+        <mxCell id="leg4" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FCE4EC;strokeColor=#E53935;fontSize=9;" parent="legend_box" vertex="1">
+          <mxGeometry x="15" y="90" width="20" height="15" as="geometry" />
+        </mxCell>
+        <mxCell id="leg4t" value="Bare Metal OpenShift Clusters (DC + DR sites)" style="text;html=1;align=left;verticalAlign=middle;resizable=0;points=[];fontSize=9;fontColor=#333333;" parent="legend_box" vertex="1">
+          <mxGeometry x="42" y="90" width="260" height="15" as="geometry" />
+        </mxCell>
+        <mxCell id="leg5" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F3E5F5;strokeColor=#7B1FA2;fontSize=9;" parent="legend_box" vertex="1">
+          <mxGeometry x="340" y="30" width="20" height="15" as="geometry" />
+        </mxCell>
+        <mxCell id="leg5t" value="Bastion Hosts (SSH gateway to clusters)" style="text;html=1;align=left;verticalAlign=middle;resizable=0;points=[];fontSize=9;fontColor=#333333;" parent="legend_box" vertex="1">
+          <mxGeometry x="367" y="30" width="240" height="15" as="geometry" />
+        </mxCell>
+        <mxCell id="leg6" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E0F7FA;strokeColor=#00838F;fontSize=9;" parent="legend_box" vertex="1">
+          <mxGeometry x="340" y="50" width="20" height="15" as="geometry" />
+        </mxCell>
+        <mxCell id="leg6t" value="Cross-Cluster Services (Submariner, ODF DR, ACM)" style="text;html=1;align=left;verticalAlign=middle;resizable=0;points=[];fontSize=9;fontColor=#333333;" parent="legend_box" vertex="1">
+          <mxGeometry x="367" y="50" width="240" height="15" as="geometry" />
+        </mxCell>
+        <mxCell id="leg7" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF9C4;strokeColor=#F9A825;fontSize=9;" parent="legend_box" vertex="1">
+          <mxGeometry x="340" y="70" width="20" height="15" as="geometry" />
+        </mxCell>
+        <mxCell id="leg7t" value="Network Requirements (ports, protocols)" style="text;html=1;align=left;verticalAlign=middle;resizable=0;points=[];fontSize=9;fontColor=#333333;" parent="legend_box" vertex="1">
+          <mxGeometry x="367" y="70" width="240" height="15" as="geometry" />
+        </mxCell>
+        <mxCell id="flow_box" value="&lt;b&gt;Execution Flow:&lt;/b&gt;  ❶ Developer triggers pipeline → ❷ ADO dispatches to self-hosted agent pool → ❸ Agent picks up job, installs Terraform → ❹ Secrets injected from Variable Group as env vars → ❺ Terraform connects to bastion/clusters via SSH + API → ❻ Infrastructure provisioned on bare metal" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ECEFF1;strokeColor=#90A4AE;fontSize=10;fontColor=#333333;arcSize=8;align=left;spacingLeft=10;spacingRight=10;" parent="1" vertex="1">
+          <mxGeometry x="30" y="640" width="1330" height="40" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
