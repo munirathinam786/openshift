@@ -552,6 +552,106 @@ variable "odf_dr_s3_secret_key" {
 }
 
 # =============================================================================
+# Ceph Migration Variables
+# =============================================================================
+variable "enable_ceph_migration" {
+  description = "Enable Ceph storage migration between clusters/datacenters"
+  type        = bool
+  default     = false
+}
+variable "ceph_migration_source_cluster_name" {
+  description = "Name of the source cluster (migrating FROM)"
+  type        = string
+  default     = ""
+}
+variable "ceph_migration_source_cluster_kubeconfig" {
+  description = "Kubeconfig path for the source cluster on the bastion"
+  type        = string
+  default     = ""
+}
+variable "ceph_migration_destination_cluster_name" {
+  description = "Name of the destination cluster (migrating TO)"
+  type        = string
+  default     = ""
+}
+variable "ceph_migration_destination_cluster_kubeconfig" {
+  description = "Kubeconfig path for the destination cluster on the bastion"
+  type        = string
+  default     = ""
+}
+variable "ceph_migration_mode" {
+  description = "Replication mode: async (snapshot-based) or sync (real-time)"
+  type        = string
+  default     = "async"
+}
+variable "ceph_migration_replication_schedule" {
+  description = "Cron schedule for async replication"
+  type        = string
+  default     = "*/5 * * * *"
+}
+variable "ceph_migration_pool_name" {
+  description = "Ceph block pool name to migrate"
+  type        = string
+  default     = "ocs-storagecluster-cephblockpool"
+}
+variable "ceph_migration_cephfs_pool_name" {
+  description = "CephFS data pool name to migrate (empty to skip)"
+  type        = string
+  default     = ""
+}
+variable "ceph_migration_storage_class" {
+  description = "StorageClass for migrated PVCs on the destination"
+  type        = string
+  default     = "ocs-storagecluster-ceph-rbd"
+}
+variable "ceph_migration_namespaces" {
+  description = "Namespaces whose PVCs should be migrated"
+  type = list(object({
+    name           = string
+    pvc_selector   = optional(map(string), {})
+    exclude_pvcs   = optional(list(string), [])
+  }))
+  default = []
+}
+variable "ceph_migration_action" {
+  description = "Migration action: prepare, migrate, validate, or cleanup"
+  type        = string
+  default     = "prepare"
+}
+variable "ceph_migration_s3_endpoint" {
+  description = "S3 endpoint for migration metadata"
+  type        = string
+  default     = ""
+}
+variable "ceph_migration_s3_bucket" {
+  description = "S3 bucket for migration metadata"
+  type        = string
+  default     = "ceph-migration-metadata"
+}
+variable "ceph_migration_s3_access_key" {
+  description = "S3 access key for migration metadata"
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+variable "ceph_migration_s3_secret_key" {
+  description = "S3 secret key for migration metadata"
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+variable "ceph_migration_rbd_mirror_count" {
+  description = "Number of rbd-mirror daemon instances"
+  type        = number
+  default     = 1
+}
+variable "ceph_migration_verify_data_integrity" {
+  description = "Verify data integrity after migration"
+  type        = bool
+  default     = true
+}
+
+# =============================================================================
 # Cluster Logging Variables
 # =============================================================================
 variable "enable_cluster_logging" {

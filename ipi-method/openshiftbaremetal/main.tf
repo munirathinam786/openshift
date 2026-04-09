@@ -300,6 +300,36 @@ module "odf_dr" {
   depends_on = [module.odf_operator, module.submariner]
 }
 
+# --- Ceph Migration (RBD mirroring between clusters/datacenters) ---
+module "ceph_migration" {
+  source = "./modules/ceph-migration"
+  count  = var.enable_ceph_migration ? 1 : 0
+
+  kubeconfig                     = local.kubeconfig
+  bastion_host                   = var.bastion_host
+  bastion_user                   = var.bastion_user
+  bastion_ssh_key                = var.bastion_ssh_private_key_file
+  source_cluster_name            = var.ceph_migration_source_cluster_name
+  source_cluster_kubeconfig      = var.ceph_migration_source_cluster_kubeconfig
+  destination_cluster_name       = var.ceph_migration_destination_cluster_name
+  destination_cluster_kubeconfig = var.ceph_migration_destination_cluster_kubeconfig
+  migration_mode                 = var.ceph_migration_mode
+  replication_schedule           = var.ceph_migration_replication_schedule
+  pool_name                      = var.ceph_migration_pool_name
+  cephfs_pool_name               = var.ceph_migration_cephfs_pool_name
+  storage_class                  = var.ceph_migration_storage_class
+  namespaces                     = var.ceph_migration_namespaces
+  migration_action               = var.ceph_migration_action
+  s3_endpoint                    = var.ceph_migration_s3_endpoint
+  s3_bucket                      = var.ceph_migration_s3_bucket
+  s3_access_key                  = var.ceph_migration_s3_access_key
+  s3_secret_key                  = var.ceph_migration_s3_secret_key
+  rbd_mirror_count               = var.ceph_migration_rbd_mirror_count
+  verify_data_integrity          = var.ceph_migration_verify_data_integrity
+
+  depends_on = [module.odf_operator]
+}
+
 # --- Cluster Logging (ClusterLogging + ClusterLogForwarder with S3) ---
 module "cluster_logging" {
   source = "./modules/cluster-logging"

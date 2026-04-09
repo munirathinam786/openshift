@@ -1,0 +1,196 @@
+# Author: Sathishkumar Munirathinam
+
+# =============================================================================
+# Azure DevOps Pipeline — Ceph Migration
+# Migrates Ceph/ODF storage data (RBD images, CephFS volumes) between
+# OpenShift clusters or datacenters using Rook-Ceph mirroring.
+# =============================================================================
+
+trigger: none   # Always manual — never auto-triggered
+
+parameters:
+  # ---- Target Cluster ----
+  - name: deploymentScope
+    displayName: "Source Cluster (migrate FROM)"
+    type: string
+    default: "dc-only"
+    values:
+      - dc-only
+      - dr-only
+
+  # ---- Migration Action ----
+  - name: migrationAction
+    displayName: "Migration Action"
+    type: string
+    default: "prepare"
+    values:
+      - prepare
+      - migrate
+      - validate
+      - cleanup
+
+  # ---- Migration Mode ----
+  - name: migrationMode
+    displayName: "Replication Mode"
+    type: string
+    default: "async"
+    values:
+      - async
+      - sync
+
+  # ---- Replication Schedule ----
+  - name: replicationSchedule
+    displayName: "Replication Schedule (cron, async only)"
+    type: string
+    default: "*/5 * * * *"
+
+  # ---- Pool Configuration ----
+  - name: poolName
+    displayName: "Ceph Block Pool Name"
+    type: string
+    default: "ocs-storagecluster-cephblockpool"
+
+  # ---- Data Integrity ----
+  - name: verifyDataIntegrity
+    displayName: "Verify Data Integrity After Migration"
+    type: boolean
+    default: true
+
+  # ---- Terraform Action ----
+  - name: terraformAction
+    displayName: "Terraform Action"
+    type: string
+    default: "plan"
+    values:
+      - plan
+      - apply
+      - destroy
+
+  # ---- Variable Group ----
+  - name: variableGroup
+    displayName: "ADO Variable Group (for secrets)"
+    type: string
+    default: "ocp-ceph-migration-secrets"
+
+variables:
+  - group: ${{ parameters.variableGroup }}
+  - name: TF_IN_AUTOMATION
+    value: "true"
+  - name: TF_INPUT
+    value: "false"
+
+stages:
+  # =====================================================================
+  # Stage 1: Ceph Migration — DC Primary
+  # =====================================================================
+  - stage: Ceph_Migration_DC_Primary
+    displayName: "Ceph Migration — DC Primary"
+    condition: eq('${{ parameters.deploymentScope }}', 'dc-only')
+    jobs:
+      - job: CephMigrationDC
+        displayName: "Terraform Ceph Migration — DC Primary"
+        pool:
+          name: "self-hosted-linux"
+        steps:
+          - checkout: self
+
+          - task: TerraformInstaller@1
+            displayName: "Install Terraform"
+            inputs:
+              terraformVersion: "latest"
+
+          - script: |
+              cd openshiftbaremetal
+              terraform init -input=false
+            displayName: "Terraform Init — DC Primary"
+
+          - script: |
+              cd openshiftbaremetal
+              terraform ${{ parameters.terraformAction }} \
+                -var-file=terraform.tfvars \
+                -var-file=ceph-migration.tfvars \
+                -var enable_ceph_migration=true \
+                -var ceph_migration_action=${{ parameters.migrationAction }} \
+                -var ceph_migration_mode=${{ parameters.migrationMode }} \
+                -var "ceph_migration_replication_schedule=${{ parameters.replicationSchedule }}" \
+                -var ceph_migration_pool_name=${{ parameters.poolName }} \
+                -var ceph_migration_verify_data_integrity=${{ parameters.verifyDataIntegrity }} \
+                -input=false \
+                $(if [ "${{ parameters.terraformAction }}" = "apply" ] || [ "${{ parameters.terraformAction }}" = "destroy" ]; then echo "-auto-approve"; fi)
+            displayName: "Terraform ${{ parameters.terraformAction }} — Ceph Migration DC"
+            env:
+              TF_VAR_ceph_migration_s3_access_key: $(ceph-s3-access-key)
+              TF_VAR_ceph_migration_s3_secret_key: $(ceph-s3-secret-key)
+
+  # =====================================================================
+  # Stage 2: Ceph Migration — DR Secondary
+  # =====================================================================
+  - stage: Ceph_Migration_DR_Secondary
+    displayName: "Ceph Migration — DR Secondary"
+    condition: eq('${{ parameters.deploymentScope }}', 'dr-only')
+    jobs:
+      - job: CephMigrationDR
+        displayName: "Terraform Ceph Migration — DR Secondary"
+        pool:
+          name: "self-hosted-linux"
+        steps:
+          - checkout: self
+
+          - task: TerraformInstaller@1
+            displayName: "Install Terraform"
+            inputs:
+              terraformVersion: "latest"
+
+          - script: |
+              cd openshiftbaremetal-dr
+              terraform init -input=false
+            displayName: "Terraform Init — DR Secondary"
+
+          - script: |
+              cd openshiftbaremetal-dr
+              terraform ${{ parameters.terraformAction }} \
+                -var-file=terraform.tfvars \
+                -var-file=ceph-migration.tfvars \
+                -var enable_ceph_migration=true \
+                -var ceph_migration_action=${{ parameters.migrationAction }} \
+                -var ceph_migration_mode=${{ parameters.migrationMode }} \
+                -var "ceph_migration_replication_schedule=${{ parameters.replicationSchedule }}" \
+                -var ceph_migration_pool_name=${{ parameters.poolName }} \
+                -var ceph_migration_verify_data_integrity=${{ parameters.verifyDataIntegrity }} \
+                -input=false \
+                $(if [ "${{ parameters.terraformAction }}" = "apply" ] || [ "${{ parameters.terraformAction }}" = "destroy" ]; then echo "-auto-approve"; fi)
+            displayName: "Terraform ${{ parameters.terraformAction }} — Ceph Migration DR"
+            env:
+              TF_VAR_ceph_migration_s3_access_key: $(ceph-s3-access-key)
+              TF_VAR_ceph_migration_s3_secret_key: $(ceph-s3-secret-key)
+
+  # =====================================================================
+  # Stage 3: Summary
+  # =====================================================================
+  - stage: Summary
+    displayName: "Migration Summary"
+    dependsOn:
+      - ${{ if eq(parameters.deploymentScope, 'dc-only') }}:
+          - Ceph_Migration_DC_Primary
+      - ${{ if eq(parameters.deploymentScope, 'dr-only') }}:
+          - Ceph_Migration_DR_Secondary
+    condition: succeeded()
+    jobs:
+      - job: PrintSummary
+        displayName: "Print Summary"
+        pool:
+          name: "self-hosted-linux"
+        steps:
+          - script: |
+              echo "========================================"
+              echo "Ceph Migration Deployment"
+              echo "========================================"
+              echo "Source Cluster:       ${{ parameters.deploymentScope }}"
+              echo "Action:               ${{ parameters.terraformAction }}"
+              echo "Migration Action:     ${{ parameters.migrationAction }}"
+              echo "Migration Mode:       ${{ parameters.migrationMode }}"
+              echo "Replication Schedule: ${{ parameters.replicationSchedule }}"
+              echo "Pool:                 ${{ parameters.poolName }}"
+              echo "Verify Integrity:     ${{ parameters.verifyDataIntegrity }}"
+              echo "========================================"
+            displayName: "Print Deployment Summary"

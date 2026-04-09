@@ -1,0 +1,56 @@
+<mxfile host="app.diagrams.net" modified="2026-04-09T12:00:00.000Z" agent="draw.io" type="device">
+  <diagram id="ceph-migration-pipeline" name="Ceph Migration Pipeline">
+    <mxGraphModel dx="1422" dy="762" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+        <!-- Title -->
+        <mxCell id="2" value="Ceph Migration Pipeline — Azure DevOps" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=18;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="284" y="20" width="600" height="40" as="geometry"/>
+        </mxCell>
+        <!-- Trigger -->
+        <mxCell id="3" value="Manual Trigger&#xa;(azure-pipelines-ceph-migration.yml)" style="shape=hexagon;perimeter=hexagonPerimeter2;whiteSpace=wrap;html=1;fixedSize=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="400" y="80" width="260" height="60" as="geometry"/>
+        </mxCell>
+        <!-- Parameters -->
+        <mxCell id="4" value="Parameters&#xa;deploymentScope | migrationAction&#xa;migrationMode | replicationSchedule&#xa;poolName | verifyDataIntegrity" style="shape=document;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="370" y="170" width="320" height="80" as="geometry"/>
+        </mxCell>
+        <mxCell id="5" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="3" target="4" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <!-- Decision -->
+        <mxCell id="6" value="deploymentScope?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="440" y="290" width="180" height="80" as="geometry"/>
+        </mxCell>
+        <mxCell id="7" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="4" target="6" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <!-- DC Stage -->
+        <mxCell id="8" value="Stage 1a: Ceph Migration&#xa;DC Primary&#xa;&#xa;terraform init → terraform action&#xa;-var-file=ceph-migration.tfvars&#xa;-var ceph_migration_action=..." style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="150" y="420" width="280" height="100" as="geometry"/>
+        </mxCell>
+        <!-- DR Stage -->
+        <mxCell id="9" value="Stage 1b: Ceph Migration&#xa;DR Secondary&#xa;&#xa;terraform init → terraform action&#xa;-var-file=ceph-migration.tfvars&#xa;-var ceph_migration_action=..." style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="630" y="420" width="280" height="100" as="geometry"/>
+        </mxCell>
+        <mxCell id="10" value="dc-only" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="6" target="8" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="11" value="dr-only" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="6" target="9" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <!-- Summary -->
+        <mxCell id="12" value="Stage 2: Summary&#xa;Print migration parameters" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="400" y="570" width="260" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="13" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="8" target="12" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="14" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="9" target="12" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

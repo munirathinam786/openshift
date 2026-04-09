@@ -83,6 +83,7 @@ nav:
     - OpenShift Virtualization Pipeline: "pipeline/terraform-cnv-pipeline.md"
     - VM Migration Pipeline: "pipeline/terraform-vm-migration-pipeline.md"
     - MTC Container Migration Pipeline: "pipeline/terraform-mtc-pipeline.md"
+    - Ceph Storage Migration Pipeline: "pipeline/terraform-ceph-migration-pipeline.md"
 
   - Terraform Code:
     - IPI DC Primary (ipi-method/openshiftbaremetal):
@@ -95,6 +96,7 @@ nav:
       - openshift-virtualization.tfvars: "code/ipi-method/openshiftbaremetal/openshift-virtualization-tfvars.md"
       - vm-migration.tfvars: "code/ipi-method/openshiftbaremetal/vm-migration-tfvars.md"
       - mtc.tfvars: "code/ipi-method/openshiftbaremetal/mtc-tfvars.md"
+      - ceph-migration.tfvars: "code/ipi-method/openshiftbaremetal/ceph-migration-tfvars.md"
     - IPI DR Secondary (ipi-method/openshiftbaremetal-dr):
       - main.tf: "code/ipi-method/openshiftbaremetal-dr/main.md"
       - variables.tf: "code/ipi-method/openshiftbaremetal-dr/variables.md"
@@ -105,6 +107,7 @@ nav:
       - openshift-virtualization.tfvars: "code/ipi-method/openshiftbaremetal-dr/openshift-virtualization-tfvars.md"
       - vm-migration.tfvars: "code/ipi-method/openshiftbaremetal-dr/vm-migration-tfvars.md"
       - mtc.tfvars: "code/ipi-method/openshiftbaremetal-dr/mtc-tfvars.md"
+      - ceph-migration.tfvars: "code/ipi-method/openshiftbaremetal-dr/ceph-migration-tfvars.md"
     - IPI Management DC (ipi-method/mgmt-dc):
       - main.tf: "code/ipi-method/mgmt-dc/main.md"
       - variables.tf: "code/ipi-method/mgmt-dc/variables.md"
@@ -145,6 +148,7 @@ nav:
       - azure-pipelines-cnv.yml (CNV): "code/ipi-method/pipeline/azure-pipelines-cnv.md"
       - azure-pipelines-vm-migration.yml (VM Migration): "code/ipi-method/pipeline/azure-pipelines-vm-migration.md"
       - azure-pipelines-mtc.yml (MTC): "code/ipi-method/pipeline/azure-pipelines-mtc.md"
+      - azure-pipelines-ceph-migration.yml (Ceph Migration): "code/ipi-method/pipeline/azure-pipelines-ceph-migration.md"
     - UPI DC Primary (upi-method/openshiftbaremetal):
       - main.tf: "code/upi-method/main.md"
       - variables.tf: "code/upi-method/variables.md"
@@ -155,6 +159,7 @@ nav:
       - openshift-virtualization.tfvars: "code/upi-method/openshift-virtualization-tfvars.md"
       - vm-migration.tfvars: "code/upi-method/vm-migration-tfvars.md"
       - mtc.tfvars: "code/upi-method/mtc-tfvars.md"
+      - ceph-migration.tfvars: "code/upi-method/ceph-migration-tfvars.md"
       - azure-pipelines-upi.yml (Day 1): "code/upi-method/azure-pipelines-upi.md"
       - azure-pipelines-day2-upi.yml (Day 2): "code/upi-method/azure-pipelines-day2-upi.md"
       - azure-pipelines-acm-import.yml (ACM Import): "code/upi-method/azure-pipelines-acm-import.md"
@@ -162,6 +167,7 @@ nav:
       - azure-pipelines-cnv.yml (CNV): "code/upi-method/azure-pipelines-cnv.md"
       - azure-pipelines-vm-migration.yml (VM Migration): "code/upi-method/azure-pipelines-vm-migration.md"
       - azure-pipelines-mtc.yml (MTC): "code/upi-method/azure-pipelines-mtc.md"
+      - azure-pipelines-ceph-migration.yml (Ceph Migration): "code/upi-method/azure-pipelines-ceph-migration.md"
     - UPI DR Secondary (upi-method/openshiftbaremetal-dr):
       - main.tf: "code/upi-method/openshiftbaremetal-dr/main.md"
       - variables.tf: "code/upi-method/openshiftbaremetal-dr/variables.md"
@@ -172,6 +178,7 @@ nav:
       - openshift-virtualization.tfvars: "code/upi-method/openshiftbaremetal-dr/openshift-virtualization-tfvars.md"
       - vm-migration.tfvars: "code/upi-method/openshiftbaremetal-dr/vm-migration-tfvars.md"
       - mtc.tfvars: "code/upi-method/openshiftbaremetal-dr/mtc-tfvars.md"
+      - ceph-migration.tfvars: "code/upi-method/openshiftbaremetal-dr/ceph-migration-tfvars.md"
     - UPI Agent Builder DC (upi-method/agent-builder):
       - main.tf: "code/upi-method/agent-builder/main.md"
       - variables.tf: "code/upi-method/agent-builder/variables.md"

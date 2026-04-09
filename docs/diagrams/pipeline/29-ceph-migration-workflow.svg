@@ -1,0 +1,108 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="1100" height="520" viewBox="-0.5 -0.5 1100 520">
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#333"/>
+    </marker>
+  </defs>
+  <g>
+    <!-- Title -->
+    <text x="550" y="30" fill="#333" font-family="Helvetica" font-size="18" font-weight="bold" text-anchor="middle">Ceph Migration Workflow — Step by Step</text>
+
+    <!-- Source Cluster -->
+    <rect x="30" y="60" rx="15" ry="15" width="180" height="60" fill="#DAE8FC" stroke="#6C8EBF" stroke-width="2"/>
+    <text x="120" y="85" fill="#333" font-family="Helvetica" font-size="12" font-weight="bold" text-anchor="middle">Source Cluster</text>
+    <text x="120" y="105" fill="#666" font-family="Helvetica" font-size="10" text-anchor="middle">(DC Primary)</text>
+
+    <!-- Replication Arrow -->
+    <line x1="210" y1="90" x2="870" y2="90" stroke="#B85450" stroke-width="3" stroke-dasharray="8,4" marker-end="url(#arrow)"/>
+    <text x="540" y="80" fill="#B85450" font-family="Helvetica" font-size="11" font-weight="bold" text-anchor="middle">RBD Mirroring (Async / Sync)</text>
+
+    <!-- Destination Cluster -->
+    <rect x="870" y="60" rx="15" ry="15" width="180" height="60" fill="#D5E8D4" stroke="#82B366" stroke-width="2"/>
+    <text x="960" y="85" fill="#333" font-family="Helvetica" font-size="12" font-weight="bold" text-anchor="middle">Destination Cluster</text>
+    <text x="960" y="105" fill="#666" font-family="Helvetica" font-size="10" text-anchor="middle">(DR Secondary)</text>
+
+    <!-- PREPARE Phase Label -->
+    <rect x="20" y="145" rx="5" ry="5" width="100" height="25" fill="#FFF2CC" stroke="#D6B656" stroke-width="1.5"/>
+    <text x="70" y="162" fill="#333" font-family="Helvetica" font-size="11" font-weight="bold" text-anchor="middle">PREPARE</text>
+
+    <!-- Step 1 -->
+    <rect x="30" y="185" rx="8" ry="8" width="230" height="65" fill="#FFF2CC" stroke="#D6B656" stroke-width="2"/>
+    <text x="145" y="207" fill="#333" font-family="Helvetica" font-size="11" font-weight="bold" text-anchor="middle">1. Enable RBD Mirroring</text>
+    <text x="145" y="225" fill="#666" font-family="Helvetica" font-size="9" text-anchor="middle">Source: patch StorageCluster</text>
+    <text x="145" y="240" fill="#666" font-family="Helvetica" font-size="9" text-anchor="middle">Configure pool mirror mode</text>
+
+    <!-- Step 2 -->
+    <rect x="290" y="185" rx="8" ry="8" width="230" height="65" fill="#FFF2CC" stroke="#D6B656" stroke-width="2"/>
+    <text x="405" y="207" fill="#333" font-family="Helvetica" font-size="11" font-weight="bold" text-anchor="middle">2. Enable RBD Mirroring</text>
+    <text x="405" y="225" fill="#666" font-family="Helvetica" font-size="9" text-anchor="middle">Destination: patch StorageCluster</text>
+    <text x="405" y="240" fill="#666" font-family="Helvetica" font-size="9" text-anchor="middle">Import peer token</text>
+
+    <!-- Step 3 -->
+    <rect x="550" y="185" rx="8" ry="8" width="230" height="65" fill="#FFF2CC" stroke="#D6B656" stroke-width="2"/>
+    <text x="665" y="207" fill="#333" font-family="Helvetica" font-size="11" font-weight="bold" text-anchor="middle">3. Create MirrorPeer</text>
+    <text x="665" y="225" fill="#666" font-family="Helvetica" font-size="9" text-anchor="middle">Link source ↔ destination</text>
+    <text x="665" y="240" fill="#666" font-family="Helvetica" font-size="9" text-anchor="middle">Label PVCs for replication</text>
+
+    <!-- Validate -->
+    <rect x="810" y="185" rx="8" ry="8" width="230" height="65" fill="#E1D5E7" stroke="#9673A6" stroke-width="2"/>
+    <text x="925" y="207" fill="#333" font-family="Helvetica" font-size="11" font-weight="bold" text-anchor="middle">4. VALIDATE</text>
+    <text x="925" y="225" fill="#666" font-family="Helvetica" font-size="9" text-anchor="middle">Check daemon health</text>
+    <text x="925" y="240" fill="#666" font-family="Helvetica" font-size="9" text-anchor="middle">Verify image sync status</text>
+
+    <!-- Arrows row 1 -->
+    <line x1="260" y1="217" x2="290" y2="217" stroke="#333" stroke-width="2" marker-end="url(#arrow)"/>
+    <line x1="520" y1="217" x2="550" y2="217" stroke="#333" stroke-width="2" marker-end="url(#arrow)"/>
+    <line x1="780" y1="217" x2="810" y2="217" stroke="#333" stroke-width="2" marker-end="url(#arrow)"/>
+
+    <!-- MIGRATE Phase Label -->
+    <rect x="20" y="275" rx="5" ry="5" width="100" height="25" fill="#F8CECC" stroke="#B85450" stroke-width="1.5"/>
+    <text x="70" y="292" fill="#333" font-family="Helvetica" font-size="11" font-weight="bold" text-anchor="middle">MIGRATE</text>
+
+    <!-- Step 5 -->
+    <rect x="30" y="320" rx="8" ry="8" width="230" height="65" fill="#F8CECC" stroke="#B85450" stroke-width="2"/>
+    <text x="145" y="342" fill="#333" font-family="Helvetica" font-size="11" font-weight="bold" text-anchor="middle">5. Fence Source</text>
+    <text x="145" y="360" fill="#666" font-family="Helvetica" font-size="9" text-anchor="middle">Scale deployments to 0</text>
+    <text x="145" y="375" fill="#666" font-family="Helvetica" font-size="9" text-anchor="middle">Scale statefulsets to 0</text>
+
+    <!-- Step 6 -->
+    <rect x="290" y="320" rx="8" ry="8" width="230" height="65" fill="#F8CECC" stroke="#B85450" stroke-width="2"/>
+    <text x="405" y="342" fill="#333" font-family="Helvetica" font-size="11" font-weight="bold" text-anchor="middle">6. Final Sync + Demote</text>
+    <text x="405" y="360" fill="#666" font-family="Helvetica" font-size="9" text-anchor="middle">Wait for last replication</text>
+    <text x="405" y="375" fill="#666" font-family="Helvetica" font-size="9" text-anchor="middle">Demote source pool</text>
+
+    <!-- Step 7 -->
+    <rect x="550" y="320" rx="8" ry="8" width="230" height="65" fill="#D5E8D4" stroke="#82B366" stroke-width="2"/>
+    <text x="665" y="342" fill="#333" font-family="Helvetica" font-size="11" font-weight="bold" text-anchor="middle">7. Promote Destination</text>
+    <text x="665" y="360" fill="#666" font-family="Helvetica" font-size="9" text-anchor="middle">Promote destination pool</text>
+    <text x="665" y="375" fill="#666" font-family="Helvetica" font-size="9" text-anchor="middle">Verify PVCs on destination</text>
+
+    <!-- Step 8 -->
+    <rect x="810" y="320" rx="8" ry="8" width="230" height="65" fill="#F5F5F5" stroke="#666" stroke-width="2"/>
+    <text x="925" y="342" fill="#333" font-family="Helvetica" font-size="11" font-weight="bold" text-anchor="middle">8. CLEANUP (Optional)</text>
+    <text x="925" y="360" fill="#666" font-family="Helvetica" font-size="9" text-anchor="middle">Remove replication labels</text>
+    <text x="925" y="375" fill="#666" font-family="Helvetica" font-size="9" text-anchor="middle">Delete MirrorPeer</text>
+
+    <!-- Arrows row 2 -->
+    <line x1="260" y1="352" x2="290" y2="352" stroke="#333" stroke-width="2" marker-end="url(#arrow)"/>
+    <line x1="520" y1="352" x2="550" y2="352" stroke="#333" stroke-width="2" marker-end="url(#arrow)"/>
+    <line x1="780" y1="352" x2="810" y2="352" stroke="#333" stroke-width="2" marker-end="url(#arrow)"/>
+
+    <!-- Arrow from validate down to migrate -->
+    <line x1="925" y1="250" x2="925" y2="270" stroke="#333" stroke-width="1.5"/>
+    <line x1="925" y1="270" x2="145" y2="270" stroke="#333" stroke-width="1.5"/>
+    <line x1="145" y1="270" x2="145" y2="320" stroke="#333" stroke-width="2" marker-end="url(#arrow)"/>
+
+    <!-- Legend -->
+    <rect x="30" y="420" rx="5" ry="5" width="15" height="15" fill="#FFF2CC" stroke="#D6B656"/>
+    <text x="55" y="433" fill="#333" font-family="Helvetica" font-size="10">Prepare Phase</text>
+    <rect x="180" y="420" rx="5" ry="5" width="15" height="15" fill="#F8CECC" stroke="#B85450"/>
+    <text x="205" y="433" fill="#333" font-family="Helvetica" font-size="10">Migrate Phase (Disruptive)</text>
+    <rect x="400" y="420" rx="5" ry="5" width="15" height="15" fill="#D5E8D4" stroke="#82B366"/>
+    <text x="425" y="433" fill="#333" font-family="Helvetica" font-size="10">Promotion / Complete</text>
+    <rect x="600" y="420" rx="5" ry="5" width="15" height="15" fill="#E1D5E7" stroke="#9673A6"/>
+    <text x="625" y="433" fill="#333" font-family="Helvetica" font-size="10">Validation</text>
+    <rect x="750" y="420" rx="5" ry="5" width="15" height="15" fill="#F5F5F5" stroke="#666"/>
+    <text x="775" y="433" fill="#333" font-family="Helvetica" font-size="10">Cleanup (Optional)</text>
+  </g>
+</svg>
