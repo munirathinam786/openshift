@@ -28,6 +28,7 @@ This page documents the **Azure DevOps pipeline** for deploying the Agent Builde
 | `imageTag` | string | `latest` | Container image tag for Agent Builder services |
 | `targetCluster` | string | `dc-primary` | Target: `dc-primary` / `dr-secondary` |
 | `enableOIDC` | boolean | `false` | Enable OIDC authentication |
+| `buildImages` | boolean | `false` | Build and push images from the repository `packages/` source tree |
 
 ## Pipeline Stages
 
@@ -35,14 +36,51 @@ This page documents the **Azure DevOps pipeline** for deploying the Agent Builde
 
 Builds container images for all Agent Builder microservices using `podman` and pushes to the Quay mirror registry.
 
+This stage now runs **only when `buildImages=true`** and the deployment scope includes the application layer. The pipeline validates that all required application folders exist under the repository root before attempting any build, which prevents silent skips and makes missing source trees obvious.
+
 !!! note "Images Built"
     - `agent-builder-api` — FastAPI backend
-    - `agent-builder-ui` — React + Vite frontend
+    - `agent-builder-ui` — lightweight web UI
     - `temporal-workers` — Python Temporal workers
     - `tool-catalog` — MCP tool server
     - `agent-deployment-service` — OCP build/deploy orchestrator
     - `agent-registry` — Agent metadata registry
     - `a2a-gateway` — Agent-to-Agent gateway
+
+### Application source required for `buildImages=true`
+
+```text
+packages/
+├── agent-builder-api/
+├── agent-builder-ui/
+├── agent-builder-temporal-workers/
+├── tool-catalog/
+├── agent-deployment-service/
+├── agent-registry/
+└── a2a-gateway/
+```
+
+If any of those directories are missing, the build stage exits with an error and tells the operator either to restore the source tree or rerun with `buildImages=false`.
+
+### Stage 1 build logic
+
+```yaml
+  - name: buildImages
+    displayName: "Build application images from local packages/ sources"
+    type: boolean
+    default: false
+
+  - stage: Build_Images
+    condition: |
+      and(
+        succeeded(),
+        eq('${{ parameters.buildImages }}', 'true'),
+        or(
+          eq('${{ parameters.deploymentScope }}', 'full-platform'),
+          eq('${{ parameters.deploymentScope }}', 'app-layer-only')
+        )
+      )
+```
 
 ### Stage 2: Deploy Data Layer
 
@@ -136,6 +174,7 @@ Before running this pipeline, ensure:
 | **ADO Variable Group** | `agent-builder-secrets` created with all secrets (see table below) |
 | **ADO Agent Pool** | `self-hosted-linux` pool with bastion node registered |
 | **Bastion Tools** | Terraform >= 1.9.0, `oc` CLI (authenticated), `podman`, SSH keys |
+| **Application Sources** | Top-level `packages/` tree present when `buildImages=true` |
 | **OCP Access** | `oc login` with `cluster-admin` on target cluster from ADO agent |
 | **ODF Storage** | `ocs-storagecluster-ceph-rbd` StorageClass with >= 210Gi available |
 | **Container Images** | All images accessible or mirrored (see [Agent Builder Deployment](../clusters/terraform-agent-builder.md#container-image-requirements)) |
@@ -146,6 +185,10 @@ Before running this pipeline, ensure:
 
 !!! warning "First Run"
     On first deployment, use `deploymentScope: full-platform` and `terraformAction: plan` to review the plan before applying.
+
+!!! tip "When to enable `buildImages`"
+  - Use `buildImages: true` when you want the pipeline to build the Agent Builder application images from the repository sources in `packages/`.
+  - Use `buildImages: false` when your registry already contains the required images and you only want Terraform to deploy them.
 
 ## Related Pages
 

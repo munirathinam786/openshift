@@ -1,6 +1,6 @@
 # Agent Builder Factory — Azure DevOps Pipeline (Day 1)
 
-Azure DevOps Pipeline for Day 1 deployment of the Agent Builder Factory platform. Features 6 stages: container image build, data layer (PostgreSQL/MongoDB/Redis), infrastructure (Temporal/Ollama/LiteLLM), application services, validation, and summary.
+Azure DevOps Pipeline for Day 1 deployment of the Agent Builder Factory platform. The reference below is updated to match the live pipeline in the repository, including the `develop` branch trigger and the `buildImages` toggle that controls whether application images are built from the top-level `packages/` source tree.
 
 ## Source Code
 
@@ -12,7 +12,7 @@ Azure DevOps Pipeline for Day 1 deployment of the Agent Builder Factory platform
 trigger:
   branches:
     include:
-      - main
+      - develop
   paths:
     include:
       - ipi-method/agent-builder/**
@@ -93,6 +93,11 @@ parameters:
     type: boolean
     default: false
 
+  - name: buildImages
+    displayName: "Build application images from local packages/ sources"
+    type: boolean
+    default: false
+
 variables:
   - group: ${{ parameters.variableGroup }}
   - name: TF_IN_AUTOMATION
@@ -111,6 +116,7 @@ stages:
     condition: |
       and(
         succeeded(),
+        eq('${{ parameters.buildImages }}', 'true'),
         or(
           eq('${{ parameters.deploymentScope }}', 'full-platform'),
           eq('${{ parameters.deploymentScope }}', 'app-layer-only')
@@ -127,51 +133,62 @@ stages:
           - script: |
               echo "=== Building Agent Builder Container Images ==="
               echo "Image tag: ${{ parameters.imageTag }}"
+              echo "Local image build enabled: ${{ parameters.buildImages }}"
 
               REGISTRY=$(grep 'container_registry' $(WORKING_DIR)/terraform.tfvars | cut -d'"' -f2)
               TAG="${{ parameters.imageTag }}"
+              REQUIRED_DIRS="packages/agent-builder-api packages/agent-builder-ui packages/agent-builder-temporal-workers packages/tool-catalog packages/agent-deployment-service packages/agent-registry packages/a2a-gateway"
+
+              for dir in ${REQUIRED_DIRS}; do
+                if [ ! -d "$dir" ]; then
+                  echo "Missing required application source directory: $dir" >&2
+                  echo "This repository does not currently include the Agent Builder application sources under packages/." >&2
+                  echo "Either run the pipeline with buildImages=false to deploy prebuilt images, or add the application source tree before enabling local builds." >&2
+                  exit 1
+                fi
+              done
 
               # Build API image
               echo "Building agent-builder-api..."
               podman build -t ${REGISTRY}/agent-builder-api:${TAG} \
                 -f packages/agent-builder-api/Dockerfile \
-                packages/agent-builder-api/ || echo "API image build skipped (source not present)"
+                packages/agent-builder-api/
 
               # Build UI image
               echo "Building agent-builder-ui..."
               podman build -t ${REGISTRY}/agent-builder-ui:${TAG} \
                 -f packages/agent-builder-ui/Dockerfile \
-                packages/agent-builder-ui/ || echo "UI image build skipped (source not present)"
+                packages/agent-builder-ui/
 
               # Build Temporal Workers image
               echo "Building agent-builder-temporal-workers..."
               podman build -t ${REGISTRY}/agent-builder-temporal-workers:${TAG} \
                 -f packages/agent-builder-temporal-workers/Dockerfile \
-                packages/agent-builder-temporal-workers/ || echo "Workers image build skipped (source not present)"
+                packages/agent-builder-temporal-workers/
 
               # Build Tool Catalog image
               echo "Building agent-builder-tool-catalog..."
               podman build -t ${REGISTRY}/agent-builder-tool-catalog:${TAG} \
                 -f packages/tool-catalog/Dockerfile \
-                packages/tool-catalog/ || echo "Tool Catalog image build skipped (source not present)"
+                packages/tool-catalog/
 
               # Build Agent Deployment Service image
               echo "Building agent-deployment-service..."
               podman build -t ${REGISTRY}/agent-deployment-service:${TAG} \
                 -f packages/agent-deployment-service/Dockerfile \
-                packages/agent-deployment-service/ || echo "Deploy Service image build skipped (source not present)"
+                packages/agent-deployment-service/
 
               # Build Agent Registry image
               echo "Building agent-builder-registry..."
               podman build -t ${REGISTRY}/agent-builder-registry:${TAG} \
                 -f packages/agent-registry/Dockerfile \
-                packages/agent-registry/ || echo "Registry image build skipped (source not present)"
+                packages/agent-registry/
 
               # Build A2A Gateway image
               echo "Building agent-builder-a2a-gateway..."
               podman build -t ${REGISTRY}/agent-builder-a2a-gateway:${TAG} \
                 -f packages/a2a-gateway/Dockerfile \
-                packages/a2a-gateway/ || echo "A2A Gateway image build skipped (source not present)"
+                packages/a2a-gateway/
 
               echo "=== Push images to registry ==="
               podman push --tls-verify=false ${REGISTRY}/agent-builder-api:${TAG} || true
@@ -453,6 +470,7 @@ stages:
               echo ""
               echo "Action:           ${{ parameters.terraformAction }}"
               echo "Scope:            ${{ parameters.deploymentScope }}"
+              echo "Build Images:     ${{ parameters.buildImages }}"
               echo "Target Cluster:   ${{ parameters.targetCluster }}"
               echo "Image Tag:        ${{ parameters.imageTag }}"
               echo "Ollama Enabled:   ${{ parameters.enableOllama }}"

@@ -18,6 +18,8 @@ The platform deploys 14 microservices on OpenShift using Terraform via `null_res
 
 The Agent Builder Factory is deployed across 4 environments — IPI DC, IPI DR, UPI DC, and UPI DR:
 
+The Terraform deployment folders describe **how the platform is installed on OpenShift**, while the top-level `packages/` folder now contains the **actual buildable application sources** that the Day 1 pipelines can turn into container images.
+
 === "IPI DC Primary"
 
     ```
@@ -89,6 +91,25 @@ The Agent Builder Factory is deployed across 4 environments — IPI DC, IPI DR, 
 | **UPI DC Primary** | `upi-method/agent-builder/` | `ocp-ai-upi` | `10.142.41.10` | `example.com` |
 | **UPI DR Secondary** | `upi-method/agent-builder-dr/` | `ocp-ai-upi-dr` | `10.143.41.10` | `dr.example.com` |
 
+### Application Source Tree (`packages/`)
+
+The repository now includes the missing Agent Builder application source tree used by the container build stages in the IPI and UPI pipelines:
+
+```text
+packages/
+├── agent-builder-api/              # FastAPI backend for agents, tools, workflows
+├── agent-builder-ui/               # Lightweight web UI served on port 3000
+├── agent-builder-temporal-workers/ # Worker health and queue service
+├── tool-catalog/                   # MCP-style tool discovery API
+├── agent-deployment-service/       # Deployment orchestration API
+├── agent-registry/                 # Agent metadata registry service
+└── a2a-gateway/                    # Agent-to-agent routing facade
+```
+
+Each package includes a `Dockerfile`, a dependency manifest, and runnable source code so `buildImages=true` can build images locally instead of relying only on externally prepared images.
+
+See also: [Application Packages](terraform-agent-builder-packages.md)
+
 ### Pipeline Files
 
 | Pipeline | IPI | UPI |
@@ -96,17 +117,20 @@ The Agent Builder Factory is deployed across 4 environments — IPI DC, IPI DR, 
 | **Day 1 Deployment** | `ipi-method/azure-pipelines-agent-builder.yml` | `upi-method/azure-pipelines-agent-builder.yml` |
 | **Day 2 Operations** | `ipi-method/azure-pipelines-agent-builder-day2.yml` | `upi-method/azure-pipelines-agent-builder-day2.yml` |
 
+!!! note "Local image builds are now explicit"
+    The Day 1 pipelines now expose a `buildImages` parameter. When set to `true`, the pipeline builds images from the repository's top-level `packages/` source tree and fails fast if any required service folder is missing. When set to `false`, Terraform deploys using the image names configured in `terraform.tfvars` without rebuilding them in the pipeline.
+
 ## Service Components
 
 | Service | Port | Image | Replicas | Purpose |
 |---------|------|-------|----------|---------|
-| **Agent Builder UI** | 3000 | `node:20-alpine` | 2 | React SPA — agent design interface |
-| **Agent Builder API** | 8000 | `python:3.11-slim` | 2 | FastAPI — core API & orchestration |
-| **Tool Catalog** | 8090 | `python:3.11-slim` | 1 | MCP tool server — browsable tool registry |
-| **A2A Gateway** | 8003 | `python:3.11-slim` | 1 | Agent-to-Agent discovery & routing |
-| **Agent Registry** | 8002 | `python:3.11-slim` | 1 | Agent metadata & endpoint registry |
-| **Agent Deploy Svc** | 8001 | `python:3.11-slim` | 1 | OCP build/deploy orchestrator |
-| **Temporal Workers** | 8000 | `python:3.11-slim` | 2 | Workflow execution workers |
+| **Agent Builder UI** | 3000 | Custom image from `packages/agent-builder-ui/` | 2 | Web UI for platform access, API discovery, and OIDC-aware configuration |
+| **Agent Builder API** | 8000 | Custom image from `packages/agent-builder-api/` | 2 | FastAPI — core API, agent registration, and workflow submission |
+| **Tool Catalog** | 8090 | Custom image from `packages/tool-catalog/` | 1 | MCP-style tool server — browsable tool registry |
+| **A2A Gateway** | 8003 | Custom image from `packages/a2a-gateway/` | 1 | Agent-to-Agent discovery and message routing |
+| **Agent Registry** | 8002 | Custom image from `packages/agent-registry/` | 1 | Agent metadata and endpoint registry |
+| **Agent Deploy Svc** | 8001 | Custom image from `packages/agent-deployment-service/` | 1 | Deployment orchestration API |
+| **Temporal Workers** | 8000 | Custom image from `packages/agent-builder-temporal-workers/` | 2 | Workflow execution workers and queue-health service |
 | **Temporal Server** | 7233 | `temporalio/auto-setup:1.30.4` | 1 | Workflow orchestration engine |
 | **Temporal UI** | 8080 | `temporalio/ui:2.49.1` | 1 | Workflow monitoring dashboard |
 | **LiteLLM Proxy** | 4000 | `ghcr.io/berriai/litellm:v1.83.10-stable` | 1 | Multi-model LLM gateway |
@@ -383,6 +407,7 @@ The following images must be accessible from the cluster (pulled from Red Hat / 
 
 ## Related Pages
 
+- [Application Packages](terraform-agent-builder-packages.md)
 - [ADO Pipeline — Agent Builder (Day 1)](../pipeline/terraform-agent-builder-pipeline.md)
 - [ADO Pipeline — Agent Builder (Day 2)](../pipeline/terraform-agent-builder-pipeline-day2.md)
 - [Multi-Cluster Architecture](../architecture/terraform-multi-cluster-overview.md)

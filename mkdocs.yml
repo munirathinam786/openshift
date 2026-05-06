@@ -85,6 +85,7 @@ nav:
     - Pipeline: "azure-aro/pipeline.md"
   - Agent Builder Factory:
     - Deployment Guide: "clusters/terraform-agent-builder.md"
+    - Application Packages: "clusters/terraform-agent-builder-packages.md"
     - Pipeline (Day 1): "pipeline/terraform-agent-builder-pipeline.md"
     - Pipeline (Day 2): "pipeline/terraform-agent-builder-pipeline-day2.md"
   - Draw.io Diagrams: "diagrams/index.md"
