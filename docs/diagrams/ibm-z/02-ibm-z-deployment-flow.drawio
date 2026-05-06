@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="app.diagrams.net" modified="2026-05-06T00:00:00.000Z" agent="GitHub Copilot" version="24.0.0" type="device">
+  <diagram id="ibmz-flow" name="IBM Z Deployment Flow">
+    <mxGraphModel dx="1400" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1500" pageHeight="320" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+        <mxCell id="s1" value="1. Render install-config.yaml" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#EF6C00;fontSize=12;fontStyle=1;arcSize=10;" vertex="1" parent="1"><mxGeometry x="30" y="120" width="190" height="50" as="geometry"/></mxCell>
+        <mxCell id="s2" value="2. Render agent-config.yaml" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#EF6C00;fontSize=12;fontStyle=1;arcSize=10;" vertex="1" parent="1"><mxGeometry x="250" y="120" width="190" height="50" as="geometry"/></mxCell>
+        <mxCell id="s3" value="3. Optional z/VM guest provisioning" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E3F2FD;strokeColor=#1565C0;fontSize=12;fontStyle=1;arcSize=10;" vertex="1" parent="1"><mxGeometry x="470" y="120" width="220" height="50" as="geometry"/></mxCell>
+        <mxCell id="s4" value="4. Copy assets to bastion" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ECEFF1;strokeColor=#455A64;fontSize=12;fontStyle=1;arcSize=10;" vertex="1" parent="1"><mxGeometry x="720" y="120" width="180" height="50" as="geometry"/></mxCell>
+        <mxCell id="s5" value="5. openshift-install agent create image" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FCE4EC;strokeColor=#C62828;fontSize=12;fontStyle=1;arcSize=10;" vertex="1" parent="1"><mxGeometry x="930" y="120" width="220" height="50" as="geometry"/></mxCell>
+        <mxCell id="s6" value="6. Boot IBM Z guests / LPARs" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FBE9E7;strokeColor=#BF360C;fontSize=12;fontStyle=1;arcSize=10;" vertex="1" parent="1"><mxGeometry x="1180" y="120" width="200" height="50" as="geometry"/></mxCell>
+        <mxCell id="s7" value="7. Wait for bootstrap + install complete" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F5E9;strokeColor=#2E7D32;fontSize=12;fontStyle=1;arcSize=10;" vertex="1" parent="1"><mxGeometry x="1410" y="120" width="230" height="50" as="geometry"/></mxCell>
+        <mxCell id="e1" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=2;" edge="1" source="s1" target="s2" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e2" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=2;" edge="1" source="s2" target="s3" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e3" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=2;" edge="1" source="s3" target="s4" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e4" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=2;" edge="1" source="s4" target="s5" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e5" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=2;" edge="1" source="s5" target="s6" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e6" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=2;" edge="1" source="s6" target="s7" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="title" value="&lt;b&gt;IBM Z Deployment Flow&lt;/b&gt;&lt;br&gt;&lt;i&gt;Terraform orchestration to bastion-led install&lt;/i&gt;" style="text;html=1;align=center;verticalAlign=middle;strokeColor=none;fillColor=none;fontSize=18;fontColor=#333333;" vertex="1" parent="1"><mxGeometry x="470" y="35" width="700" height="40" as="geometry"/></mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

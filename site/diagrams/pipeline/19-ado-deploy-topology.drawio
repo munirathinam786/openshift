@@ -15,7 +15,7 @@ terraform apply" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EF6C00;strok
         <mxCell id="dc" value="&lt;b&gt;DC Primary&lt;/b&gt;" style="swimlane;startSize=35;fillColor=#2E7D32;fontColor=#FFFFFF;strokeColor=#2E7D32;rounded=1;fontSize=13;fontStyle=1;whiteSpace=wrap;html=1;container=1;collapsible=0;" vertex="1" parent="dc_site">
           <mxGeometry x="15" y="35" width="145" height="100" as="geometry"/>
         </mxCell>
-        <mxCell id="dc_ocp" value="OCP 4.15 + AI" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#333333;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="dc">
+        <mxCell id="dc_ocp" value="OCP 4.20 + AI" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#333333;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="dc">
           <mxGeometry x="10" y="40" width="125" height="20" as="geometry"/>
         </mxCell>
         <mxCell id="dc_sub" value="Submariner Broker" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#333333;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="dc">
@@ -42,7 +42,7 @@ terraform apply" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EF6C00;strok
         <mxCell id="dr" value="&lt;b&gt;DR Secondary&lt;/b&gt;" style="swimlane;startSize=35;fillColor=#1565C0;fontColor=#FFFFFF;strokeColor=#1565C0;rounded=1;fontSize=13;fontStyle=1;whiteSpace=wrap;html=1;container=1;collapsible=0;" vertex="1" parent="dr_site">
           <mxGeometry x="15" y="35" width="145" height="100" as="geometry"/>
         </mxCell>
-        <mxCell id="dr_ocp" value="OCP 4.15 + AI" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#333333;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="dr">
+        <mxCell id="dr_ocp" value="OCP 4.20 + AI" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#333333;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="dr">
           <mxGeometry x="10" y="40" width="125" height="20" as="geometry"/>
         </mxCell>
         <mxCell id="dr_sub" value="Submariner Agent" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#333333;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="dr">

@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1400 640" font-family="Roboto, Arial, sans-serif">
+  <defs>
+    <style>
+      .title { font-size: 24px; font-weight: 700; fill: #1f2937; }
+      .label { font-size: 14px; font-weight: 700; fill: #1f2937; }
+      .small { font-size: 12px; fill: #374151; }
+    </style>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#475569" />
+    </marker>
+  </defs>
+  <text x="700" y="40" text-anchor="middle" class="title">AWS ROSA Terraform Modules</text>
+
+  <rect x="520" y="90" width="320" height="90" rx="12" fill="#ede9fe" stroke="#7c3aed" stroke-width="2" />
+  <text x="680" y="125" text-anchor="middle" class="label">Root module</text>
+  <text x="680" y="150" text-anchor="middle" class="small">aws-rosa/main.tf</text>
+
+  <rect x="90" y="260" width="250" height="100" rx="12" fill="#eff6ff" stroke="#2563eb" stroke-width="2" />
+  <text x="215" y="295" text-anchor="middle" class="label">networking</text>
+  <text x="215" y="320" text-anchor="middle" class="small">VPC, subnets, NAT, SGs</text>
+
+  <rect x="410" y="260" width="250" height="100" rx="12" fill="#fefce8" stroke="#d97706" stroke-width="2" />
+  <text x="535" y="295" text-anchor="middle" class="label">vpc-endpoints</text>
+  <text x="535" y="320" text-anchor="middle" class="small">Interface and gateway endpoints</text>
+
+  <rect x="730" y="260" width="250" height="100" rx="12" fill="#faf5ff" stroke="#9333ea" stroke-width="2" />
+  <text x="855" y="295" text-anchor="middle" class="label">rosa-automation</text>
+  <text x="855" y="320" text-anchor="middle" class="small">ROSA, Route53, inventory scripts</text>
+
+  <rect x="1050" y="260" width="250" height="100" rx="12" fill="#ecfeff" stroke="#0284c7" stroke-width="2" />
+  <text x="1175" y="295" text-anchor="middle" class="label">alb-operator</text>
+  <text x="1175" y="320" text-anchor="middle" class="small">IAM policy and install assets</text>
+
+  <rect x="470" y="450" width="420" height="100" rx="12" fill="#f8fafc" stroke="#475569" stroke-width="2" />
+  <text x="680" y="485" text-anchor="middle" class="label">Outputs</text>
+  <text x="680" y="510" text-anchor="middle" class="small">VPC IDs, subnets, endpoints, script paths, ALB policy ARN</text>
+
+  <line x1="600" y1="180" x2="250" y2="260" stroke="#475569" stroke-width="3" marker-end="url(#arrow)" />
+  <line x1="650" y1="180" x2="535" y2="260" stroke="#475569" stroke-width="3" marker-end="url(#arrow)" />
+  <line x1="720" y1="180" x2="855" y2="260" stroke="#475569" stroke-width="3" marker-end="url(#arrow)" />
+  <line x1="770" y1="180" x2="1175" y2="260" stroke="#475569" stroke-width="3" marker-end="url(#arrow)" />
+  <line x1="215" y1="360" x2="520" y2="450" stroke="#475569" stroke-width="3" marker-end="url(#arrow)" />
+  <line x1="535" y1="360" x2="610" y2="450" stroke="#475569" stroke-width="3" marker-end="url(#arrow)" />
+  <line x1="855" y1="360" x2="760" y2="450" stroke="#475569" stroke-width="3" marker-end="url(#arrow)" />
+  <line x1="1175" y1="360" x2="850" y2="450" stroke="#475569" stroke-width="3" marker-end="url(#arrow)" />
+</svg>

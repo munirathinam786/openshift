@@ -1,7 +1,7 @@
 # DC Primary — main.tf
 
 Main orchestration file for the DC Primary workload cluster (`openshiftbaremetal/`).
-Deploys OCP 4.15 on bare metal with OpenShift AI, NVIDIA GPU, ODF, Submariner broker, and ODF DR.
+Deploys OCP 4.20 on bare metal with OpenShift AI, NVIDIA GPU, ODF, Submariner broker, and ODF DR.
 
 ## Module Dependencies
 

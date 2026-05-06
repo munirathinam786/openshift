@@ -8,7 +8,7 @@
 # Cluster Logging
 # =============================================================================
 enable_cluster_logging    = true
-logging_channel           = "stable-5.9"
+logging_channel           = "stable-6.2"
 log_store_type            = "elasticsearch"
 log_retention_application = "7d"
 log_retention_infra       = "7d"
@@ -30,7 +30,7 @@ log_s3_secret_key         = ""   # Provide via ADO Variable Group or env var
 # OADP — Backup & Restore
 # =============================================================================
 enable_oadp               = true
-oadp_channel              = "stable-1.4"
+oadp_channel              = "stable-1.6"
 oadp_dpa_name             = "velero-dpa"
 
 # OADP S3 Backup Storage Location (ODF-based — update endpoint per cluster)

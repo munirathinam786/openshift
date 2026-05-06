@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="650" viewBox="0 0 1200 650">
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#555" />
+    </marker>
+    <style>
+      .title{font:700 28px Arial,sans-serif;fill:#333}.subtitle{font:italic 16px Arial,sans-serif;fill:#666}
+      .box{rx:14;ry:14;stroke-width:2}.label{font:700 18px Arial,sans-serif;fill:#222}.small{font:14px Arial,sans-serif;fill:#333}
+      .arrow{stroke:#555;stroke-width:3;fill:none;marker-end:url(#arrow)}
+    </style>
+  </defs>
+  <text x="600" y="38" text-anchor="middle" class="title">IBM Z / LinuxONE OpenShift Architecture</text>
+  <text x="600" y="64" text-anchor="middle" class="subtitle">Agent-based deployment with optional z/VM automation</text>
+
+  <rect x="50" y="100" width="220" height="84" class="box" fill="#E8EAF6" stroke="#3F51B5"/>
+  <text x="160" y="132" text-anchor="middle" class="label">Disconnected Mirror</text>
+  <text x="160" y="156" text-anchor="middle" class="small">s390x release + operators</text>
+
+  <rect x="330" y="100" width="250" height="84" class="box" fill="#FFF3E0" stroke="#EF6C00"/>
+  <text x="455" y="132" text-anchor="middle" class="label">Bastion / Helper Node</text>
+  <text x="455" y="156" text-anchor="middle" class="small">Terraform + openshift-install</text>
+
+  <rect x="640" y="100" width="220" height="84" class="box" fill="#E3F2FD" stroke="#1565C0"/>
+  <text x="750" y="132" text-anchor="middle" class="label">z/VM Control Point</text>
+  <text x="750" y="156" text-anchor="middle" class="small">Optional guest automation</text>
+
+  <rect x="400" y="245" width="330" height="84" class="box" fill="#ECEFF1" stroke="#455A64"/>
+  <text x="565" y="278" text-anchor="middle" class="label">IBM Z Network Fabric</text>
+  <text x="565" y="302" text-anchor="middle" class="small">OSA-Express / HiperSockets / VLAN</text>
+
+  <rect x="210" y="390" width="280" height="92" class="box" fill="#EE0000" stroke="#CC0000"/>
+  <text x="350" y="426" text-anchor="middle" class="label" fill="#fff">Control Plane Nodes</text>
+  <text x="350" y="452" text-anchor="middle" class="small" fill="#fff">3 × s390x guests or LPARs</text>
+
+  <rect x="540" y="390" width="240" height="92" class="box" fill="#FBE9E7" stroke="#BF360C"/>
+  <text x="660" y="426" text-anchor="middle" class="label">Worker Nodes</text>
+  <text x="660" y="452" text-anchor="middle" class="small">s390x compute pool</text>
+
+  <rect x="840" y="390" width="230" height="92" class="box" fill="#E0F2F1" stroke="#00695C"/>
+  <text x="955" y="426" text-anchor="middle" class="label">Enterprise Storage</text>
+  <text x="955" y="452" text-anchor="middle" class="small">DASD / FCP / SAN</text>
+
+  <rect x="350" y="535" width="470" height="72" class="box" fill="#FFFFFF" stroke="#757575"/>
+  <text x="585" y="575" text-anchor="middle" class="label">OpenShift workloads, platform services, operators</text>
+
+  <path d="M270 142 H330" class="arrow" stroke="#3F51B5"/>
+  <path d="M580 142 H640" class="arrow" stroke="#1565C0"/>
+  <path d="M455 184 V245" class="arrow" stroke="#EF6C00"/>
+  <path d="M750 184 V390 H490" class="arrow" stroke="#1565C0"/>
+  <path d="M520 329 V390 H350" class="arrow" stroke="#455A64"/>
+  <path d="M610 329 V390 H660" class="arrow" stroke="#455A64"/>
+  <path d="M840 436 H780" class="arrow" stroke="#00695C"/>
+  <path d="M350 482 V535" class="arrow" stroke="#CC0000"/>
+  <path d="M660 482 V535" class="arrow" stroke="#BF360C"/>
+
+  <text x="300" y="132" class="small" fill="#3F51B5">Mirrored payload</text>
+  <text x="595" y="132" class="small" fill="#1565C0">Provision guests</text>
+  <text x="465" y="220" class="small" fill="#EF6C00">Installer + assets</text>
+</svg>

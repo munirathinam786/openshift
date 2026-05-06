@@ -20,7 +20,7 @@ variable "base_domain" {
 }
 variable "ocp_version" {
   type    = string
-  default = "4.15"
+  default = "4.20"
 }
 
 # ---- UPI Install ----
@@ -188,7 +188,7 @@ variable "quay_ca_cert_file" {
 }
 variable "ocp_channel" {
   type    = string
-  default = "stable-4.15"
+  default = "stable-4.20"
 }
 variable "mirror_operators" {
   type = list(object({
@@ -241,7 +241,7 @@ variable "odf_storage_capacity" {
 }
 variable "odf_channel" {
   type    = string
-  default = "stable-4.16"
+  default = "stable-4.20"
 }
 
 # ---- ACM (Hub) ----
@@ -357,7 +357,7 @@ variable "enable_cluster_logging" {
 variable "logging_channel" {
   description = "OLM subscription channel for Cluster Logging operator"
   type        = string
-  default     = "stable-5.9"
+  default     = "stable-6.2"
 }
 variable "log_store_type" {
   description = "Log store backend: elasticsearch or lokistack"
@@ -445,7 +445,7 @@ variable "enable_oadp" {
 variable "oadp_channel" {
   description = "OLM subscription channel for OADP operator"
   type        = string
-  default     = "stable-1.4"
+  default     = "stable-1.6"
 }
 variable "oadp_dpa_name" {
   description = "DataProtectionApplication CR name"

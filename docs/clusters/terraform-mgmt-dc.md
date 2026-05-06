@@ -164,7 +164,7 @@ The **LDAP/OAuth module** configures OpenShift to authenticate users against a c
 | `disable_kubeadmin` | bool | `false` | Remove kubeadmin (irreversible) |
 
 !!! info "Mirrored Operators (Updated)"
-    The Management DC cluster now also mirrors **OADP** (`stable-1.4`), **Submariner** (`stable-0.18`), and **ODR Hub** operators.
+    The Management DC cluster now also mirrors **OADP** (`stable-1.6`), **Submariner** (`stable-0.20`), and **ODR Hub** operators.
 
 ## ACM Cluster Import
 

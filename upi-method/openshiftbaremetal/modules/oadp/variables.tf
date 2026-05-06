@@ -24,7 +24,7 @@ variable "bastion_ssh_key" {
 variable "oadp_channel" {
   description = "OLM subscription channel for OADP operator"
   type        = string
-  default     = "stable-1.4"
+  default     = "stable-1.6"
 }
 
 variable "oadp_dpa_name" {

@@ -123,7 +123,7 @@ The pipeline uses the `agent-builder-secrets` variable group:
 |---------|-------|
 | **Pool** | `self-hosted-linux` |
 | **Agent** | Bastion node with SSH access |
-| **Tools** | Terraform >= 1.5.0, oc CLI, podman |
+| **Tools** | Terraform >= 1.9.0, oc CLI, podman |
 | **Working Directory** | `ipi-method/agent-builder/` (IPI) or `upi-method/agent-builder/` (UPI) |
 | **Pattern** | `null_resource` + SSH `remote-exec` |
 
@@ -135,7 +135,7 @@ Before running this pipeline, ensure:
 |--------------|---------|
 | **ADO Variable Group** | `agent-builder-secrets` created with all secrets (see table below) |
 | **ADO Agent Pool** | `self-hosted-linux` pool with bastion node registered |
-| **Bastion Tools** | Terraform >= 1.5.0, `oc` CLI (authenticated), `podman`, SSH keys |
+| **Bastion Tools** | Terraform >= 1.9.0, `oc` CLI (authenticated), `podman`, SSH keys |
 | **OCP Access** | `oc login` with `cluster-admin` on target cluster from ADO agent |
 | **ODF Storage** | `ocs-storagecluster-ceph-rbd` StorageClass with >= 210Gi available |
 | **Container Images** | All images accessible or mirrored (see [Agent Builder Deployment](../clusters/terraform-agent-builder.md#container-image-requirements)) |

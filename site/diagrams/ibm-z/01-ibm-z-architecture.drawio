@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="app.diagrams.net" modified="2026-05-06T00:00:00.000Z" agent="GitHub Copilot" version="24.0.0" type="device">
+  <diagram id="ibmz-arch" name="IBM Z Architecture Overview">
+    <mxGraphModel dx="1400" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1400" pageHeight="760" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+        <mxCell id="mirror" value="&lt;b&gt;Disconnected Mirror Registry&lt;/b&gt;&lt;br&gt;OCP release + operators" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8EAF6;strokeColor=#3F51B5;fontSize=12;fontStyle=1;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="60" y="90" width="220" height="70" as="geometry"/>
+        </mxCell>
+        <mxCell id="bastion" value="&lt;b&gt;Bastion / Helper Node&lt;/b&gt;&lt;br&gt;Terraform + openshift-install" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#EF6C00;fontSize=12;fontStyle=1;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="340" y="90" width="230" height="70" as="geometry"/>
+        </mxCell>
+        <mxCell id="zvm" value="&lt;b&gt;z/VM Control Point&lt;/b&gt;&lt;br&gt;Optional guest automation" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E3F2FD;strokeColor=#1565C0;fontSize=12;fontStyle=1;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="640" y="90" width="210" height="70" as="geometry"/>
+        </mxCell>
+        <mxCell id="fabric" value="&lt;b&gt;IBM Z Network Fabric&lt;/b&gt;&lt;br&gt;OSA-Express / HiperSockets / VLAN" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ECEFF1;strokeColor=#455A64;fontSize=12;fontStyle=1;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="400" y="240" width="300" height="70" as="geometry"/>
+        </mxCell>
+        <mxCell id="cp" value="&lt;b&gt;Control Plane Nodes&lt;/b&gt;&lt;br&gt;3 x s390x guests or LPARs" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EE0000;strokeColor=#CC0000;fontSize=12;fontStyle=1;fontColor=#FFFFFF;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="240" y="380" width="260" height="80" as="geometry"/>
+        </mxCell>
+        <mxCell id="wk" value="&lt;b&gt;Worker Nodes&lt;/b&gt;&lt;br&gt;s390x compute pool" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FBE9E7;strokeColor=#BF360C;fontSize=12;fontStyle=1;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="560" y="380" width="240" height="80" as="geometry"/>
+        </mxCell>
+        <mxCell id="storage" value="&lt;b&gt;Enterprise Storage&lt;/b&gt;&lt;br&gt;DASD / FCP / SAN" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E0F2F1;strokeColor=#00695C;fontSize=12;fontStyle=1;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="860" y="380" width="220" height="80" as="geometry"/>
+        </mxCell>
+        <mxCell id="apps" value="OpenShift workloads, platform services, operators" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#757575;fontSize=12;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="360" y="520" width="420" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="e1" value="Mirrored payload" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#3F51B5;strokeWidth=2;fontSize=10;fontColor=#3F51B5;labelBackgroundColor=#FFFFFF;" edge="1" source="mirror" target="bastion" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e2" value="Provision guests" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#1565C0;strokeWidth=2;fontSize=10;fontColor=#1565C0;labelBackgroundColor=#FFFFFF;" edge="1" source="bastion" target="zvm" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e3" value="Installer + assets" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#EF6C00;strokeWidth=2;fontSize=10;fontColor=#EF6C00;labelBackgroundColor=#FFFFFF;" edge="1" source="bastion" target="fabric" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e4" value="Attach media / config" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#1565C0;strokeWidth=2;fontSize=10;fontColor=#1565C0;labelBackgroundColor=#FFFFFF;" edge="1" source="zvm" target="cp" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e5" value="Static network" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#455A64;strokeWidth=2;fontSize=10;fontColor=#455A64;labelBackgroundColor=#FFFFFF;" edge="1" source="fabric" target="cp" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e6" value="Static network" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#455A64;strokeWidth=2;fontSize=10;fontColor=#455A64;labelBackgroundColor=#FFFFFF;" edge="1" source="fabric" target="wk" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e7" value="Persistent storage" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#00695C;strokeWidth=2;fontSize=10;fontColor=#00695C;labelBackgroundColor=#FFFFFF;" edge="1" source="storage" target="wk" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e8" value="Runs platform" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#CC0000;strokeWidth=2;fontSize=10;fontColor=#CC0000;labelBackgroundColor=#FFFFFF;" edge="1" source="cp" target="apps" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e9" value="Runs workloads" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#BF360C;strokeWidth=2;fontSize=10;fontColor=#BF360C;labelBackgroundColor=#FFFFFF;" edge="1" source="wk" target="apps" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="title" value="&lt;b&gt;IBM Z / LinuxONE OpenShift Architecture&lt;/b&gt;&lt;br&gt;&lt;i&gt;Agent-based deployment with optional z/VM automation&lt;/i&gt;" style="text;html=1;align=center;verticalAlign=middle;strokeColor=none;fillColor=none;fontSize=18;fontColor=#333333;" vertex="1" parent="1">
+          <mxGeometry x="250" y="20" width="650" height="40" as="geometry"/>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

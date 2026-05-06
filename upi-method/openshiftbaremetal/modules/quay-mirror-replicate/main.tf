@@ -63,9 +63,9 @@ variable "dest_quay_organization" {
 }
 
 variable "ocp_version" {
-  description = "OCP version to replicate (e.g., 4.15)"
+  description = "OCP version to replicate (e.g., 4.20)"
   type        = string
-  default     = "4.15"
+  default     = "4.20"
 }
 
 variable "mirror_operators" {

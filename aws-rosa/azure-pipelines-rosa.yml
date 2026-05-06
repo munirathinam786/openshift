@@ -1,0 +1,106 @@
+# =============================================================================
+# Azure DevOps Pipeline — OpenShift on AWS (ROSA)
+# Builds the AWS network foundation, VPC endpoints, and renders ROSA / ALB assets
+# =============================================================================
+
+trigger:
+  branches:
+    include:
+      - develop
+  paths:
+    include:
+      - aws-rosa/**
+      - docs/aws-rosa/**
+      - docs/diagrams/aws-rosa/**
+
+parameters:
+  - name: terraformAction
+    displayName: Terraform Action
+    type: string
+    default: plan
+    values:
+      - plan
+      - apply
+      - destroy
+
+  - name: runRosaCli
+    displayName: Execute generated ROSA scripts
+    type: boolean
+    default: false
+
+  - name: runAlbSetup
+    displayName: Execute generated ALB setup script
+    type: boolean
+    default: false
+
+variables:
+  - name: TF_IN_AUTOMATION
+    value: "true"
+  - name: TF_INPUT
+    value: "false"
+  - name: WORKING_DIR
+    value: "aws-rosa"
+
+stages:
+  - stage: Validate
+    displayName: Validate ROSA Terraform
+    jobs:
+      - job: FmtValidate
+        pool:
+          name: self-hosted-linux
+        steps:
+          - checkout: self
+          - task: TerraformInstaller@1
+            inputs:
+              terraformVersion: latest
+          - script: |
+              cd $(WORKING_DIR)
+              terraform init -input=false
+              terraform fmt -check -recursive
+              terraform validate
+            displayName: terraform init / fmt / validate
+
+  - stage: Provision
+    displayName: Render ROSA and ALB assets
+    dependsOn: Validate
+    jobs:
+      - job: TerraformApply
+        pool:
+          name: self-hosted-linux
+        steps:
+          - checkout: self
+          - task: TerraformInstaller@1
+            inputs:
+              terraformVersion: latest
+          - script: |
+              cd $(WORKING_DIR)
+              terraform init -input=false
+              terraform ${{ parameters.terraformAction }} \
+                -var-file=terraform.tfvars \
+                -var auto_execute_rosa=${{ lower(parameters.runRosaCli) }} \
+                -var auto_execute_alb_setup=${{ lower(parameters.runAlbSetup) }} \
+                -input=false \
+                $(if [ "${{ parameters.terraformAction }}" != "plan" ]; then echo "-auto-approve"; fi)
+            displayName: terraform plan/apply/destroy
+            env:
+              AWS_ACCESS_KEY_ID: $(aws-access-key-id)
+              AWS_SECRET_ACCESS_KEY: $(aws-secret-access-key)
+              AWS_SESSION_TOKEN: $(aws-session-token)
+              AWS_DEFAULT_REGION: $(aws-region)
+              OCM_TOKEN: $(ocm-token)
+
+  - stage: Summary
+    displayName: ROSA summary
+    dependsOn: Provision
+    condition: always()
+    jobs:
+      - job: OutputSummary
+        pool:
+          name: self-hosted-linux
+        steps:
+          - checkout: none
+          - script: |
+              echo "ROSA Terraform workflow completed."
+              echo "Review aws-rosa/generated for the preflight, cluster creation, Route 53, and ALB scripts."
+              echo "If runRosaCli=false or runAlbSetup=false, execute the generated scripts manually once credentials and CLI tools are available."
+            displayName: Print summary

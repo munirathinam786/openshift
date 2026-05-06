@@ -6,12 +6,12 @@
 # ---- Cluster ----
 cluster_name = "mgmt-dr-upi"
 base_domain  = "dr.example.com"
-ocp_version  = "4.15"
+ocp_version  = "4.20"
 
 # ---- UPI Install ----
 install_dir      = "/home/kni/upi-install"
-rhcos_iso_url    = "https://mirror.openshift.com/pub/openshift-v4/x86_64/dependencies/rhcos/4.15/latest/rhcos-live.x86_64.iso"
-rhcos_rootfs_url = "https://mirror.openshift.com/pub/openshift-v4/x86_64/dependencies/rhcos/4.15/latest/rhcos-live-rootfs.x86_64.img"
+rhcos_iso_url    = "https://mirror.openshift.com/pub/openshift-v4/x86_64/dependencies/rhcos/4.20/latest/rhcos-live.x86_64.iso"
+rhcos_rootfs_url = "https://mirror.openshift.com/pub/openshift-v4/x86_64/dependencies/rhcos/4.20/latest/rhcos-live-rootfs.x86_64.img"
 install_disk     = "/dev/sda"
 boot_method      = "pxe"
 ignition_http_port = 8080
@@ -49,24 +49,24 @@ quay_admin_user     = "quayadmin"
 quay_admin_password = "REPLACE_QUAY_PASSWORD"
 quay_organization   = "ocp4"
 quay_ca_cert_file   = "/home/kni/quay-certs/quay-ca.pem"
-ocp_channel         = "stable-4.15"
+ocp_channel         = "stable-4.20"
 
 mirror_operators = [
   {
-    catalog = "registry.redhat.io/redhat/redhat-operator-index:v4.15"
+    catalog = "registry.redhat.io/redhat/redhat-operator-index:v4.20"
     packages = [
       { name = "advanced-cluster-management", channel = "release-2.11" },
       { name = "rhacs-operator", channel = "stable" },
       { name = "quay-operator", channel = "stable-3.12" },
-      { name = "odf-operator", channel = "stable-4.16" },
+      { name = "odf-operator", channel = "stable-4.20" },
       { name = "metallb-operator", channel = "stable" },
       { name = "cluster-logging", channel = "stable" },
       { name = "elasticsearch-operator", channel = "stable" },
-      { name = "redhat-oadp-operator", channel = "stable-1.4" },
-      { name = "submariner", channel = "stable-0.18" },
+      { name = "redhat-oadp-operator", channel = "stable-1.6" },
+      { name = "submariner", channel = "stable-0.20" },
       { name = "openshift-gitops-operator", channel = "latest" },
       { name = "openshift-pipelines-operator-rh", channel = "latest" },
-      { name = "odr-hub-operator", channel = "stable-4.16" },
+      { name = "odr-hub-operator", channel = "stable-4.20" },
     ]
   },
 ]
@@ -164,7 +164,7 @@ metallb_l2_advertisements = [
 # ---- ODF ----
 enable_odf           = true
 odf_storage_capacity = "2Ti"
-odf_channel          = "stable-4.16"
+odf_channel          = "stable-4.20"
 
 # ---- ACM (Standby) ----
 enable_acm               = true

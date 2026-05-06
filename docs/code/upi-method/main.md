@@ -1,7 +1,7 @@
 # UPI Method — main.tf
 
 Main orchestration file for the UPI baremetal workload cluster (`upi-method/`).
-Deploys OCP 4.15 on bare metal using **User Provisioned Infrastructure** with OpenShift AI, NVIDIA GPU, ODF, and day-2 operators.
+Deploys OCP 4.20 on bare metal using **User Provisioned Infrastructure** with OpenShift AI, NVIDIA GPU, ODF, and day-2 operators.
 
 ## Key Difference from IPI
 

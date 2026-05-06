@@ -1,7 +1,7 @@
 # UPI DR Secondary — main.tf
 
 Main orchestration file for the UPI DR Secondary workload cluster (`upi-method/openshiftbaremetal-dr/`).
-Deploys OCP 4.15 on bare metal using **UPI** at the DR site with OpenShift AI, GPU, ODF, Submariner **agent**, and ODF DR replication.
+Deploys OCP 4.20 on bare metal using **UPI** at the DR site with OpenShift AI, GPU, ODF, Submariner **agent**, and ODF DR replication.
 
 !!! info "Key Differences from DC Primary"
     - **Submariner role**: Agent (connects to DC Primary broker via `broker_api_url`, `broker_token`, `broker_ca`)

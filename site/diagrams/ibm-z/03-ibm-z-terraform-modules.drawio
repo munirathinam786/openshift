@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="app.diagrams.net" modified="2026-05-06T00:00:00.000Z" agent="GitHub Copilot" version="24.0.0" type="device">
+  <diagram id="ibmz-modules" name="IBM Z Terraform Modules">
+    <mxGraphModel dx="1400" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1200" pageHeight="520" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+        <mxCell id="root" value="&lt;b&gt;Root module&lt;/b&gt;&lt;br&gt;ibm-z/main.tf" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#EF6C00;fontSize=13;fontStyle=1;arcSize=10;" vertex="1" parent="1"><mxGeometry x="460" y="50" width="260" height="70" as="geometry"/></mxCell>
+        <mxCell id="m1" value="install-config&lt;br&gt;Render install-config.yaml" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ECEFF1;strokeColor=#455A64;fontSize=12;fontStyle=1;arcSize=10;" vertex="1" parent="1"><mxGeometry x="80" y="210" width="220" height="70" as="geometry"/></mxCell>
+        <mxCell id="m2" value="agent-config&lt;br&gt;Render agent-config.yaml" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ECEFF1;strokeColor=#455A64;fontSize=12;fontStyle=1;arcSize=10;" vertex="1" parent="1"><mxGeometry x="340" y="210" width="220" height="70" as="geometry"/></mxCell>
+        <mxCell id="m3" value="zvm-guests&lt;br&gt;Guest CSV + wrapper script" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E3F2FD;strokeColor=#1565C0;fontSize=12;fontStyle=1;arcSize=10;" vertex="1" parent="1"><mxGeometry x="600" y="210" width="220" height="70" as="geometry"/></mxCell>
+        <mxCell id="m4" value="cluster-install&lt;br&gt;Copy assets + run installer" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FCE4EC;strokeColor=#C62828;fontSize=12;fontStyle=1;arcSize=10;" vertex="1" parent="1"><mxGeometry x="860" y="210" width="220" height="70" as="geometry"/></mxCell>
+        <mxCell id="o1" value="Generated assets&lt;br&gt;ibm-z/generated/&lt;cluster&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F5E9;strokeColor=#2E7D32;fontSize=12;fontStyle=1;arcSize=10;" vertex="1" parent="1"><mxGeometry x="340" y="360" width="220" height="60" as="geometry"/></mxCell>
+        <mxCell id="o2" value="Bastion host&lt;br&gt;openshift-install" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF8E1;strokeColor=#F57F17;fontSize=12;fontStyle=1;arcSize=10;" vertex="1" parent="1"><mxGeometry x="640" y="360" width="220" height="60" as="geometry"/></mxCell>
+        <mxCell id="e1" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=2;" edge="1" source="root" target="m1" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e2" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=2;" edge="1" source="root" target="m2" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e3" value="optional" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=2;fontSize=10;labelBackgroundColor=#FFFFFF;" edge="1" source="root" target="m3" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e4" value="depends_on" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeWidth=2;fontSize=10;labelBackgroundColor=#FFFFFF;" edge="1" source="root" target="m4" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e5" value="writes YAML" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#2E7D32;strokeWidth=2;fontSize=10;fontColor=#2E7D32;labelBackgroundColor=#FFFFFF;" edge="1" source="m1" target="o1" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e6" value="writes YAML" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#2E7D32;strokeWidth=2;fontSize=10;fontColor=#2E7D32;labelBackgroundColor=#FFFFFF;" edge="1" source="m2" target="o1" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e7" value="writes manifest" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#1565C0;strokeWidth=2;fontSize=10;fontColor=#1565C0;labelBackgroundColor=#FFFFFF;" edge="1" source="m3" target="o1" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e8" value="launches" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#C62828;strokeWidth=2;fontSize=10;fontColor=#C62828;labelBackgroundColor=#FFFFFF;" edge="1" source="m4" target="o2" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="title" value="&lt;b&gt;IBM Z Terraform Module Relationships&lt;/b&gt;" style="text;html=1;align=center;verticalAlign=middle;strokeColor=none;fillColor=none;fontSize=18;fontColor=#333333;" vertex="1" parent="1"><mxGeometry x="300" y="10" width="600" height="30" as="geometry"/></mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

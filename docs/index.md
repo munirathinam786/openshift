@@ -1,6 +1,6 @@
 # Terraform IaC for OpenShift Multi Cluster AirGapped
 
-Welcome to the **Terraform IaC documentation** for deploying a multi-cluster Red Hat OpenShift environment on bare metal in air-gapped mode with NVIDIA GPU support, disaster recovery, and centralized management.
+Welcome to the **Terraform IaC documentation** for deploying Red Hat OpenShift across **x86 bare-metal**, **IBM Z / LinuxONE (`s390x`)**, and **AWS ROSA** architectures, including disaster recovery, managed-cloud, and centralized management patterns.
 
 ## What This Covers
 
@@ -13,10 +13,17 @@ This documentation site provides the complete Terraform codebase and architectur
 | **Management DC** | `ipi-method/mgmt-dc/` | `upi-method/mgmt-dc/` | Cluster management hub | OCP + ACM Hub + ACS Central + Quay Enterprise |
 | **Management DR** | `ipi-method/mgmt-dr/` | `upi-method/mgmt-dr/` | Management standby | OCP + ACM Standby + ACS SecuredCluster + Quay Enterprise |
 
+In addition, the repository now includes:
+
+- an **IBM Z implementation** under `ibm-z/` for agent-based OpenShift deployments on **z/VM guests** or **LPARs**, using a bastion-driven workflow and disconnected registry mirroring
+- an **AWS ROSA implementation** under `aws-rosa/` for **OpenShift Service on AWS** with VPC design, required AWS endpoints, Route 53 helper assets, and ALB operator enablement
+
 ## Documentation Sections
 
 - **[Architecture](architecture/terraform-multi-cluster-overview.md)** — Multi-cluster architecture, network topology, deployment flows, failover workflows
 - **[Cluster Environments](clusters/terraform-ocp-baremetal.md)** — Per-cluster Terraform documentation with module details and variable references
+- **[IBM Z](ibm-z/index.md)** — IBM Z / LinuxONE architecture, deployment flow, code reference, and pipeline guidance
+- **[AWS ROSA](aws-rosa/index.md)** — ROSA architecture, Terraform foundation, endpoint design, ALB enablement, and pipeline guidance
 - **[CI/CD Pipeline](pipeline/terraform-ado-pipeline.md)** — Azure DevOps pipeline for selective multi-cluster deployment
 - **[Terraform Code — IPI](code/ipi-method/openshiftbaremetal/main.md)** — Complete annotated IPI Terraform code for all cluster environments
 - **[Terraform Code — UPI](code/upi-method/main.md)** — Complete annotated UPI Terraform code for all cluster environments
@@ -59,13 +66,27 @@ terraform init && terraform apply
 cd ../../upi-method/openshiftbaremetal/
 vi terraform.tfvars
 terraform init && terraform apply
+
+# === IBM Z Method ===
+cd ../../ibm-z/
+vi terraform.tfvars
+terraform init
+terraform plan
+terraform apply
+
+# === AWS ROSA Method ===
+cd ../aws-rosa/
+vi terraform.tfvars
+terraform init
+terraform plan
+terraform apply
 ```
 
 ## Prerequisites
 
 | Requirement | Details |
 |-------------|---------|
-| **Terraform** | >= 1.5.0 |
+| **Terraform** | >= 1.9.0 |
 | **Bastion Node** | RHEL 8.x/9.x with `kni` user, libvirt, `oc` CLI, `openshift-baremetal-install` (IPI) or `openshift-install` (UPI) |
 | **Pull Secret** | From [console.redhat.com](https://console.redhat.com/openshift/downloads#tool-pull-secret) |
 | **DNS** | A records for `api.<cluster>.<domain>`, `*.apps.<cluster>.<domain>` |
@@ -73,6 +94,28 @@ terraform init && terraform apply
 | **SSH Key Pair** | Ed25519 or RSA for `core` user |
 | **NVIDIA NGC** | NGC API key for GPU driver images |
 | **HAProxy** | External load balancer for API + Ingress **(UPI only — IPI uses built-in keepalived)** |
+
+### IBM Z Specific Requirements
+
+| Requirement | Details |
+|-------------|---------|
+| **Architecture** | `s390x` release payload mirrored internally |
+| **Platform** | IBM Z / LinuxONE nodes running as z/VM guests or LPARs |
+| **Installer Pattern** | Agent-based installer with `install-config.yaml` and `agent-config.yaml` |
+| **Node Storage** | DASD or FCP-backed install device per node |
+| **Node Networking** | Static IP, MAC, gateway, DNS, and interface definitions |
+| **Optional Automation** | z/VM guest creation wrapper invoked from `ibm-z/modules/zvm-guests` |
+
+### AWS ROSA Specific Requirements
+
+| Requirement | Details |
+|-------------|---------|
+| **ROSA CLI** | `rosa` CLI available on the operator workstation or pipeline agent |
+| **AWS APIs** | IAM, EC2, ELB, Route 53, and VPC endpoint permissions in the target account |
+| **STS mode** | The generated workflow assumes STS-based ROSA clusters in `--mode auto` |
+| **Private connectivity** | Interface endpoints for STS, EC2, ELB, ECR, Logs, Monitoring, Route 53, and related services |
+| **ALB support** | `helm` + `oc` available for the generated AWS load balancer controller install script |
+| **Optional DNS** | Route 53 hosted zone ID if you want Terraform-rendered alias helper scripts |
 
 ### Secrets & Credentials
 
@@ -167,12 +210,15 @@ Each cluster uses **non-overlapping CIDRs** for Submariner cross-cluster routing
 ## Running This Documentation Locally
 
 ```bash
-# Using Podman Compose
-podman-compose up -d --build
+# Preferred: use Podman with the repository compose file
+podman compose up -d --build
 
 # Or build and run manually with Podman
-podman build -t terraform-iac-docs -f Containerfile .
-podman run -d -p 8000:8000 -v ./:/docs --name terraform-iac-docs terraform-iac-docs
+podman build -t localhost/terraform-iac-docs:local.1.0.0 -f Containerfile .
+podman run -d -p 8000:8000 -v ./:/docs:Z --name terraform-iac-docs localhost/terraform-iac-docs:local.1.0.0
 
 # Access at http://localhost:8000
 ```
+
+!!! tip "Podman is the supported local container runtime"
+    Use `podman compose` with `compose.yaml` for local documentation preview and validation. The legacy `docker-compose.yaml` file is kept only for compatibility with tooling that still looks for that filename.

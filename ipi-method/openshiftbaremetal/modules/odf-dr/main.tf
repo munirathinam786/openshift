@@ -87,7 +87,7 @@ resource "null_resource" "odf_dr_operator" {
         name: odr-cluster-operator
         namespace: openshift-operators
       spec:
-        channel: stable-4.16
+        channel: stable-4.20
         installPlanApproval: Automatic
         name: odr-cluster-operator
         source: redhat-operators

@@ -24,7 +24,7 @@ variable "base_domain" {
 variable "ocp_version" {
   description = "OpenShift version to deploy"
   type        = string
-  default     = "4.15"
+  default     = "4.20"
 }
 
 # ---- Networking ----
@@ -204,9 +204,9 @@ variable "quay_ca_cert_file" {
 }
 
 variable "ocp_channel" {
-  description = "OCP update channel for oc-mirror (e.g. stable-4.15)"
+  description = "OCP update channel for oc-mirror (e.g. stable-4.20)"
   type        = string
-  default     = "stable-4.15"
+  default     = "stable-4.20"
 }
 
 variable "mirror_operators" {
@@ -220,11 +220,11 @@ variable "mirror_operators" {
   }))
   default = [
     {
-      catalog = "registry.redhat.io/redhat/redhat-operator-index:v4.15"
+      catalog = "registry.redhat.io/redhat/redhat-operator-index:v4.20"
       packages = [
         { name = "nfd", channel = "stable" },
-        { name = "gpu-operator-certified", channel = "v24.6" },
-        { name = "odf-operator", channel = "stable-4.16" },
+        { name = "gpu-operator-certified", channel = "v26.3" },
+        { name = "odf-operator", channel = "stable-4.20" },
         { name = "kubernetes-nmstate-operator", channel = "stable" },
         { name = "metallb-operator", channel = "stable" },
         { name = "sriov-network-operator", channel = "stable" },
@@ -238,9 +238,9 @@ variable "mirror_operators" {
       ]
     },
     {
-      catalog = "registry.redhat.io/redhat/certified-operator-index:v4.15"
+      catalog = "registry.redhat.io/redhat/certified-operator-index:v4.20"
       packages = [
-        { name = "gpu-operator-certified", channel = "v24.6" },
+        { name = "gpu-operator-certified", channel = "v26.3" },
       ]
     },
   ]
@@ -275,7 +275,7 @@ variable "nls_token_file" {
 variable "vgpu_driver_version" {
   description = "NVIDIA vGPU guest driver version"
   type        = string
-  default     = "550.90.07"
+  default     = "560.35.03"
 }
 
 variable "vgpu_driver_image" {
@@ -371,7 +371,7 @@ variable "odf_storage_capacity" {
 variable "odf_channel" {
   description = "ODF operator channel"
   type        = string
-  default     = "stable-4.16"
+  default     = "stable-4.20"
 }
 
 # ---- OpenShift AI ----
@@ -530,7 +530,7 @@ variable "enable_cluster_logging" {
 variable "logging_channel" {
   description = "OLM subscription channel for Cluster Logging operator"
   type        = string
-  default     = "stable-5.9"
+  default     = "stable-6.2"
 }
 variable "log_store_type" {
   description = "Log store backend: elasticsearch or lokistack"
@@ -618,7 +618,7 @@ variable "enable_oadp" {
 variable "oadp_channel" {
   description = "OLM subscription channel for OADP operator"
   type        = string
-  default     = "stable-1.4"
+  default     = "stable-1.6"
 }
 variable "oadp_dpa_name" {
   description = "DataProtectionApplication CR name"

@@ -116,7 +116,7 @@ resource "null_resource" "postgresql" {
       "        fsGroup: 26",
       "      containers:",
       "        - name: postgresql",
-      "          image: registry.redhat.io/rhel9/postgresql-15:latest",
+      "          image: registry.redhat.io/rhel9/postgresql-16:latest",
       "          ports:",
       "            - containerPort: 5432",
       "              name: postgresql",

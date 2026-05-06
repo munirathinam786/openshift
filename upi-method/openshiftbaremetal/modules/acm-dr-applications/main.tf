@@ -126,7 +126,7 @@ resource "null_resource" "odr_hub_operator" {
         name: odr-hub-operator
         namespace: openshift-operators
       spec:
-        channel: stable-4.16
+        channel: stable-4.20
         installPlanApproval: Automatic
         name: odr-hub-operator
         source: redhat-operators

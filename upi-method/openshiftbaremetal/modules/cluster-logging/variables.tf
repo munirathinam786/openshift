@@ -24,7 +24,7 @@ variable "bastion_ssh_key" {
 variable "logging_channel" {
   description = "OLM subscription channel for Cluster Logging operator"
   type        = string
-  default     = "stable-5.9"
+  default     = "stable-6.2"
 }
 
 variable "log_store_type" {

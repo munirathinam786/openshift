@@ -1,13 +1,13 @@
 # Author: Sathishkumar Munirathinam
 
-# Run with podman-compose
-# podman-compose build --no-cache
-# podman-compose up -d --build
+# Legacy compose filename retained for compatibility.
+# Preferred local workflow uses Podman with ./compose.yaml:
+#   podman compose up -d --build
 
 services:
   terraform-iac-docs:
     restart: always
-    image: "terraform-iac-docs:local.1.0.0"
+    image: "localhost/terraform-iac-docs:local.1.0.0"
     build:
       context: ./
       dockerfile: ./Containerfile
@@ -15,6 +15,6 @@ services:
     container_name: terraform-iac-docs
     tty: true
     volumes:
-      - ./:/docs
+      - ./:/docs:Z
     ports:
       - "8000:8000"

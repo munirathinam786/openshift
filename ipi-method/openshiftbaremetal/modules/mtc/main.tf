@@ -14,7 +14,7 @@ variable "bastion_ssh_key" { type = string }
 # ---- Operator ----
 variable "mtc_channel" {
   type    = string
-  default = "release-v1.8"
+  default = "release-v1.10"
 }
 variable "mtc_install_plan_approval" {
   type    = string

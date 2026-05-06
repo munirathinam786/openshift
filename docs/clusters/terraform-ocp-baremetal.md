@@ -112,7 +112,7 @@ Before running Terraform, ensure the following are in place:
 
 | Requirement | Details |
 |-------------|---------|
-| **Terraform** | >= 1.5.0 |
+| **Terraform** | >= 1.9.0 |
 | **Bastion/Provisioner Node** | RHEL 8.x/9.x with `kni` user, libvirt, qemu-kvm, `oc` CLI, `openshift-baremetal-install` |
 | **Pull Secret** | Downloaded from [console.redhat.com](https://console.redhat.com/openshift/downloads#tool-pull-secret) |
 | **DNS** | A records for `api.<cluster>.<domain>`, `*.apps.<cluster>.<domain>`, master/worker nodes, etcd SRV records |
@@ -313,8 +313,8 @@ This module:
 | Operator | Channel | Catalog |
 |----------|---------|---------|
 | NFD | stable | redhat-operators |
-| GPU Operator | v24.6 | certified-operators |
-| ODF | stable-4.16 | redhat-operators |
+| GPU Operator | v26.3 | certified-operators |
+| ODF | stable-4.20 | redhat-operators |
 | NMState | stable | redhat-operators |
 | MetalLB | stable | redhat-operators |
 | SR-IOV | stable | redhat-operators |
@@ -325,9 +325,9 @@ This module:
 | RHOAI | stable | redhat-operators |
 | Cluster Logging | stable | redhat-operators |
 | Elasticsearch | stable | redhat-operators |
-| Submariner | stable-0.18 | redhat-operators |
-| OADP (redhat-oadp-operator) | stable-1.4 | redhat-operators |
-| ODR (odr-cluster-operator) | stable-4.16 | redhat-operators |
+| Submariner | stable-0.20 | redhat-operators |
+| OADP (redhat-oadp-operator) | stable-1.6 | redhat-operators |
+| ODR (odr-cluster-operator) | stable-4.20 | redhat-operators |
 
 ### 4. OCP Baremetal Install (`modules/ocp-baremetal/`)
 
@@ -335,7 +335,7 @@ Generates `install-config.yaml` and runs `openshift-baremetal-install` on the ba
 
 **Key Configuration:**
 
-- **Network Type**: OVNKubernetes (mandatory OCP 4.15+)
+- **Network Type**: OVNKubernetes (mandatory OCP 4.20+)
 - **Bond Interface**: `bond0` — 802.3ad LACP, MTU 9000
 - **BMC Protocol**: Redfish Virtual Media (`idrac-virtualmedia://` or `redfish-virtualmedia://`)
 - **Boot Mode**: UEFI
@@ -513,7 +513,7 @@ Deploys Submariner for **cross-cluster networking** between DC Primary and DR Se
 
 **What it deploys:**
 
-1. **Submariner Operator** — from `redhat-operators` catalog, `stable-0.18` channel
+1. **Submariner Operator** — from `redhat-operators` catalog, `stable-0.20` channel
 2. **Gateway node labels** — marks worker nodes as Submariner gateways
 3. **Broker CR** — establishes the broker (DC Primary only)
 4. **Submariner CR** — configures IPsec tunnel, service discovery, cluster CIDR registration
@@ -632,7 +632,7 @@ oc get csv -A          # Installed operators
 |----------|------|---------|-------------|
 | `cluster_name` | string | — | OCP cluster name |
 | `base_domain` | string | — | Base DNS domain |
-| `ocp_version` | string | `4.15` | OpenShift version |
+| `ocp_version` | string | `4.20` | OpenShift version |
 | `machine_network_cidr` | string | — | Machine network CIDR |
 | `cluster_network_cidr` | string | `10.128.0.0/14` | Pod network CIDR |
 | `service_network_cidr` | string | `172.30.0.0/16` | Service network CIDR |
@@ -667,7 +667,7 @@ oc get csv -A          # Installed operators
 |----------|------|---------|-------------|
 | `ngc_api_key` | string | — | NVIDIA NGC API key |
 | `nls_token_file` | string | — | NLS license token file path |
-| `vgpu_driver_version` | string | `550.90.07` | vGPU driver version |
+| `vgpu_driver_version` | string | `560.35.03` | vGPU driver version |
 | `gpu_rdma_enabled` | bool | `false` | Enable GPUDirect RDMA |
 | `entitlement_pem_file` | string | — | Red Hat entitlement PEM |
 

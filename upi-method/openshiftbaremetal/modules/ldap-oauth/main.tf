@@ -191,7 +191,7 @@ resource "null_resource" "ldap_group_sync" {
       "          restartPolicy: Never",
       "          containers:",
       "          - name: ldap-group-sync",
-      "            image: registry.redhat.io/openshift4/ose-cli:v4.15",
+      "            image: registry.redhat.io/openshift4/ose-cli:v4.20",
       "            command:",
       "            - /bin/bash",
       "            - -c",

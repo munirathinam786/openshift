@@ -372,4 +372,4 @@ The **LDAP/OAuth module** configures OpenShift to authenticate users against a c
 | `disable_kubeadmin` | bool | `false` | Remove kubeadmin user (irreversible) |
 
 !!! info "Mirrored Operators (Updated)"
-    The UPI clusters now also mirror **Submariner** (`stable-0.18`), **OADP** (`stable-1.4`), and **ODR** (`stable-4.16`) operators for workload clusters.
+    The UPI clusters now also mirror **Submariner** (`stable-0.20`), **OADP** (`stable-1.6`), and **ODR** (`stable-4.20`) operators for workload clusters.

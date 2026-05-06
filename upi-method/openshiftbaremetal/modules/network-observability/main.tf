@@ -80,7 +80,7 @@ resource "null_resource" "network_observability_operator" {
       "  name: loki-operator",
       "  namespace: openshift-operators-redhat",
       "spec:",
-      "  channel: stable-6.1",
+      "  channel: stable-6.2",
       "  installPlanApproval: Automatic",
       "  name: loki-operator",
       "  source: redhat-operators",

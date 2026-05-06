@@ -19,7 +19,7 @@ Configures ACM Hub, ACS Central, and Quay Enterprise with ODF storage.
 | ACS | Central + SecuredCluster, `stable` channel | Security scanning |
 | Quay Enterprise | `stable-3.12`, all components managed | Container registry |
 | LDAP | `enable_ldap = true` | Corporate LDAP identity provider |
-| Mirror Operators | Added `redhat-oadp-operator` (stable-1.4), `submariner` (stable-0.18), `odr-hub-operator` (stable-4.16) | Updated |
+| Mirror Operators | Added `redhat-oadp-operator` (stable-1.6), `submariner` (stable-0.20), `odr-hub-operator` (stable-4.20) | Updated |
 
 !!! info "ACM Additional Var Files"
     ACM Cluster Import and DR Applications use separate tfvars files:

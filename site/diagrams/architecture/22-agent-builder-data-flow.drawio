@@ -1,12 +1,117 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<mxfile host="app.diagrams.net" modified="2026-04-09" agent="" etag="" version="24.0.0" type="device">
+<mxfile host="app.diagrams.net" modified="2026-04-09T00:00:00.000Z" agent="GitHub Copilot" version="24.0.0" type="device">
   <diagram id="agent-builder-dataflow" name="Agent Builder Data Flow">
     <mxGraphModel dx="1400" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1400" pageHeight="900" math="0" shadow="0">
       <root>
-        <mxCell id="0" />
-        <mxCell id="1" parent="0" />
-        <mxCell id="title" value="&lt;b&gt;Agent Builder — Data Flow: Agent Creation to Deployment&lt;/b&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontSize=18;fontColor=#1a1a2e;" vertex="1" parent="1">
-          <mxGeometry x="350" y="10" width="500" height="30" as="geometry" />
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+        <mxCell id="title" value="&lt;b&gt;Agent Builder — Data Flow: Agent Creation to Deployment&lt;/b&gt;&lt;br&gt;&lt;i&gt;End-to-end workflow from user design to live agent on OpenShift&lt;/i&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=18;fontColor=#333333;" vertex="1" parent="1">
+          <mxGeometry x="200" y="10" width="1000" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="step1" value="&lt;b&gt;1. Design Agent&lt;/b&gt;" style="swimlane;startSize=35;fillColor=#2E7D32;fontColor=#FFFFFF;strokeColor=#2E7D32;rounded=1;fontSize=13;fontStyle=1;whiteSpace=wrap;html=1;container=1;collapsible=0;" vertex="1" parent="1">
+          <mxGeometry x="20" y="80" width="260" height="170" as="geometry"/>
+        </mxCell>
+        <mxCell id="s1a" value="&lt;b&gt;Agent Builder UI&lt;/b&gt;&lt;br&gt;&lt;i&gt;Visual drag-and-drop&lt;/i&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F5E9;strokeColor=#2E7D32;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="step1">
+          <mxGeometry x="15" y="45" width="230" height="45" as="geometry"/>
+        </mxCell>
+        <mxCell id="s1b" value="Define: name, tools,&lt;br&gt;system prompt, model" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#333333;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="step1">
+          <mxGeometry x="15" y="100" width="230" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="step2" value="&lt;b&gt;2. Save &amp; Configure&lt;/b&gt;" style="swimlane;startSize=35;fillColor=#1565C0;fontColor=#FFFFFF;strokeColor=#1565C0;rounded=1;fontSize=13;fontStyle=1;whiteSpace=wrap;html=1;container=1;collapsible=0;" vertex="1" parent="1">
+          <mxGeometry x="310" y="80" width="260" height="170" as="geometry"/>
+        </mxCell>
+        <mxCell id="s2a" value="&lt;b&gt;Agent Builder API&lt;/b&gt;&lt;br&gt;&lt;i&gt;POST /agents&lt;/i&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E3F2FD;strokeColor=#1565C0;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="step2">
+          <mxGeometry x="15" y="45" width="230" height="45" as="geometry"/>
+        </mxCell>
+        <mxCell id="s2b" value="Save to &lt;b&gt;MongoDB&lt;/b&gt;&lt;br&gt;Register in &lt;b&gt;Agent Registry&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#333333;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="step2">
+          <mxGeometry x="15" y="100" width="230" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="step3" value="&lt;b&gt;3. Orchestrate Workflow&lt;/b&gt;" style="swimlane;startSize=35;fillColor=#7B1FA2;fontColor=#FFFFFF;strokeColor=#7B1FA2;rounded=1;fontSize=13;fontStyle=1;whiteSpace=wrap;html=1;container=1;collapsible=0;" vertex="1" parent="1">
+          <mxGeometry x="600" y="80" width="260" height="170" as="geometry"/>
+        </mxCell>
+        <mxCell id="s3a" value="&lt;b&gt;Temporal Server&lt;/b&gt;&lt;br&gt;&lt;i&gt;Workflow Execution&lt;/i&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F3E5F5;strokeColor=#7B1FA2;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="step3">
+          <mxGeometry x="15" y="45" width="230" height="45" as="geometry"/>
+        </mxCell>
+        <mxCell id="s3b" value="&lt;b&gt;Temporal Workers&lt;/b&gt;&lt;br&gt;Execute activities:&lt;br&gt;LLM calls, tool runs" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#333333;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="step3">
+          <mxGeometry x="15" y="100" width="230" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="step4" value="&lt;b&gt;4. LLM Inference&lt;/b&gt;" style="swimlane;startSize=35;fillColor=#EE0000;fontColor=#FFFFFF;strokeColor=#CC0000;rounded=1;fontSize=13;fontStyle=1;whiteSpace=wrap;html=1;container=1;collapsible=0;" vertex="1" parent="1">
+          <mxGeometry x="890" y="80" width="260" height="170" as="geometry"/>
+        </mxCell>
+        <mxCell id="s4a" value="&lt;b&gt;LiteLLM Proxy&lt;/b&gt;&lt;br&gt;&lt;i&gt;Route to best model&lt;/i&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFCDD2;strokeColor=#C62828;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="step4">
+          <mxGeometry x="15" y="45" width="230" height="45" as="geometry"/>
+        </mxCell>
+        <mxCell id="s4b" value="Ollama (local) or&lt;br&gt;Cloud LLM providers" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#333333;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="step4">
+          <mxGeometry x="15" y="100" width="230" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="step5" value="&lt;b&gt;5. Tool Execution&lt;/b&gt;" style="swimlane;startSize=35;fillColor=#EF6C00;fontColor=#FFFFFF;strokeColor=#EF6C00;rounded=1;fontSize=13;fontStyle=1;whiteSpace=wrap;html=1;container=1;collapsible=0;" vertex="1" parent="1">
+          <mxGeometry x="20" y="300" width="260" height="170" as="geometry"/>
+        </mxCell>
+        <mxCell id="s5a" value="&lt;b&gt;Tool Catalog&lt;/b&gt;&lt;br&gt;&lt;i&gt;MCP Server • :8090&lt;/i&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#EF6C00;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="step5">
+          <mxGeometry x="15" y="45" width="230" height="45" as="geometry"/>
+        </mxCell>
+        <mxCell id="s5b" value="Agent picks tools from&lt;br&gt;catalog, Workers execute" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#333333;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="step5">
+          <mxGeometry x="15" y="100" width="230" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="step6" value="&lt;b&gt;6. Deploy Agent&lt;/b&gt;" style="swimlane;startSize=35;fillColor=#1565C0;fontColor=#FFFFFF;strokeColor=#1565C0;rounded=1;fontSize=13;fontStyle=1;whiteSpace=wrap;html=1;container=1;collapsible=0;" vertex="1" parent="1">
+          <mxGeometry x="310" y="300" width="260" height="170" as="geometry"/>
+        </mxCell>
+        <mxCell id="s6a" value="&lt;b&gt;Agent Deploy Service&lt;/b&gt;&lt;br&gt;&lt;i&gt;FastAPI • :8001&lt;/i&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E3F2FD;strokeColor=#1565C0;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="step6">
+          <mxGeometry x="15" y="45" width="230" height="45" as="geometry"/>
+        </mxCell>
+        <mxCell id="s6b" value="Creates runtime pod&lt;br&gt;in agent-builder ns" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#333333;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="step6">
+          <mxGeometry x="15" y="100" width="230" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="step7" value="&lt;b&gt;7. Agent-to-Agent&lt;/b&gt;" style="swimlane;startSize=35;fillColor=#7B1FA2;fontColor=#FFFFFF;strokeColor=#7B1FA2;rounded=1;fontSize=13;fontStyle=1;whiteSpace=wrap;html=1;container=1;collapsible=0;" vertex="1" parent="1">
+          <mxGeometry x="600" y="300" width="260" height="170" as="geometry"/>
+        </mxCell>
+        <mxCell id="s7a" value="&lt;b&gt;A2A Gateway&lt;/b&gt;&lt;br&gt;&lt;i&gt;Agent-to-Agent • :8003&lt;/i&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F3E5F5;strokeColor=#7B1FA2;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="step7">
+          <mxGeometry x="15" y="45" width="230" height="45" as="geometry"/>
+        </mxCell>
+        <mxCell id="s7b" value="Deployed agents talk&lt;br&gt;to each other via A2A" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#333333;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="step7">
+          <mxGeometry x="15" y="100" width="230" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="step8" value="&lt;b&gt;8. Live Agent&lt;/b&gt;" style="swimlane;startSize=35;fillColor=#2E7D32;fontColor=#FFFFFF;strokeColor=#2E7D32;rounded=1;fontSize=13;fontStyle=1;whiteSpace=wrap;html=1;container=1;collapsible=0;" vertex="1" parent="1">
+          <mxGeometry x="890" y="300" width="260" height="170" as="geometry"/>
+        </mxCell>
+        <mxCell id="s8a" value="&lt;b&gt;Runtime Pod&lt;/b&gt;&lt;br&gt;&lt;i&gt;Deployed Agent on OCP&lt;/i&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F5E9;strokeColor=#2E7D32;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="step8">
+          <mxGeometry x="15" y="45" width="230" height="45" as="geometry"/>
+        </mxCell>
+        <mxCell id="s8b" value="Serves users via&lt;br&gt;OpenShift Route" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#333333;fontSize=11;fontStyle=0;fontColor=#333333;arcSize=10;" vertex="1" parent="step8">
+          <mxGeometry x="15" y="100" width="230" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="data_stores" value="&lt;b&gt;Persistent Data Stores&lt;/b&gt;" style="swimlane;startSize=35;fillColor=#F57F17;fontColor=#FFFFFF;strokeColor=#F57F17;rounded=1;fontSize=13;fontStyle=1;whiteSpace=wrap;html=1;container=1;collapsible=0;" vertex="1" parent="1">
+          <mxGeometry x="20" y="520" width="1130" height="90" as="geometry"/>
+        </mxCell>
+        <mxCell id="pg_d" value="&lt;b&gt;PostgreSQL 15&lt;/b&gt;&lt;br&gt;&lt;i&gt;Temporal + LiteLLM + Registry&lt;/i&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF8E1;strokeColor=#F57F17;fontSize=11;fontStyle=1;fontColor=#333333;arcSize=10;" vertex="1" parent="data_stores">
+          <mxGeometry x="20" y="40" width="240" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="mongo_d" value="&lt;b&gt;MongoDB 6&lt;/b&gt;&lt;br&gt;&lt;i&gt;Agent Metadata + Workflows&lt;/i&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF8E1;strokeColor=#F57F17;fontSize=11;fontStyle=1;fontColor=#333333;arcSize=10;" vertex="1" parent="data_stores">
+          <mxGeometry x="290" y="40" width="240" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="redis_d" value="&lt;b&gt;Redis 7&lt;/b&gt;&lt;br&gt;&lt;i&gt;LLM Cache&lt;/i&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF8E1;strokeColor=#F57F17;fontSize=11;fontStyle=1;fontColor=#333333;arcSize=10;" vertex="1" parent="data_stores">
+          <mxGeometry x="560" y="40" width="160" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="ollama_d" value="&lt;b&gt;Ollama PVC&lt;/b&gt;&lt;br&gt;&lt;i&gt;100Gi Model Store&lt;/i&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF8E1;strokeColor=#F57F17;fontSize=11;fontStyle=1;fontColor=#333333;arcSize=10;" vertex="1" parent="data_stores">
+          <mxGeometry x="750" y="40" width="180" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="ef1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#333333;strokeWidth=2;" edge="1" source="step1" target="step2" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="ef2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#333333;strokeWidth=2;" edge="1" source="step2" target="step3" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="ef3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#333333;strokeWidth=2;" edge="1" source="step3" target="step4" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="ef4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#333333;strokeWidth=2;" edge="1" source="step5" target="step6" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="ef5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#333333;strokeWidth=2;" edge="1" source="step6" target="step7" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="ef6" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#333333;strokeWidth=2;" edge="1" source="step7" target="step8" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
         </mxCell>
       </root>
     </mxGraphModel>

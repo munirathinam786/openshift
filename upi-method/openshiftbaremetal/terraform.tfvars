@@ -6,7 +6,7 @@
 # ---- Cluster ----
 cluster_name = "ocp-ai-upi"
 base_domain  = "example.com"
-ocp_version  = "4.15"
+ocp_version  = "4.20"
 
 # ---- Networking ----
 machine_network_cidr        = "10.142.41.0/24"
@@ -32,8 +32,8 @@ bastion_ssh_private_key_file = "~/.ssh/id_ed25519"
 install_dir = "/home/kni/ocp-install"
 
 # ---- RHCOS Images (UPI — manual boot) ----
-rhcos_iso_url    = "http://10.142.41.10:8080/rhcos-4.15.0-x86_64-live.x86_64.iso"
-rhcos_rootfs_url = "http://10.142.41.10:8080/rhcos-4.15.0-x86_64-live-rootfs.x86_64.img"
+rhcos_iso_url    = "http://10.142.41.10:8080/rhcos-4.20.0-x86_64-live.x86_64.iso"
+rhcos_rootfs_url = "http://10.142.41.10:8080/rhcos-4.20.0-x86_64-live-rootfs.x86_64.img"
 install_disk     = "/dev/sda"
 
 # ---- Boot Method ----
@@ -56,14 +56,14 @@ quay_admin_user     = "quayadmin"
 quay_admin_password = "REPLACE_QUAY_PASSWORD"
 quay_organization   = "ocp4"
 quay_ca_cert_file   = "/home/kni/quay-certs/quay-ca.pem"
-ocp_channel         = "stable-4.15"
+ocp_channel         = "stable-4.20"
 
 mirror_operators = [
   {
-    catalog = "registry.redhat.io/redhat/redhat-operator-index:v4.15"
+    catalog = "registry.redhat.io/redhat/redhat-operator-index:v4.20"
     packages = [
       { name = "nfd", channel = "stable" },
-      { name = "odf-operator", channel = "stable-4.16" },
+      { name = "odf-operator", channel = "stable-4.20" },
       { name = "kubernetes-nmstate-operator", channel = "stable" },
       { name = "metallb-operator", channel = "stable" },
       { name = "sriov-network-operator", channel = "stable" },
@@ -74,16 +74,16 @@ mirror_operators = [
       { name = "rhods-operator", channel = "stable" },
       { name = "cluster-logging", channel = "stable" },
       { name = "elasticsearch-operator", channel = "stable" },
-      { name = "submariner", channel = "stable-0.18" },
-      { name = "redhat-oadp-operator", channel = "stable-1.4" },
-      { name = "odr-cluster-operator", channel = "stable-4.16" },
+      { name = "submariner", channel = "stable-0.20" },
+      { name = "redhat-oadp-operator", channel = "stable-1.6" },
+      { name = "odr-cluster-operator", channel = "stable-4.20" },
       { name = "openshift-gitops-operator", channel = "latest" },
     ]
   },
   {
-    catalog = "registry.redhat.io/redhat/certified-operator-index:v4.15"
+    catalog = "registry.redhat.io/redhat/certified-operator-index:v4.20"
     packages = [
-      { name = "gpu-operator-certified", channel = "v24.6" },
+      { name = "gpu-operator-certified", channel = "v26.3" },
     ]
   },
 ]
@@ -187,7 +187,7 @@ sriov_networks        = []
 # ---- GPU / NVIDIA ----
 ngc_api_key         = "REPLACE_NGC_API_KEY"
 nls_token_file      = "/path/to/client_configuration_token.tok"
-vgpu_driver_version = "550.90.07"
+vgpu_driver_version = "580.126.20"
 vgpu_driver_image   = "vgpu-guest-driver-5"
 gpu_rdma_enabled    = false
 
@@ -197,7 +197,7 @@ entitlement_pem_file = "/path/to/entitlement.pem"
 # ---- ODF Storage ----
 enable_odf           = true
 odf_storage_capacity = "2Ti"
-odf_channel          = "stable-4.16"
+odf_channel          = "stable-4.20"
 
 # ---- OpenShift AI ----
 enable_openshift_ai = true

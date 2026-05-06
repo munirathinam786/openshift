@@ -154,7 +154,7 @@ In addition to the core management services, two dedicated modules and pipelines
 | **DR Applications** | `acm-dr-applications` | `acm-dr.tfvars` | `azure-pipelines-acm-dr.yml` | DRPolicy + failover/failback/relocate |
 
 !!! note "Mirror Operators"
-    The `odr-hub-operator` (stable-4.16) has been added to `mirror_operators` in all management cluster `terraform.tfvars` files to support disconnected ODR Hub deployment.
+    The `odr-hub-operator` (stable-4.20) has been added to `mirror_operators` in all management cluster `terraform.tfvars` files to support disconnected ODR Hub deployment.
 
 ### 5. Disaster Recovery Failover Workflow
 

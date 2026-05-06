@@ -68,6 +68,16 @@ nav:
     - DR Secondary: "clusters/terraform-dr-secondary.md"
     - Management DC: "clusters/terraform-mgmt-dc.md"
     - Management DR: "clusters/terraform-mgmt-dr.md"
+  - IBM Z:
+    - Overview: "ibm-z/index.md"
+    - Architecture: "ibm-z/architecture.md"
+    - Terraform Code Reference: "ibm-z/code-reference.md"
+    - Pipeline: "ibm-z/pipeline.md"
+  - AWS ROSA:
+    - Overview: "aws-rosa/index.md"
+    - Architecture: "aws-rosa/architecture.md"
+    - Terraform Code Reference: "aws-rosa/code-reference.md"
+    - Pipeline: "aws-rosa/pipeline.md"
   - Agent Builder Factory:
     - Deployment Guide: "clusters/terraform-agent-builder.md"
     - Pipeline (Day 1): "pipeline/terraform-agent-builder-pipeline.md"
@@ -85,7 +95,18 @@ nav:
     - MTC Container Migration Pipeline: "pipeline/terraform-mtc-pipeline.md"
     - Ceph Storage Migration Pipeline: "pipeline/terraform-ceph-migration-pipeline.md"
 
-  - Terraform Code:
+  - Terraform Code Walkthrough (Learn to Write):
+    - Overview — How the Code is Structured: "code/terraform-code-walkthrough.md"
+    - Agent Builder — Step by Step:
+      - Why No AWS Provider? — Air-Gapped Pattern: "code/ipi-method/agent-builder/providers-explained.md"
+      - versions.tf — Providers Explained: "code/ipi-method/agent-builder/versions-walkthrough.md"
+      - variables.tf — Inputs Explained: "code/ipi-method/agent-builder/variables-walkthrough.md"
+      - terraform.tfvars — Values Explained: "code/ipi-method/agent-builder/tfvars-walkthrough.md"
+      - main.tf — Root Orchestration Explained: "code/ipi-method/agent-builder/main-walkthrough.md"
+      - outputs.tf — Outputs Explained: "code/ipi-method/agent-builder/outputs-walkthrough.md"
+      - All 14 Modules — Deep Dive: "code/ipi-method/agent-builder/modules-walkthrough.md"
+
+  - Terraform Code (Reference):
     - IPI DC Primary (ipi-method/openshiftbaremetal):
       - main.tf: "code/ipi-method/openshiftbaremetal/main.md"
       - variables.tf: "code/ipi-method/openshiftbaremetal/variables.md"

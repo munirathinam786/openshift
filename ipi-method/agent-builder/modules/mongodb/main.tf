@@ -80,7 +80,7 @@ resource "null_resource" "mongodb" {
       "        fsGroup: 184",
       "      containers:",
       "        - name: mongodb",
-      "          image: registry.redhat.io/rhel9/mongodb-6:latest",
+      "          image: registry.redhat.io/rhel9/mongodb-7:latest",
       "          ports:",
       "            - containerPort: 27017",
       "              name: mongodb",

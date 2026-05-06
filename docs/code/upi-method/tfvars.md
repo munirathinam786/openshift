@@ -12,8 +12,8 @@ Environment-specific values for the UPI baremetal deployment (`upi-method/`).
 install_dir = "/home/kni/ocp-install"
 
 # ---- RHCOS Images (UPI — manual boot) ----
-rhcos_iso_url    = "http://10.142.41.10:8080/rhcos-4.15.0-x86_64-live.x86_64.iso"
-rhcos_rootfs_url = "http://10.142.41.10:8080/rhcos-4.15.0-x86_64-live-rootfs.x86_64.img"
+rhcos_iso_url    = "http://10.142.41.10:8080/rhcos-4.20.0-x86_64-live.x86_64.iso"
+rhcos_rootfs_url = "http://10.142.41.10:8080/rhcos-4.20.0-x86_64-live-rootfs.x86_64.img"
 install_disk     = "/dev/sda"
 
 # ---- Boot Method ----
@@ -37,7 +37,7 @@ bootstrap_mac = "aa:bb:cc:dd:ee:00"
 # ---- Cluster ----
 cluster_name = "ocp-ai-upi"
 base_domain  = "example.com"
-ocp_version  = "4.15"
+ocp_version  = "4.20"
 
 # ---- Networking ----
 machine_network_cidr        = "10.142.41.0/24"
@@ -63,8 +63,8 @@ bastion_ssh_private_key_file = "~/.ssh/id_ed25519"
 install_dir = "/home/kni/ocp-install"
 
 # ---- RHCOS Images ----
-rhcos_iso_url    = "http://10.142.41.10:8080/rhcos-4.15.0-x86_64-live.x86_64.iso"
-rhcos_rootfs_url = "http://10.142.41.10:8080/rhcos-4.15.0-x86_64-live-rootfs.x86_64.img"
+rhcos_iso_url    = "http://10.142.41.10:8080/rhcos-4.20.0-x86_64-live.x86_64.iso"
+rhcos_rootfs_url = "http://10.142.41.10:8080/rhcos-4.20.0-x86_64-live-rootfs.x86_64.img"
 install_disk     = "/dev/sda"
 boot_method      = "pxe"
 ignition_http_port = 8080

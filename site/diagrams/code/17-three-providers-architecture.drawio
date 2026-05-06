@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="app.diagrams.net" modified="2026-04-22T00:00:00.000Z" agent="GitHub Copilot" version="24.0.0" type="device">
+  <diagram id="three-providers" name="Three Providers Architecture">
+    <mxGraphModel dx="1200" dy="700" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="670" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+        <mxCell id="title" value="The Three Providers — How They Work Together" style="text;html=1;align=center;verticalAlign=middle;strokeColor=none;fillColor=none;fontColor=#37474F;fontSize=16;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="280" y="10" width="450" height="35" as="geometry"/>
+        </mxCell>
+        <mxCell id="vtf" value="versions.tf&#xa;terraform { required_providers { ... } }" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#37474F;fontColor=#FFFFFF;strokeColor=#263238;fontSize=12;fontStyle=1;arcSize=20;shadow=1;" vertex="1" parent="1">
+          <mxGeometry x="380" y="55" width="280" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="p_null" value="hashicorp/null&#xa;~&gt; 3.2" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#C62828;fontColor=#FFFFFF;strokeColor=#B71C1C;fontSize=13;fontStyle=1;arcSize=20;shadow=1;" vertex="1" parent="1">
+          <mxGeometry x="30" y="155" width="180" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="p_local" value="hashicorp/local&#xa;~&gt; 2.4" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E65100;fontColor=#FFFFFF;strokeColor=#BF360C;fontSize=13;fontStyle=1;arcSize=20;shadow=1;" vertex="1" parent="1">
+          <mxGeometry x="420" y="155" width="180" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="p_tls" value="hashicorp/tls&#xa;~&gt; 4.0 (reserved)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#78909C;fontColor=#FFFFFF;strokeColor=#546E7A;fontSize=13;fontStyle=1;arcSize=20;shadow=1;dashed=1;dashPattern=8 4;" vertex="1" parent="1">
+          <mxGeometry x="830" y="155" width="180" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="ev1" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#546E7A;strokeWidth=2;" edge="1" source="vtf" target="p_null" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="ev2" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#546E7A;strokeWidth=2;" edge="1" source="vtf" target="p_local" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="ev3" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#78909C;strokeWidth=2;dashed=1;" edge="1" source="vtf" target="p_tls" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="lbl_null" value="PRIMARY — Orchestration Engine" style="text;html=1;align=center;verticalAlign=middle;strokeColor=none;fillColor=none;fontSize=10;fontStyle=1;fontColor=#C62828;" vertex="1" parent="1">
+          <mxGeometry x="30" y="215" width="180" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="lbl_local" value="SECONDARY — Config Generator" style="text;html=1;align=center;verticalAlign=middle;strokeColor=none;fillColor=none;fontSize=10;fontStyle=1;fontColor=#E65100;" vertex="1" parent="1">
+          <mxGeometry x="420" y="215" width="180" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="lbl_tls" value="RESERVED — Not Active" style="text;html=1;align=center;verticalAlign=middle;strokeColor=none;fillColor=none;fontSize=10;fontStyle=1;fontColor=#78909C;" vertex="1" parent="1">
+          <mxGeometry x="830" y="215" width="180" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="n_res" value="null_resource" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EF9A9A;fontColor=#B71C1C;strokeColor=#C62828;fontSize=11;fontStyle=1;arcSize=15;shadow=1;" vertex="1" parent="1">
+          <mxGeometry x="45" y="250" width="150" height="35" as="geometry"/>
+        </mxCell>
+        <mxCell id="n_conn" value="connection { } block&#xa;type = &quot;ssh&quot;&#xa;host = var.bastion_host&#xa;user = var.bastion_user&#xa;private_key = file(var.bastion_ssh_key)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFCDD2;fontColor=#B71C1C;strokeColor=#EF5350;fontSize=9;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="10" y="305" width="220" height="75" as="geometry"/>
+        </mxCell>
+        <mxCell id="n_re" value="provisioner &quot;remote-exec&quot;&#xa;oc apply -f - &lt;&lt;EOF ... EOF&#xa;openshift-baremetal-install create cluster&#xa;oc create secret --dry-run | oc apply" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFCDD2;fontColor=#B71C1C;strokeColor=#EF5350;fontSize=9;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="10" y="400" width="220" height="70" as="geometry"/>
+        </mxCell>
+        <mxCell id="n_fp" value="provisioner &quot;file&quot;&#xa;Uploads files to bastion via SCP" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFCDD2;fontColor=#B71C1C;strokeColor=#EF5350;fontSize=9;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="10" y="490" width="220" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="n_bastion" value="Bastion Host&#xa;10.142.41.10" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#B71C1C;fontColor=#FFFFFF;strokeColor=#7F0000;fontSize=12;fontStyle=1;arcSize=20;shadow=1;" vertex="1" parent="1">
+          <mxGeometry x="35" y="560" width="170" height="45" as="geometry"/>
+        </mxCell>
+        <mxCell id="ne1" style="rounded=1;strokeColor=#C62828;strokeWidth=1;" edge="1" source="p_null" target="n_res" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="ne2" style="rounded=1;strokeColor=#C62828;strokeWidth=1;" edge="1" source="n_res" target="n_conn" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="ne3" style="rounded=1;strokeColor=#C62828;strokeWidth=1;" edge="1" source="n_conn" target="n_re" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="ne3b" style="rounded=1;strokeColor=#C62828;strokeWidth=1;" edge="1" source="n_conn" target="n_fp" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="ne4" style="rounded=1;strokeColor=#C62828;strokeWidth=2;" edge="1" source="n_re" target="n_bastion" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="ne5" style="rounded=1;strokeColor=#C62828;strokeWidth=2;" edge="1" source="n_fp" target="n_bastion" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="l_res" value="local_file" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFE0B2;fontColor=#BF360C;strokeColor=#E65100;fontSize=11;fontStyle=1;arcSize=15;shadow=1;" vertex="1" parent="1">
+          <mxGeometry x="435" y="250" width="150" height="35" as="geometry"/>
+        </mxCell>
+        <mxCell id="l_tpl" value="templatefile()&#xa;Renders .tftpl templates&#xa;with variable values" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF3E0;fontColor=#BF360C;strokeColor=#FF8F00;fontSize=10;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="400" y="310" width="230" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="l_out1" value="install-config.yaml&#xa;OCP cluster install config" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF3E0;fontColor=#BF360C;strokeColor=#FF8F00;fontSize=10;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="400" y="390" width="160" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="l_out2" value="haproxy.cfg&#xa;Load balancer config" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF3E0;fontColor=#BF360C;strokeColor=#FF8F00;fontSize=10;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="400" y="450" width="160" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="l_out3" value="imageset-config.yaml&#xa;Mirror registry config" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF3E0;fontColor=#BF360C;strokeColor=#FF8F00;fontSize=10;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="400" y="510" width="160" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="l_disk" value="Local Disk&#xa;modules/*/generated/" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#BF360C;fontColor=#FFFFFF;strokeColor=#7F0000;fontSize=12;fontStyle=1;arcSize=20;shadow=1;" vertex="1" parent="1">
+          <mxGeometry x="415" y="580" width="180" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="le1" style="rounded=1;strokeColor=#E65100;strokeWidth=1;" edge="1" source="p_local" target="l_res" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="le2" style="rounded=1;strokeColor=#E65100;strokeWidth=1;" edge="1" source="l_res" target="l_tpl" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="le3" style="rounded=1;strokeColor=#E65100;strokeWidth=1;" edge="1" source="l_tpl" target="l_out1" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="le4" style="rounded=1;strokeColor=#E65100;strokeWidth=1;" edge="1" source="l_tpl" target="l_out2" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="le5" style="rounded=1;strokeColor=#E65100;strokeWidth=1;" edge="1" source="l_tpl" target="l_out3" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="le6" style="rounded=1;strokeColor=#E65100;strokeWidth=2;" edge="1" source="l_out1" target="l_disk" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="le7" style="rounded=1;strokeColor=#E65100;strokeWidth=2;" edge="1" source="l_out2" target="l_disk" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="le8" style="rounded=1;strokeColor=#E65100;strokeWidth=2;" edge="1" source="l_out3" target="l_disk" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="t_res" value="No resources currently used&#xa;Reserved for future:&#xa;tls_private_key&#xa;tls_self_signed_cert" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ECEFF1;fontColor=#546E7A;strokeColor=#B0BEC5;fontSize=10;fontStyle=2;arcSize=10;dashed=1;" vertex="1" parent="1">
+          <mxGeometry x="830" y="250" width="180" height="70" as="geometry"/>
+        </mxCell>
+        <mxCell id="te1" style="rounded=1;strokeColor=#78909C;strokeWidth=1;dashed=1;" edge="1" source="p_tls" target="t_res" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="cross_label" value="file provisioner uploads&#xa;generated configs to bastion" style="text;html=1;align=center;verticalAlign=middle;strokeColor=none;fillColor=none;fontSize=9;fontColor=#6A1B9A;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="250" y="590" width="160" height="30" as="geometry"/>
+        </mxCell>
+        <mxCell id="cross1" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#6A1B9A;strokeWidth=2;dashed=1;dashPattern=6 4;" edge="1" source="l_disk" target="n_bastion" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

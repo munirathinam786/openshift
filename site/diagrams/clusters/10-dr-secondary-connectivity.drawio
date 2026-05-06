@@ -8,7 +8,7 @@
         <mxCell id="dr_s" value="&lt;b&gt;DR Secondary Workload Cluster&lt;/b&gt;" style="swimlane;startSize=35;fillColor=#1565C0;fontColor=#FFFFFF;strokeColor=#1565C0;rounded=1;fontSize=13;fontStyle=1;whiteSpace=wrap;html=1;container=1;collapsible=0;" vertex="1" parent="1">
           <mxGeometry x="40" y="60" width="350" height="290" as="geometry"/>
         </mxCell>
-        <mxCell id="ocp_dr" value="OCP 4.15 Baremetal" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EE0000;strokeColor=#CC0000;fontSize=11;fontStyle=1;fontColor=#FFFFFF;arcSize=10;" vertex="1" parent="dr_s">
+        <mxCell id="ocp_dr" value="OCP 4.20 Baremetal" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EE0000;strokeColor=#CC0000;fontSize=11;fontStyle=1;fontColor=#FFFFFF;arcSize=10;" vertex="1" parent="dr_s">
           <mxGeometry x="20" y="50" width="150" height="40" as="geometry"/>
         </mxCell>
         <mxCell id="sub_a" value="Submariner Agent+Gateway

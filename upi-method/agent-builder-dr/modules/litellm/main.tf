@@ -169,7 +169,7 @@ resource "null_resource" "litellm" {
       "    spec:",
       "      containers:",
       "        - name: litellm",
-      "          image: ghcr.io/berriai/litellm:v1.75.5-stable",
+      "          image: ghcr.io/berriai/litellm:v1.83.10-stable",
       "          args:",
       "            - --config",
       "            - /etc/litellm/litellm_config.yaml",

@@ -108,3 +108,11 @@ All architecture, cluster, pipeline, and code diagrams are available as interact
 | 9 | ![](code/09-ipi-pipeline-stage-order.svg){: style="max-width:200px" } | [:material-download: .drawio](code/09-ipi-pipeline-stage-order.drawio) |
 | 10 | ![](code/10-upi-dc-dep-chain.svg){: style="max-width:200px" } | [:material-download: .drawio](code/10-upi-dc-dep-chain.drawio) |
 | 11 | ![](code/11-upi-dr-dep-chain.svg){: style="max-width:200px" } | [:material-download: .drawio](code/11-upi-dr-dep-chain.drawio) |
+
+## IBM Z Diagrams
+
+| # | Diagram | Download |
+|---|---------|----------|
+| 1 | ![](ibm-z/01-ibm-z-architecture.svg){: style="max-width:200px" } | [:material-download: .drawio](ibm-z/01-ibm-z-architecture.drawio) |
+| 2 | ![](ibm-z/02-ibm-z-deployment-flow.svg){: style="max-width:200px" } | [:material-download: .drawio](ibm-z/02-ibm-z-deployment-flow.drawio) |
+| 3 | ![](ibm-z/03-ibm-z-terraform-modules.svg){: style="max-width:200px" } | [:material-download: .drawio](ibm-z/03-ibm-z-terraform-modules.drawio) |

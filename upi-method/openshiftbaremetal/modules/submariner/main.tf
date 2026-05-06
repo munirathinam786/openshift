@@ -142,7 +142,7 @@ resource "null_resource" "submariner_operator" {
         name: submariner
         namespace: submariner-operator
       spec:
-        channel: stable-0.18
+        channel: stable-0.20
         installPlanApproval: Automatic
         name: submariner
         source: redhat-operators

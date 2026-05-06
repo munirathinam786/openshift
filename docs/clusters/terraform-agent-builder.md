@@ -32,9 +32,9 @@ The Agent Builder Factory is deployed across 4 environments — IPI DC, IPI DR, 
         ├── postgresql/               # PostgreSQL 15 StatefulSet (4 databases)
         ├── mongodb/                  # MongoDB 6 StatefulSet (agent metadata)
         ├── redis/                    # Redis 7 StatefulSet (LLM response cache)
-        ├── temporal/                 # Temporal Server v1.28.1 + UI v2.39.0
+        ├── temporal/                 # Temporal Server v1.30.4 + UI v2.49.1
         ├── ollama/                   # Ollama local LLM (Llama3, optional GPU)
-        ├── litellm/                  # LiteLLM Proxy v1.75.5 (multi-model gateway)
+        ├── litellm/                  # LiteLLM Proxy v1.83.10 (multi-model gateway)
         ├── temporal-workers/         # Python Temporal workflow workers
         ├── agent-builder-api/        # FastAPI backend (core API)
         ├── agent-builder-ui/         # React + Vite frontend
@@ -107,12 +107,12 @@ The Agent Builder Factory is deployed across 4 environments — IPI DC, IPI DR, 
 | **Agent Registry** | 8002 | `python:3.11-slim` | 1 | Agent metadata & endpoint registry |
 | **Agent Deploy Svc** | 8001 | `python:3.11-slim` | 1 | OCP build/deploy orchestrator |
 | **Temporal Workers** | 8000 | `python:3.11-slim` | 2 | Workflow execution workers |
-| **Temporal Server** | 7233 | `temporalio/auto-setup:1.28.1` | 1 | Workflow orchestration engine |
-| **Temporal UI** | 8080 | `temporalio/ui:2.39.0` | 1 | Workflow monitoring dashboard |
-| **LiteLLM Proxy** | 4000 | `ghcr.io/berriai/litellm:v1.75.5-stable` | 1 | Multi-model LLM gateway |
+| **Temporal Server** | 7233 | `temporalio/auto-setup:1.30.4` | 1 | Workflow orchestration engine |
+| **Temporal UI** | 8080 | `temporalio/ui:2.49.1` | 1 | Workflow monitoring dashboard |
+| **LiteLLM Proxy** | 4000 | `ghcr.io/berriai/litellm:v1.83.10-stable` | 1 | Multi-model LLM gateway |
 | **Ollama** | 11434 | `ollama/ollama:latest` | 1 | Local LLM (Llama3, GPU optional) |
-| **PostgreSQL** | 5432 | `registry.redhat.io/rhel9/postgresql-15` | 1 | Temporal + LiteLLM + Registry DBs |
-| **MongoDB** | 27017 | `registry.redhat.io/rhel9/mongodb-6` | 1 | Agent metadata + conversations |
+| **PostgreSQL** | 5432 | `registry.redhat.io/rhel9/postgresql-16` | 1 | Temporal + LiteLLM + Registry DBs |
+| **MongoDB** | 27017 | `registry.redhat.io/rhel9/mongodb-7` | 1 | Agent metadata + conversations |
 | **Redis** | 6379 | `registry.redhat.io/rhel9/redis-7` | 1 | LLM response & semantic cache |
 
 ## LLM Connectivity
@@ -182,8 +182,8 @@ Before deploying the Agent Builder Factory, ensure the following are in place:
 
 | Requirement | Details |
 |-------------|---------|
-| **OpenShift Version** | 4.15+ (bare metal IPI or UPI) |
-| **Terraform** | >= 1.5.0 with `null` (~> 3.2), `local` (~> 2.4), `tls` (~> 4.0) providers |
+| **OpenShift Version** | 4.20+ (bare metal IPI or UPI) |
+| **Terraform** | >= 1.9.0 with `null` (~> 3.2), `local` (~> 2.8), `tls` (~> 4.2) providers |
 | **Bastion/Provisioner Node** | RHEL 8.x/9.x with `oc` CLI, SSH access to cluster nodes, Terraform installed |
 | **SSH Key Pair** | Ed25519 or RSA key pair for bastion → cluster SSH (`remote-exec`) |
 | **OCP CLI** | `oc` CLI installed on bastion and authenticated (`oc login`) to the target cluster |
@@ -291,12 +291,12 @@ The following images must be accessible from the cluster (pulled from Red Hat / 
 
 | Image | Tag | Source |
 |-------|-----|--------|
-| `registry.redhat.io/rhel9/postgresql-15` | `latest` | Red Hat Registry |
-| `registry.redhat.io/rhel9/mongodb-6` | `latest` | Red Hat Registry |
+| `registry.redhat.io/rhel9/postgresql-16` | `latest` | Red Hat Registry |
+| `registry.redhat.io/rhel9/mongodb-7` | `latest` | Red Hat Registry |
 | `registry.redhat.io/rhel9/redis-7` | `latest` | Red Hat Registry |
-| `temporalio/auto-setup` | `1.28.1` | Docker Hub |
-| `temporalio/ui` | `2.39.0` | Docker Hub |
-| `ghcr.io/berriai/litellm` | `v1.75.5-stable` | GitHub Container Registry |
+| `temporalio/auto-setup` | `1.30.4` | Docker Hub |
+| `temporalio/ui` | `2.49.1` | Docker Hub |
+| `ghcr.io/berriai/litellm` | `v1.83.10-stable` | GitHub Container Registry |
 | `ollama/ollama` | `latest` | Docker Hub |
 | `python:3.11-slim` | `latest` | Docker Hub |
 | `node:20-alpine` | `latest` | Docker Hub |
@@ -306,9 +306,9 @@ The following images must be accessible from the cluster (pulled from Red Hat / 
 
 ### Pre-Deployment Checklist
 
-- [ ] OpenShift 4.15+ cluster is healthy (`oc get clusterversion`)
+- [ ] OpenShift 4.20+ cluster is healthy (`oc get clusterversion`)
 - [ ] ODF is deployed and `ocs-storagecluster-ceph-rbd` StorageClass exists
-- [ ] Bastion has Terraform >= 1.5.0, `oc` CLI, `podman` installed
+- [ ] Bastion has Terraform >= 1.9.0, `oc` CLI, `podman` installed
 - [ ] SSH connectivity from bastion to cluster nodes is verified
 - [ ] `oc login` completed with `cluster-admin` privileges
 - [ ] At least 8 vCPU / 20Gi memory available for scheduling

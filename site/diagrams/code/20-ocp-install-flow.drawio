@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="app.diagrams.net" modified="2026-04-22T00:00:00.000Z" agent="GitHub Copilot" version="24.0.0" type="device">
+  <diagram id="ocp-install" name="OpenShift Cluster Installation Flow">
+    <mxGraphModel dx="1100" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="900" pageHeight="700" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+        <mxCell id="title" value="OpenShift Cluster Installation Flow (5 Steps)" style="text;html=1;align=center;verticalAlign=middle;strokeColor=none;fillColor=none;fontColor=#37474F;fontSize=16;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="210" y="10" width="400" height="30" as="geometry"/>
+        </mxCell>
+        <mxCell id="s1_badge" value="Step 1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E65100;fontColor=#FFFFFF;strokeColor=#BF360C;fontSize=9;fontStyle=1;arcSize=50;" vertex="1" parent="1">
+          <mxGeometry x="20" y="58" width="55" height="22" as="geometry"/>
+        </mxCell>
+        <mxCell id="s1" value="local_file + templatefile()&#xa;&#xa;Reads .tftpl template&#xa;Substitutes variables from tfvars&#xa;Writes install-config.yaml to disk" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF3E0;fontColor=#BF360C;strokeColor=#FF8F00;fontSize=11;arcSize=10;shadow=1;" vertex="1" parent="1">
+          <mxGeometry x="90" y="50" width="300" height="80" as="geometry"/>
+        </mxCell>
+        <mxCell id="s1_out" value="Output:&#xa;install-config.yaml&#xa;haproxy.cfg&#xa;imageset-config.yaml" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFE0B2;fontColor=#BF360C;strokeColor=#FF8F00;fontSize=10;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="450" y="50" width="180" height="80" as="geometry"/>
+        </mxCell>
+        <mxCell id="es1" style="rounded=1;strokeColor=#E65100;strokeWidth=2;" edge="1" source="s1" target="s1_out" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="s2_badge" value="Step 2" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#AD1457;fontColor=#FFFFFF;strokeColor=#880E4F;fontSize=9;fontStyle=1;arcSize=50;" vertex="1" parent="1">
+          <mxGeometry x="20" y="170" width="55" height="22" as="geometry"/>
+        </mxCell>
+        <mxCell id="s2" value="null_resource + file provisioner&#xa;&#xa;Connects to bastion via SSH&#xa;Uploads generated config files&#xa;Uses SCP (Secure Copy Protocol)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FCE4EC;fontColor=#880E4F;strokeColor=#E91E63;fontSize=11;arcSize=10;shadow=1;" vertex="1" parent="1">
+          <mxGeometry x="90" y="160" width="300" height="80" as="geometry"/>
+        </mxCell>
+        <mxCell id="s2_out" value="Bastion now has:&#xa;/opt/openshift/&#xa;  install-config.yaml&#xa;  haproxy.cfg" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F8BBD0;fontColor=#880E4F;strokeColor=#E91E63;fontSize=10;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="450" y="160" width="180" height="80" as="geometry"/>
+        </mxCell>
+        <mxCell id="es2" style="rounded=1;strokeColor=#AD1457;strokeWidth=2;" edge="1" source="s2" target="s2_out" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="es1to2" style="rounded=1;strokeColor=#546E7A;strokeWidth=2;" edge="1" source="s1_out" target="s2" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="s3_badge" value="Step 3" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#C62828;fontColor=#FFFFFF;strokeColor=#B71C1C;fontSize=9;fontStyle=1;arcSize=50;" vertex="1" parent="1">
+          <mxGeometry x="20" y="285" width="55" height="22" as="geometry"/>
+        </mxCell>
+        <mxCell id="s3" value="null_resource + remote-exec&#xa;&#xa;openshift-baremetal-install create cluster&#xa;Powers on 6 physical servers via BMC/IPMI&#xa;Boots RHCOS, forms etcd, installs OCP" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFEBEE;fontColor=#B71C1C;strokeColor=#E53935;fontSize=11;arcSize=10;shadow=1;" vertex="1" parent="1">
+          <mxGeometry x="90" y="275" width="340" height="80" as="geometry"/>
+        </mxCell>
+        <mxCell id="s3_srv" value="3 Masters + 3 Workers&#xa;Physical bare-metal servers&#xa;RHCOS booted, OCP running" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EF9A9A;fontColor=#B71C1C;strokeColor=#E53935;fontSize=10;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="490" y="275" width="200" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="s3_time" value="~45 minutes" style="text;html=1;align=center;verticalAlign=middle;strokeColor=none;fillColor=none;fontSize=9;fontColor=#C62828;fontStyle=2;" vertex="1" parent="1">
+          <mxGeometry x="510" y="340" width="70" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="es3" style="rounded=1;strokeColor=#C62828;strokeWidth=2;" edge="1" source="s3" target="s3_srv" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="es2to3" style="rounded=1;strokeColor=#546E7A;strokeWidth=2;" edge="1" source="s2_out" target="s3" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="s4_badge" value="Step 4" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#D32F2F;fontColor=#FFFFFF;strokeColor=#C62828;fontSize=9;fontStyle=1;arcSize=50;" vertex="1" parent="1">
+          <mxGeometry x="20" y="400" width="55" height="22" as="geometry"/>
+        </mxCell>
+        <mxCell id="s4" value="null_resource + remote-exec (post-install)&#xa;&#xa;oc apply -f - for each module:&#xa;  Namespaces, Secrets, ConfigMaps&#xa;  StatefulSets, Deployments, Services&#xa;  Routes, Operators, CRDs" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFCDD2;fontColor=#B71C1C;strokeColor=#EF5350;fontSize=11;arcSize=10;shadow=1;" vertex="1" parent="1">
+          <mxGeometry x="90" y="390" width="340" height="90" as="geometry"/>
+        </mxCell>
+        <mxCell id="s4_out" value="14 microservices deployed:&#xa;Harbor, GitLab, Jenkins&#xa;HashiCorp Vault, Keycloak&#xa;SonarQube, Nexus, etc." style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EF9A9A;fontColor=#B71C1C;strokeColor=#E53935;fontSize=10;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="490" y="395" width="200" height="75" as="geometry"/>
+        </mxCell>
+        <mxCell id="es4" style="rounded=1;strokeColor=#D32F2F;strokeWidth=2;" edge="1" source="s4" target="s4_out" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="es3to4" style="rounded=1;strokeColor=#546E7A;strokeWidth=2;" edge="1" source="s3_srv" target="s4" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="s5_badge" value="Step 5" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#6A1B9A;fontColor=#FFFFFF;strokeColor=#4A148C;fontSize=9;fontStyle=1;arcSize=50;" vertex="1" parent="1">
+          <mxGeometry x="20" y="530" width="55" height="22" as="geometry"/>
+        </mxCell>
+        <mxCell id="s5" value="outputs.tf&#xa;&#xa;Prints cluster access information&#xa;after successful deployment" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F3E5F5;fontColor=#4A148C;strokeColor=#CE93D8;fontSize=11;arcSize=10;shadow=1;" vertex="1" parent="1">
+          <mxGeometry x="90" y="520" width="300" height="65" as="geometry"/>
+        </mxCell>
+        <mxCell id="s5_urls" value="console_url = https://console-openshift-...&#xa;api_url = https://api.ocp.example.com:6443&#xa;kubeconfig_path = /opt/openshift/auth/kubeconfig&#xa;cluster_name = ocp-baremetal-dc&#xa;bastion_host = 10.142.41.10" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E1BEE7;fontColor=#4A148C;strokeColor=#CE93D8;fontSize=9;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="450" y="510" width="310" height="85" as="geometry"/>
+        </mxCell>
+        <mxCell id="es5" style="rounded=1;strokeColor=#6A1B9A;strokeWidth=2;" edge="1" source="s5" target="s5_urls" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="es4to5" style="rounded=1;strokeColor=#546E7A;strokeWidth=2;" edge="1" source="s4_out" target="s5" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="summary" value="All 5 steps use null_resource + SSH to bastion. No cloud API is involved at any point." style="text;html=1;align=center;verticalAlign=middle;strokeColor=none;fillColor=none;fontColor=#546E7A;fontSize=10;fontStyle=2;" vertex="1" parent="1">
+          <mxGeometry x="200" y="620" width="450" height="20" as="geometry"/>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
