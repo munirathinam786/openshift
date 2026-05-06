@@ -39,6 +39,17 @@ aws-rosa/
     └── alb-operator/
 ```
 
+## Actual implementation, not a skeleton
+
+This AWS ROSA content is backed by working Terraform and executable operational assets:
+
+- `modules/networking` creates the VPC, public/private subnets, route tables, NAT gateways, and security groups with real `aws_*` resources.
+- `modules/vpc-endpoints` creates real AWS interface and gateway endpoints for services such as STS, EC2, ECR, ELB, CloudWatch, and S3.
+- `modules/alb-operator` creates an actual IAM policy and renders the install assets required for the AWS Load Balancer Controller.
+- `modules/rosa-automation` renders executable Bash scripts for ROSA preflight checks, cluster creation, Route 53 aliasing, and cluster deletion.
+
+The only part not modeled as a native Terraform provider resource is the ROSA cluster lifecycle itself. That is intentional: ROSA STS cluster creation is driven by the `rosa` CLI, so this blueprint renders and optionally executes the real `rosa` commands rather than pretending a Terraform-only cluster resource exists where it does not.
+
 ## Deployment flow at a glance
 
 1. Terraform creates the customer VPC, public/private subnets, route tables, NAT, and security groups.

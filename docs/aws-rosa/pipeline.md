@@ -11,6 +11,8 @@ The pipeline follows the same repo convention as the IBM Z and bare-metal conten
 - optionally execute the generated operational scripts
 - leave human-readable artifacts behind for review and troubleshooting
 
+This pipeline is not a placeholder. It runs real Terraform against `aws-rosa/` and can optionally execute the generated ROSA and ALB scripts when the build agent has the required CLI tooling and credentials.
+
 ## Workflow overview
 
 ![AWS ROSA Deployment Flow](../diagrams/aws-rosa/02-aws-rosa-deployment-flow.svg){: .drawio-diagram }
@@ -56,3 +58,4 @@ The pipeline expects secret variables or variable-group entries for:
 - The pipeline watches `aws-rosa/**`, `docs/aws-rosa/**`, and `docs/diagrams/aws-rosa/**`.
 - Generated scripts land under `aws-rosa/generated/` during Terraform execution.
 - The ALB workflow is intentionally post-install because it depends on the cluster OIDC endpoint and an active `oc` session.
+- The ROSA cluster create/delete lifecycle is intentionally CLI-driven, so the pipeline bridges Terraform-managed AWS infrastructure with Red Hat-supported `rosa` automation rather than relying on a fake Terraform-only cluster resource.

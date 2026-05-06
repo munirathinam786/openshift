@@ -35,25 +35,57 @@ The root module composes the ROSA workflow in four parts:
 3. `rosa-automation` — renders preflight, cluster create, Route 53, and delete scripts
 4. `alb-operator` — creates the IAM policy and install assets for ALB-backed ingress
 
+This is important from an operator perspective: the blueprint is **not** a placeholder repo shape with empty modules. The root module wires concrete Terraform resources together and emits executable operational assets for the pieces that must be driven by the ROSA CLI.
+
 ### Key orchestration excerpt
 
 ```hcl
 module "networking" {
   source = "./modules/networking"
+
+  cluster_name         = var.cluster_name
+  aws_region           = var.aws_region
+  availability_zones   = var.availability_zones
+  vpc_cidr             = var.vpc_cidr
+  public_subnet_cidrs  = var.public_subnet_cidrs
+  private_subnet_cidrs = var.private_subnet_cidrs
 }
 
 module "vpc_endpoints" {
   source = "./modules/vpc-endpoints"
+
+  vpc_id                  = module.networking.vpc_id
+  private_subnet_ids      = module.networking.private_subnet_ids
+  private_route_table_ids = module.networking.private_route_table_ids
 }
 
 module "rosa_automation" {
   source = "./modules/rosa-automation"
+
+  private_subnet_ids = module.networking.private_subnet_ids
+  public_subnet_ids  = module.networking.public_subnet_ids
+  endpoint_inventory = module.vpc_endpoints.endpoint_inventory
 }
 
 module "alb_operator" {
   source = "./modules/alb-operator"
+
+  vpc_id             = module.networking.vpc_id
+  public_subnet_ids  = module.networking.public_subnet_ids
+  private_subnet_ids = module.networking.private_subnet_ids
 }
 ```
+
+### Why the ROSA cluster is script-driven
+
+Unlike the Azure ARO implementation, ROSA cluster creation in this repo is intentionally driven through generated `rosa` CLI automation. That choice keeps the AWS foundation in Terraform while using the Red Hat-supported STS workflow for:
+
+- account role creation
+- OIDC configuration
+- operator role creation
+- cluster creation and teardown
+
+So if you see generated scripts under `aws-rosa/generated/<cluster>/`, that is the **real implementation**, not a missing piece.
 
 ## `variables.tf`
 
@@ -104,6 +136,8 @@ This module renders the operational hand-off files under `aws-rosa/generated/<cl
 
 The generated cluster command uses **ROSA STS auto mode**, which is the cleanest way to keep the Terraform layer readable while still capturing the real creation flow.
 
+When `auto_execute_rosa=true`, Terraform can also execute the generated preflight and cluster creation scripts during the apply step.
+
 ## `modules/alb-operator`
 
 This module adds the application ingress extension path:
@@ -114,6 +148,8 @@ This module adds the application ingress extension path:
 - renders a sample `sample-alb-ingress.yaml`
 
 That means the ROSA blueprint includes both the cluster foundation and the post-install ingress pattern many teams actually need in production.
+
+When `auto_execute_alb_setup=true`, the rendered install script can also be executed from Terraform after the cluster is reachable.
 
 ## Outputs
 
