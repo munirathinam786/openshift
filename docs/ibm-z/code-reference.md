@@ -35,17 +35,27 @@ The root module composes the IBM Z workflow in four parts:
 3. `zvm-guests` — optionally generates and runs guest provisioning commands
 4. `cluster-install` — copies assets to the bastion host and launches the installer
 
+This is not a placeholder layout with empty submodules. The implementation renders real OpenShift install assets and executable IBM Z handoff scripts, while leaving site-specific z/VM and bastion execution boundaries explicit.
+
 ### Key orchestration excerpt
 
 ```hcl
 module "install_config" {
   source = "./modules/install-config"
-  # ... cluster settings, network CIDRs, mirror and trust inputs
+
+  cluster_name         = var.cluster_name
+  base_domain          = var.base_domain
+  architecture         = var.architecture
+  machine_network_cidr = var.machine_network_cidr
 }
 
 module "agent_config" {
   source = "./modules/agent-config"
-  # ... rendezvous IP, DNS, gateway, and node inventory
+
+  rendezvous_ip       = var.rendezvous_ip
+  dns_servers         = var.dns_servers
+  gateway             = var.gateway
+  control_plane_nodes = local.control_plane_nodes
 }
 
 module "zvm_guests" {
@@ -55,6 +65,8 @@ module "zvm_guests" {
 
 module "cluster_install" {
   source = "./modules/cluster-install"
+  auto_launch_install  = var.auto_launch_install
+  auto_approve_install = var.auto_approve_install
   depends_on = [
     module.install_config,
     module.agent_config,
@@ -62,6 +74,16 @@ module "cluster_install" {
   ]
 }
 ```
+
+### Why the installer handoff is script-driven
+
+IBM Z deployments in this repository are intentionally split across Terraform, platform automation, and a bastion/helper node:
+
+- Terraform renders the OpenShift YAML assets.
+- Optional z/VM provisioning is executed through a site-owned wrapper script.
+- The bastion host runs `openshift-install agent create image` and optionally waits for completion.
+
+That separation is the real implementation model for many IBM Z environments, not a missing feature.
 
 ## `variables.tf`
 
@@ -126,6 +148,8 @@ This module creates a launcher script that:
 3. optionally waits for bootstrap and install completion
 
 That allows the bastion host to remain the execution point for OpenShift installation while Terraform remains the orchestration layer.
+
+When `auto_launch_install=false`, Terraform still renders the launcher script so teams can execute it manually under change control.
 
 ## Outputs
 

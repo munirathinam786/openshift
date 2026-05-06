@@ -33,6 +33,11 @@ parameters:
     type: boolean
     default: false
 
+  - name: runRemoteInstall
+    displayName: Launch remote installer on bastion
+    type: boolean
+    default: false
+
 variables:
   - name: TF_IN_AUTOMATION
     value: "true"
@@ -77,6 +82,7 @@ stages:
               terraform init -input=false
               terraform ${{ parameters.terraformAction }} \
                 -var-file=terraform.tfvars \
+                -var auto_launch_install=${{ lower(parameters.runRemoteInstall) }} \
                 -var auto_approve_install=${{ lower(parameters.waitForInstall) }} \
                 -var enable_zvm_guest_provisioning=${{ lower(parameters.autoProvisionZvm) }} \
                 -input=false \
@@ -96,5 +102,6 @@ stages:
           - script: |
               echo "IBM Z Terraform workflow completed."
               echo "Review ibm-z/generated for install-config.yaml, agent-config.yaml, and provisioning scripts."
-              echo "If waitForInstall=false, run the generated remote install script manually from the bastion helper host."
+              echo "If runRemoteInstall=false, execute the generated launch-ibmz-install.sh script manually when the bastion is ready."
+              echo "If waitForInstall=false but runRemoteInstall=true, installation starts remotely but completion tracking remains manual."
             displayName: Print summary

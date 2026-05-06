@@ -13,6 +13,16 @@ locals {
   all_nodes = concat(local.control_plane_nodes, local.compute_nodes)
 }
 
+resource "null_resource" "assets_dir" {
+  triggers = {
+    assets_dir = local.assets_dir
+  }
+
+  provisioner "local-exec" {
+    command = "mkdir -p '${local.assets_dir}'"
+  }
+}
+
 module "install_config" {
   source = "./modules/install-config"
 
@@ -32,6 +42,8 @@ module "install_config" {
   ssh_public_key_file          = var.ssh_public_key_file
   additional_trust_bundle_file = var.additional_trust_bundle_file
   image_digest_sources         = var.image_digest_sources
+
+  depends_on = [null_resource.assets_dir]
 }
 
 module "agent_config" {
@@ -46,6 +58,8 @@ module "agent_config" {
   gateway             = var.gateway
   control_plane_nodes = local.control_plane_nodes
   compute_nodes       = local.compute_nodes
+
+  depends_on = [null_resource.assets_dir]
 }
 
 module "zvm_guests" {
@@ -60,6 +74,8 @@ module "zvm_guests" {
   zvm_guest_script_path    = var.zvm_guest_script_path
   auto_provision           = var.enable_zvm_guest_provisioning
   nodes                    = local.all_nodes
+
+  depends_on = [null_resource.assets_dir]
 }
 
 module "cluster_install" {
@@ -72,9 +88,11 @@ module "cluster_install" {
   bastion_ssh_private_key_file = var.bastion_ssh_private_key_file
   openshift_install_binary     = var.openshift_install_binary
   remote_assets_dir            = "${var.remote_assets_dir}/${var.cluster_name}"
+  auto_launch_install          = var.auto_launch_install
   auto_approve_install         = var.auto_approve_install
 
   depends_on = [
+    null_resource.assets_dir,
     module.install_config,
     module.agent_config,
     module.zvm_guests,

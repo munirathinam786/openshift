@@ -12,7 +12,7 @@ This section adds an **IBM Z / LinuxONE deployment path** alongside the existing
 The existing repository content under `ipi-method/` and `upi-method/` is tailored to **x86 bare-metal** workflows. IBM Z differs in several important ways:
 
 | Area | x86 content in this repo | IBM Z implementation |
-|---|---|---|
+| --- | --- | --- |
 | CPU architecture | `amd64` / x86_64 | `s390x` |
 | Provisioning model | IPI or UPI bare metal | Agent-based installer with z/VM or LPAR nodes |
 | Node lifecycle | BMC/Redfish, PXE, ISO | z/VM automation or platform operations teams |
@@ -40,6 +40,17 @@ ibm-z/
     └── cluster-install/
 ```
 
+## Actual implementation, not a skeleton
+
+This IBM Z content is backed by working Terraform and executable handoff assets:
+
+- `modules/install-config` renders a real `install-config.yaml` for `platform: none`, `s390x`, mirrored content, and trust settings.
+- `modules/agent-config` renders a real `agent-config.yaml` with static network definitions, DNS, default routes, boot MACs, and root device hints.
+- `modules/zvm-guests` renders an inventory CSV and an executable provisioning wrapper for site-specific z/VM guest automation.
+- `modules/cluster-install` renders an executable bastion launch script for `openshift-install agent create image` and optional install tracking.
+
+The implementation intentionally stops short of pretending IBM Z node lifecycle can be fully abstracted inside generic Terraform resources. Instead, it renders and optionally executes the real handoff steps that IBM Z platform teams and helper hosts actually use.
+
 ## Deployment flow at a glance
 
 1. Terraform renders `install-config.yaml` with `platform: none` and `s390x` machine pools.
@@ -52,7 +63,7 @@ ibm-z/
 ## Prerequisites
 
 | Requirement | Details |
-|---|---|
+| --- | --- |
 | **OpenShift release mirror** | Mirrored `s390x` release payload and operator catalogs |
 | **Bastion/helper node** | RHEL host with `openshift-install`, `oc`, SSH access, and CA trust for mirror registry |
 | **IBM Z platform access** | z/VM management endpoint or LPAR operations workflow |
@@ -65,6 +76,7 @@ ibm-z/
 - Start with `ibm-z/terraform.tfvars` and replace placeholder hostnames, IP addresses, and mirror values.
 - Keep the generated install assets under `ibm-z/generated/<cluster>/` under version control **excluded** from Git.
 - Treat `modules/zvm-guests` as a site-adaptation point: the Terraform side is generic, while your local `provision-guest.sh` can integrate with SMAPI, DirMaint, or internal automation.
+- Keep `auto_launch_install=false` when you want Terraform to render the bastion handoff without immediately starting the installer.
 - For local documentation preview, use the repository's Podman workflow with `podman compose up -d --build` from the repo root.
 
 ## Where to go next

@@ -37,6 +37,7 @@ bastion_user                 = "kni"
 bastion_ssh_private_key_file = "/secure/id_ed25519"
 openshift_install_binary     = "/usr/local/bin/openshift-install"
 remote_assets_dir            = "/var/tmp/ocp-ibmz"
+auto_launch_install          = false
 auto_approve_install         = false
 
 enable_zvm_guest_provisioning = true

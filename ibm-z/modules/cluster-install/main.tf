@@ -26,6 +26,10 @@ variable "remote_assets_dir" {
   type = string
 }
 
+variable "auto_launch_install" {
+  type = bool
+}
+
 variable "auto_approve_install" {
   type = bool
 }
@@ -77,10 +81,11 @@ resource "null_resource" "launch_install" {
   triggers = {
     install_config = fileexists("${var.assets_dir}/install-config.yaml") ? filesha256("${var.assets_dir}/install-config.yaml") : "missing"
     agent_config   = fileexists("${var.assets_dir}/agent-config.yaml") ? filesha256("${var.assets_dir}/agent-config.yaml") : "missing"
+    launch_mode    = tostring(var.auto_launch_install)
   }
 
   provisioner "local-exec" {
-    command = "chmod +x '${local_file.launch_script.filename}' && '${local_file.launch_script.filename}'"
+    command = var.auto_launch_install ? "chmod +x '${local_file.launch_script.filename}' && '${local_file.launch_script.filename}'" : "echo 'IBM Z install launcher rendered to ${local_file.launch_script.filename}; remote execution skipped by configuration.'"
   }
 }
 

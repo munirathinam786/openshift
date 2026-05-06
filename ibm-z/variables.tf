@@ -143,6 +143,12 @@ variable "auto_approve_install" {
   default     = false
 }
 
+variable "auto_launch_install" {
+  description = "If true, Terraform copies the rendered assets to the bastion host and starts the remote installer wrapper."
+  type        = bool
+  default     = false
+}
+
 variable "zvm_host" {
   description = "Optional z/VM management host."
   type        = string
