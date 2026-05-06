@@ -101,6 +101,9 @@ nav:
     - MTC Container Migration Pipeline: "pipeline/terraform-mtc-pipeline.md"
     - Ceph Storage Migration Pipeline: "pipeline/terraform-ceph-migration-pipeline.md"
 
+  - Documentation Tooling:
+    - Overview: "code/documentation-tooling.md"
+
   - Terraform Code Walkthrough (Learn to Write):
     - Overview — How the Code is Structured: "code/terraform-code-walkthrough.md"
     - Agent Builder — Step by Step:

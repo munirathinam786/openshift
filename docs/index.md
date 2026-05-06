@@ -27,6 +27,7 @@ In addition, the repository now includes:
 - **[AWS ROSA](aws-rosa/index.md)** — ROSA architecture, Terraform foundation, endpoint design, ALB enablement, and pipeline guidance
 - **[Azure ARO](azure-aro/index.md)** — ARO architecture, Terraform foundation, Entra / RBAC design, helper assets, and pipeline guidance
 - **[CI/CD Pipeline](pipeline/terraform-ado-pipeline.md)** — Azure DevOps pipeline for selective multi-cluster deployment
+- **[Documentation Tooling](code/documentation-tooling.md)** — how MkDocs pages are generated, containerized, and previewed locally from the repository's own tooling code
 - **[Terraform Code — IPI](code/ipi-method/openshiftbaremetal/main.md)** — Complete annotated IPI Terraform code for all cluster environments
 - **[Terraform Code — UPI](code/upi-method/main.md)** — Complete annotated UPI Terraform code for all cluster environments
 
@@ -35,7 +36,7 @@ In addition, the repository now includes:
 ### Option 1: Deploy via Azure DevOps Pipeline
 
 1. Configure `terraform.tfvars` for each cluster environment
-2. Push to the `main` branch
+2. Push to the `develop` branch
 3. Run the ADO pipeline with your desired deployment scope
 
 ### Option 2: Manual Terraform Deployment
