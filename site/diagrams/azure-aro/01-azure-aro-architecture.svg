@@ -1,0 +1,74 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900">
+  <rect width="1600" height="900" fill="#ffffff"/>
+  <text x="800" y="40" text-anchor="middle" font-family="Arial, sans-serif" font-size="28" font-weight="700" fill="#1f2937">Azure Red Hat OpenShift (ARO) Architecture</text>
+
+  <rect x="40" y="80" width="980" height="560" rx="16" fill="#E3F2FD" stroke="#1565C0" stroke-width="3"/>
+  <text x="530" y="118" text-anchor="middle" font-family="Arial, sans-serif" font-size="24" font-weight="700" fill="#0f172a">Azure Subscription</text>
+  <text x="530" y="148" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" fill="#334155">Customer-managed resource group, VNet, and RBAC</text>
+
+  <rect x="80" y="150" width="590" height="390" rx="16" fill="#E8F5E9" stroke="#2E7D32" stroke-width="3"/>
+  <text x="375" y="188" text-anchor="middle" font-family="Arial, sans-serif" font-size="22" font-weight="700" fill="#0f172a">ARO VNet</text>
+  <text x="375" y="214" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" fill="#334155">Control-plane and worker subnets</text>
+
+  <rect x="120" y="230" width="220" height="110" rx="14" fill="#FFF8E1" stroke="#F57F17" stroke-width="3"/>
+  <text x="230" y="270" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" font-weight="700" fill="#0f172a">Control-plane subnet</text>
+  <text x="230" y="298" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#334155">ARO main profile subnet</text>
+
+  <rect x="390" y="230" width="220" height="110" rx="14" fill="#F3E5F5" stroke="#7B1FA2" stroke-width="3"/>
+  <text x="500" y="270" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" font-weight="700" fill="#0f172a">Worker subnet</text>
+  <text x="500" y="298" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#334155">ARO worker nodes and ingress</text>
+
+  <rect x="180" y="390" width="430" height="110" rx="14" fill="#FCE4EC" stroke="#C2185B" stroke-width="3"/>
+  <text x="395" y="430" text-anchor="middle" font-family="Arial, sans-serif" font-size="20" font-weight="700" fill="#0f172a">Microsoft Entra</text>
+  <text x="395" y="458" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#334155">Application registration, service principal, and RBAC assignments</text>
+
+  <rect x="760" y="170" width="240" height="140" rx="14" fill="#ECEFF1" stroke="#455A64" stroke-width="3"/>
+  <text x="880" y="214" text-anchor="middle" font-family="Arial, sans-serif" font-size="20" font-weight="700" fill="#0f172a">Managed ARO RG</text>
+  <text x="880" y="242" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#334155">Microsoft / Red Hat managed</text>
+  <text x="880" y="262" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#334155">cluster resources</text>
+
+  <rect x="1080" y="150" width="250" height="110" rx="14" fill="#FFF3E0" stroke="#EF6C00" stroke-width="3"/>
+  <text x="1205" y="190" text-anchor="middle" font-family="Arial, sans-serif" font-size="20" font-weight="700" fill="#0f172a">Pipeline / Runner</text>
+  <text x="1205" y="218" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#334155">terraform + az + oc</text>
+
+  <rect x="1080" y="340" width="250" height="100" rx="14" fill="#F1F8E9" stroke="#689F38" stroke-width="3"/>
+  <text x="1205" y="378" text-anchor="middle" font-family="Arial, sans-serif" font-size="20" font-weight="700" fill="#0f172a">Azure DNS</text>
+  <text x="1205" y="406" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#334155">Optional api / *.apps records</text>
+
+  <rect x="1080" y="500" width="250" height="110" rx="14" fill="#E1F5FE" stroke="#0277BD" stroke-width="3"/>
+  <text x="1205" y="540" text-anchor="middle" font-family="Arial, sans-serif" font-size="19" font-weight="700" fill="#0f172a">Generated helper assets</text>
+  <text x="1205" y="568" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#334155">preflight, kubeconfig, DNS, delete</text>
+
+  <line x1="610" y1="445" x2="840" y2="445" stroke="#C2185B" stroke-width="4" marker-end="url(#arrowPink)"/>
+  <text x="725" y="430" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" fill="#9d174d">Contributor + Network Contributor</text>
+
+  <line x1="670" y1="290" x2="760" y2="240" stroke="#455A64" stroke-width="4" marker-end="url(#arrowGray)"/>
+  <text x="730" y="275" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" fill="#374151">Managed control plane</text>
+
+  <line x1="1080" y1="205" x2="1020" y2="205" stroke="#EF6C00" stroke-width="4" marker-end="url(#arrowOrange)"/>
+  <text x="1110" y="135" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" fill="#9a3412">Terraform + Azure APIs</text>
+
+  <line x1="1205" y1="260" x2="1205" y2="500" stroke="#0277BD" stroke-width="4" marker-end="url(#arrowBlue)"/>
+  <text x="1265" y="392" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" fill="#0c4a6e">kubeconfig + admin ops</text>
+
+  <line x1="1205" y1="500" x2="1205" y2="440" stroke="#689F38" stroke-width="4" marker-end="url(#arrowGreen)"/>
+  <text x="1300" y="472" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" fill="#3f6212">custom DNS records</text>
+
+  <defs>
+    <marker id="arrowPink" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#C2185B"/>
+    </marker>
+    <marker id="arrowGray" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#455A64"/>
+    </marker>
+    <marker id="arrowOrange" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#EF6C00"/>
+    </marker>
+    <marker id="arrowBlue" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#0277BD"/>
+    </marker>
+    <marker id="arrowGreen" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#689F38"/>
+    </marker>
+  </defs>
+</svg>

@@ -31,6 +31,31 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
+         <loc>https://example.com/terraform-iac/azure-aro/</loc>
+         <lastmod>2026-05-06</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://example.com/terraform-iac/azure-aro/architecture/</loc>
+         <lastmod>2026-05-06</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://example.com/terraform-iac/azure-aro/code-reference/</loc>
+         <lastmod>2026-05-06</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://example.com/terraform-iac/azure-aro/pipeline/</loc>
+         <lastmod>2026-05-06</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://example.com/terraform-iac/clusters/terraform-agent-builder-packages/</loc>
+         <lastmod>2026-05-06</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
          <loc>https://example.com/terraform-iac/clusters/terraform-agent-builder/</loc>
          <lastmod>2026-05-06</lastmod>
          <changefreq>daily</changefreq>
@@ -57,6 +82,11 @@
     </url>
     <url>
          <loc>https://example.com/terraform-iac/clusters/terraform-upi-baremetal/</loc>
+         <lastmod>2026-05-06</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://example.com/terraform-iac/code/documentation-tooling/</loc>
          <lastmod>2026-05-06</lastmod>
          <changefreq>daily</changefreq>
     </url>
