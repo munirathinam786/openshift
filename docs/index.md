@@ -1,6 +1,6 @@
 # Terraform IaC for OpenShift Multi Cluster AirGapped
 
-Welcome to the **Terraform IaC documentation** for deploying Red Hat OpenShift across **x86 bare-metal**, **IBM Z / LinuxONE (`s390x`)**, and **AWS ROSA** architectures, including disaster recovery, managed-cloud, and centralized management patterns.
+Welcome to the **Terraform IaC documentation** for deploying Red Hat OpenShift across **x86 bare-metal**, **IBM Z / LinuxONE (`s390x`)**, **AWS ROSA**, and **Azure Red Hat OpenShift (ARO)** architectures, including disaster recovery, managed-cloud, and centralized management patterns.
 
 ## What This Covers
 
@@ -17,6 +17,7 @@ In addition, the repository now includes:
 
 - an **IBM Z implementation** under `ibm-z/` for agent-based OpenShift deployments on **z/VM guests** or **LPARs**, using a bastion-driven workflow and disconnected registry mirroring
 - an **AWS ROSA implementation** under `aws-rosa/` for **OpenShift Service on AWS** with VPC design, required AWS endpoints, Route 53 helper assets, and ALB operator enablement
+- an **Azure ARO implementation** under `azure-aro/` for **Azure Red Hat OpenShift** with Azure networking, Microsoft Entra service principal automation, Azure RBAC, helper assets, and Azure DevOps pipeline support
 
 ## Documentation Sections
 
@@ -24,6 +25,7 @@ In addition, the repository now includes:
 - **[Cluster Environments](clusters/terraform-ocp-baremetal.md)** — Per-cluster Terraform documentation with module details and variable references
 - **[IBM Z](ibm-z/index.md)** — IBM Z / LinuxONE architecture, deployment flow, code reference, and pipeline guidance
 - **[AWS ROSA](aws-rosa/index.md)** — ROSA architecture, Terraform foundation, endpoint design, ALB enablement, and pipeline guidance
+- **[Azure ARO](azure-aro/index.md)** — ARO architecture, Terraform foundation, Entra / RBAC design, helper assets, and pipeline guidance
 - **[CI/CD Pipeline](pipeline/terraform-ado-pipeline.md)** — Azure DevOps pipeline for selective multi-cluster deployment
 - **[Terraform Code — IPI](code/ipi-method/openshiftbaremetal/main.md)** — Complete annotated IPI Terraform code for all cluster environments
 - **[Terraform Code — UPI](code/upi-method/main.md)** — Complete annotated UPI Terraform code for all cluster environments
@@ -80,6 +82,13 @@ vi terraform.tfvars
 terraform init
 terraform plan
 terraform apply
+
+# === Azure ARO Method ===
+cd ../azure-aro/
+vi terraform.tfvars
+terraform init
+terraform plan
+terraform apply
 ```
 
 ## Prerequisites
@@ -116,6 +125,19 @@ terraform apply
 | **Private connectivity** | Interface endpoints for STS, EC2, ELB, ECR, Logs, Monitoring, Route 53, and related services |
 | **ALB support** | `helm` + `oc` available for the generated AWS load balancer controller install script |
 | **Optional DNS** | Route 53 hosted zone ID if you want Terraform-rendered alias helper scripts |
+
+### Azure ARO Specific Requirements
+
+| Requirement | Details |
+|-------------|---------|
+| **Azure CLI** | `az` 2.67.0 or newer on the operator workstation or pipeline agent |
+| **Azure permissions** | Contributor + User Access Administrator or Owner on the target scope |
+| **Microsoft Entra permissions** | Application Administrator or equivalent if Terraform creates the service principal |
+| **Provider registration** | `Microsoft.RedHatOpenShift`, `Microsoft.Compute`, `Microsoft.Storage`, `Microsoft.Authorization` |
+| **Quota** | Minimum 44 vCPUs available during installation |
+| **Subnet design** | Two empty subnets, each /27 or larger, with no overlapping pod/service CIDRs |
+| **Pull secret** | Optional but recommended for Red Hat and partner operator access |
+| **Optional DNS** | Azure DNS zone and resource group if you want Terraform-rendered helper scripts |
 
 ### Secrets & Credentials
 

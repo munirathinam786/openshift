@@ -4,3 +4,7 @@ __pycache__/
 *.pyc
 .terraform/
 **/.terraform/
+aws-rosa/generated/
+azure-aro/generated/
+*.tfstate
+*.tfstate.*

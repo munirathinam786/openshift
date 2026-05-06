@@ -78,6 +78,11 @@ nav:
     - Architecture: "aws-rosa/architecture.md"
     - Terraform Code Reference: "aws-rosa/code-reference.md"
     - Pipeline: "aws-rosa/pipeline.md"
+  - Azure ARO:
+    - Overview: "azure-aro/index.md"
+    - Architecture: "azure-aro/architecture.md"
+    - Terraform Code Reference: "azure-aro/code-reference.md"
+    - Pipeline: "azure-aro/pipeline.md"
   - Agent Builder Factory:
     - Deployment Guide: "clusters/terraform-agent-builder.md"
     - Pipeline (Day 1): "pipeline/terraform-agent-builder-pipeline.md"

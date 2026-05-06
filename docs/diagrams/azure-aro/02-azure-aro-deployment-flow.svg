@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900">
+  <rect width="1600" height="900" fill="#ffffff"/>
+  <text x="800" y="42" text-anchor="middle" font-family="Arial, sans-serif" font-size="28" font-weight="700" fill="#1f2937">Azure Red Hat OpenShift Deployment Flow</text>
+
+  <g font-family="Arial, sans-serif">
+    <rect x="120" y="120" width="330" height="72" rx="14" fill="#E3F2FD" stroke="#1565C0" stroke-width="3"/>
+    <text x="285" y="150" text-anchor="middle" font-size="17" font-weight="700">1. Create resource group, VNet,</text>
+    <text x="285" y="175" text-anchor="middle" font-size="17" font-weight="700">and two empty subnets</text>
+
+    <rect x="500" y="120" width="330" height="72" rx="14" fill="#FCE4EC" stroke="#C2185B" stroke-width="3"/>
+    <text x="665" y="150" text-anchor="middle" font-size="17" font-weight="700">2. Create or reuse the</text>
+    <text x="665" y="175" text-anchor="middle" font-size="17" font-weight="700">Microsoft Entra service principal</text>
+
+    <rect x="880" y="120" width="330" height="72" rx="14" fill="#FFF8E1" stroke="#F57F17" stroke-width="3"/>
+    <text x="1045" y="150" text-anchor="middle" font-size="17" font-weight="700">3. Grant Contributor and</text>
+    <text x="1045" y="175" text-anchor="middle" font-size="17" font-weight="700">Network Contributor roles</text>
+
+    <rect x="120" y="280" width="330" height="72" rx="14" fill="#E8F5E9" stroke="#2E7D32" stroke-width="3"/>
+    <text x="285" y="310" text-anchor="middle" font-size="17" font-weight="700">4. Provision ARO with</text>
+    <text x="285" y="335" text-anchor="middle" font-size="17" font-weight="700">azurerm_redhat_openshift_cluster</text>
+
+    <rect x="500" y="280" width="330" height="72" rx="14" fill="#E1F5FE" stroke="#0277BD" stroke-width="3"/>
+    <text x="665" y="310" text-anchor="middle" font-size="17" font-weight="700">5. Render preflight, kubeconfig,</text>
+    <text x="665" y="335" text-anchor="middle" font-size="17" font-weight="700">DNS, and delete helper assets</text>
+
+    <rect x="880" y="280" width="330" height="72" rx="14" fill="#F3E5F5" stroke="#7B1FA2" stroke-width="3"/>
+    <text x="1045" y="310" text-anchor="middle" font-size="17" font-weight="700">6. Azure DevOps optionally</text>
+    <text x="1045" y="335" text-anchor="middle" font-size="17" font-weight="700">fetches admin kubeconfig</text>
+
+    <rect x="300" y="440" width="340" height="72" rx="14" fill="#FFF3E0" stroke="#EF6C00" stroke-width="3"/>
+    <text x="470" y="470" text-anchor="middle" font-size="17" font-weight="700">7. Validate console and API</text>
+    <text x="470" y="495" text-anchor="middle" font-size="17" font-weight="700">access with az and oc</text>
+
+    <rect x="710" y="440" width="360" height="72" rx="14" fill="#F1F8E9" stroke="#689F38" stroke-width="3"/>
+    <text x="890" y="470" text-anchor="middle" font-size="17" font-weight="700">8. Optionally add api and *.apps</text>
+    <text x="890" y="495" text-anchor="middle" font-size="17" font-weight="700">records with the Azure DNS helper</text>
+  </g>
+
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#546E7A"/>
+    </marker>
+  </defs>
+
+  <g stroke="#546E7A" stroke-width="4" fill="none" marker-end="url(#arrow)">
+    <line x1="450" y1="156" x2="500" y2="156"/>
+    <line x1="830" y1="156" x2="880" y2="156"/>
+    <path d="M1045 192 L1045 236 L285 236 L285 280"/>
+    <line x1="450" y1="316" x2="500" y2="316"/>
+    <line x1="830" y1="316" x2="880" y2="316"/>
+    <path d="M1045 352 L1045 396 L470 396 L470 440"/>
+    <line x1="640" y1="476" x2="710" y2="476"/>
+  </g>
+</svg>

@@ -1,0 +1,114 @@
+# =============================================================================
+# Azure DevOps Pipeline — Azure Red Hat OpenShift (ARO)
+# Validates Terraform, provisions the Azure network and ARO cluster, and
+# optionally fetches the admin kubeconfig after cluster creation.
+# =============================================================================
+
+trigger:
+  branches:
+    include:
+      - develop
+  paths:
+    include:
+      - azure-aro/**
+      - docs/azure-aro/**
+      - docs/diagrams/azure-aro/**
+
+parameters:
+  - name: terraformAction
+    displayName: Terraform Action
+    type: string
+    default: plan
+    values:
+      - plan
+      - apply
+      - destroy
+
+  - name: fetchAdminKubeconfig
+    displayName: Fetch admin kubeconfig after create
+    type: boolean
+    default: false
+
+variables:
+  - name: TF_IN_AUTOMATION
+    value: "true"
+  - name: TF_INPUT
+    value: "false"
+  - name: WORKING_DIR
+    value: "azure-aro"
+
+stages:
+  - stage: Validate
+    displayName: Validate ARO Terraform
+    jobs:
+      - job: FmtValidate
+        pool:
+          name: self-hosted-linux
+        steps:
+          - checkout: self
+          - task: TerraformInstaller@1
+            inputs:
+              terraformVersion: latest
+          - script: |
+              cd $(WORKING_DIR)
+              terraform init -input=false
+              terraform fmt -check -recursive
+              terraform validate
+            displayName: terraform init / fmt / validate
+            env:
+              ARM_CLIENT_ID: $(azure-client-id)
+              ARM_CLIENT_SECRET: $(azure-client-secret)
+              ARM_SUBSCRIPTION_ID: $(azure-subscription-id)
+              ARM_TENANT_ID: $(azure-tenant-id)
+              AZURE_CLIENT_ID: $(azure-client-id)
+              AZURE_CLIENT_SECRET: $(azure-client-secret)
+              AZURE_SUBSCRIPTION_ID: $(azure-subscription-id)
+              AZURE_TENANT_ID: $(azure-tenant-id)
+
+  - stage: Provision
+    displayName: Provision Azure foundation and ARO
+    dependsOn: Validate
+    jobs:
+      - job: TerraformApply
+        pool:
+          name: self-hosted-linux
+        steps:
+          - checkout: self
+          - task: TerraformInstaller@1
+            inputs:
+              terraformVersion: latest
+          - script: |
+              cd $(WORKING_DIR)
+              terraform init -input=false
+              terraform ${{ parameters.terraformAction }} \
+                -var-file=terraform.tfvars \
+                -var auto_fetch_admin_kubeconfig=${{ lower(parameters.fetchAdminKubeconfig) }} \
+                -input=false \
+                $(if [ "${{ parameters.terraformAction }}" != "plan" ]; then echo "-auto-approve"; fi)
+            displayName: terraform plan/apply/destroy
+            env:
+              ARM_CLIENT_ID: $(azure-client-id)
+              ARM_CLIENT_SECRET: $(azure-client-secret)
+              ARM_SUBSCRIPTION_ID: $(azure-subscription-id)
+              ARM_TENANT_ID: $(azure-tenant-id)
+              AZURE_CLIENT_ID: $(azure-client-id)
+              AZURE_CLIENT_SECRET: $(azure-client-secret)
+              AZURE_SUBSCRIPTION_ID: $(azure-subscription-id)
+              AZURE_TENANT_ID: $(azure-tenant-id)
+              TF_VAR_pull_secret: $(aro-pull-secret)
+
+  - stage: Summary
+    displayName: ARO summary
+    dependsOn: Provision
+    condition: always()
+    jobs:
+      - job: OutputSummary
+        pool:
+          name: self-hosted-linux
+        steps:
+          - checkout: none
+          - script: |
+              echo "ARO Terraform workflow completed."
+              echo "Review azure-aro/generated for the preflight, kubeconfig, DNS, and delete helper assets."
+              echo "If fetchAdminKubeconfig=false, run the generated helper scripts manually once az login and oc are available."
+            displayName: Print summary

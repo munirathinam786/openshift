@@ -116,3 +116,11 @@ All architecture, cluster, pipeline, and code diagrams are available as interact
 | 1 | ![](ibm-z/01-ibm-z-architecture.svg){: style="max-width:200px" } | [:material-download: .drawio](ibm-z/01-ibm-z-architecture.drawio) |
 | 2 | ![](ibm-z/02-ibm-z-deployment-flow.svg){: style="max-width:200px" } | [:material-download: .drawio](ibm-z/02-ibm-z-deployment-flow.drawio) |
 | 3 | ![](ibm-z/03-ibm-z-terraform-modules.svg){: style="max-width:200px" } | [:material-download: .drawio](ibm-z/03-ibm-z-terraform-modules.drawio) |
+
+## Azure ARO Diagrams
+
+| # | Diagram | Download |
+|---|---------|----------|
+| 1 | ![](azure-aro/01-azure-aro-architecture.svg){: style="max-width:200px" } | [:material-download: .drawio](azure-aro/01-azure-aro-architecture.drawio) |
+| 2 | ![](azure-aro/02-azure-aro-deployment-flow.svg){: style="max-width:200px" } | [:material-download: .drawio](azure-aro/02-azure-aro-deployment-flow.drawio) |
+| 3 | ![](azure-aro/03-azure-aro-terraform-modules.svg){: style="max-width:200px" } | [:material-download: .drawio](azure-aro/03-azure-aro-terraform-modules.drawio) |
