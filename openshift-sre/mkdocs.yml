@@ -1,0 +1,50 @@
+site_name: OpenShift SRE Local Agent
+site_description: Documentation for a local-model Red Hat OpenShift SRE operations agent
+site_url: http://localhost:8000/docs
+repo_name: local/openshift-sre-local-agent
+copyright: >-
+  Author: Sathishkumar Munirathinam /
+  <a href="mailto:Sathishkumar.munirathinam@kyndryl.com">Sathishkumar.munirathinam@kyndryl.com</a>
+nav:
+  - Home: index.md
+  - LLM Utilization: llm-utilization.html
+  - Security Console: security-console.html
+  - Troubleshooting Console: troubleshooting.html
+  - Agent Console: console.html
+  - FinOps Console: finops-console.html
+  - Historical Dashboard: history.html
+  - Tool Drilldown: tool-drilldown.html
+  - API Reference: api-reference.md
+  - LLM Providers: llm-providers.md
+  - FinOps Queue Flow: finops-queue-flow.md
+  - End-to-End Code Flow: end-to-end-flow.md
+  - Service Coverage: service-coverage.md
+  - Platform Impact Notes: cost-impact.md
+  - Architecture: architecture.md
+  - Architecture v0.3.0: architecture-v030.md
+  - Operations: operations.md
+  - Operator Playbooks:
+      - Audit & Security: playbook-audit-security.md
+      - Advanced Security & Governance: playbook-advanced-security-governance.md
+      - Capacity & Optimization: playbook-finops.md
+      - Platform & Automation: playbook-platform-automation.md
+      - Storage & Governance: playbook-storage-governance.md
+  - Code Explained:
+      - Core Python Files: code-core.md
+      - Service & API Files: code-services.md
+      - Runtime, Docs, and Tests: code-runtime.md
+      - Function Reference: function-reference.md
+theme:
+  name: material
+markdown_extensions:
+  - admonition
+  - attr_list
+  - def_list
+  - tables
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.details
+  - pymdownx.highlight

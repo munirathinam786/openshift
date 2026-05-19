@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>OpenShift SRE Drift Diff</title>
+    <link rel="stylesheet" href="assets/stylesheets/agent-console.css">
+  </head>
+  <body dir="ltr">
+    <div data-app-shell>
+      <script type="application/json" data-app-shell-props>
+        {
+          "key": "drift-diff",
+          "eyebrow": "Historical comparison",
+          "title": "Drift Diff",
+          "description": "Compare two stored runs, inspect duration and tool drift, and see which recorded metrics moved between baselines.",
+          "badges": ["Run comparison", "Baseline-friendly", "Operator drift review"],
+          "actions": [
+            { "label": "Open History", "href": "history.html" },
+            { "label": "Open Watchlists", "href": "watchlists.html" },
+            { "label": "Open Agent Console", "href": "console.html" }
+          ],
+          "secondaryActions": [
+            { "label": "Posture Radar", "href": "posture-radar.html" },
+            { "label": "Tool Drilldown", "href": "tool-drilldown.html" }
+          ],
+          "stats": [
+            { "label": "Comparison scope", "value": "Run-to-run drift", "detail": "Compare any two stored runs to see where timing, tools, and metrics changed between baselines." },
+            { "label": "Best used for", "value": "Regression review", "detail": "Useful after platform changes, policy rollouts, or recurring watchlist runs when you need to see what moved." },
+            { "label": "Output shape", "value": "Summary cards + metric deltas", "detail": "High-level drift stays readable while metric-level changes remain available for deeper inspection." }
+          ],
+          "sectionNav": [
+            { "label": "Select runs", "href": "#diff-select" },
+            { "label": "Diff output", "href": "#diff-results" }
+          ],
+          "shortcuts": [
+            { "label": "Compare recent runs", "href": "#diff-select" },
+            { "label": "Metric deltas", "href": "#diff-results" }
+          ],
+          "workspaceSignals": ["Uses /history/compare", "Shows tool added/removed", "Highlights numeric metric drift"],
+          "highlights": [
+            { "title": "Baseline-friendly comparisons", "description": "Use one run as the stable baseline and instantly see what changed in duration, steps, tools, and metrics." },
+            { "title": "Tool drift visibility", "description": "Added and removed tool calls stay visible so investigation quality changes are easier to explain." },
+            { "title": "Metric movement at a glance", "description": "Numeric deltas surface quickly so operator reviews can focus on what materially moved instead of rereading full histories." }
+          ],
+          "featureGroups": [
+            {
+              "kicker": "Historical comparison",
+              "title": "Explain what changed between two stored runs",
+              "description": "This page turns historical runs into an operator-friendly drift review instead of a manual JSON diff exercise.",
+              "items": [
+                { "title": "Recent run selector", "description": "Pull from stored history and compare runs without leaving the operator workspace.", "meta": "Run history", "href": "#diff-select" },
+                { "title": "Metric delta review", "description": "Track numerical movement across recorded metrics to spot regressions, improvements, or noisy shifts.", "meta": "Trend context", "href": "#diff-results" },
+                { "title": "Tooling change awareness", "description": "See when the tool mix itself changed so you can separate real platform drift from investigation drift.", "meta": "Method clarity", "href": "#diff-results" }
+              ]
+            }
+          ]
+        }
+      </script>
+    </div>
+    <main class="md-main">
+      <div class="md-content" data-md-component="content">
+        <article class="md-content__inner md-typeset">
+          <div class="agent-console" data-drift-diff>
+            <section class="agent-console__panel" id="diff-select">
+              <h2>Select two runs</h2>
+              <p class="agent-console__meta">Pick any two stored runs. The diff view compares duration, step count, tool usage changes, tag changes, and numeric metric deltas.</p>
+              <label class="agent-console__label" for="diff-left">Left / baseline run</label>
+              <select id="diff-left" class="agent-console__input" data-diff-left></select>
+              <label class="agent-console__label" for="diff-right">Right / comparison run</label>
+              <select id="diff-right" class="agent-console__input" data-diff-right></select>
+              <div class="agent-console__actions">
+                <button class="agent-console__button" type="button" data-diff-run>Compare runs</button>
+                <button class="agent-console__example" type="button" data-diff-refresh>Refresh recent runs</button>
+              </div>
+              <div class="agent-console__status" data-diff-status></div>
+            </section>
+
+            <section class="agent-console__panel" id="diff-results">
+              <h2>Diff results</h2>
+              <div class="agent-console__cards" data-diff-summary>
+                <p class="agent-console__meta">Run comparison cards will appear here.</p>
+              </div>
+              <h3>Metric deltas</h3>
+              <div class="agent-console__tables" data-diff-metrics>
+                <p class="agent-console__meta">Metric-level deltas will appear here after a comparison.</p>
+              </div>
+            </section>
+          </div>
+        </article>
+      </div>
+    </main>
+    <footer class="agent-console__footer">
+      <span>Author: Sathishkumar Munirathinam / </span>
+      <a href="mailto:Sathishkumar.munirathinam@kyndryl.com">Sathishkumar.munirathinam@kyndryl.com</a>
+    </footer>
+    <script src="assets/javascripts/app-shell.js"></script>
+    <script src="assets/javascripts/drift-diff.js"></script>
+  </body>
+</html>

@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>AWS SRE Posture Radar</title>
+    <link rel="stylesheet" href="assets/stylesheets/agent-console.css">
+  </head>
+  <body dir="ltr">
+    <div data-app-shell>
+      <script type="application/json" data-app-shell-props>
+        {
+          "key": "posture-radar",
+          "eyebrow": "Cross-region & cross-account visibility",
+          "title": "Posture Radar",
+          "description": "Run the same AWS inspection pack across multiple regions and accounts to surface posture drift, identity context, and shared hotspots.",
+          "badges": ["3D shell", "Multi-region sweep", "Trust-context aware"],
+          "actions": [
+            { "label": "Open Agent Console", "href": "console.html" },
+            { "label": "Open Watchlists", "href": "watchlists.html" },
+            { "label": "Open Drift Diff", "href": "drift-diff.html" }
+          ],
+          "secondaryActions": [
+            { "label": "History", "href": "history.html" },
+            { "label": "Tool Drilldown", "href": "tool-drilldown.html" }
+          ],
+          "stats": [
+            { "label": "Sweep mode", "value": "Region + role fan-out", "detail": "Each target run captures its own caller identity before executing tool packs." },
+            { "label": "Best used for", "value": "Governance & platform checks", "detail": "Ideal for regional drift, storage posture, and shared-account checks." },
+            { "label": "Output shape", "value": "Target cards + raw evidence", "detail": "Summaries keep the operator view fast while full JSON stays available." }
+          ],
+          "sectionNav": [
+            { "label": "Sweep builder", "href": "#radar-run" },
+            { "label": "Sweep results", "href": "#radar-results" }
+          ],
+          "shortcuts": [
+            { "label": "Cmd/Ctrl + Enter → sweep", "href": "#radar-run" },
+            { "label": "Target evidence", "href": "#radar-results" }
+          ],
+          "workspaceSignals": ["Uses /platform/sweep", "Captures caller identity per target", "Raw evidence stays expandable"],
+          "highlights": [
+            { "title": "Cross-target evidence", "description": "Each target response preserves both summary cards and raw evidence so operators can compare posture without losing detail." },
+            { "title": "Identity-aware sweep", "description": "Caller identity is captured per account or role target, helping operators verify exactly which trust path answered." },
+            { "title": "Pack-driven posture review", "description": "Run focused packs for networking, storage, or identity rather than manually stitching the same tools together every time." }
+          ],
+          "featureGroups": [
+            {
+              "kicker": "Sweep orchestration",
+              "title": "Fan out the same inspection pack across regions and accounts",
+              "description": "Posture Radar is built for broad situational awareness when one account or one region tells only part of the story.",
+              "items": [
+                { "title": "Pack-based targeting", "description": "Choose the tools once, then replay the same posture check across every target in the sweep.", "meta": "Consistency", "href": "#radar-run" },
+                { "title": "Identity verification", "description": "Every response carries its own caller identity so cross-account comparisons remain trustworthy.", "meta": "Trust context", "href": "#radar-results" },
+                { "title": "Expandable raw evidence", "description": "Summary cards keep the overview fast while expandable JSON keeps the deep evidence one click away.", "meta": "Evidence depth", "href": "#radar-results" }
+              ]
+            }
+          ],
+          "notice": "Use this page for broad posture fan-out when one live region is not enough. It complements the main console rather than replacing it."
+        }
+      </script>
+    </div>
+    <main class="md-main">
+      <div class="md-content" data-md-component="content">
+        <article class="md-content__inner md-typeset">
+          <div class="agent-console" data-posture-radar>
+            <section class="agent-console__panel" id="radar-run">
+              <h2>Build a posture sweep</h2>
+              <p class="agent-console__meta">Pick the investigation pack, regions, and optional role ARNs. Every target returns its caller identity so operators can confirm exactly which account answered.</p>
+              <details class="agent-console__settings" open>
+                <summary>Runtime credentials</summary>
+                <p class="agent-console__meta">Posture Radar runs AWS tools directly through <code>/platform/sweep</code>. Supply AWS runtime overrides here when the container defaults are not the credentials or trust context you want.</p>
+                <div class="agent-console__settings-grid">
+                  <label>
+                    AWS profile
+                    <input class="agent-console__input" type="text" data-radar-aws-profile placeholder="default">
+                  </label>
+                  <label>
+                    AWS access key ID
+                    <input class="agent-console__input" type="text" data-radar-aws-access-key-id placeholder="AKIA...">
+                  </label>
+                  <label>
+                    AWS secret access key
+                    <input class="agent-console__input" type="password" data-radar-aws-secret-access-key placeholder="Secret access key">
+                  </label>
+                  <label>
+                    AWS session token
+                    <textarea class="agent-console__textarea" data-radar-aws-session-token placeholder="Optional STS session token"></textarea>
+                  </label>
+                  <label class="agent-console__checkbox">
+                    <input type="checkbox" data-radar-aws-verify-ssl checked>
+                    <span>Verify AWS TLS certificates</span>
+                  </label>
+                </div>
+                <p class="agent-console__meta">Model selection is not shown here because Posture Radar does not use the LLM reasoning loop; it fans out direct AWS toolkit calls and returns raw evidence per target.</p>
+              </details>
+              <label class="agent-console__label" for="radar-tools">Tool pack</label>
+              <select id="radar-tools" class="agent-console__input" data-radar-tools multiple size="8">
+                <option value="get_caller_identity" selected>Caller identity</option>
+                <option value="list_enabled_regions">Enabled regions</option>
+                <option value="list_security_groups" selected>Security groups</option>
+                <option value="list_route_tables" selected>Route tables</option>
+                <option value="list_nat_gateways">NAT gateways</option>
+                <option value="list_vpc_endpoints">VPC endpoints</option>
+                <option value="list_s3_bucket_posture" selected>S3 bucket posture</option>
+                <option value="list_iam_roles">IAM roles</option>
+                <option value="list_lambda_operational_posture">Lambda posture</option>
+                <option value="list_rds_failover_posture">RDS failover posture</option>
+                <option value="list_rds_event_subscriptions">RDS event subscriptions</option>
+                <option value="list_cost_by_account">Cost by account</option>
+                <option value="list_budgets">Budgets</option>
+              </select>
+              <label class="agent-console__label" for="radar-regions">Regions</label>
+              <input id="radar-regions" class="agent-console__input" data-radar-regions type="text" value="us-east-1,us-west-2" placeholder="us-east-1,us-west-2">
+              <label class="agent-console__label" for="radar-roles">Role ARNs (optional, one per line)</label>
+              <textarea id="radar-roles" class="agent-console__textarea" data-radar-roles placeholder="arn:aws:iam::111111111111:role/ReadOnlyAudit"></textarea>
+              <div class="agent-console__actions">
+                <button class="agent-console__button" type="button" data-radar-run>Run posture radar</button>
+                <button class="agent-console__example" type="button" data-radar-preset="network">Network posture pack</button>
+                <button class="agent-console__example" type="button" data-radar-preset="storage">Storage governance pack</button>
+                <button class="agent-console__example" type="button" data-radar-preset="identity">Identity hygiene pack</button>
+              </div>
+              <div class="agent-console__status" data-radar-status></div>
+            </section>
+
+            <section class="agent-console__panel" id="radar-results">
+              <h2>Radar results</h2>
+              <div class="agent-console__queue-header">
+                <div>
+                  <h3>Export latest sweep</h3>
+                  <p class="agent-console__meta">Package the current posture radar results as an operator handoff in CSV, PowerPoint, PDF, or Word-compatible format.</p>
+                </div>
+                <span class="agent-console__history-badge agent-console__history-badge--neutral">CSV · PPT · PDF · Word</span>
+              </div>
+              <div class="agent-console__actions">
+                <button class="agent-console__button" type="button" data-radar-export-format="csv" disabled>Export CSV</button>
+                <button class="agent-console__button" type="button" data-radar-export-format="ppt" disabled>Export PPT</button>
+                <button class="agent-console__button agent-console__button--secondary" type="button" data-radar-export-format="pdf" disabled>Export PDF</button>
+                <button class="agent-console__example" type="button" data-radar-export-format="word" disabled>Export Word</button>
+              </div>
+              <div class="agent-console__status" data-radar-report-status>Run the posture radar to unlock exports.</div>
+              <div class="agent-console__cards" data-radar-cards>
+                <p class="agent-console__meta">Sweep targets will appear here after the first run.</p>
+              </div>
+              <h3>Raw evidence</h3>
+              <div class="agent-console__tables" data-radar-raw>
+                <p class="agent-console__meta">Expanded JSON evidence is shown here for deeper review and copy/paste workflows.</p>
+              </div>
+            </section>
+          </div>
+        </article>
+      </div>
+    </main>
+    <footer class="agent-console__footer">
+      <span>Author: Sathishkumar Munirathinam / </span>
+      <a href="mailto:Sathishkumar.munirathinam@kyndryl.com">Sathishkumar.munirathinam@kyndryl.com</a>
+    </footer>
+    <script src="assets/javascripts/app-shell.js"></script>
+    <script src="https://unpkg.com/pptxgenjs@3.12.0/dist/pptxgen.bundle.js"></script>
+    <script src="https://unpkg.com/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+    <script src="assets/javascripts/posture-radar.js"></script>
+  </body>
+</html>

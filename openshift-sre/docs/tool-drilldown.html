@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>AWS SRE Tool Drilldown</title>
+    <link rel="stylesheet" href="assets/stylesheets/agent-console.css">
+  </head>
+  <body dir="ltr">
+    <div data-app-shell>
+      <script type="application/json" data-app-shell-props>
+        {
+          "key": "tool-drilldown",
+          "eyebrow": "Tool-level analytics",
+          "title": "Tool Drilldown",
+          "description": "Inspect one tool across persisted runs, compare model and region behavior, and review invocation details in a more focused analysis workspace.",
+          "badges": ["React shell", "Tool-centric analytics", "History linked"],
+          "actions": [
+            { "label": "Open history", "href": "history.html" },
+            { "label": "Open agent console", "href": "console.html" }
+          ],
+          "secondaryActions": [
+            { "label": "Troubleshooting", "href": "troubleshooting.html" },
+            { "label": "LLM utilization", "href": "llm-utilization.html" }
+          ],
+          "stats": [
+            { "label": "Best use case", "value": "Investigate one tool deeply", "detail": "Great for noisy tools, regional hotspots, or debugging a single evidence source." },
+            { "label": "Filters", "value": "Time / model / region", "detail": "Keep the page focused on a single tool while still slicing by runtime context." },
+            { "label": "Linked flow", "value": "History-aware", "detail": "Jump between per-tool detail and the full historical dashboard with less friction." }
+          ],
+          "workspaceSignals": ["Querystring-linked tool state", "Model + region slices", "CSV/PPT/PDF/Word reporting", "Latest metrics + trend pairing", "Invocation payload inspection"],
+          "sectionNav": [
+            { "label": "Filters", "href": "#tool-filters" },
+            { "label": "Report exports", "href": "#tool-exports" },
+            { "label": "Summary", "href": "#tool-summary" },
+            { "label": "Latest metrics", "href": "#tool-latest" },
+            { "label": "Trend lane", "href": "#tool-trends" },
+            { "label": "Invocations", "href": "#tool-invocations" }
+          ],
+          "shortcuts": [
+            { "label": "Shareable tool query", "href": "#tool-filters" },
+            { "label": "Theme toggle", "href": "#tool-summary" },
+            { "label": "History pivot", "href": "history.html" },
+            { "label": "Invocation detail expand", "href": "#tool-invocations" }
+          ],
+          "highlights": [
+            { "title": "Sharper drilldown framing", "description": "The page now opens with clearer context and quick navigation instead of a bare filter wall." },
+            { "title": "Better scan rhythm", "description": "Summary, latest metrics, trends, and invocations feel more like one workflow instead of disconnected blocks." },
+            { "title": "Friendlier preview states", "description": "Static previews now explain missing live data instead of feeling broken." }
+          ],
+          "featureGroups": [
+            {
+              "kicker": "Focused analysis",
+              "title": "One tool, many views",
+              "description": "The drilldown page is tuned for noisy tools that need a tighter, more evidence-rich review path.",
+              "items": [
+                { "title": "Multi-dimensional filtering", "description": "Keep the tool fixed while slicing by time range, model, and region to isolate hotspots.", "meta": "Comparative focus", "href": "#tool-filters" },
+                { "title": "Latest vs trend pairing", "description": "See what the tool emitted most recently and whether those values are part of a wider pattern.", "meta": "Signal quality", "href": "#tool-latest" },
+                { "title": "Invocation payload review", "description": "Expand concrete tool arguments and results when you need the exact evidence behind the summary.", "meta": "Deep inspection", "href": "#tool-invocations" }
+              ]
+            }
+          ]
+        }
+      </script>
+    </div>
+    <main class="md-main">
+      <div class="md-content" data-md-component="content">
+        <article class="md-content__inner md-typeset">
+          <section class="agent-shell__fallback">
+            <h1>Tool Drilldown</h1>
+            <p>Inspect one tool across all persisted runs, including invocation history, metrics, and filtered regional/model behavior.</p>
+            <p><a href="history.html">Back to the historical dashboard</a></p>
+          </section>
+
+          <section class="agent-console__panel agent-console__panel--full" id="tool-filters">
+            <div class="agent-console__history-topbar">
+              <div>
+                <h2>Tool filters and refresh</h2>
+                <p class="agent-console__meta">Choose a tool, then refine by time range, model, and region.</p>
+              </div>
+              <div class="agent-console__actions">
+                <button class="agent-console__example" type="button" data-tool-theme-toggle>Dark mode</button>
+                <button class="agent-console__button" type="button" data-tool-refresh>Refresh drilldown</button>
+                <a class="agent-console__example" href="history.html">Open history dashboard</a>
+              </div>
+            </div>
+            <div class="agent-console__history-filter-grid">
+              <label class="agent-console__label">
+                Tool
+                <select class="agent-console__input" data-tool-name></select>
+              </label>
+              <label class="agent-console__label">
+                Time range
+                <select class="agent-console__input" data-tool-range>
+                  <option value="24h">Last 24 hours</option>
+                  <option value="7d">Last 7 days</option>
+                  <option value="30d" selected>Last 30 days</option>
+                  <option value="90d">Last 90 days</option>
+                  <option value="all">All history</option>
+                </select>
+              </label>
+              <label class="agent-console__label">
+                Model
+                <select class="agent-console__input agent-console__input--multi" data-tool-models multiple size="5"></select>
+              </label>
+              <label class="agent-console__label">
+                AWS region
+                <select class="agent-console__input agent-console__input--multi" data-tool-regions multiple size="5"></select>
+              </label>
+              <div class="agent-console__history-inline-meta">
+                <p class="agent-console__meta"><strong>Selected tool:</strong> <span data-tool-active-name>Loading…</span></p>
+                <p class="agent-console__meta"><strong>Model filter:</strong> <span data-tool-active-models>All models</span></p>
+                <p class="agent-console__meta"><strong>Region filter:</strong> <span data-tool-active-regions>All regions</span></p>
+                <p class="agent-console__meta"><strong>Last refresh:</strong> <span data-tool-last-refresh>Waiting for first load…</span></p>
+              </div>
+            </div>
+          </section>
+
+          <section class="agent-console__panel agent-console__panel--full" id="tool-exports">
+            <div class="agent-console__queue-header">
+              <div>
+                <h2>Tool reporting exports</h2>
+                <p class="agent-console__meta">Export the active tool view as either a performance summary or an invocation evidence pack in CSV, PowerPoint, PDF, or Word-compatible format.</p>
+              </div>
+              <span class="agent-console__history-badge agent-console__history-badge--neutral">CSV · PPT · PDF · Word</span>
+            </div>
+            <div class="agent-console__report-grid">
+              <article class="agent-console__report-card">
+                <h5>Tool performance report</h5>
+                <p class="agent-console__meta">Summarizes invocation volume, failures, duration, latest metrics, and trend posture for the selected tool.</p>
+                <div class="agent-console__actions">
+                  <button class="agent-console__button" type="button" data-tool-export-report="tool-performance" data-tool-export-format="csv">Export CSV</button>
+                  <button class="agent-console__button" type="button" data-tool-export-report="tool-performance" data-tool-export-format="ppt">Export PPT</button>
+                  <button class="agent-console__button agent-console__button--secondary" type="button" data-tool-export-report="tool-performance" data-tool-export-format="pdf">Export PDF</button>
+                  <button class="agent-console__example" type="button" data-tool-export-report="tool-performance" data-tool-export-format="word">Export Word</button>
+                </div>
+              </article>
+              <article class="agent-console__report-card">
+                <h5>Invocation evidence pack</h5>
+                <p class="agent-console__meta">Packages recent invocation prompts, arguments, results, and error detail for focused operational review.</p>
+                <div class="agent-console__actions">
+                  <button class="agent-console__button" type="button" data-tool-export-report="invocation-evidence" data-tool-export-format="csv">Export CSV</button>
+                  <button class="agent-console__button" type="button" data-tool-export-report="invocation-evidence" data-tool-export-format="ppt">Export PPT</button>
+                  <button class="agent-console__button agent-console__button--secondary" type="button" data-tool-export-report="invocation-evidence" data-tool-export-format="pdf">Export PDF</button>
+                  <button class="agent-console__example" type="button" data-tool-export-report="invocation-evidence" data-tool-export-format="word">Export Word</button>
+                </div>
+              </article>
+            </div>
+            <div class="agent-console__status" data-tool-report-status>Refresh the tool drilldown to unlock report exports.</div>
+          </section>
+
+          <div class="agent-console agent-console--history" data-tool-drilldown>
+            <section class="agent-console__panel agent-console__panel--full" id="tool-summary">
+              <h2>Tool summary</h2>
+              <div class="agent-console__status" data-tool-status></div>
+              <div class="agent-console__history-summary" data-tool-summary></div>
+            </section>
+
+            <section class="agent-console__panel" id="tool-latest">
+              <h2>Latest metrics</h2>
+              <div class="agent-console__history-latest" data-tool-latest></div>
+            </section>
+
+            <section class="agent-console__panel" id="tool-trends">
+              <h2>Metric trends</h2>
+              <div class="agent-console__history-trends" data-tool-trends></div>
+            </section>
+
+            <section class="agent-console__panel agent-console__panel--full" id="tool-invocations">
+              <h2>Recent invocations</h2>
+              <div class="agent-console__history-runs" data-tool-invocations></div>
+            </section>
+          </div>
+        </article>
+      </div>
+    </main>
+    <footer class="agent-console__footer">
+      <span>Author: Sathishkumar Munirathinam / </span>
+      <a href="mailto:Sathishkumar.munirathinam@kyndryl.com">Sathishkumar.munirathinam@kyndryl.com</a>
+    </footer>
+    <script src="assets/javascripts/app-shell.js"></script>
+    <script src="https://unpkg.com/pptxgenjs@3.12.0/dist/pptxgen.bundle.js"></script>
+    <script src="https://unpkg.com/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+    <script src="assets/javascripts/tool-drilldown.js"></script>
+  </body>
+</html>

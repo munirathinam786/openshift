@@ -1,0 +1,355 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>AWS SRE Historical Dashboard</title>
+    <link rel="stylesheet" href="assets/stylesheets/agent-console.css">
+  </head>
+  <body dir="ltr">
+    <a class="agent-console__skip-link" href="#main-dashboard">Skip to dashboard</a>
+    <div data-app-shell>
+      <script type="application/json" data-app-shell-props>
+        {
+          "key": "history",
+          "eyebrow": "Operational analytics",
+          "title": "Historical Dashboard",
+          "description": "Track persisted runs, success rates, durations, model and region breakdowns, and metric trends through an executive-style analytics workspace with benchmark ribbons, week-over-week storytelling, latency percentile bands, executive exception rollups, and weekly ops review exports.",
+          "badges": ["React shell", "Executive analytics", "Live /history/overview", "Weekly ops review export"],
+          "actions": [
+            { "label": "Open agent console", "href": "console.html" },
+            { "label": "Open LLM utilization", "href": "llm-utilization.html" }
+          ],
+          "secondaryActions": [
+            { "label": "Troubleshooting", "href": "troubleshooting.html" },
+            { "label": "Tool drilldown", "href": "tool-drilldown.html" }
+          ],
+          "stats": [
+            { "label": "Primary signal", "value": "Run health + metrics", "detail": "See how prompts, tool calls, and numeric metrics evolve over time." },
+            { "label": "Exports", "value": "CSV + PPT + PDF + Word", "detail": "Download filtered views for leadership sharing, incident review, board packs, or stand-up decks." },
+            { "label": "Filters", "value": "Time / model / region / tool + SLA", "detail": "Narrow trends and tune executive thresholds without reloading the whole docs site." }
+          ],
+          "workspaceSignals": ["Saved URL-shareable filters", "Executive benchmark ribbons", "CSV/PPT/PDF/Word reporting", "Weekly ops review export", "Metric and run drilldown"],
+          "sectionNav": [
+            { "label": "Controls", "href": "#history-controls" },
+            { "label": "Report exports", "href": "#history-exports" },
+            { "label": "Executive overview", "href": "#history-overview" },
+            { "label": "Operational patterns", "href": "#history-patterns" },
+            { "label": "Metric intelligence", "href": "#history-metrics" },
+            { "label": "Trace drilldown", "href": "#history-trace" }
+          ],
+          "shortcuts": [
+            { "label": "Saved querystring state", "href": "#history-controls" },
+            { "label": "CSV / PNG / weekly review export", "href": "#history-controls" },
+            { "label": "Metric row → detail", "href": "#history-metrics" },
+            { "label": "Run row → trace", "href": "#history-trace" }
+          ],
+          "highlights": [
+            { "title": "Executive summary framing", "description": "Section dividers, KPI storytelling, benchmark ribbons, and week-over-week comparisons make the dashboard easier to scan in leadership reviews." },
+            { "title": "Linked operator workflow", "description": "Jump from metrics to detailed runs and then into tool drilldown with less friction." },
+            { "title": "Board-ready outputs", "description": "Variance callouts, percentile bands, executive exception rollups, and weekly ops exports help package a board-friendly readout without extra formatting work." }
+          ],
+          "featureGroups": [
+            {
+              "kicker": "Executive layer",
+              "title": "Leadership-ready benchmarking and storytelling surfaces",
+              "description": "The dashboard goes beyond charts to explain what matters, where it moved, and how far it is from target.",
+              "items": [
+                { "title": "Benchmark board", "description": "Compare current reliability and latency against cohort baselines and SLA thresholds.", "meta": "Executive scan", "href": "#history-overview" },
+                { "title": "Storytelling panels", "description": "This-week-vs-last-week cards, percentile bands, and exception rollups compress a lot of context into a fast read.", "meta": "Narrative analytics", "href": "#history-overview" },
+                { "title": "Export presets", "description": "Switch between standard, board, and appendix layouts before generating downstream artifacts.", "meta": "Packaging", "href": "#history-controls" }
+              ]
+            },
+            {
+              "kicker": "Traceability",
+              "title": "Move from portfolio KPI to metric payload to exact run trace",
+              "description": "Every major section links deeper rather than leaving the operator with a pretty but dead summary.",
+              "items": [
+                { "title": "Metric detail drilldown", "description": "Select a metric series or latest row to inspect the exact collected records behind it.", "meta": "Evidence path", "href": "#history-metrics" },
+                { "title": "Run detail inspection", "description": "Open recent runs to inspect prompts, steps, extracted metrics, and tool payloads.", "meta": "Operator forensics", "href": "#history-trace" },
+                { "title": "Tool-centric follow-up", "description": "Pivot from hot tools into the dedicated drilldown page when one evidence source is noisy.", "meta": "Focused analysis", "href": "tool-drilldown.html" }
+              ]
+            }
+          ]
+        }
+      </script>
+    </div>
+    <main class="md-main">
+      <div class="md-content" data-md-component="content">
+        <article class="md-content__inner md-typeset">
+          <section class="agent-shell__fallback">
+            <h1>Historical Dashboard</h1>
+            <p>Review persisted run history, success and failure rates, response durations, and metric trends from the MariaDB-backed history store.</p>
+            <ul>
+              <li>This page reads the live <code>GET /history/overview</code> endpoint.</li>
+              <li>Run prompts from the <a href="console.html">Agent Console</a> to populate the dashboard.</li>
+              <li>Use the refresh button if you want to pull the latest history without reloading the full page.</li>
+              <li>For multi-select filters, use <code>⌘/Ctrl</code> while clicking filter options.</li>
+            </ul>
+          </section>
+
+          <section class="agent-console__panel agent-console__panel--full agent-console__history-controls" id="history-controls" data-history-controls>
+            <div class="agent-console__history-topbar">
+              <div>
+                <h2>Filters, refresh, and export</h2>
+                <p class="agent-console__meta">Adjust the visible time horizon, keep the dashboard refreshed automatically, and export the current view.</p>
+              </div>
+              <div class="agent-console__actions">
+                <button class="agent-console__example" type="button" data-history-theme-toggle>Dark mode</button>
+                <button class="agent-console__button" type="button" data-history-refresh>Refresh dashboard</button>
+                <button class="agent-console__example" type="button" data-history-export-csv>Export CSV</button>
+                <button class="agent-console__example" type="button" data-history-export-png>Export PNG</button>
+                <button class="agent-console__example" type="button" data-history-export-weekly-review>Weekly ops review</button>
+                <a class="agent-console__example" href="llm-utilization.html">Open LLM utilization</a>
+                <a class="agent-console__example" href="console.html">Open agent console</a>
+              </div>
+            </div>
+            <div class="agent-console__history-filter-grid">
+              <label class="agent-console__label">
+                Time range
+                <select class="agent-console__input" data-history-range>
+                  <option value="24h">Last 24 hours</option>
+                  <option value="7d">Last 7 days</option>
+                  <option value="30d" selected>Last 30 days</option>
+                  <option value="90d">Last 90 days</option>
+                  <option value="all">All history</option>
+                </select>
+              </label>
+              <label class="agent-console__label">
+                Model
+                <select class="agent-console__input agent-console__input--multi" data-history-model multiple size="4">
+                </select>
+              </label>
+              <label class="agent-console__label">
+                AWS region
+                <select class="agent-console__input agent-console__input--multi" data-history-region multiple size="4">
+                </select>
+              </label>
+              <label class="agent-console__label">
+                Tool filter
+                <select class="agent-console__input agent-console__input--multi" data-history-tools multiple size="6">
+                </select>
+              </label>
+              <label class="agent-console__label">
+                Auto-refresh
+                <select class="agent-console__input" data-history-auto-refresh>
+                  <option value="0" selected>Off</option>
+                  <option value="30">Every 30 seconds</option>
+                  <option value="60">Every minute</option>
+                  <option value="300">Every 5 minutes</option>
+                </select>
+              </label>
+              <label class="agent-console__label">
+                Success SLA (%)
+                <input class="agent-console__input" data-history-sla-success type="number" min="0" max="100" step="0.1" value="99">
+              </label>
+              <label class="agent-console__label">
+                Avg duration SLA (ms)
+                <input class="agent-console__input" data-history-sla-duration type="number" min="1" step="100" value="90000">
+              </label>
+              <label class="agent-console__label">
+                Export layout
+                <select class="agent-console__input" data-history-export-layout>
+                  <option value="standard" selected>Standard dashboard</option>
+                  <option value="board">Board review</option>
+                  <option value="appendix">Appendix / dense detail</option>
+                </select>
+              </label>
+              <div class="agent-console__history-inline-meta">
+                <p class="agent-console__meta"><strong>Active window:</strong> <span data-history-active-range>Last 30 days</span></p>
+                <p class="agent-console__meta"><strong>Model filter:</strong> <span data-history-active-model>All models</span></p>
+                <p class="agent-console__meta"><strong>Region filter:</strong> <span data-history-active-region>All regions</span></p>
+                <p class="agent-console__meta"><strong>Tool filter:</strong> <span data-history-active-tool>All tools</span></p>
+                <p class="agent-console__meta"><strong>SLA pack:</strong> <span data-history-active-sla>99% success · 90,000 ms avg duration</span></p>
+                <p class="agent-console__meta"><strong>Export layout:</strong> <span data-history-active-layout>Standard dashboard</span></p>
+                <p class="agent-console__meta"><strong>Comparison mode:</strong> <span data-history-active-comparison>This week vs last week</span></p>
+                <p class="agent-console__meta"><strong>Last refresh:</strong> <span data-history-last-refresh>Waiting for first load…</span></p>
+              </div>
+            </div>
+          </section>
+
+          <section class="agent-console__panel agent-console__panel--full" id="history-exports">
+            <div class="agent-console__queue-header">
+              <div>
+                <h2>Reporting exports</h2>
+                <p class="agent-console__meta">Generate presentation-ready history summaries as CSV, PowerPoint, PDF, or Word-compatible exports while keeping the existing PNG and weekly review actions available.</p>
+              </div>
+              <span class="agent-console__history-badge agent-console__history-badge--neutral">CSV · PPT · PDF · Word</span>
+            </div>
+            <div class="agent-console__report-grid">
+              <article class="agent-console__report-card">
+                <h5>Executive portfolio report</h5>
+                <p class="agent-console__meta">Packages benchmark ribbons, run health, top tools, and exception rollups for leadership reviews.</p>
+                <div class="agent-console__actions">
+                  <button class="agent-console__button" type="button" data-history-export-report="executive-portfolio" data-history-export-format="csv">Export CSV</button>
+                  <button class="agent-console__button" type="button" data-history-export-report="executive-portfolio" data-history-export-format="ppt">Export PPT</button>
+                  <button class="agent-console__button agent-console__button--secondary" type="button" data-history-export-report="executive-portfolio" data-history-export-format="pdf">Export PDF</button>
+                  <button class="agent-console__example" type="button" data-history-export-report="executive-portfolio" data-history-export-format="word">Export Word</button>
+                </div>
+              </article>
+              <article class="agent-console__report-card">
+                <h5>Operations review pack</h5>
+                <p class="agent-console__meta">Focuses on time-window deltas, percentile latency bands, recent run posture, and operational follow-up context.</p>
+                <div class="agent-console__actions">
+                  <button class="agent-console__button" type="button" data-history-export-report="operations-review" data-history-export-format="csv">Export CSV</button>
+                  <button class="agent-console__button" type="button" data-history-export-report="operations-review" data-history-export-format="ppt">Export PPT</button>
+                  <button class="agent-console__button agent-console__button--secondary" type="button" data-history-export-report="operations-review" data-history-export-format="pdf">Export PDF</button>
+                  <button class="agent-console__example" type="button" data-history-export-report="operations-review" data-history-export-format="word">Export Word</button>
+                </div>
+              </article>
+            </div>
+            <div class="agent-console__status" data-history-report-status>Refresh the dashboard to unlock history report exports.</div>
+          </section>
+
+            <div class="agent-console agent-console--history" id="main-dashboard" data-history-dashboard>
+            <section class="agent-console__section-divider agent-console__panel--full" id="history-overview" aria-label="Executive overview section">
+              <p class="agent-console__section-kicker">Executive overview</p>
+              <h2 class="agent-console__section-title">Portfolio health at a glance</h2>
+              <p class="agent-console__section-copy">Start with an operator-safe summary of reliability, throughput, and current inference posture before drilling into the evidence.</p>
+            </section>
+
+            <section class="agent-console__panel agent-console__panel--full">
+              <div class="agent-console__history-topbar">
+                <div>
+                  <h2>Run history overview</h2>
+                  <p class="agent-console__meta">High-level health, usage, and trend signals across stored runs.</p>
+                </div>
+              </div>
+              <div class="agent-console__status" data-history-status></div>
+              <div class="agent-console__history-badges" data-history-badges></div>
+              <div class="agent-console__history-summary" data-history-summary></div>
+            </section>
+
+            <section class="agent-console__panel agent-console__panel--full">
+              <div class="agent-console__history-topbar">
+                <div>
+                  <h2>Benchmark board</h2>
+                  <p class="agent-console__meta">Compare the live portfolio against visible cohort benchmarks, variance bands, and the SLA targets used in executive reviews.</p>
+                </div>
+              </div>
+              <div class="agent-console__history-benchmarks" data-history-benchmarks></div>
+              <div class="agent-console__history-board-brief" data-history-board-brief></div>
+            </section>
+
+            <section class="agent-console__panel agent-console__panel--full">
+              <div class="agent-console__history-topbar">
+                <div>
+                  <h2>Operator storytelling</h2>
+                  <p class="agent-console__meta">Track this week versus last week, inspect percentile latency bands, and pull the exceptions that deserve executive attention.</p>
+                </div>
+              </div>
+              <div class="agent-console__history-storytelling" data-history-storytelling></div>
+              <div class="agent-console__history-percentiles" data-history-percentiles></div>
+              <div class="agent-console__history-exceptions" data-history-exceptions></div>
+            </section>
+
+            <section class="agent-console__panel">
+              <div class="agent-console__history-topbar">
+                <div>
+                  <h2>Live LLM utilization</h2>
+                  <p class="agent-console__meta">Quick view of the currently loaded Ollama model for this stack.</p>
+                </div>
+                <div class="agent-console__actions">
+                  <a class="agent-console__example" href="llm-utilization.html">Open full page</a>
+                </div>
+              </div>
+              <div class="agent-console__history-summary" data-history-llm-summary>
+                <p class="agent-console__meta">The dashboard will load live Ollama utilization here.</p>
+              </div>
+            </section>
+
+            <section class="agent-console__section-divider agent-console__panel--full" id="history-patterns" aria-label="Operational patterns section">
+              <p class="agent-console__section-kicker">Operational patterns</p>
+              <h2 class="agent-console__section-title">Outcome, latency, and workload distribution</h2>
+              <p class="agent-console__section-copy">These panels show where workload is landing, how quickly runs are completing, and whether execution quality is drifting over time.</p>
+            </section>
+
+            <section class="agent-console__panel">
+              <h2>Run health charts</h2>
+              <div class="agent-console__history-layout-2">
+                <div class="agent-console__chart-block" data-history-status-chart></div>
+                <div class="agent-console__chart-block" data-history-duration-chart></div>
+              </div>
+            </section>
+
+            <section class="agent-console__panel">
+              <h2>Usage and status charts</h2>
+              <div class="agent-console__history-layout-2">
+                <div class="agent-console__chart-block" data-history-tool-usage></div>
+                <div class="agent-console__chart-block" data-history-status-timeline></div>
+              </div>
+            </section>
+
+            <section class="agent-console__panel">
+              <h2>Model comparison</h2>
+              <div class="agent-console__chart-block" data-history-model-comparison></div>
+            </section>
+
+            <section class="agent-console__panel">
+              <h2>Region comparison</h2>
+              <div class="agent-console__chart-block" data-history-region-comparison></div>
+            </section>
+
+            <section class="agent-console__section-divider agent-console__panel--full" id="history-metrics" aria-label="Metric intelligence section">
+              <p class="agent-console__section-kicker">Metric intelligence</p>
+              <h2 class="agent-console__section-title">Trend cards and latest metric movement</h2>
+              <p class="agent-console__section-copy">Use the metric surfaces below to spot movement quickly, then open the detailed source collections for the evidence behind each data point.</p>
+            </section>
+
+            <section class="agent-console__panel">
+              <h2>Metric trends</h2>
+              <div class="agent-console__history-trends" data-history-trends></div>
+            </section>
+
+            <section class="agent-console__panel">
+              <h2>Latest metrics</h2>
+              <div class="agent-console__history-latest" data-history-latest></div>
+            </section>
+
+            <section class="agent-console__panel agent-console__panel--full">
+              <div class="agent-console__history-topbar">
+                <div>
+                  <h2>Metric details</h2>
+                  <p class="agent-console__meta">Click a metric trend card or a row from the latest metrics table to inspect its source collection and export it as CSV.</p>
+                </div>
+                <div class="agent-console__actions">
+                  <button class="agent-console__example" type="button" data-history-export-metric-csv disabled>Export selected metric CSV</button>
+                </div>
+              </div>
+              <div class="agent-console__history-metric-detail" data-history-metric-detail>
+                <p class="agent-console__meta">Select a metric to inspect the detailed collected payload behind it.</p>
+              </div>
+            </section>
+
+            <section class="agent-console__section-divider agent-console__panel--full" id="history-trace" aria-label="Trace drilldown section">
+              <p class="agent-console__section-kicker">Trace drilldown</p>
+              <h2 class="agent-console__section-title">Evidence review and run inspection</h2>
+              <p class="agent-console__section-copy">Move from top-level signals into the precise run, step payload, and collected metric record that created them.</p>
+            </section>
+
+            <section class="agent-console__panel agent-console__panel--full">
+              <h2>Recent persisted runs</h2>
+              <p class="agent-console__meta">Click any run row to inspect prompt, answer, steps, and extracted metrics.</p>
+              <div class="agent-console__history-runs" data-history-runs></div>
+            </section>
+
+            <section class="agent-console__panel agent-console__panel--full">
+              <h2>Run details</h2>
+              <div class="agent-console__history-run-detail" data-history-run-detail>
+                <p class="agent-console__meta">Select a run above to inspect its full trace.</p>
+              </div>
+            </section>
+          </div>
+        </article>
+      </div>
+    </main>
+    <footer class="agent-console__footer">
+      <span>Author: Sathishkumar Munirathinam / </span>
+      <a href="mailto:Sathishkumar.munirathinam@kyndryl.com">Sathishkumar.munirathinam@kyndryl.com</a>
+    </footer>
+    <script src="assets/javascripts/app-shell.js"></script>
+    <script src="https://unpkg.com/pptxgenjs@3.12.0/dist/pptxgen.bundle.js"></script>
+    <script src="https://unpkg.com/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+    <script src="assets/javascripts/history-dashboard.js"></script>
+  </body>
+</html>

@@ -88,6 +88,7 @@ nav:
     - Application Packages: "clusters/terraform-agent-builder-packages.md"
     - Pipeline (Day 1): "pipeline/terraform-agent-builder-pipeline.md"
     - Pipeline (Day 2): "pipeline/terraform-agent-builder-pipeline-day2.md"
+  - SRE-OpenShift: "http://localhost:8000/guide/console.html"
   - Draw.io Diagrams: "diagrams/index.md"
   - CI/CD Pipeline:
     - ADO Pipeline (IPI — Day 1): "pipeline/terraform-ado-pipeline.md"

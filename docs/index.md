@@ -1,6 +1,28 @@
 # Terraform IaC for OpenShift Multi Cluster AirGapped
 
+!!! tip "Launch the live SRE operator workspace"
+    Use this repository home page as the documentation landing zone, then jump straight into the live OpenShift SRE workspace from here.
+
+    [SRE-OpenShift](http://localhost:8000/guide/console.html){ .md-button .md-button--primary .sre-launch-button .sre-hero-button }
+    [Security Console](http://localhost:8000/guide/security-console.html){ .md-button .sre-launch-button .sre-hero-button }
+
 Welcome to the **Terraform IaC documentation** for deploying Red Hat OpenShift across **x86 bare-metal**, **IBM Z / LinuxONE (`s390x`)**, **AWS ROSA**, and **Azure Red Hat OpenShift (ARO)** architectures, including disaster recovery, managed-cloud, and centralized management patterns.
+
+## OpenShift SRE quick launch
+
+!!! info "Looking for the live SRE agent?"
+    The root URL (`http://localhost:8000/`) is the **Terraform IaC documentation home**.
+    The live **OpenShift SRE agent** is available from the same service under the guide routes below:
+
+    - [Launch the Agent Console](http://localhost:8000/guide/console.html)
+    - [Launch the Security Console](http://localhost:8000/guide/security-console.html)
+    - [Launch the Troubleshooting Console](http://localhost:8000/guide/troubleshooting.html)
+    - [Open the SRE guide home](http://localhost:8000/guide/)
+
+    Compatibility aliases also work if you prefer them:
+
+    - [Agent Console alias](http://localhost:8000/docs/console.html)
+    - [Security Console alias](http://localhost:8000/docs/security-console.html)
 
 ## What This Covers
 
@@ -18,6 +40,7 @@ In addition, the repository now includes:
 - an **IBM Z implementation** under `ibm-z/` for agent-based OpenShift deployments on **z/VM guests** or **LPARs**, using a bastion-driven workflow and disconnected registry mirroring
 - an **AWS ROSA implementation** under `aws-rosa/` for **OpenShift Service on AWS** with VPC design, required AWS endpoints, Route 53 helper assets, and ALB operator enablement
 - an **Azure ARO implementation** under `azure-aro/` for **Azure Red Hat OpenShift** with Azure networking, Microsoft Entra service principal automation, Azure RBAC, helper assets, and Azure DevOps pipeline support
+- an **OpenShift SRE application** under `openshift-sre/` with a live operator console, troubleshooting views, security console, historical dashboards, and Podman-based local runtime on port `8000`
 
 ## Documentation Sections
 
@@ -26,6 +49,7 @@ In addition, the repository now includes:
 - **[IBM Z](ibm-z/index.md)** — IBM Z / LinuxONE architecture, deployment flow, code reference, and pipeline guidance
 - **[AWS ROSA](aws-rosa/index.md)** — ROSA architecture, Terraform foundation, endpoint design, ALB enablement, and pipeline guidance
 - **[Azure ARO](azure-aro/index.md)** — ARO architecture, Terraform foundation, Entra / RBAC design, helper assets, and pipeline guidance
+- **[OpenShift SRE Console](openshift-sre/index.md)** — access instructions for the in-repo OpenShift SRE console and its operator surfaces
 - **[CI/CD Pipeline](pipeline/terraform-ado-pipeline.md)** — Azure DevOps pipeline for selective multi-cluster deployment
 - **[Documentation Tooling](code/documentation-tooling.md)** — how MkDocs pages are generated, containerized, and previewed locally from the repository's own tooling code
 - **[Terraform Code — IPI](code/ipi-method/openshiftbaremetal/main.md)** — Complete annotated IPI Terraform code for all cluster environments

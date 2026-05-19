@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Security Console – OpenShift SRE Local Agent</title>
+    <link rel="stylesheet" href="assets/stylesheets/agent-console.css">
+    <link rel="stylesheet" href="assets/stylesheets/finops-console.css">
+    <link rel="stylesheet" href="assets/stylesheets/security-console.css">
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  </head>
+  <body dir="ltr">
+    <div data-app-shell>
+      <script type="application/json" data-app-shell-props>
+        {
+          "key": "security",
+          "eyebrow": "Audit, detection, and governance",
+          "title": "Security Console",
+          "description": "Dedicated OpenShift security workspace for SCC review, network segmentation posture, quota governance, operator lifecycle health, and platform hardening evidence export.",
+          "badges": ["3D shell", "Audit-ready", "Hardening packs", "OpenShift security coverage", "CSV/PPT/PDF/Word"],
+          "actions": [
+            { "label": "Agent console", "href": "console.html" },
+            { "label": "Open history", "href": "history.html" }
+          ],
+          "secondaryActions": [
+            { "label": "FinOps console", "href": "finops-console.html" },
+            { "label": "Tool drilldown", "href": "tool-drilldown.html" }
+          ],
+          "stats": [
+            { "label": "Security coverage", "value": "OpenShift + Kubernetes posture", "detail": "Cluster operators, SCCs, network policies, resource quotas, routes, OLM state, storage posture, and node security signals." },
+            { "label": "Audit profiles", "value": "Hardening + governance", "detail": "Run focused reviews for cluster hardening, namespace guardrails, operator lifecycle health, ingress exposure, and storage governance." },
+            { "label": "Report delivery", "value": "CSV + PPT + PDF + Word", "detail": "Export the latest audit run as an executive pack or handoff-ready compliance summary." }
+          ],
+          "workspaceSignals": ["Audit profile dropdown", "AWS security feature picker", "3D operator shell", "Executive export packs", "Live batched audit analysis"],
+          "sectionNav": [
+            { "label": "Audit launcher", "href": "#security-launcher" },
+            { "label": "Latest results", "href": "#security-results" },
+            { "label": "Report exports", "href": "#security-exports" },
+            { "label": "Evidence trace", "href": "#security-trace" }
+          ],
+          "shortcuts": [
+            { "label": "SOX preset", "href": "#security-launcher" },
+            { "label": "Findings triage preset", "href": "#security-launcher" },
+            { "label": "Cmd/Ctrl + Enter → run review", "href": "#security-launcher" },
+            { "label": "Export audit pack", "href": "#security-exports" }
+          ],
+          "highlights": [
+            { "title": "Separate security surface", "description": "Security and audit reviews now live in their own console instead of hiding inside the general run surface." },
+            { "title": "Compliance-aware launcher", "description": "Choose an audit lens like hardening or quota governance, then combine it with the exact OpenShift controls you want reviewed." },
+            { "title": "Handoff-ready evidence", "description": "Every run can be exported as a report pack with selected controls, reasoning trace, and next-step guidance." }
+          ],
+          "featureGroups": [
+            {
+              "kicker": "Security workspace",
+              "title": "Audit, threat, and governance reviews in one operator lane",
+              "description": "The page is built for control owners, cloud security teams, platform engineers, and audit responders who need both summary and evidence depth.",
+              "items": [
+                { "title": "Audit profile selector", "description": "Load SOX, CIS, PCI DSS, SOC 2, ISO 27001, NIST CSF, IAM hygiene, or resilience governance narratives into the prompt builder.", "meta": "Launcher", "href": "#security-launcher" },
+                { "title": "Security feature multi-select", "description": "Pick the AWS security services and governance controls you want included, from CloudTrail and Config to Security Hub, Backup, and Control Tower.", "meta": "Coverage", "href": "#security-launcher" },
+                { "title": "Executive report packs", "description": "Turn a live review into stakeholder-ready exports without copying findings into slides by hand.", "meta": "Delivery", "href": "#security-exports" }
+              ]
+            }
+          ],
+          "notice": "This page uses the live FastAPI backend on http://127.0.0.1:8000/ and runs batched security audits from the selected profile and control set so larger compliance reviews finish faster."
+        }
+      </script>
+    </div>
+
+    <main class="md-main">
+      <div class="md-content" data-md-component="content">
+        <article class="md-content__inner md-typeset">
+          <section class="agent-shell__fallback">
+            <h1>Security Console</h1>
+            <p>Dedicated React workspace for OpenShift audit, SCC review, network policy posture, quota governance, and operator lifecycle oversight.</p>
+            <ul>
+              <li>Choose audit profiles like cluster hardening, namespace governance, ingress exposure, and storage posture.</li>
+              <li>Select the OpenShift security controls to include in the review.</li>
+              <li>Generate live exportable reviews from the dedicated <code>POST /security/audit</code> endpoint built for batched compliance runs.</li>
+            </ul>
+            <p><a href="console.html">Back to Agent Console</a> &middot; <a href="finops-console.html">Open FinOps Console</a></p>
+          </section>
+          <div id="security-root"></div>
+          <div id="security-workspace" hidden></div>
+        </article>
+      </div>
+    </main>
+
+    <footer class="agent-console__footer">
+      <span>Author: Sathishkumar Munirathinam / </span>
+      <a href="mailto:Sathishkumar.munirathinam@kyndryl.com">Sathishkumar.munirathinam@kyndryl.com</a>
+    </footer>
+
+    <script src="assets/javascripts/app-shell.js"></script>
+    <script src="assets/javascripts/llm-provider-runtime.js"></script>
+    <script src="https://unpkg.com/pptxgenjs@3.12.0/dist/pptxgen.bundle.js"></script>
+    <script src="https://unpkg.com/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+    <script src="assets/javascripts/security-console.js"></script>
+  </body>
+</html>

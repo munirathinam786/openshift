@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>LLM Utilization</title>
+    <link rel="stylesheet" href="assets/stylesheets/agent-console.css">
+  </head>
+  <body dir="ltr">
+    <div data-app-shell>
+      <script type="application/json" data-app-shell-props>
+        {
+          "key": "llm",
+          "eyebrow": "Model runtime visibility",
+          "title": "LLM Utilization",
+          "description": "Inspect the active Ollama model, context size, VRAM footprint, and host-level visibility guidance in a cleaner runtime health view.",
+          "badges": ["React shell", "Live /ollama/utilization", "Model visibility"],
+          "actions": [
+            { "label": "Open history", "href": "history.html" },
+            { "label": "Open agent console", "href": "console.html" }
+          ],
+          "secondaryActions": [
+            { "label": "Troubleshooting", "href": "troubleshooting.html" },
+            { "label": "Tool drilldown", "href": "tool-drilldown.html" }
+          ],
+          "stats": [
+            { "label": "Focus", "value": "Live model runtime", "detail": "Quickly verify what is loaded before you trust response quality or latency." },
+            { "label": "Best for", "value": "Capacity checks", "detail": "Use this page when a model swap, VRAM change, or context shift may explain behavior." },
+            { "label": "Host support", "value": "Laptop commands included", "detail": "The page still documents direct macOS inspection commands when container visibility is limited." }
+          ],
+          "workspaceSignals": ["Live runtime summary", "Process visibility notes", "CSV/PPT/PDF/Word reporting", "Copyable host commands", "History-linked context"],
+          "sectionNav": [
+            { "label": "Runtime snapshot", "href": "#llm-snapshot" },
+            { "label": "Report exports", "href": "#llm-exports" },
+            { "label": "Loaded models", "href": "#llm-models" },
+            { "label": "Process visibility", "href": "#llm-processes" },
+            { "label": "Host commands", "href": "#llm-commands" }
+          ],
+          "shortcuts": [
+            { "label": "Refresh utilization", "href": "#llm-snapshot" },
+            { "label": "Theme toggle", "href": "#llm-snapshot" },
+            { "label": "Copy host commands", "href": "#llm-commands" },
+            { "label": "Jump back to history", "href": "history.html" }
+          ],
+          "highlights": [
+            { "title": "Cleaner snapshot view", "description": "Configuration, loaded models, and process visibility are separated into easier-to-scan sections." },
+            { "title": "Less guesswork", "description": "The runtime notice now tells you whether the issue is API reachability or limited host visibility." },
+            { "title": "Linked operator flow", "description": "Jump back to history or the live console once you confirm the active model posture." }
+          ],
+          "featureGroups": [
+            {
+              "kicker": "Runtime health",
+              "title": "Model identity, memory posture, and visibility boundaries",
+              "description": "This page is designed to answer the question “what model is actually serving right now?” quickly.",
+              "items": [
+                { "title": "Snapshot summary cards", "description": "See model identity, context length, VRAM footprint, and API reachability in one glance.", "meta": "Runtime posture", "href": "#llm-snapshot" },
+                { "title": "Loaded model table", "description": "Review all active models, their quantization levels, and expiry windows in one structured surface.", "meta": "Capacity detail", "href": "#llm-models" },
+                { "title": "Process visibility guidance", "description": "Understand whether the current runtime can see host metrics directly or only through the Ollama API lens.", "meta": "Operator expectations", "href": "#llm-processes" }
+              ]
+            }
+          ]
+        }
+      </script>
+    </div>
+    <main class="md-main">
+      <div class="md-content" data-md-component="content">
+        <article class="md-content__inner md-typeset">
+          <section class="agent-shell__fallback">
+            <h1>LLM Utilization</h1>
+            <p>Inspect the live Ollama model currently loaded for this stack, its VRAM footprint, context window, expiry, and any process-level metrics the runtime can safely observe.</p>
+            <ul>
+              <li>This page reads the live <code>GET /ollama/utilization</code> endpoint.</li>
+              <li>When the app runs in Podman, Ollama API utilization is available, but host macOS process CPU/RAM inspection may be intentionally unavailable.</li>
+              <li>Use the documented commands on this page to inspect host-level Ollama processes directly from your laptop when you need exact macOS resource usage.</li>
+            </ul>
+            <p>
+              <a href="history.html">Open the Historical Dashboard</a>
+              ·
+              <a href="console.html">Open the Agent Console</a>
+              ·
+              <a href="troubleshooting.html">Open the Troubleshooting Console</a>
+            </p>
+          </section>
+
+          <div class="agent-console" data-llm-utilization>
+            <section class="agent-console__panel agent-console__panel--full" id="llm-snapshot">
+              <div class="agent-console__history-topbar">
+                <div>
+                  <h2>Live Ollama runtime snapshot</h2>
+                  <p class="agent-console__meta">This section shows the configured Ollama base URL, currently loaded models, and runtime visibility details.</p>
+                </div>
+                <div class="agent-console__actions">
+                  <button class="agent-console__example" type="button" data-llm-theme-toggle>Dark mode</button>
+                  <button class="agent-console__button" type="button" data-llm-refresh>Refresh utilization</button>
+                  <a class="agent-console__example" href="history.html">Back to dashboard</a>
+                </div>
+              </div>
+              <div class="agent-console__status" data-llm-status></div>
+              <div class="agent-console__history-summary" data-llm-summary>
+                <p class="agent-console__meta">Refresh the page to load the current Ollama utilization snapshot.</p>
+              </div>
+            </section>
+
+            <section class="agent-console__panel agent-console__panel--full" id="llm-exports">
+              <div class="agent-console__queue-header">
+                <div>
+                  <h2>Runtime reporting exports</h2>
+                  <p class="agent-console__meta">Export the current LLM runtime posture as either a capacity snapshot or a model inventory pack in CSV, PowerPoint, PDF, or Word-compatible format.</p>
+                </div>
+                <span class="agent-console__history-badge agent-console__history-badge--neutral">CSV · PPT · PDF · Word</span>
+              </div>
+              <div class="agent-console__report-grid">
+                <article class="agent-console__report-card">
+                  <h5>Capacity snapshot</h5>
+                  <p class="agent-console__meta">Summarizes API reachability, loaded model posture, VRAM footprint, context length, and process visibility notes.</p>
+                  <div class="agent-console__actions">
+                    <button class="agent-console__button" type="button" data-llm-export-report="capacity-snapshot" data-llm-export-format="csv">Export CSV</button>
+                    <button class="agent-console__button" type="button" data-llm-export-report="capacity-snapshot" data-llm-export-format="ppt">Export PPT</button>
+                    <button class="agent-console__button agent-console__button--secondary" type="button" data-llm-export-report="capacity-snapshot" data-llm-export-format="pdf">Export PDF</button>
+                    <button class="agent-console__example" type="button" data-llm-export-report="capacity-snapshot" data-llm-export-format="word">Export Word</button>
+                  </div>
+                </article>
+                <article class="agent-console__report-card">
+                  <h5>Model inventory pack</h5>
+                  <p class="agent-console__meta">Packages loaded model rows, quantization details, expiry windows, and host-side inspection commands for handoff.</p>
+                  <div class="agent-console__actions">
+                    <button class="agent-console__button" type="button" data-llm-export-report="model-inventory" data-llm-export-format="csv">Export CSV</button>
+                    <button class="agent-console__button" type="button" data-llm-export-report="model-inventory" data-llm-export-format="ppt">Export PPT</button>
+                    <button class="agent-console__button agent-console__button--secondary" type="button" data-llm-export-report="model-inventory" data-llm-export-format="pdf">Export PDF</button>
+                    <button class="agent-console__example" type="button" data-llm-export-report="model-inventory" data-llm-export-format="word">Export Word</button>
+                  </div>
+                </article>
+              </div>
+              <div class="agent-console__status" data-llm-report-status>Refresh utilization to unlock LLM runtime report exports.</div>
+            </section>
+
+            <section class="agent-console__panel" id="llm-models">
+              <h2>Loaded models</h2>
+              <div class="agent-console__tables" data-llm-models>
+                <p class="agent-console__meta">Loaded models will appear here after the first refresh.</p>
+              </div>
+            </section>
+
+            <section class="agent-console__panel" id="llm-processes">
+              <h2>Process visibility</h2>
+              <div class="agent-console__tables" data-llm-processes>
+                <p class="agent-console__meta">Process inspection details will appear here after the first refresh.</p>
+              </div>
+            </section>
+
+            <section class="agent-console__panel agent-console__panel--full" id="llm-commands">
+              <h2>Laptop commands for host-level inspection</h2>
+              <div class="agent-console__tables" data-llm-commands>
+                <p class="agent-console__meta">Host-side commands will appear here after the first refresh.</p>
+              </div>
+            </section>
+          </div>
+        </article>
+      </div>
+    </main>
+    <footer class="agent-console__footer">
+      <span>Author: Sathishkumar Munirathinam / </span>
+      <a href="mailto:Sathishkumar.munirathinam@kyndryl.com">Sathishkumar.munirathinam@kyndryl.com</a>
+    </footer>
+    <script src="assets/javascripts/app-shell.js"></script>
+    <script src="https://unpkg.com/pptxgenjs@3.12.0/dist/pptxgen.bundle.js"></script>
+    <script src="https://unpkg.com/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+    <script src="assets/javascripts/llm-utilization.js"></script>
+  </body>
+</html>

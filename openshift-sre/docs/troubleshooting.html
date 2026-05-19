@@ -1,0 +1,754 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>OpenShift SRE Troubleshooting Console</title>
+    <link rel="stylesheet" href="assets/stylesheets/agent-console.css">
+  </head>
+  <body dir="ltr">
+    <div data-app-shell>
+      <script type="application/json" data-app-shell-props>
+        {
+          "key": "troubleshooting",
+          "eyebrow": "Incident triage workspace",
+          "title": "Troubleshooting Console",
+          "description": "Investigate OpenShift failures through guided workflows, evidence paths, and operator-safe next steps in a cleaner, more professional triage view.",
+          "badges": ["React shell", "8 guided scenarios", "Read-only safe"],
+          "actions": [
+            { "label": "Open agent console", "href": "console.html" },
+            { "label": "Open history", "href": "history.html" }
+          ],
+          "secondaryActions": [
+            { "label": "LLM utilization", "href": "llm-utilization.html" },
+            { "label": "Tool drilldown", "href": "tool-drilldown.html" }
+          ],
+          "stats": [
+            { "label": "Troubleshooting coverage", "value": "Cluster → workload → ingress", "detail": "Scenarios span operators, nodes, workloads, networking, storage, quotas, and governance." },
+            { "label": "Working mode", "value": "Evidence-first", "detail": "The generated prompt captures severity, time window, scope, and validated checks." },
+            { "label": "Best for", "value": "Rapid failure isolation", "detail": "Use it when alarms are noisy and the fault domain is still fuzzy." }
+          ],
+          "workspaceSignals": ["Scenario progress tracking", "Preset save/load workflow", "Checklist-aware prompt generation", "Incident / RCA export lane", "ITSM management tabs"],
+          "sectionNav": [
+            { "label": "Scenario setup", "href": "#troubleshooting-run" },
+            { "label": "Management hub", "href": "#troubleshooting-management" },
+            { "label": "Evidence plan", "href": "#troubleshooting-evidence" },
+            { "label": "Report exports", "href": "#troubleshooting-exports" },
+            { "label": "Response hub", "href": "#troubleshooting-response" },
+            { "label": "Reasoning trace", "href": "#troubleshooting-trace" }
+          ],
+          "shortcuts": [
+            { "label": "Load scenario → refine prompt", "href": "#troubleshooting-run" },
+            { "label": "Switch ITSM workflow tabs", "href": "#troubleshooting-management" },
+            { "label": "Save team presets locally", "href": "#troubleshooting-run" },
+            { "label": "Checklist state injected into prompt", "href": "#troubleshooting-evidence" },
+            { "label": "Export incident pack / RCA", "href": "#troubleshooting-exports" }
+          ],
+          "highlights": [
+            { "title": "Scenario-first triage", "description": "Start from a likely failure domain instead of building an investigation prompt from scratch." },
+            { "title": "Safer evidence review", "description": "Checklists, command hints, and runbook links stay grouped beside the active scenario." },
+            { "title": "ITSM management tabs", "description": "Incident, change, and problem-management tabs keep operational context structured for responders and approvers." },
+            { "title": "Cleaner readability", "description": "The symptom, evidence, and investigation cards now wrap and scale properly across widths." }
+          ],
+          "featureGroups": [
+            {
+              "kicker": "Investigation setup",
+              "title": "Scenario composition, incident context, and evidence capture",
+              "description": "This console is now optimized to capture incident facts before the agent starts guessing.",
+              "items": [
+                { "title": "Scenario and service filters", "description": "Trim the investigation surface by workload type, symptom, severity, blast radius, and environment.", "meta": "Triage framing", "href": "#troubleshooting-run" },
+                { "title": "Timeline + scope capture", "description": "Record issue start, last-known-good, change windows, and affected resources directly into the generated prompt.", "meta": "Context fidelity", "href": "#troubleshooting-run" },
+                { "title": "Local presets for repeat incidents", "description": "Save common environments or service stacks so recurring incidents are quicker to initialize.", "meta": "Team reuse", "href": "#troubleshooting-run" }
+              ]
+            },
+            {
+              "kicker": "Evidence lane",
+              "title": "Checklist progress, read-only validation commands, and runbook links",
+              "description": "Operators can now see how complete the scenario setup is before they run the agent.",
+              "items": [
+                { "title": "Checklist-aware progress", "description": "Track how much of the expected evidence has already been validated and what still needs checking.", "meta": "Coverage signal", "href": "#troubleshooting-evidence" },
+                { "title": "Read-only command hints", "description": "Scenario-specific OpenShift checks stay nearby so the operator can validate the prompt against reality.", "meta": "Manual verification", "href": "#troubleshooting-evidence" },
+                { "title": "Runbook handoff", "description": "Jump from live diagnosis into architecture, operations, or playbook pages without losing the scenario thread.", "meta": "Context continuity", "href": "#troubleshooting-evidence" }
+              ]
+            }
+          ],
+          "notice": "If you are investigating from a static file preview, the shell will still render, but the live queue and history sections need the running API to respond."
+        }
+      </script>
+    </div>
+    <main class="md-main">
+      <div class="md-content" data-md-component="content">
+        <article class="md-content__inner md-typeset">
+          <section class="agent-shell__fallback">
+            <h1>OpenShift Troubleshooting Console</h1>
+            <p>Run focused OpenShift troubleshooting investigations directly from a dedicated console page.</p>
+            <ul>
+              <li>This page is centered on scenario-driven troubleshooting with a dropdown for all supported investigation flows.</li>
+              <li>Select a scenario, review the generated evidence path, and run the agent immediately from the same page.</li>
+              <li>The page still uses the live <code>POST /chat</code> endpoint on the current origin.</li>
+            </ul>
+            <p>
+              <a href="console.html">Open the general Agent Console</a>
+              ·
+              <a href="history.html">Open the historical dashboard</a>
+            </p>
+            <p><strong>Tip:</strong> when running in Podman on macOS, <code>http://host.containers.internal:11434</code> is usually the right Ollama URL if Ollama is running on your Mac.</p>
+          </section>
+
+          <div class="agent-console" data-agent-console data-agent-auto-load-troubleshooting="true">
+            <section class="agent-console__panel" id="troubleshooting-run">
+              <h2>Run a troubleshooting scenario</h2>
+              <section class="agent-console__module-section">
+                <div class="agent-console__module-header">
+                  <div>
+                    <h3>Scenario-driven OpenShift troubleshooting</h3>
+                    <p class="agent-console__meta">This dedicated page keeps troubleshooting front and center. Every supported OpenShift troubleshooting scenario is available from the dropdown below and can be run directly against the agent.</p>
+                  </div>
+                </div>
+                <article class="agent-console__module-card agent-console__module-card--troubleshooting agent-console__module-card--selected">
+                  <div class="agent-console__module-badge-row">
+                    <span class="agent-console__history-badge">Troubleshooting</span>
+                    <span class="agent-console__history-badge">Dedicated console</span>
+                    <span class="agent-console__history-badge agent-console__history-badge--ok">Read-only safe</span>
+                  </div>
+                  <h4>Technical troubleshooting</h4>
+                  <p>Choose a scenario, inspect the evidence plan, load the prompt, and run the agent. This page is optimized for operational diagnosis across platform operators, networking, workloads, storage, OLM, quota pressure, and namespace guardrails.</p>
+                  <section class="agent-console__troubleshooting-callout">
+                    <div>
+                      <h5>OpenShift troubleshooting scenarios</h5>
+                      <p class="agent-console__meta">Use the dropdown for scenarios such as operator degradation, route failures, rollout issues, quota pressure, OLM problems, and storage binding failures.</p>
+                    </div>
+                    <label class="agent-console__label" for="agent-troubleshooting-scenario">
+                      Troubleshooting workflow
+                      <select id="agent-troubleshooting-scenario" class="agent-console__input" data-agent-troubleshooting-scenario>
+                        <optgroup label="Core triage">
+                          <option value="general-incident-triage" selected>General incident triage</option>
+                        </optgroup>
+                        <optgroup label="Platform">
+                          <option value="operator-degradation">Cluster operator degradation</option>
+                        </optgroup>
+                        <optgroup label="Networking">
+                          <option value="route-ingress-connectivity">Route / ingress / service connectivity</option>
+                        </optgroup>
+                        <optgroup label="Workloads">
+                          <option value="node-pressure-readiness">Node readiness / pressure / scheduling issues</option>
+                          <option value="workload-rollout-failures">Deployment / StatefulSet / DaemonSet rollout failures</option>
+                        </optgroup>
+                        <optgroup label="Storage">
+                          <option value="storage-binding-capacity">Persistent volume binding / storage capacity issues</option>
+                        </optgroup>
+                        <optgroup label="Security &amp; governance">
+                          <option value="security-guardrail-review">SCC / network policy / quota guardrail issues</option>
+                        </optgroup>
+                        <optgroup label="Operators">
+                          <option value="olm-csv-subscription-failures">OLM subscription / CSV failures</option>
+                        </optgroup>
+                      </select>
+                    </label>
+                  </section>
+                  <div class="agent-console__troubleshooting-catalog" data-agent-troubleshooting-details>
+                    <div class="agent-console__troubleshooting-header">
+                      <div class="agent-console__module-badge-row">
+                        <span class="agent-console__history-badge">Core triage</span>
+                        <span class="agent-console__history-badge agent-console__history-badge--ok">guided workflow</span>
+                      </div>
+                      <h5>General incident triage</h5>
+                      <p class="agent-console__meta">Start broad when the symptom is real but the failure domain is still fuzzy.</p>
+                    </div>
+                    <div class="agent-console__troubleshooting-grid">
+                      <section class="agent-console__troubleshooting-block">
+                        <h6>Typical symptoms</h6>
+                        <ul>
+                          <li>Customer impact is reported but the owning team is not yet sure whether the issue is control plane, worker, ingress, storage, or workload related.</li>
+                          <li>Multiple alerts or dashboards look noisy and you need the shortest path to a likely failure domain.</li>
+                        </ul>
+                      </section>
+                      <section class="agent-console__troubleshooting-block">
+                        <h6>OpenShift evidence sources</h6>
+                        <ul>
+                          <li>Cluster operator health and warning events</li>
+                          <li>Recent rollout, upgrade, or configuration changes</li>
+                          <li>Top-level dependencies across nodes, workloads, routes, storage, and operator lifecycle</li>
+                        </ul>
+                      </section>
+                      <section class="agent-console__troubleshooting-block">
+                        <h6>Investigation steps</h6>
+                        <ul>
+                          <li>Confirm the first bad timestamp and blast radius.</li>
+                          <li>Compare healthy versus unhealthy nodes, namespaces, routes, or worker pools.</li>
+                          <li>List the next safe validation steps if the first hypothesis is wrong.</li>
+                        </ul>
+                      </section>
+                    </div>
+                    <section class="agent-console__troubleshooting-block">
+                      <h6>Generated investigation prompt</h6>
+                      <p class="agent-console__troubleshooting-prompt">Act as an OpenShift incident commander for read-only troubleshooting. Investigate the operator issue by gathering evidence from cluster operators, warning events, rollout changes, node state, and major upstream or downstream dependencies. Return: 1) likely root cause, 2) evidence collected, 3) blast radius, 4) immediate next safe checks, and 5) deeper follow-up checks if the first hypothesis is wrong.</p>
+                    </section>
+                  </div>
+                  <section class="agent-console__workflow-stack">
+                    <div class="agent-console__history-layout-2">
+                      <section class="agent-console__table-block">
+                        <h5>Workflow filters</h5>
+                        <div class="agent-console__workflow-grid">
+                          <label class="agent-console__label">
+                            Service filter
+                            <select class="agent-console__input" data-agent-service-filter>
+                              <option value="all" selected>All services</option>
+                              <option value="Cluster operators">Cluster operators</option>
+                              <option value="Nodes">Nodes</option>
+                              <option value="Workloads">Workloads</option>
+                              <option value="Routes">Routes / ingress</option>
+                              <option value="Storage">Storage</option>
+                              <option value="SCCs">SCCs / policies</option>
+                              <option value="OLM">OLM / subscriptions</option>
+                              <option value="Machine API">Machine API</option>
+                            </select>
+                          </label>
+                          <label class="agent-console__label">
+                            Symptom
+                            <select class="agent-console__input" data-agent-symptom>
+                              <option value="auto" selected>Auto from scenario</option>
+                            </select>
+                          </label>
+                          <label class="agent-console__label">
+                            Severity
+                            <select class="agent-console__input" data-agent-severity>
+                              <option value="sev1">SEV1 / Critical</option>
+                              <option value="sev2" selected>SEV2 / High</option>
+                              <option value="sev3">SEV3 / Moderate</option>
+                              <option value="sev4">SEV4 / Low</option>
+                            </select>
+                          </label>
+                          <label class="agent-console__label">
+                            Environment
+                            <select class="agent-console__input" data-agent-environment>
+                              <option value="production" selected>Production</option>
+                              <option value="staging">Staging</option>
+                              <option value="development">Development</option>
+                              <option value="unknown">Unknown</option>
+                            </select>
+                          </label>
+                          <label class="agent-console__label">
+                            Blast radius
+                            <select class="agent-console__input" data-agent-blast-radius>
+                              <option value="single-resource">Single resource</option>
+                              <option value="single-service" selected>Single service</option>
+                              <option value="single-namespace">Single namespace</option>
+                              <option value="single-nodepool">Single node pool</option>
+                              <option value="cluster-wide">Cluster-wide</option>
+                              <option value="multi-cluster">Multi-cluster / fleet-wide</option>
+                            </select>
+                          </label>
+                          <label class="agent-console__label">
+                            Time window
+                            <select class="agent-console__input" data-agent-time-window>
+                              <option value="last-15-minutes">Last 15 minutes</option>
+                              <option value="last-hour" selected>Last hour</option>
+                              <option value="last-6-hours">Last 6 hours</option>
+                              <option value="last-24-hours">Last 24 hours</option>
+                              <option value="custom">Custom / based on timeline inputs</option>
+                            </select>
+                          </label>
+                        </div>
+                      </section>
+                      <section class="agent-console__table-block">
+                        <h5>Incident timeline &amp; scope</h5>
+                        <div class="agent-console__workflow-grid">
+                          <label class="agent-console__label">
+                            Issue started at
+                            <input class="agent-console__input" data-agent-issue-start type="datetime-local">
+                          </label>
+                          <label class="agent-console__label">
+                            Last known healthy
+                            <input class="agent-console__input" data-agent-last-healthy type="datetime-local">
+                          </label>
+                          <label class="agent-console__label">
+                            Recent change / deploy time
+                            <input class="agent-console__input" data-agent-recent-change type="datetime-local">
+                          </label>
+                          <label class="agent-console__label">
+                            Primary resource / workload
+                            <input class="agent-console__input" data-agent-primary-resource type="text" placeholder="payments-api, openshift-ingress, worker-a, mcp-worker, etc.">
+                          </label>
+                          <label class="agent-console__label">
+                            Affected scope / account
+                            <input class="agent-console__input" data-agent-affected-scope type="text" placeholder="payments namespace, prod cluster, ingress tier, customer portal, etc.">
+                          </label>
+                          <label class="agent-console__label">
+                            Comparison: healthy reference
+                            <input class="agent-console__input" data-agent-healthy-resource type="text" placeholder="healthy node, namespace, route, operator, or workload, etc.">
+                          </label>
+                          <label class="agent-console__label">
+                            Comparison: unhealthy reference
+                            <input class="agent-console__input" data-agent-unhealthy-resource type="text" placeholder="failing node, namespace, route, operator, or workload, etc.">
+                          </label>
+                        </div>
+                        <label class="agent-console__label">
+                          Resource identifiers / routes / namespaces
+                          <textarea class="agent-console__textarea agent-console__textarea--compact" data-agent-resource-ids placeholder="Paste namespaces, pod names, deployment names, route hosts, node names, PVCs, CSVs, or subscription names here."></textarea>
+                        </label>
+                      </section>
+                    </div>
+                    <section class="agent-console__table-block" id="troubleshooting-evidence">
+                      <h5>Guided evidence checklist</h5>
+                      <div class="agent-console__checklist-grid" data-agent-evidence-checklist>
+                        <label class="agent-console__checklist-item"><input type="checkbox" value="confirm-blast-radius"><span>Confirmed issue start time and blast radius</span></label>
+                        <label class="agent-console__checklist-item"><input type="checkbox" value="check-operators"><span>Checked cluster operators and recent warning events</span></label>
+                        <label class="agent-console__checklist-item"><input type="checkbox" value="check-topology"><span>Reviewed routes, workload health, storage, or dependency path</span></label>
+                        <label class="agent-console__checklist-item"><input type="checkbox" value="check-recent-change"><span>Compared against recent upgrades, rollouts, or policy drift</span></label>
+                      </div>
+                      <p class="agent-console__meta">These checked items are injected into the generated prompt so the agent knows what is already validated.</p>
+                    </section>
+                    <div class="agent-console__history-layout-2">
+                      <section class="agent-console__table-block">
+                        <h5>Recommended read-only checks &amp; commands</h5>
+                        <div class="agent-console__workflow-list" data-agent-command-hints>
+                          <p class="agent-console__meta">Scenario-specific command hints and read-only checks will appear here.</p>
+                        </div>
+                      </section>
+                      <section class="agent-console__table-block">
+                        <h5>Runbooks &amp; reference links</h5>
+                        <div class="agent-console__workflow-list" data-agent-runbooks>
+                          <p class="agent-console__meta">Runbook links tied to the selected scenario will appear here.</p>
+                        </div>
+                      </section>
+                    </div>
+                  </section>
+                  <ul>
+                    <li>scenario-first OpenShift investigation flows</li>
+                    <li>platform, workload, networking, storage, and governance troubleshooting</li>
+                    <li>evidence preview before sending the prompt</li>
+                    <li>safe, read-only operator guidance</li>
+                  </ul>
+                  <div class="agent-console__actions">
+                    <button class="agent-console__example agent-console__example--selected" type="button" data-agent-load-troubleshooting aria-pressed="true">Load selected workflow</button>
+                    <button class="agent-console__example" type="button" data-agent-module="technical-triage" data-agent-prompt="Act as an OpenShift technical troubleshooting specialist. Investigate the operator issue by gathering evidence from cluster operators, warning events, node state, workload health, route posture, and storage dependencies. Return: 1) likely root cause, 2) evidence collected, 3) blast radius, 4) immediate next steps, and 5) deeper follow-up checks if the first hypothesis is wrong.">Load troubleshooting specialist</button>
+                    <button class="agent-console__example" type="button" data-agent-prompt="Investigate a production issue by checking cluster operators, warning events, route and service posture, rollout health, node readiness, and storage dependencies. Summarize the most likely failure path and the next safe operator actions.">Incident triage</button>
+                  </div>
+                </article>
+              </section>
+
+              <section class="agent-console__table-block agent-console__management-hub" id="troubleshooting-management">
+                <div class="agent-console__queue-header">
+                  <div>
+                    <h4>Operations management workspace</h4>
+                    <p class="agent-console__meta">Track the active operating mode with ITSM-style tabs for incident management, change management, and problem management. These selections are folded into prompts, exports, and run reviews.</p>
+                  </div>
+                  <span class="agent-console__history-badge agent-console__history-badge--ok">Tabs + drop-down driven</span>
+                </div>
+                <div class="agent-console__tab-strip" role="tablist" aria-label="Troubleshooting management tabs">
+                  <button class="agent-console__tab-button is-active" type="button" role="tab" aria-selected="true" data-agent-management-tab="incident-management">Incident management</button>
+                  <button class="agent-console__tab-button" type="button" role="tab" aria-selected="false" data-agent-management-tab="change-management">Change management</button>
+                  <button class="agent-console__tab-button" type="button" role="tab" aria-selected="false" data-agent-management-tab="problem-management">Problem management</button>
+                </div>
+                <div class="agent-console__management-panels">
+                  <section class="agent-console__management-panel is-active" data-agent-management-panel="incident-management" role="tabpanel">
+                    <div class="agent-console__workflow-grid">
+                      <label class="agent-console__label">
+                        Incident phase
+                        <select class="agent-console__input" data-agent-incident-phase>
+                          <option value="detection" selected>Detection / triage</option>
+                          <option value="assessment">Impact assessment</option>
+                          <option value="mitigation">Mitigation in progress</option>
+                          <option value="monitoring">Monitoring / stabilization</option>
+                          <option value="closure">Closure / handoff</option>
+                        </select>
+                      </label>
+                      <label class="agent-console__label">
+                        Incident type
+                        <select class="agent-console__input" data-agent-incident-type>
+                          <option value="service-outage" selected>Service outage</option>
+                          <option value="degradation">Service degradation</option>
+                          <option value="security-event">Security event</option>
+                          <option value="cost-incident">Cost anomaly / FinOps incident</option>
+                          <option value="compliance-breach">Compliance / governance issue</option>
+                          <option value="vendor-dependency">Vendor / dependency failure</option>
+                        </select>
+                      </label>
+                      <label class="agent-console__label">
+                        Communications status
+                        <select class="agent-console__input" data-agent-communications-status>
+                          <option value="drafting" selected>Drafting first update</option>
+                          <option value="internal-sent">Internal update sent</option>
+                          <option value="executive-sent">Executive update sent</option>
+                          <option value="customer-sent">Customer communication sent</option>
+                          <option value="watch-only">Watch only / no comms yet</option>
+                        </select>
+                      </label>
+                      <label class="agent-console__label">
+                        Stakeholder audience
+                        <select class="agent-console__input" data-agent-stakeholder-audience>
+                          <option value="ops-only" selected>Ops only</option>
+                          <option value="engineering-leads">Engineering leads</option>
+                          <option value="executives">Executives</option>
+                          <option value="customer-facing">Customer-facing teams</option>
+                          <option value="all-hands">All-hands bridge</option>
+                        </select>
+                      </label>
+                      <label class="agent-console__label">
+                        Restoration status
+                        <select class="agent-console__input" data-agent-restoration-status>
+                          <option value="not-started" selected>Not restored yet</option>
+                          <option value="partial">Partially restored</option>
+                          <option value="restored-monitoring">Restored, monitoring</option>
+                          <option value="fully-restored">Fully restored</option>
+                        </select>
+                      </label>
+                      <label class="agent-console__label">
+                        Incident owner / commander
+                        <input class="agent-console__input" data-agent-incident-owner type="text" placeholder="incident commander, team alias, or resolver group">
+                      </label>
+                    </div>
+                    <div class="agent-console__history-layout-2">
+                      <label class="agent-console__label">
+                        Customer impact statement
+                        <textarea class="agent-console__textarea agent-console__textarea--compact" data-agent-customer-impact placeholder="Summarize user-facing symptoms, affected journeys, and external impact."></textarea>
+                      </label>
+                      <label class="agent-console__label">
+                        Business impact / decisions needed
+                        <textarea class="agent-console__textarea agent-console__textarea--compact" data-agent-business-impact placeholder="Capture revenue risk, SLA exposure, compliance impact, or escalation decisions."></textarea>
+                      </label>
+                    </div>
+                  </section>
+
+                  <section class="agent-console__management-panel" data-agent-management-panel="change-management" role="tabpanel" hidden>
+                    <div class="agent-console__workflow-grid">
+                      <label class="agent-console__label">
+                        Change type
+                        <select class="agent-console__input" data-agent-change-type>
+                          <option value="standard" selected>Standard change</option>
+                          <option value="normal">Normal change</option>
+                          <option value="emergency">Emergency change</option>
+                          <option value="rollback">Rollback / backout</option>
+                          <option value="config-tuning">Config-only tuning</option>
+                        </select>
+                      </label>
+                      <label class="agent-console__label">
+                        Change risk
+                        <select class="agent-console__input" data-agent-change-risk>
+                          <option value="low">Low</option>
+                          <option value="medium" selected>Medium</option>
+                          <option value="high">High</option>
+                          <option value="critical">Critical</option>
+                        </select>
+                      </label>
+                      <label class="agent-console__label">
+                        Approval state
+                        <select class="agent-console__input" data-agent-change-approval>
+                          <option value="not-requested" selected>Not requested</option>
+                          <option value="pending-cab">Pending CAB / approver</option>
+                          <option value="approved">Approved</option>
+                          <option value="conditionally-approved">Conditionally approved</option>
+                          <option value="rejected">Rejected / deferred</option>
+                        </select>
+                      </label>
+                      <label class="agent-console__label">
+                        Implementation status
+                        <select class="agent-console__input" data-agent-change-implementation>
+                          <option value="analysis" selected>Analysis only</option>
+                          <option value="ready">Ready for implementation</option>
+                          <option value="in-progress">Implementation in progress</option>
+                          <option value="validation">Validation / monitoring</option>
+                          <option value="rolled-back">Rolled back</option>
+                        </select>
+                      </label>
+                      <label class="agent-console__label">
+                        Rollback readiness
+                        <select class="agent-console__input" data-agent-rollback-readiness>
+                          <option value="defined" selected>Rollback plan defined</option>
+                          <option value="partial">Partial rollback coverage</option>
+                          <option value="unknown">Unknown / missing</option>
+                          <option value="not-required">Not required</option>
+                        </select>
+                      </label>
+                      <label class="agent-console__label">
+                        Change window
+                        <select class="agent-console__input" data-agent-change-window>
+                          <option value="next-window" selected>Next approved window</option>
+                          <option value="active-window">Active change window</option>
+                          <option value="emergency-now">Emergency now</option>
+                          <option value="after-rca">After RCA / problem review</option>
+                        </select>
+                      </label>
+                    </div>
+                    <label class="agent-console__label">
+                      Change summary / implementation notes
+                      <textarea class="agent-console__textarea agent-console__textarea--compact" data-agent-change-summary placeholder="Capture the intended change, safeguards, validation plan, and any dependency on CAB or rollback checks."></textarea>
+                    </label>
+                  </section>
+
+                  <section class="agent-console__management-panel" data-agent-management-panel="problem-management" role="tabpanel" hidden>
+                    <div class="agent-console__workflow-grid">
+                      <label class="agent-console__label">
+                        Problem record status
+                        <select class="agent-console__input" data-agent-problem-record>
+                          <option value="not-opened" selected>Not opened</option>
+                          <option value="draft">Draft problem record</option>
+                          <option value="open">Open / under investigation</option>
+                          <option value="known-error">Known error documented</option>
+                          <option value="closed">Closed</option>
+                        </select>
+                      </label>
+                      <label class="agent-console__label">
+                        Recurrence pattern
+                        <select class="agent-console__input" data-agent-problem-recurrence>
+                          <option value="first-time" selected>First-time event</option>
+                          <option value="intermittent">Intermittent recurrence</option>
+                          <option value="daily">Daily recurrence</option>
+                          <option value="post-change">Recurs after changes</option>
+                          <option value="unknown">Unknown pattern</option>
+                        </select>
+                      </label>
+                      <label class="agent-console__label">
+                        RCA method
+                        <select class="agent-console__input" data-agent-rca-method>
+                          <option value="5-whys" selected>5 Whys</option>
+                          <option value="fishbone">Fishbone / Ishikawa</option>
+                          <option value="timeline-analysis">Timeline analysis</option>
+                          <option value="fault-tree">Fault tree analysis</option>
+                          <option value="kepner-tregoe">Kepner-Tregoe</option>
+                        </select>
+                      </label>
+                      <label class="agent-console__label">
+                        Root cause domain
+                        <select class="agent-console__input" data-agent-root-cause-domain>
+                          <option value="application" selected>Application / code</option>
+                          <option value="infrastructure">Infrastructure / platform</option>
+                          <option value="network">Network / connectivity</option>
+                          <option value="security">Security / identity</option>
+                          <option value="process">Process / change / runbook</option>
+                          <option value="third-party">Third-party dependency</option>
+                        </select>
+                      </label>
+                      <label class="agent-console__label">
+                        Known error status
+                        <select class="agent-console__input" data-agent-known-error-status>
+                          <option value="not-documented" selected>Not documented</option>
+                          <option value="candidate">Candidate known error</option>
+                          <option value="documented-workaround">Documented workaround</option>
+                          <option value="permanent-fix-planned">Permanent fix planned</option>
+                        </select>
+                      </label>
+                      <label class="agent-console__label">
+                        Corrective action owner
+                        <input class="agent-console__input" data-agent-corrective-owner type="text" placeholder="owner, squad, or problem manager">
+                      </label>
+                    </div>
+                    <label class="agent-console__label">
+                      RCA notes / preventive actions
+                      <textarea class="agent-console__textarea agent-console__textarea--compact" data-agent-problem-notes placeholder="Capture contributing factors, preventive controls, follow-up fixes, and known-error notes."></textarea>
+                    </label>
+                  </section>
+                </div>
+              </section>
+
+              <div class="agent-console__grid">
+                <div>
+                  <label class="agent-console__label" for="llm-provider">LLM provider</label>
+                  <select id="llm-provider" class="agent-console__input" data-agent-llm-provider>
+                    <option value="ollama">Local Ollama</option>
+                  </select>
+                </div>
+                <div data-agent-ollama-field>
+                  <label class="agent-console__label" for="ollama-base-url">Ollama base URL</label>
+                  <input id="ollama-base-url" class="agent-console__input" data-agent-ollama-base-url type="url" placeholder="http://host.containers.internal:11434">
+                </div>
+                <div data-agent-ollama-field>
+                  <label class="agent-console__label" for="local-model-name">Model name</label>
+                  <select id="local-model-name" class="agent-console__input" data-agent-model-name data-agent-default-model="gpt-oss:20b">
+                    <option value="gpt-oss:20b">gpt-oss:20b</option>
+                  </select>
+                </div>
+                <div data-agent-external-llm-field hidden>
+                  <label class="agent-console__label" for="external-model-name">External model name</label>
+                  <input id="external-model-name" class="agent-console__input" data-agent-external-model-name type="text" placeholder="gpt-4.1-mini">
+                </div>
+                <div data-agent-external-llm-field hidden>
+                  <label class="agent-console__label" for="external-base-url">Provider base URL</label>
+                  <input id="external-base-url" class="agent-console__input" data-agent-external-base-url type="url" placeholder="https://api.openai.com/v1">
+                </div>
+                <div data-agent-external-llm-field hidden>
+                  <label class="agent-console__label" for="external-api-key">Provider API key</label>
+                  <input id="external-api-key" class="agent-console__input" data-agent-external-api-key type="password" placeholder="Required for external providers">
+                </div>
+                <div data-agent-external-llm-field hidden>
+                  <label class="agent-console__label" for="external-organization">Organization / tenant</label>
+                  <input id="external-organization" class="agent-console__input" data-agent-external-organization type="text" placeholder="Optional provider org or tenant hint">
+                </div>
+                <div data-agent-external-llm-field hidden>
+                  <label class="agent-console__label" for="external-api-version">Provider API version</label>
+                  <input id="external-api-version" class="agent-console__input" data-agent-external-api-version type="text" placeholder="Optional API version">
+                </div>
+                <div>
+                  <label class="agent-console__label" for="aws-region">Cluster name</label>
+                  <input id="aws-region" class="agent-console__input" data-agent-aws-region type="text" placeholder="prod-ocp-east">
+                </div>
+                <div>
+                  <label class="agent-console__label" for="aws-profile">Namespace / project</label>
+                  <input id="aws-profile" class="agent-console__input" data-agent-aws-profile type="text" placeholder="openshift-ingress">
+                </div>
+                <div>
+                  <label class="agent-console__label" for="aws-access-key-id">Kube context</label>
+                  <input id="aws-access-key-id" class="agent-console__input" data-agent-aws-access-key-id type="text" placeholder="admin@prod-ocp-east">
+                </div>
+                <div>
+                  <label class="agent-console__label" for="aws-secret-access-key">API token</label>
+                  <input id="aws-secret-access-key" class="agent-console__input" data-agent-aws-secret-access-key type="password" placeholder="Optional per-request override">
+                </div>
+                <div class="agent-console__grid-span-2">
+                  <label class="agent-console__label" for="aws-session-token">Kubeconfig path</label>
+                  <input id="aws-session-token" class="agent-console__input" data-agent-aws-session-token type="text" placeholder="~/.kube/config">
+                </div>
+                <label class="agent-console__checkbox agent-console__grid-span-2">
+                  <input data-agent-aws-verify-ssl type="checkbox" checked>
+                  <span>Verify cluster API certificates</span>
+                </label>
+              </div>
+              <p class="agent-console__meta" data-agent-llm-provider-note>Choose between the local Ollama runtime and supported external providers such as OpenAI, Azure OpenAI, Anthropic, Gemini, and OpenRouter.</p>
+              <label class="agent-console__label" for="agent-issue-notes">Pasted errors / logs / operator notes</label>
+              <textarea id="agent-issue-notes" class="agent-console__textarea agent-console__textarea--compact" data-agent-issue-notes placeholder="Paste stack traces, oc output, warning events, failing route details, pod errors, or operator notes here."></textarea>
+              <section class="agent-console__table-block">
+                <div class="agent-console__preset-toolbar">
+                  <label class="agent-console__label">
+                    Preset name
+                    <input class="agent-console__input" data-agent-preset-name type="text" placeholder="payments-prod-vpc, lambda-timeout-prod, rds-latency-us-east-1">
+                  </label>
+                  <label class="agent-console__label">
+                    Saved presets
+                    <select class="agent-console__input" data-agent-preset-select>
+                      <option value="">No saved presets</option>
+                    </select>
+                  </label>
+                </div>
+                <div class="agent-console__actions">
+                  <button class="agent-console__example" type="button" data-agent-preset-save>Save preset</button>
+                  <button class="agent-console__example" type="button" data-agent-preset-load>Load preset</button>
+                  <button class="agent-console__example" type="button" data-agent-preset-delete>Delete preset</button>
+                  <button class="agent-console__example" type="button" data-agent-refresh-workflow>Refresh prompt from workflow</button>
+                </div>
+              </section>
+              <label class="agent-console__label" for="agent-prompt">Prompt</label>
+              <textarea id="agent-prompt" class="agent-console__textarea" data-agent-prompt placeholder="Select a troubleshooting workflow above, or describe the OpenShift issue you want investigated.">Act as an OpenShift incident commander for read-only troubleshooting. Investigate the operator issue by gathering evidence from cluster operators, warning events, rollout changes, node state, and major upstream or downstream dependencies. Return: 1) likely root cause, 2) evidence collected, 3) blast radius, 4) immediate next safe checks, and 5) deeper follow-up checks if the first hypothesis is wrong.</textarea>
+              <p class="agent-console__meta">Tip: this page auto-loads the selected troubleshooting scenario into the prompt so you can run immediately or refine it first.</p>
+              <div class="agent-console__actions">
+                <button class="agent-console__button" type="button" data-agent-run>Run troubleshooting agent</button>
+                <button class="agent-console__example" type="button" data-agent-example="Investigate an OpenShift route connectivity issue by checking route admission state, ingress posture, service selectors, endpoints, and backing workload readiness. Summarize the likely failure path and the next safe operator actions.">Route connectivity</button>
+                <button class="agent-console__example" type="button" data-agent-example="Investigate node readiness or pressure issues by checking node conditions, machine config pools, scheduling failures, pod Pending state, and recent warning events. Summarize the likely root cause and next safe operator actions.">Node pressure</button>
+                <button class="agent-console__example" type="button" data-agent-example="Investigate storage binding failures by checking PVs, PVCs, storage classes, mount errors, and workload rollout impact. Summarize the likely root cause and next safe operator actions.">Storage binding</button>
+              </div>
+              <p class="agent-console__meta">Tip: press <strong>Ctrl/Cmd + Enter</strong> to submit. Any Ollama and cluster scope values entered here are used only for this request.</p>
+              <div class="agent-console__status" data-agent-status></div>
+            </section>
+
+            <section class="agent-console__panel" id="troubleshooting-response">
+              <h2>Agent response</h2>
+              <div class="agent-console__answer" data-agent-answer>Run a troubleshooting scenario to see the final answer here.</div>
+              <h3>Likely root causes</h3>
+              <div class="agent-console__cards" data-agent-root-causes>
+                <p class="agent-console__meta">Scenario-based likely root causes will appear here before and after a run.</p>
+              </div>
+              <h3>Recommended next actions</h3>
+              <div class="agent-console__cards" data-agent-next-actions>
+                <p class="agent-console__meta">Scenario guidance and post-run next actions will appear here.</p>
+              </div>
+              <section class="agent-console__table-block" id="troubleshooting-exports">
+                <div class="agent-console__queue-header">
+                  <div>
+                    <h4>Incident report &amp; RCA exports</h4>
+                    <p class="agent-console__meta">Export the current troubleshooting run as a presentation-friendly incident report or as a root cause analysis pack in PowerPoint, PDF, or Word-compatible format.</p>
+                  </div>
+                  <span class="agent-console__history-badge agent-console__history-badge--neutral">PPT · PDF · Word</span>
+                </div>
+                <div class="agent-console__report-grid">
+                  <article class="agent-console__report-card">
+                    <h5>Incident report</h5>
+                    <p class="agent-console__meta">Includes severity, impact, timeline, evidence captured, response summary, and immediate next actions.</p>
+                    <div class="agent-console__actions">
+                      <button class="agent-console__button" type="button" data-agent-export-report="incident-report" data-agent-export-format="ppt">Export PPT</button>
+                      <button class="agent-console__button agent-console__button--secondary" type="button" data-agent-export-report="incident-report" data-agent-export-format="pdf">Export PDF</button>
+                      <button class="agent-console__example" type="button" data-agent-export-report="incident-report" data-agent-export-format="word">Export Word</button>
+                    </div>
+                  </article>
+                  <article class="agent-console__report-card">
+                    <h5>Root cause analysis</h5>
+                    <p class="agent-console__meta">Packages likely root causes, contributing factors, corrective actions, and problem-management follow-up into an RCA deliverable.</p>
+                    <div class="agent-console__actions">
+                      <button class="agent-console__button" type="button" data-agent-export-report="rca" data-agent-export-format="ppt">Export PPT</button>
+                      <button class="agent-console__button agent-console__button--secondary" type="button" data-agent-export-report="rca" data-agent-export-format="pdf">Export PDF</button>
+                      <button class="agent-console__example" type="button" data-agent-export-report="rca" data-agent-export-format="word">Export Word</button>
+                    </div>
+                  </article>
+                </div>
+                <div class="agent-console__status" data-agent-report-status>Run a troubleshooting scenario to unlock incident report and RCA exports.</div>
+              </section>
+              <div class="agent-console__approval-panel" data-agent-approval-panel hidden>
+                <h3>Approval actions</h3>
+                <p class="agent-console__meta">Choose an approval path and send it back as the next guided input.</p>
+                <div class="agent-console__approval-options" data-agent-approval-options></div>
+                <div class="agent-console__actions">
+                  <button class="agent-console__button agent-console__button--secondary" type="button" data-agent-approval-apply>Continue with selected approval</button>
+                </div>
+              </div>
+              <h3>Service state overview</h3>
+              <div class="agent-console__cards" data-agent-cards>
+                <p class="agent-console__meta">Service-state cards will appear here after a run.</p>
+              </div>
+              <h3>Severity &amp; compliance summaries</h3>
+              <div class="agent-console__tables" data-agent-tables>
+                <p class="agent-console__meta">Severity and compliance summaries will appear here when available.</p>
+              </div>
+              <h3>FinOps optimization workflow</h3>
+              <div class="agent-console__finops-overview" data-agent-finops-overview>
+                <p class="agent-console__meta">FinOps workflow sections remain available for shared console compatibility, but this page is intended for troubleshooting-led runs.</p>
+              </div>
+              <div class="agent-console__finops-savings" data-agent-finops-savings>
+                <p class="agent-console__meta">Estimated savings tables will appear here after a FinOps-oriented run.</p>
+              </div>
+              <div class="agent-console__finops-actions" data-agent-finops-actions>
+                <p class="agent-console__meta">Recommended action cards will appear here after a FinOps-oriented run.</p>
+              </div>
+              <section class="agent-console__table-block agent-console__table-block--queue">
+                <div class="agent-console__queue-header">
+                  <div>
+                    <h4>Approval queue for future safe execution</h4>
+                    <p class="agent-console__meta">Queue recommendations for later controlled execution. This page stays read-only for AWS operations, but the queue is still available when a run returns staged follow-up actions.</p>
+                  </div>
+                  <label class="agent-console__checkbox agent-console__checkbox--compact">
+                    <input data-agent-finops-auto-approve type="checkbox">
+                    <span>Auto approve queued FinOps actions</span>
+                  </label>
+                </div>
+                <div class="agent-console__finops-queue" data-agent-finops-queue>
+                  <p class="agent-console__meta">Queued approval items will appear here after you add a recommendation.</p>
+                </div>
+              </section>
+              <h3>Historical metrics dashboard</h3>
+              <div class="agent-console__history-summary" data-agent-history-summary>
+                <p class="agent-console__meta">Historical run and metric summaries will appear here after the database is connected.</p>
+              </div>
+              <div class="agent-console__history-trends" data-agent-history-trends>
+                <p class="agent-console__meta">Trend charts will appear here after a few stored runs.</p>
+              </div>
+              <div class="agent-console__history-runs" data-agent-history-runs>
+                <p class="agent-console__meta">Recent persisted runs will appear here after the database is connected.</p>
+              </div>
+              <h3 id="troubleshooting-trace">Reasoning trace</h3>
+              <div class="agent-console__steps" data-agent-steps>
+                <p class="agent-console__meta">Each completed run will show tool calls and reasoning steps here.</p>
+              </div>
+            </section>
+          </div>
+        </article>
+      </div>
+    </main>
+    <footer class="agent-console__footer">
+      <span>Author: Sathishkumar Munirathinam / </span>
+      <a href="mailto:Sathishkumar.munirathinam@kyndryl.com">Sathishkumar.munirathinam@kyndryl.com</a>
+    </footer>
+    <script src="assets/javascripts/app-shell.js"></script>
+    <script src="assets/javascripts/llm-provider-runtime.js"></script>
+    <script src="https://unpkg.com/pptxgenjs@3.12.0/dist/pptxgen.bundle.js"></script>
+    <script src="https://unpkg.com/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+    <script src="assets/javascripts/agent-console.js"></script>
+  </body>
+</html>

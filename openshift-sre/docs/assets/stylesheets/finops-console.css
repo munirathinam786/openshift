@@ -1,0 +1,482 @@
+/*
+ * FinOps Console – supplementary styles on top of agent-console.css.
+ *
+ * This file only contains FinOps-specific additions.  The base design
+ * system (panels, inputs, buttons, badges, tables, cards, typography)
+ * is inherited from agent-console.css via the shared class names.
+ *
+ * Accent colour is set by  body[data-shell-page="finops"]  in the
+ * base stylesheet so that all gradient top-bars, badges, and buttons
+ * automatically pick up the teal/cyan FinOps palette.
+ *
+ * @file finops-console.css
+ * @see  agent-console.css   – base design system
+ * @see  finops-console.js   – React components
+ * @see  finops-console.html – page shell
+ */
+
+/* ── Toast notification ──────────────────────────────────────── */
+
+.finops-toast {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  z-index: 9999;
+  max-width: 420px;
+  padding: 0.75rem 1.15rem;
+  border-radius: 999px;
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: #fff;
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.92), rgba(30, 41, 59, 0.92));
+  box-shadow: 0 14px 28px rgba(15, 23, 42, 0.22);
+  cursor: pointer;
+  animation: finops-toast-in 0.25s ease-out;
+  backdrop-filter: blur(8px);
+}
+.finops-toast--ok    { background: linear-gradient(135deg, rgba(22, 101, 52, 0.92), rgba(22, 163, 74, 0.86)); }
+.finops-toast--error { background: linear-gradient(135deg, rgba(153, 27, 27, 0.92), rgba(220, 38, 38, 0.86)); }
+.finops-toast--info  { background: linear-gradient(135deg, rgba(30, 64, 175, 0.92), rgba(59, 130, 246, 0.86)); }
+
+@keyframes finops-toast-in {
+  from { opacity: 0; transform: translateY(-12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Connection / credentials settings ───────────────────────── */
+
+.finops-settings {
+  margin: 1rem 0;
+  padding: 1rem;
+  border: 1px solid rgba(127, 127, 127, 0.22);
+  border-radius: 18px;
+  background: linear-gradient(180deg, rgba(var(--agent-accent-rgb), 0.04), rgba(255, 255, 255, 0.96));
+}
+.finops-settings summary {
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 0.84rem;
+  letter-spacing: 0.03em;
+  color: #475569;
+}
+.finops-settings__grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.85rem;
+  margin-top: 0.85rem;
+}
+.finops-settings__grid label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #475569;
+}
+
+.finops-settings__model-picker {
+  display: flex;
+  gap: 0.55rem;
+  align-items: center;
+}
+
+.finops-settings__model-picker .agent-console__input {
+  flex: 1 1 auto;
+}
+
+/* ── Operation selector ──────────────────────────────────────── */
+
+.finops-op-selector {
+  margin-bottom: 1rem;
+}
+
+/* ── Controls row ────────────────────────────────────────────── */
+
+.finops-controls-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-top: 0.9rem;
+}
+
+/* ── Category summary cards ──────────────────────────────────── */
+
+.finops-category-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+}
+
+.finops-category-card {
+  border: 1px solid rgba(var(--agent-accent-rgb), 0.14);
+  border-radius: 18px;
+  background: linear-gradient(180deg, rgba(var(--agent-accent-rgb), 0.06), rgba(255, 255, 255, 0.98));
+  padding: 1rem 1.05rem;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.04);
+}
+.finops-category-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.45rem;
+}
+.finops-category-header h4 { margin: 0; font-size: 0.95rem; }
+
+.finops-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.34rem;
+  border-radius: 999px;
+  padding: 0.24rem 0.62rem;
+  font-size: 0.76rem;
+  font-weight: 600;
+  background: rgba(148, 163, 184, 0.16);
+  color: #334155;
+}
+.finops-pill::before {
+  content: '';
+  width: 0.42rem;
+  height: 0.42rem;
+  border-radius: 999px;
+  background: currentColor;
+  opacity: 0.65;
+}
+.finops-pill--active {
+  background: rgba(22, 163, 74, 0.12);
+  color: #166534;
+}
+
+/* ── Action cards grid ───────────────────────────────────────── */
+
+.finops-actions-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.85rem;
+}
+
+/* ── Queue controls ──────────────────────────────────────────── */
+
+.finops-queue-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+}
+
+.finops-queue-delete {
+  appearance: none;
+  border: 1px solid rgba(239, 68, 68, 0.24);
+  border-radius: 999px;
+  padding: 0.4rem 0.82rem;
+  background: rgba(239, 68, 68, 0.08);
+  color: #b91c1c;
+  font-size: 0.76rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+.finops-queue-delete:hover {
+  background: rgba(239, 68, 68, 0.16);
+}
+
+/* ── Response / reasoning trace ──────────────────────────────── */
+
+.finops-step summary {
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 0.84rem;
+  color: #334155;
+}
+.finops-step-pre {
+  max-height: 280px;
+  overflow: auto;
+  font-size: 0.78rem;
+  background: rgba(15, 23, 42, 0.04);
+  padding: 0.85rem 1rem;
+  border-radius: 12px;
+  margin-top: 0.55rem;
+}
+
+/* ── FinOps workspace hero / shell polish ───────────────────── */
+
+.finops-workspace-hero {
+  position: relative;
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: minmax(0, 1.7fr) minmax(280px, 1fr);
+  gap: 1.25rem;
+  padding: 1.4rem;
+  border: 1px solid rgba(var(--agent-accent-rgb), 0.22);
+  background:
+    radial-gradient(circle at top left, rgba(34, 211, 238, 0.24), transparent 34%),
+    linear-gradient(145deg, rgba(8, 47, 73, 0.95), rgba(15, 23, 42, 0.96));
+  box-shadow:
+    0 28px 60px rgba(8, 47, 73, 0.24),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.finops-workspace-hero::before,
+.finops-workspace-hero::after {
+  content: '';
+  position: absolute;
+  border-radius: 999px;
+  pointer-events: none;
+  filter: blur(18px);
+}
+
+.finops-workspace-hero::before {
+  width: 11rem;
+  height: 11rem;
+  top: -3.6rem;
+  right: -2.4rem;
+  background: radial-gradient(circle, rgba(34, 211, 238, 0.46), transparent 68%);
+}
+
+.finops-workspace-hero::after {
+  width: 8rem;
+  height: 8rem;
+  bottom: -2.5rem;
+  left: 40%;
+  background: radial-gradient(circle, rgba(45, 212, 191, 0.28), transparent 72%);
+}
+
+.finops-workspace-hero__copy,
+.finops-workspace-hero__stats {
+  position: relative;
+  z-index: 1;
+}
+
+.finops-workspace-hero__kicker {
+  margin: 0 0 0.45rem;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(103, 232, 249, 0.92);
+}
+
+.finops-workspace-hero h2 {
+  margin: 0 0 0.65rem;
+  color: #f8fafc;
+}
+
+.finops-workspace-hero .agent-console__meta {
+  color: rgba(226, 232, 240, 0.84);
+}
+
+.finops-workspace-hero__stats {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.finops-workspace-hero__stat {
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 18px;
+  padding: 0.95rem 1rem;
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0.42), rgba(15, 23, 42, 0.72));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.finops-workspace-hero__stat span {
+  display: block;
+  font-size: 0.74rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: rgba(148, 163, 184, 0.94);
+}
+
+.finops-workspace-hero__stat strong {
+  display: block;
+  margin-top: 0.3rem;
+  font-size: 1.08rem;
+  color: #f8fafc;
+}
+
+.finops-panel {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(var(--agent-accent-rgb), 0.16);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.97), rgba(248, 250, 252, 0.96));
+  box-shadow:
+    0 18px 34px rgba(15, 23, 42, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.7);
+}
+
+.finops-panel::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(130deg, rgba(var(--agent-accent-rgb), 0.08), transparent 38%);
+  pointer-events: none;
+}
+
+.finops-panel > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* ── Report export lane ─────────────────────────────────────── */
+
+.finops-report-deck {
+  margin: 1.2rem 0 1.45rem;
+  padding: 1.2rem;
+  border-radius: 22px;
+  border: 1px solid rgba(34, 211, 238, 0.22);
+  background:
+    radial-gradient(circle at top right, rgba(34, 211, 238, 0.15), transparent 28%),
+    linear-gradient(155deg, rgba(8, 47, 73, 0.96), rgba(15, 23, 42, 0.96));
+  color: #e2e8f0;
+  box-shadow: 0 22px 50px rgba(8, 47, 73, 0.18);
+}
+
+.finops-report-deck__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.finops-report-deck__header .agent-console__meta {
+  color: rgba(226, 232, 240, 0.82);
+}
+
+.finops-report-deck__kicker {
+  margin: 0 0 0.35rem;
+  font-size: 0.72rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  font-weight: 800;
+  color: #67e8f9;
+}
+
+.finops-report-deck__header h3 {
+  margin: 0 0 0.35rem;
+  color: #f8fafc;
+}
+
+.finops-report-deck__actions {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  flex-wrap: wrap;
+}
+
+.finops-report-deck__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 0.8rem;
+  margin-top: 1rem;
+}
+
+.finops-report-card {
+  border: 1px solid rgba(103, 232, 249, 0.18);
+  border-radius: 18px;
+  padding: 0.95rem 1rem;
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0.36), rgba(15, 23, 42, 0.66));
+}
+
+.finops-report-card h4,
+.finops-report-deck__column h4 {
+  margin: 0 0 0.35rem;
+  color: #f8fafc;
+}
+
+.finops-report-card p {
+  margin: 0;
+  color: #e2e8f0;
+}
+
+.finops-report-card .agent-console__meta {
+  margin-top: 0.35rem;
+  color: rgba(203, 213, 225, 0.78);
+}
+
+.finops-report-deck__summary {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.95rem;
+  margin-top: 1rem;
+}
+
+.finops-report-deck__column {
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  border-radius: 18px;
+  padding: 0.95rem 1rem;
+  background: rgba(15, 23, 42, 0.42);
+}
+
+.finops-report-list {
+  margin: 0;
+  padding-left: 1.15rem;
+}
+
+.finops-report-list li {
+  margin-bottom: 0.42rem;
+  color: rgba(226, 232, 240, 0.92);
+}
+
+body[data-shell-page="finops"] .finops-report-deck .agent-console__button {
+  background: linear-gradient(135deg, rgba(34, 211, 238, 0.94), rgba(14, 165, 233, 0.88));
+  color: #082f49;
+  box-shadow: 0 16px 30px rgba(14, 165, 233, 0.24);
+}
+
+body[data-shell-page="finops"] .finops-report-deck .agent-console__button:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+/* ── Responsive + dark polish ───────────────────────────────── */
+
+@media (max-width: 1080px) {
+  .finops-workspace-hero,
+  .finops-report-deck__summary {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .finops-settings__grid,
+  .finops-workspace-hero__stats,
+  .finops-report-deck__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .finops-report-deck__header,
+  .finops-actions-header,
+  .finops-queue-controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
+body[data-theme="dark"] .finops-settings,
+body[data-theme="dark"] .finops-panel,
+body[data-theme="dark"] .finops-category-card {
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0.95), rgba(15, 23, 42, 0.9));
+  border-color: rgba(103, 232, 249, 0.12);
+  color: #e2e8f0;
+}
+
+body[data-theme="dark"] .finops-settings summary,
+body[data-theme="dark"] .finops-settings__grid label,
+body[data-theme="dark"] .finops-category-header h4,
+body[data-theme="dark"] .finops-pill,
+body[data-theme="dark"] .finops-panel h2,
+body[data-theme="dark"] .finops-panel h3,
+body[data-theme="dark"] .finops-panel h4 {
+  color: #e2e8f0;
+}
+
+body[data-theme="dark"] .finops-pill {
+  background: rgba(148, 163, 184, 0.16);
+}
+
+body[data-theme="dark"] .finops-step-pre {
+  background: rgba(2, 6, 23, 0.72);
+  color: #e2e8f0;
+}

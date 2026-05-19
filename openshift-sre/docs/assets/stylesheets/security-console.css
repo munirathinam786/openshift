@@ -1,0 +1,84 @@
+/* Security Console – only layout hooks that are unique to the security page.
+ * The core visual theme intentionally reuses finops-console.css so this page
+ * looks like the FinOps workspace, just with security-specific content.
+ */
+
+#security-workspace-hero.finops-workspace-hero {
+  background:
+    radial-gradient(circle at top left, rgba(34, 211, 238, 0.24), transparent 34%),
+    linear-gradient(145deg, rgba(8, 47, 73, 0.95), rgba(15, 23, 42, 0.96));
+  box-shadow:
+    0 28px 60px rgba(8, 47, 73, 0.24),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+#security-workspace-hero.finops-workspace-hero::before {
+  background: radial-gradient(circle, rgba(34, 211, 238, 0.46), transparent 68%);
+}
+
+#security-workspace-hero.finops-workspace-hero::after {
+  background: radial-gradient(circle, rgba(45, 212, 191, 0.28), transparent 72%);
+}
+
+.security-control-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.9rem;
+}
+
+.security-control-grid label,
+.security-control-grid .security-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.32rem;
+}
+
+.security-control-grid .security-field label {
+  display: block;
+}
+
+.security-features-select {
+  min-height: 18rem;
+}
+
+.security-preset-row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.security-summary-grid,
+.security-findings-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 0.8rem;
+}
+
+.security-summary-grid .agent-console__history-card {
+  min-height: 100%;
+}
+
+.security-findings-grid .finops-category-card {
+  min-height: 100%;
+}
+
+.security-trace-table {
+  overflow: auto;
+}
+
+@media (max-width: 1080px) {
+  #security-workspace-hero.finops-workspace-hero,
+  .security-control-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .finops-report-deck__header,
+  .finops-report-deck__actions,
+  .security-preset-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}

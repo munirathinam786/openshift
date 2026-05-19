@@ -1,0 +1,50 @@
+services:
+  db:
+    image: docker.io/library/mariadb:11.4
+    container_name: openshift-sre-agent-db
+    environment:
+      MARIADB_DATABASE: openshift_sre_agent
+      MARIADB_USER: openshift_sre_agent
+      MARIADB_PASSWORD: change-me
+      MARIADB_ROOT_PASSWORD: root-change-me
+    volumes:
+      - openshift-sre-agent-mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+
+  app:
+    build:
+      context: .
+      dockerfile: Containerfile
+    image: localhost/openshift-sre-agent-local:dev
+    container_name: openshift-sre-agent
+    depends_on:
+      - db
+    environment:
+      LEGACY_SITE_DIR: /app/legacy-site
+      OLLAMA_BASE_URL: http://host.containers.internal:11434
+      LOCAL_MODEL_NAME: gpt-oss:20b
+      OPENSHIFT_CLUSTER: local-cluster
+      OPENSHIFT_NAMESPACE: openshift-monitoring
+      KUBECONFIG_PATH: /root/.kube/config
+      OPENSHIFT_VERIFY_SSL: "true"
+      ALLOW_MUTATING_ACTIONS: "false"
+      AGENT_MAX_STEPS: "16"
+      DATABASE_ENABLED: "true"
+      DB_HOST: db
+      DB_PORT: "3306"
+      DB_NAME: openshift_sre_agent
+      DB_USER: openshift_sre_agent
+      DB_PASSWORD: change-me
+    ports:
+      - "8000:8000"
+    volumes:
+      - ${HOME}/.kube:/root/.kube:ro
+      - ../site:/app/legacy-site:ro
+
+volumes:
+  openshift-sre-agent-mysql-data:
+    name: openshift-sre-agent-mysql-data

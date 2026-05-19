@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>FinOps Console – AWS SRE Local Agent</title>
+    <link rel="stylesheet" href="assets/stylesheets/agent-console.css">
+    <link rel="stylesheet" href="assets/stylesheets/finops-console.css">
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  </head>
+  <body dir="ltr">
+    <div data-app-shell>
+      <script type="application/json" data-app-shell-props>
+        {
+          "key": "finops",
+          "eyebrow": "Cloud financial operations",
+          "title": "FinOps Console",
+          "description": "Dedicated workspace for AWS cost optimization, chargeback & showback, reserved/spot instance purchasing, executive reporting, rightsizing, anomaly detection, and approval-queue-driven safe execution planning.",
+          "badges": ["React", "45+ operations", "Chargeback", "RI/Spot purchasing", "Executive reports", "Approval queue"],
+          "actions": [
+            { "label": "Agent console", "href": "console.html" },
+            { "label": "Open history", "href": "history.html" }
+          ],
+          "secondaryActions": [
+            { "label": "LLM utilization", "href": "llm-utilization.html" },
+            { "label": "Tool drilldown", "href": "tool-drilldown.html" }
+          ],
+          "stats": [
+            { "label": "FinOps tools", "value": "45+ operations", "detail": "Cost analysis, chargeback by tags/account/project, RI & Spot purchasing, storage & network optimization, executive summaries, team scorecards, and more." },
+            { "label": "Execution model", "value": "Proposal-only", "detail": "All recommendations are queued for human review before any AWS mutation." },
+            { "label": "Approval queue", "value": "Persistent stages", "detail": "Items progress through planned → approved → precheck → ready → executed → rolled back." }
+          ],
+          "workspaceSignals": ["45+ FinOps operations", "Chargeback and showback lenses", "Persistent approval queue", "Executive reporting templates"],
+          "sectionNav": [
+            { "label": "Operation launcher", "href": "#finops-launcher" },
+            { "label": "Workflow results", "href": "#finops-results" },
+            { "label": "Approval queue", "href": "#finops-queue" },
+            { "label": "Executive exports", "href": "#finops-exports" }
+          ],
+          "shortcuts": [
+            { "label": "Operation dropdown → prompt", "href": "#finops-launcher" },
+            { "label": "Auto-approve queue mode", "href": "#finops-queue" },
+            { "label": "Queue all recommendations", "href": "#finops-queue" },
+            { "label": "Export report as PPT / PDF", "href": "#finops-exports" }
+          ],
+          "highlights": [
+            { "title": "Operation selector", "description": "45+ operations across 8 groups: Workflows, Cost Analysis, Chargeback & Showback, Commitment & Purchasing, Optimization, Governance, and Reporting & Executive." },
+            { "title": "Chargeback & showback", "description": "Charge back costs by tags, account, project, team, or Kubernetes namespace. Allocate shared services and track budget variance." },
+            { "title": "Purchasing intelligence", "description": "Reserved Instance & Savings Plans purchase planning, Spot strategy, Graviton migration, and commitment expiry analysis." },
+            { "title": "Executive reporting", "description": "Generate executive summaries, board presentations, weekly digests, savings reports, unit economics, team scorecards, and what-if forecasts." },
+            { "title": "Safe execution queue", "description": "Queue recommendations with stage tracking, auto-approve toggles, and rollback guidance." }
+          ],
+          "featureGroups": [
+            {
+              "kicker": "FinOps workspace",
+              "title": "Optimization, chargeback, commitments, and reporting in one surface",
+              "description": "The FinOps page is purpose-built for both platform operators and finance-facing review workflows.",
+              "items": [
+                { "title": "Operation catalog", "description": "Navigate broad workflows, single-question analyses, and executive report generators from a structured catalog.", "meta": "Launcher", "href": "#finops-launcher" },
+                { "title": "Opportunity workflow", "description": "Transform raw tool outputs into categorized savings actions with confidence, risk, and execution-plan context.", "meta": "Decision support", "href": "#finops-results" },
+                { "title": "Approval-stage persistence", "description": "Carry recommendations through planning, approval, precheck, change-window readiness, execution, and rollback state.", "meta": "Governed follow-through", "href": "#finops-queue" }
+              ]
+            },
+            {
+              "kicker": "Executive delivery",
+              "title": "Reports that leave the browser as presentation artifacts",
+              "description": "Once a report is generated, the workspace now supports presentation-ready export instead of making leaders squint at a console tab.",
+              "items": [
+                { "title": "PowerPoint & PDF export", "description": "Create `.pptx` or `.pdf` report packs with summary, KPI, opportunity, and queue context from the live report.", "meta": "Presentation-ready", "href": "#finops-exports" },
+                { "title": "Narrative brief", "description": "Pair the raw agent answer with structured report highlights so both executives and operators get what they need.", "meta": "Dual audience", "href": "#finops-results" },
+                { "title": "Queue-aware handoff", "description": "The presentation export can include current approval-stage items so reporting and action planning stay aligned.", "meta": "Follow-through", "href": "#finops-queue" }
+              ]
+            }
+          ],
+          "notice": "This page is a React-powered FinOps workspace. Live API panels require the running FastAPI backend on http://127.0.0.1:8000/."
+        }
+      </script>
+    </div>
+
+    <main class="md-main">
+      <div class="md-content" data-md-component="content">
+        <article class="md-content__inner md-typeset">
+          <section class="agent-shell__fallback">
+            <h1>FinOps Console</h1>
+            <p>Dedicated workspace for AWS cost optimization, chargeback & showback, reserved/spot instance purchasing, executive reporting, and approval-queue-driven safe execution planning.</p>
+            <ul>
+              <li>Select from 45+ FinOps operations across 8 groups (Workflows, Cost Analysis, Chargeback, Commitment & Purchasing, Optimization, Governance, Reporting & Executive).</li>
+              <li>The page calls the live <code>POST /chat</code> endpoint on the same origin.</li>
+              <li>Workflow results are structured into opportunities, savings tables, action cards, and an approval queue.</li>
+            </ul>
+            <p><a href="console.html">Back to Agent Console</a> &middot; <a href="history.html">Open the historical dashboard</a></p>
+            <p><strong>Tip:</strong> when running in Podman on macOS, <code>http://host.containers.internal:11434</code> is usually the right Ollama URL if Ollama is running on your Mac.</p>
+          </section>
+          <div id="finops-root"></div>
+          <div id="finops-workspace" hidden></div>
+        </article>
+      </div>
+    </main>
+
+    <footer class="agent-console__footer">
+      <span>Author: Sathishkumar Munirathinam / </span>
+      <a href="mailto:Sathishkumar.munirathinam@kyndryl.com">Sathishkumar.munirathinam@kyndryl.com</a>
+    </footer>
+
+    <script src="assets/javascripts/app-shell.js"></script>
+    <script src="assets/javascripts/llm-provider-runtime.js"></script>
+    <script src="https://unpkg.com/pptxgenjs@3.12.0/dist/pptxgen.bundle.js"></script>
+    <script src="https://unpkg.com/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+    <script src="assets/javascripts/finops-console.js"></script>
+  </body>
+</html>

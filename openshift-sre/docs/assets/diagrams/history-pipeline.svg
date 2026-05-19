@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="520" viewBox="0 0 1280 520" role="img" aria-labelledby="historyPipelineTitle historyPipelineDesc">
+  <title id="historyPipelineTitle">Historical metrics pipeline</title>
+  <desc id="historyPipelineDesc">Diagram showing the operator and dashboard calling FastAPI, which invokes the AWS SRE agent, persists runs through HistoryStore, extracts metrics, and stores them in a MariaDB container with a persistent volume.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#334155" />
+    </marker>
+    <style>
+      .box { rx: 18; ry: 18; stroke-width: 2; }
+      .label { font: 600 18px Inter, Arial, sans-serif; fill: #0f172a; text-anchor: middle; }
+      .small { font: 500 14px Inter, Arial, sans-serif; fill: #334155; text-anchor: middle; }
+      .edge { stroke: #334155; stroke-width: 2.5; fill: none; marker-end: url(#arrow); }
+      .dash { stroke-dasharray: 8 6; }
+    </style>
+  </defs>
+  <rect x="40" y="210" width="190" height="80" class="box" fill="#dae8fc" stroke="#6c8ebf" />
+  <text x="135" y="245" class="label">Operator / Dashboard</text>
+  <text x="135" y="268" class="small">Prompts + trend views</text>
+
+  <rect x="280" y="210" width="250" height="80" class="box" fill="#d5e8d4" stroke="#82b366" />
+  <text x="405" y="242" class="label">FastAPI endpoints</text>
+  <text x="405" y="266" class="small">/chat and /history/overview</text>
+
+  <rect x="590" y="90" width="220" height="80" class="box" fill="#fff2cc" stroke="#d6b656" />
+  <text x="700" y="122" class="label">AwsSreAgent + Toolkit</text>
+  <text x="700" y="146" class="small">Reasoning, tools, summaries</text>
+
+  <rect x="590" y="320" width="220" height="80" class="box" fill="#e1d5e7" stroke="#9673a6" />
+  <text x="700" y="352" class="label">HistoryStore</text>
+  <text x="700" y="376" class="small">SQLAlchemy persistence layer</text>
+
+  <rect x="870" y="320" width="220" height="80" class="box" fill="#ffe6cc" stroke="#d79b00" />
+  <text x="980" y="352" class="label">Metric extractor</text>
+  <text x="980" y="376" class="small">Counts, cost, severity, trends</text>
+
+  <rect x="1120" y="320" width="120" height="80" class="box" fill="#f8cecc" stroke="#b85450" />
+  <text x="1180" y="352" class="label">MariaDB</text>
+  <text x="1180" y="376" class="small">Named volume</text>
+
+  <path d="M 230 250 L 280 250" class="edge" />
+  <path d="M 530 225 L 590 140" class="edge" />
+  <path d="M 530 275 L 590 360" class="edge" />
+  <path d="M 810 130 L 900 130" class="edge" />
+  <path d="M 810 360 L 870 360" class="edge" />
+  <path d="M 1090 360 L 1120 360" class="edge" />
+  <path d="M 1180 400 C 1180 470, 405 470, 405 290" class="edge dash" />
+
+  <path d="M 905 105 C 955 55, 1060 60, 1110 110 C 1140 140, 1135 180, 1080 190 C 1060 220, 1000 225, 970 190 C 920 190, 890 160, 900 125 Z" fill="#f8fafc" stroke="#64748b" stroke-width="2" />
+  <text x="1015" y="135" class="label">Live AWS + Ollama</text>
+  <text x="1015" y="159" class="small">Tool execution and model calls</text>
+</svg>

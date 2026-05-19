@@ -1,0 +1,426 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>OpenShift SRE Local Agent Console</title>
+    <link rel="stylesheet" href="assets/stylesheets/agent-console.css">
+  </head>
+  <body dir="ltr">
+    <div data-app-shell>
+      <script type="application/json" data-app-shell-props>
+        {
+          "key": "console",
+          "eyebrow": "AI-assisted operations",
+          "title": "OpenShift SRE Console",
+          "description": "Run OpenShift SRE prompts, troubleshooting flows, and review structured output in an operator workspace. The LLM runtime controls, cluster scope overrides, and guided diagnostics all live here.",
+          "badges": ["React shell", "Live /chat endpoint", "Operator-safe guidance"],
+          "actions": [
+            { "label": "Open docs home", "href": "/docs-home/" },
+            { "label": "Open FinOps console", "href": "finops-console.html" },
+            { "label": "Open troubleshooting", "href": "troubleshooting.html" },
+            { "label": "Open history", "href": "history.html" }
+          ],
+          "secondaryActions": [
+            { "label": "LLM utilization", "href": "llm-utilization.html" },
+            { "label": "Tool drilldown", "href": "tool-drilldown.html" }
+          ],
+          "stats": [
+            { "label": "Primary workflow", "value": "Agent-driven investigations", "detail": "Switch between general prompts, cluster posture reviews, and guided troubleshooting." },
+            { "label": "Safety model", "value": "Read-only by default", "detail": "OpenShift mutations remain policy-gated." },
+            { "label": "Connected views", "value": "5 operator pages", "detail": "Console, troubleshooting, history, utilization, and drilldown stay linked." }
+          ],
+          "workspaceSignals": ["Prompt drafts persisted locally", "Answer export and copy workflow", "Response report exports", "Scenario-led troubleshooting handoff", "FinOps queue integration"],
+          "sectionNav": [
+            { "label": "Run surface", "href": "#console-run" },
+            { "label": "Response hub", "href": "#console-response" },
+            { "label": "Report exports", "href": "#console-exports" },
+            { "label": "Runtime telemetry", "href": "#console-runtime" },
+            { "label": "History snapshot", "href": "#console-history" },
+            { "label": "Reasoning trace", "href": "#console-trace" }
+          ],
+          "shortcuts": [
+            { "label": "Ctrl/Cmd + Enter → run", "href": "#console-run" },
+            { "label": "Ctrl/Cmd + / → focus prompt", "href": "#console-run" },
+            { "label": "Esc → clear prompt", "href": "#console-run" },
+            { "label": "Drafts + recent prompts", "href": "#console-run" }
+          ],
+          "highlights": [
+            { "title": "Guided modules", "description": "Start with structured workflows instead of a blank prompt every time." },
+            { "title": "Embedded LLM controls", "description": "Choose the LLM provider, Ollama base URL, and model directly in the main run surface before every investigation." },
+            { "title": "Response-aware layout", "description": "Root causes, next actions, tables, and traces each land in dedicated sections." },
+            { "title": "Workspace continuity", "description": "Move between live operations, history, utilization, and drilldowns without losing context." }
+          ],
+          "featureGroups": [
+            {
+              "kicker": "Run section",
+              "title": "Prompt engineering, guided execution, and safe runtime overrides",
+              "description": "The console now behaves more like an operator launchpad than a plain textarea.",
+              "items": [
+                { "title": "Runtime override cockpit", "description": "Tune Ollama, cluster scope, namespace focus, and per-request access settings without leaving the page.", "meta": "Execution context", "href": "#console-run" },
+                { "title": "Guided module loading", "description": "Jump from posture or troubleshooting patterns into a ready-to-run prompt with less prompt-writing overhead.", "meta": "Operator acceleration", "href": "#console-run" },
+                { "title": "Drafts, history, and keyboard flow", "description": "Persist recent prompts locally, restore drafts quickly, and drive the page with keyboard shortcuts.", "meta": "Workflow speed", "href": "#console-run" }
+              ]
+            },
+            {
+              "kicker": "Response section",
+              "title": "Answer intelligence, structured cards, and follow-up readiness",
+              "description": "Every response surface is organized so operators can go from answer to action faster.",
+              "items": [
+                { "title": "Copy and export friendly answers", "description": "Turn the latest answer into a reusable operator note or lightweight incident summary.", "meta": "Shareability", "href": "#console-response" },
+                { "title": "Service-state cards and severity tables", "description": "Key evidence is split into readable cards, drilldown tables, and confidence-aware summaries.", "meta": "Fast scanning", "href": "#console-response" },
+                { "title": "Approval-aware next steps", "description": "When the backend suggests approval flows, the page keeps those paths visible and easy to continue.", "meta": "Operational continuity", "href": "#console-response" }
+              ]
+            }
+          ],
+          "notice": "This page now uses a React-powered shell for the custom docs UI while keeping the existing FastAPI-backed live panels intact."
+        }
+      </script>
+    </div>
+    <main class="md-main">
+      <div class="md-content" data-md-component="content">
+        <article class="md-content__inner md-typeset">
+          <section class="agent-shell__fallback">
+            <h1>OpenShift SRE Console</h1>
+            <p>Run the OpenShift SRE agent directly from the documentation UI.</p>
+            <ul>
+              <li>The page calls the live <code>POST /chat</code> endpoint on the same origin.</li>
+              <li>The LLM controls live in the main run form below, where you can set the provider, Ollama base URL, and model for each run.</li>
+              <li>You can also provide OpenShift cluster scope values directly on this page for each run.</li>
+              <li>Responses include both the final answer and the returned reasoning trace.</li>
+            </ul>
+            <p><a href="/docs-home/">Open the Terraform IaC docs home</a> to launch the broader documentation set from the same application.</p>
+            <p><a href="history.html">Open the dedicated historical dashboard</a> for charts, run health summaries, and recent persisted runs.</p>
+            <p><strong>Tip:</strong> when running in Podman on macOS, <code>http://host.containers.internal:11434</code> is usually the right Ollama URL if Ollama is running on your Mac.</p>
+          </section>
+
+          <div class="agent-console" data-agent-console>
+            <section class="agent-console__panel" id="console-run">
+              <h2>Run the agent</h2>
+              <section class="agent-console__table-block">
+                <div class="agent-console__queue-header">
+                  <div>
+                    <h4>LLM runtime controls</h4>
+                    <p class="agent-console__meta">The LLM is part of this main SRE console. Pick the provider, Ollama base URL, and model here, then use <a href="llm-utilization.html">LLM Utilization</a> for live runtime visibility.</p>
+                  </div>
+                  <span class="agent-console__history-badge agent-console__history-badge--ok">Main run surface</span>
+                </div>
+              </section>
+              <section class="agent-console__table-block">
+                <div class="agent-console__queue-header">
+                  <div>
+                    <h4>Documentation launcher</h4>
+                    <p class="agent-console__meta">Need the broader Terraform IaC docs from this same console page? Launch the docs home here and come right back to the SRE workflow when needed.</p>
+                  </div>
+                  <span class="agent-console__history-badge">Same app</span>
+                </div>
+                <div class="agent-console__actions">
+                  <a class="agent-console__button" href="/docs-home/">Open docs home</a>
+                </div>
+              </section>
+              <section class="agent-console__module-section">
+                <div class="agent-console__module-header">
+                  <div>
+                    <h3>Guided modules</h3>
+                    <p class="agent-console__meta">Use separate sections for advanced posture reviews and technical troubleshooting. These modules generate action-oriented recommendations; real OpenShift mutations remain gated by the current safety policy.</p>
+                  </div>
+                </div>
+                <div class="agent-console__module-grid">
+                  <article class="agent-console__module-card agent-console__module-card--finops">
+                    <div class="agent-console__module-badge-row">
+                      <span class="agent-console__history-badge">FinOps</span>
+                      <span class="agent-console__history-badge">React console</span>
+                      <span class="agent-console__history-badge agent-console__history-badge--ok">Dedicated page</span>
+                    </div>
+                    <h4>FinOps optimization</h4>
+                    <p>FinOps workflows have moved to a dedicated React-powered console with a dropdown of all FinOps operations, workflow visualizations, and an approval queue.</p>
+                    <div class="agent-console__actions">
+                      <a class="agent-console__button" href="finops-console.html">Open FinOps Console</a>
+                    </div>
+                  </article>
+
+                  <article class="agent-console__module-card agent-console__module-card--troubleshooting">
+                    <div class="agent-console__module-badge-row">
+                      <span class="agent-console__history-badge">Troubleshooting</span>
+                      <span class="agent-console__history-badge">Operational triage</span>
+                      <span class="agent-console__history-badge agent-console__history-badge--ok">Read-only safe</span>
+                    </div>
+                    <h4>Technical troubleshooting</h4>
+                    <p>Focus the agent on incident triage, evidence gathering, suspected root cause, blast radius, and next safe steps across compute, network, containers, logs, alarms, and security signals.</p>
+                    <section class="agent-console__troubleshooting-callout">
+                      <div>
+                        <h5>OpenShift troubleshooting scenarios</h5>
+                        <p class="agent-console__meta">Pick a workflow from the dropdown to load a focused investigation path such as route failures, operator degradation, pod crash loops, storage binding issues, and more.</p>
+                      </div>
+                      <label class="agent-console__label" for="agent-troubleshooting-scenario">
+                        Troubleshooting workflow
+                        <select id="agent-troubleshooting-scenario" class="agent-console__input" data-agent-troubleshooting-scenario>
+                          <optgroup label="Core triage">
+                            <option value="general-incident-triage" selected>General incident triage</option>
+                          </optgroup>
+                          <optgroup label="Platform">
+                            <option value="operator-degradation">Cluster operator degradation</option>
+                          </optgroup>
+                          <optgroup label="Networking">
+                            <option value="route-ingress-connectivity">Route / ingress / service connectivity</option>
+                          </optgroup>
+                          <optgroup label="Workloads">
+                            <option value="node-pressure-readiness">Node readiness / pressure / scheduling issues</option>
+                            <option value="workload-rollout-failures">Deployment / StatefulSet / DaemonSet rollout failures</option>
+                          </optgroup>
+                          <optgroup label="Storage">
+                            <option value="storage-binding-capacity">Persistent volume binding / storage capacity issues</option>
+                          </optgroup>
+                          <optgroup label="Security &amp; governance">
+                            <option value="security-guardrail-review">SCC / network policy / quota guardrail issues</option>
+                          </optgroup>
+                          <optgroup label="Operators">
+                            <option value="olm-csv-subscription-failures">OLM subscription / CSV failures</option>
+                          </optgroup>
+                        </select>
+                      </label>
+                    </section>
+                    <div class="agent-console__troubleshooting-catalog" data-agent-troubleshooting-details>
+                      <div class="agent-console__troubleshooting-header">
+                        <div class="agent-console__module-badge-row">
+                          <span class="agent-console__history-badge">Core triage</span>
+                          <span class="agent-console__history-badge agent-console__history-badge--ok">guided workflow</span>
+                        </div>
+                        <h5>General incident triage</h5>
+                        <p class="agent-console__meta">Start broad when the symptom is real but the failure domain is still fuzzy.</p>
+                      </div>
+                      <div class="agent-console__troubleshooting-grid">
+                        <section class="agent-console__troubleshooting-block">
+                          <h6>Typical symptoms</h6>
+                          <ul>
+                            <li>Customer impact reported but service owner is unsure where the fault started.</li>
+                            <li>Multiple alarms or dashboards look noisy and you need the shortest path to a likely failure domain.</li>
+                          </ul>
+                        </section>
+                        <section class="agent-console__troubleshooting-block">
+                          <h6>OpenShift evidence sources</h6>
+                          <ul>
+                            <li>Cluster operators and warning events</li>
+                            <li>Recent rollout, upgrade, or configuration changes</li>
+                            <li>Top-level dependencies across nodes, workloads, routes, storage, and operator lifecycle</li>
+                          </ul>
+                        </section>
+                        <section class="agent-console__troubleshooting-block">
+                          <h6>Investigation steps</h6>
+                          <ul>
+                            <li>Confirm the first bad timestamp and blast radius.</li>
+                            <li>Compare healthy versus unhealthy nodes, namespaces, routes, or worker pools.</li>
+                            <li>List the next safe validation steps if the first hypothesis is wrong.</li>
+                          </ul>
+                        </section>
+                      </div>
+                      <section class="agent-console__troubleshooting-block">
+                        <h6>Generated investigation prompt</h6>
+                        <p class="agent-console__troubleshooting-prompt">Act as an OpenShift incident commander for read-only troubleshooting. Investigate the operator issue by gathering evidence from cluster operators, warning events, rollout changes, node state, and major upstream or downstream dependencies. Return: 1) likely root cause, 2) evidence collected, 3) blast radius, 4) immediate next safe checks, and 5) deeper follow-up checks if the first hypothesis is wrong.</p>
+                      </section>
+                    </div>
+                    <ul>
+                      <li>symptom-first incident triage</li>
+                      <li>cluster operators, events, routes, workload, and topology checks</li>
+                      <li>blast radius and dependency mapping</li>
+                      <li>next steps for operator execution</li>
+                    </ul>
+                    <div class="agent-console__actions">
+                      <button class="agent-console__example" type="button" data-agent-load-troubleshooting>Load selected workflow</button>
+                      <button class="agent-console__example" type="button" data-agent-module="technical-triage" data-agent-prompt="Act as an OpenShift technical troubleshooting specialist. Investigate the operator issue by gathering evidence from cluster operators, warning events, workload state, platform inventory, and network topology. Return: 1) likely root cause, 2) evidence collected, 3) blast radius, 4) immediate next steps, and 5) deeper follow-up checks if the first hypothesis is wrong.">Load troubleshooting specialist</button>
+                      <button class="agent-console__example" type="button" data-agent-prompt="Investigate a production OpenShift issue by checking cluster operators, warning events, route posture, workload health, and platform dependencies. Summarize the most likely failure path and the next safe operator actions.">Incident triage</button>
+                    </div>
+                  </article>
+                </div>
+              </section>
+
+              <div class="agent-console__grid">
+                <div>
+                  <label class="agent-console__label" for="llm-provider">LLM provider</label>
+                  <select id="llm-provider" class="agent-console__input" data-agent-llm-provider>
+                    <option value="ollama">Local Ollama</option>
+                  </select>
+                </div>
+                <div data-agent-ollama-field>
+                  <label class="agent-console__label" for="ollama-base-url">Ollama base URL</label>
+                  <input id="ollama-base-url" class="agent-console__input" data-agent-ollama-base-url type="url" placeholder="http://host.containers.internal:11434">
+                </div>
+                <div data-agent-ollama-field>
+                  <label class="agent-console__label" for="local-model-name">Model name</label>
+                  <select id="local-model-name" class="agent-console__input" data-agent-model-name data-agent-default-model="gpt-oss:20b">
+                    <option value="gpt-oss:20b">gpt-oss:20b</option>
+                  </select>
+                </div>
+                <div data-agent-external-llm-field hidden>
+                  <label class="agent-console__label" for="external-model-name">External model name</label>
+                  <input id="external-model-name" class="agent-console__input" data-agent-external-model-name type="text" placeholder="gpt-4.1-mini">
+                </div>
+                <div data-agent-external-llm-field hidden>
+                  <label class="agent-console__label" for="external-base-url">Provider base URL</label>
+                  <input id="external-base-url" class="agent-console__input" data-agent-external-base-url type="url" placeholder="https://api.openai.com/v1">
+                </div>
+                <div data-agent-external-llm-field hidden>
+                  <label class="agent-console__label" for="external-api-key">Provider API key</label>
+                  <input id="external-api-key" class="agent-console__input" data-agent-external-api-key type="password" placeholder="Required for external providers">
+                </div>
+                <div data-agent-external-llm-field hidden>
+                  <label class="agent-console__label" for="external-organization">Organization / tenant</label>
+                  <input id="external-organization" class="agent-console__input" data-agent-external-organization type="text" placeholder="Optional provider org or tenant hint">
+                </div>
+                <div data-agent-external-llm-field hidden>
+                  <label class="agent-console__label" for="external-api-version">Provider API version</label>
+                  <input id="external-api-version" class="agent-console__input" data-agent-external-api-version type="text" placeholder="Optional API version">
+                </div>
+                <div>
+                  <label class="agent-console__label" for="aws-region">Cluster name</label>
+                  <input id="aws-region" class="agent-console__input" data-agent-aws-region type="text" placeholder="prod-ocp-east">
+                </div>
+                <div>
+                  <label class="agent-console__label" for="aws-profile">Namespace / project</label>
+                  <input id="aws-profile" class="agent-console__input" data-agent-aws-profile type="text" placeholder="openshift-ingress">
+                </div>
+                <div>
+                  <label class="agent-console__label" for="aws-access-key-id">Kube context</label>
+                  <input id="aws-access-key-id" class="agent-console__input" data-agent-aws-access-key-id type="text" placeholder="admin@prod-ocp-east">
+                </div>
+                <div>
+                  <label class="agent-console__label" for="aws-secret-access-key">API token</label>
+                  <input id="aws-secret-access-key" class="agent-console__input" data-agent-aws-secret-access-key type="password" placeholder="Optional per-request override">
+                </div>
+                <div class="agent-console__grid-span-2">
+                  <label class="agent-console__label" for="aws-session-token">Kubeconfig path</label>
+                  <input id="aws-session-token" class="agent-console__input" data-agent-aws-session-token type="text" placeholder="~/.kube/config">
+                </div>
+                <label class="agent-console__checkbox agent-console__grid-span-2">
+                  <input data-agent-aws-verify-ssl type="checkbox" checked>
+                  <span>Verify cluster API certificates</span>
+                </label>
+              </div>
+              <p class="agent-console__meta" data-agent-llm-provider-note>Choose between the local Ollama runtime and supported external providers such as OpenAI, Azure OpenAI, Anthropic, Gemini, and OpenRouter.</p>
+              <label class="agent-console__label" for="agent-prompt">Prompt</label>
+              <textarea id="agent-prompt" class="agent-console__textarea" data-agent-prompt placeholder="Investigate cluster operator degradation and summarize the main risks."></textarea>
+              <p class="agent-console__meta">Tip: the guided posture module is ideal for cluster reviews, while the troubleshooting module is better for incident response and platform diagnosis.</p>
+              <div class="agent-console__actions">
+                <button class="agent-console__button" type="button" data-agent-run>Run agent</button>
+                <button class="agent-console__example" type="button" data-agent-example="Inspect cluster operators and explain which degraded operators look urgent.">Operator triage</button>
+                <button class="agent-console__example" type="button" data-agent-example="Check nodes and summarize readiness, taints, pressure conditions, and capacity concerns.">Node health</button>
+                <button class="agent-console__example" type="button" data-agent-example="Review workload rollout posture by comparing desired versus ready deployments, statefulsets, daemonsets, and jobs.">Workload health</button>
+                <button class="agent-console__example" type="button" data-agent-example="Inspect routes, services, and ingresses and summarize likely exposure or traffic risks.">Route / ingress posture</button>
+                <button class="agent-console__example" type="button" data-agent-example="Inspect machine config pools and machine sets, highlight degraded status or readiness gaps, and explain likely workload impact.">Machine API posture</button>
+                <button class="agent-console__example" type="button" data-agent-example="Review security context constraints, network policies, and resource quotas for security and guardrail posture.">Security / guardrails</button>
+                <button class="agent-console__example" type="button" data-agent-example="Inspect persistent volumes, persistent volume claims, and storage classes to identify binding or lifecycle risks.">Storage posture</button>
+                <button class="agent-console__example" type="button" data-agent-example="Review subscriptions and ClusterServiceVersions to identify operator lifecycle issues or upgrade drift.">OLM health</button>
+                <button class="agent-console__example" type="button" data-agent-example="List recent warning events across critical namespaces and summarize the highest-risk patterns.">Event review</button>
+                <button class="agent-console__example" type="button" data-agent-example="Provide a broad OpenShift platform inventory summary across cluster version, operators, nodes, projects, workloads, routes, and storage.">Full platform sweep</button>
+                <button class="agent-console__example" type="button" data-agent-example="Run a FinOps drilldown with cost and usage summary, cost by service, cost by tag for Environment, cost forecast, Savings Plans coverage, and rightsizing recommendations.">FinOps / optimization drilldown</button>
+              </div>
+              <p class="agent-console__meta">Tip: press <strong>Ctrl/Cmd + Enter</strong> to submit. Any Ollama and cluster scope values entered here are used only for this request.</p>
+              <div class="agent-console__status" data-agent-status></div>
+            </section>
+
+            <section class="agent-console__panel" id="console-response">
+              <h2>Agent response</h2>
+              <div class="agent-console__answer" data-agent-answer>Run a prompt to see the final answer here.</div>
+              <section class="agent-console__table-block" id="console-exports">
+                <div class="agent-console__queue-header">
+                  <div>
+                    <h4>Response reporting exports</h4>
+                    <p class="agent-console__meta">Package the latest console response as either an operator-ready response report or a handoff pack in CSV, PowerPoint, PDF, or Word-compatible format.</p>
+                  </div>
+                  <span class="agent-console__history-badge agent-console__history-badge--neutral">CSV · PPT · PDF · Word</span>
+                </div>
+                <div class="agent-console__report-grid">
+                  <article class="agent-console__report-card">
+                    <h5>Operator response report</h5>
+                    <p class="agent-console__meta">Summarizes the prompt, final answer, key service-state cards, and immediate next actions for operational sharing.</p>
+                    <div class="agent-console__actions">
+                      <button class="agent-console__button" type="button" data-agent-console-export-report="operator-response" data-agent-console-export-format="csv">Export CSV</button>
+                      <button class="agent-console__button" type="button" data-agent-console-export-report="operator-response" data-agent-console-export-format="ppt">Export PPT</button>
+                      <button class="agent-console__button agent-console__button--secondary" type="button" data-agent-console-export-report="operator-response" data-agent-console-export-format="pdf">Export PDF</button>
+                      <button class="agent-console__example" type="button" data-agent-console-export-report="operator-response" data-agent-console-export-format="word">Export Word</button>
+                    </div>
+                  </article>
+                  <article class="agent-console__report-card">
+                    <h5>Investigation handoff</h5>
+                    <p class="agent-console__meta">Turns the latest run into a handoff-oriented pack with prompt context, evidence steps, findings, and recommended follow-up actions.</p>
+                    <div class="agent-console__actions">
+                      <button class="agent-console__button" type="button" data-agent-console-export-report="investigation-handoff" data-agent-console-export-format="csv">Export CSV</button>
+                      <button class="agent-console__button" type="button" data-agent-console-export-report="investigation-handoff" data-agent-console-export-format="ppt">Export PPT</button>
+                      <button class="agent-console__button agent-console__button--secondary" type="button" data-agent-console-export-report="investigation-handoff" data-agent-console-export-format="pdf">Export PDF</button>
+                      <button class="agent-console__example" type="button" data-agent-console-export-report="investigation-handoff" data-agent-console-export-format="word">Export Word</button>
+                    </div>
+                  </article>
+                </div>
+                <div class="agent-console__status" data-agent-console-report-status>Run the agent to unlock console response exports.</div>
+              </section>
+              <div class="agent-console__approval-panel" data-agent-approval-panel hidden>
+                <h3>Approval actions</h3>
+                <p class="agent-console__meta">Choose an approval path and send it back as the next guided input.</p>
+                <div class="agent-console__approval-options" data-agent-approval-options></div>
+                <div class="agent-console__actions">
+                  <button class="agent-console__button agent-console__button--secondary" type="button" data-agent-approval-apply>Continue with selected approval</button>
+                </div>
+              </div>
+              <h3>Service state overview</h3>
+              <div class="agent-console__cards" data-agent-cards>
+                <p class="agent-console__meta">Service-state cards will appear here after a run.</p>
+              </div>
+              <h3>Severity &amp; compliance summaries</h3>
+              <div class="agent-console__tables" data-agent-tables>
+                <p class="agent-console__meta">Severity and compliance summaries will appear here when available.</p>
+              </div>
+              <h3>FinOps optimization workflow</h3>
+              <div class="agent-console__finops-overview" data-agent-finops-overview>
+                <p class="agent-console__meta">FinOps workflows have moved to the dedicated <a href="finops-console.html">FinOps Console</a>. The console includes a React-powered operation dropdown, workflow visualization, and approval queue.</p>
+              </div>
+              <div class="agent-console__finops-savings" data-agent-finops-savings></div>
+              <div class="agent-console__finops-actions" data-agent-finops-actions></div>
+              <section class="agent-console__table-block agent-console__table-block--queue">
+                <div class="agent-console__queue-header">
+                  <div>
+                    <h4>Approval queue</h4>
+                    <p class="agent-console__meta">The FinOps approval queue is now managed from the <a href="finops-console.html">FinOps Console</a>.</p>
+                  </div>
+                </div>
+                <div class="agent-console__finops-queue" data-agent-finops-queue></div>
+              </section>
+              <h3 id="console-runtime">Runtime and database observability</h3>
+              <div class="agent-console__history-summary" data-agent-runtime-summary>
+                <p class="agent-console__meta">Container and database telemetry will appear here when the runtime endpoint is reachable.</p>
+              </div>
+              <div class="agent-console__history-trends" data-agent-runtime-containers>
+                <p class="agent-console__meta">Live container inventory and resource usage will appear here when available.</p>
+              </div>
+              <div class="agent-console__history-runs" data-agent-runtime-database>
+                <p class="agent-console__meta">Database utilization, table inventory, and schema details will appear here when available.</p>
+              </div>
+              <h3 id="console-history">Historical metrics dashboard</h3>
+              <div class="agent-console__history-summary" data-agent-history-summary>
+                <p class="agent-console__meta">Historical run and metric summaries will appear here after the database is connected.</p>
+              </div>
+              <div class="agent-console__history-trends" data-agent-history-trends>
+                <p class="agent-console__meta">Trend charts will appear here after a few stored runs.</p>
+              </div>
+              <div class="agent-console__history-runs" data-agent-history-runs>
+                <p class="agent-console__meta">Recent persisted runs will appear here after the database is connected.</p>
+              </div>
+              <h3 id="console-trace">Reasoning trace</h3>
+              <div class="agent-console__steps" data-agent-steps>
+                <p class="agent-console__meta">Each completed run will show tool calls and reasoning steps here.</p>
+              </div>
+            </section>
+          </div>
+        </article>
+      </div>
+    </main>
+    <footer class="agent-console__footer">
+      <span>Author: Sathishkumar Munirathinam / </span>
+      <a href="mailto:Sathishkumar.munirathinam@kyndryl.com">Sathishkumar.munirathinam@kyndryl.com</a>
+    </footer>
+    <script src="assets/javascripts/app-shell.js"></script>
+    <script src="assets/javascripts/llm-provider-runtime.js"></script>
+    <script src="https://unpkg.com/pptxgenjs@3.12.0/dist/pptxgen.bundle.js"></script>
+    <script src="https://unpkg.com/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+    <script src="assets/javascripts/agent-console.js"></script>
+  </body>
+</html>

@@ -219,3 +219,35 @@ img.drawio-diagram {
   border-color: #444;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
 }
+
+.md-typeset .sre-launch-button {
+  margin: 0.85rem 0.75rem 1rem 0;
+}
+
+.md-typeset .sre-hero-button {
+  min-width: 13rem;
+  padding: 0.8rem 1.2rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  border-radius: 999px;
+  box-shadow: 0 10px 24px rgba(169, 37, 37, 0.16);
+}
+
+@media screen and (max-width: 48rem) {
+  .md-typeset h1 {
+    font-size: 2.6rem;
+    line-height: 1.15;
+    margin: 0 0 0.75rem;
+  }
+
+  .md-typeset .sre-launch-button {
+    margin: 0.7rem 0.45rem 0.45rem 0;
+  }
+
+  .md-typeset .sre-hero-button {
+    min-width: unset;
+    width: 100%;
+    text-align: center;
+  }
+}
