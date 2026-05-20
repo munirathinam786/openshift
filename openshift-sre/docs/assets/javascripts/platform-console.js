@@ -15,11 +15,17 @@
 		list_cluster_operators: 'Cluster operator health',
 		list_cluster_network_config: 'Cluster network configuration and CIDR posture',
 		list_ingress_controllers: 'IngressController domains, publishing, and replica posture',
+		list_cluster_proxy_config: 'Cluster proxy egress posture and trusted CA wiring',
+		list_cluster_dns_config: 'DNS operator resolver, zone, and node-placement posture',
+		list_feature_gate_config: 'FeatureGate set and custom no-upgrade feature posture',
+		list_scheduler_config: 'Scheduler profiles and control-plane placement posture',
 		list_nodes: 'Node readiness and worker footprint',
 		list_node_pressure: 'Node pressure, readiness, and kubelet conditions',
 		list_pods: 'Pod phase, restart, and pending risk',
 		list_machine_config_pools: 'MachineConfigPool rollout posture',
 		list_machine_sets: 'MachineSet capacity posture',
+		list_machine_health_checks: 'MachineHealthCheck remediation and max-unhealthy posture',
+		list_cluster_autoscaling: 'ClusterAutoscaler and MachineAutoscaler capacity posture',
 		list_operator_subscriptions: 'Operator subscription health',
 		list_cluster_service_versions: 'CSV install and operator lifecycle',
 		list_workload_health: 'Workload rollout and readiness posture',
@@ -65,10 +71,16 @@
 	const featureDescriptions = {
 		list_cluster_network_config: 'Checks cluster/service CIDRs, network type, and exposed network ranges before change windows.',
 		list_ingress_controllers: 'Surfaces domain, publishing strategy, and replica drift on cluster ingress control planes.',
+		list_cluster_proxy_config: 'Shows whether egress proxy settings, trusted CA wiring, and readiness endpoints are aligned before upgrades or disconnected-path changes.',
+		list_cluster_dns_config: 'Highlights DNS forwarding, zone configuration, and placement details that often break upgrades in subtle and deeply annoying ways.',
+		list_feature_gate_config: 'Flags non-default feature sets and custom no-upgrade features that should be explicitly reviewed before lifecycle changes.',
+		list_scheduler_config: 'Summarizes scheduler profiles, default selectors, and master schedulability so capacity assumptions are not based on vibes alone.',
 		list_horizontal_pod_autoscalers: 'Shows whether autoscaled workloads are pinned at min/max bounds or scaling normally.',
 		list_pod_disruption_budgets: 'Highlights workloads that may block draining, upgrades, or planned maintenance.',
 		list_cronjobs: 'Flags suspended or stale scheduled jobs that often get forgotten until a release weekend.',
 		list_volume_snapshots: 'Summarizes protection coverage and readiness of storage snapshots and snapshot classes.',
+		list_machine_health_checks: 'Shows machine remediation safety rails and whether node-health automation is actually armed for the fleet.',
+		list_cluster_autoscaling: 'Adds cluster-wide and machine-set scaling guardrails so lifecycle reviews can spot brittle capacity envelopes early.',
 		list_oauth_configuration: 'Summarizes cluster identity providers, LDAP posture, and authentication entry points used for platform access.',
 		list_rbac_bindings: 'Surfaces cluster-admin, admin, and other elevated bindings that influence governance posture.',
 		list_service_accounts: 'Shows token-mount behavior and pull-secret usage across service identities.',
@@ -87,7 +99,7 @@
 	};
 
 	const groupDescriptions = {
-		'Core platform and lifecycle': 'Version, operators, networking, ingress, and machine-fleet readiness for change windows.',
+		'Core platform and lifecycle': 'Version, operators, platform config, networking, ingress, capacity, and machine-fleet readiness for change windows.',
 		'Workloads, traffic, and storage': 'Application rollout, disruption safety, autoscaling, exposure paths, and storage protection posture.',
 		'Security and governance': 'Identity, privilege, segmentation, quota guardrails, and fleet governance controls that shape operational risk.',
 		'Delivery, automation, and data services': 'Build, rollout, GitOps, Tekton, logging, and serverless delivery surfaces.',
@@ -95,7 +107,7 @@
 	};
 
 	const featureGroups = [
-		{ title: 'Core platform and lifecycle', features: ['get_cluster_identity', 'list_cluster_infrastructure', 'list_projects', 'list_cluster_version', 'list_cluster_operators', 'list_cluster_network_config', 'list_ingress_controllers', 'list_nodes', 'list_node_pressure', 'list_machine_config_pools', 'list_machine_sets', 'list_operator_subscriptions', 'list_cluster_service_versions'] },
+		{ title: 'Core platform and lifecycle', features: ['get_cluster_identity', 'list_cluster_infrastructure', 'list_projects', 'list_cluster_version', 'list_cluster_operators', 'list_cluster_network_config', 'list_ingress_controllers', 'list_cluster_proxy_config', 'list_cluster_dns_config', 'list_feature_gate_config', 'list_scheduler_config', 'list_nodes', 'list_node_pressure', 'list_machine_config_pools', 'list_machine_sets', 'list_machine_health_checks', 'list_cluster_autoscaling', 'list_operator_subscriptions', 'list_cluster_service_versions'] },
 		{ title: 'Workloads, traffic, and storage', features: ['list_pods', 'list_workload_health', 'list_horizontal_pod_autoscalers', 'list_pod_disruption_budgets', 'list_cronjobs', 'list_services', 'list_routes', 'list_ingresses', 'list_events', 'list_persistent_storage', 'list_volume_snapshots', 'list_storage_classes'] },
 		{ title: 'Security and governance', features: ['list_security_context_constraints', 'list_oauth_configuration', 'list_rbac_bindings', 'list_service_accounts', 'list_limit_ranges', 'list_network_policies', 'list_resource_quotas', 'list_acm_multicluster_hubs', 'list_acm_managed_clusters', 'list_acm_policies', 'list_acs_central_services', 'list_acs_secured_clusters'] },
 		{ title: 'Delivery, automation, and data services', features: ['list_image_streams', 'list_builds', 'list_build_configs', 'list_deployment_configs', 'list_gitops_argocds', 'list_gitops_applications', 'list_knative_services', 'list_tekton_configs', 'list_tekton_pipeline_runs', 'list_cluster_logging', 'list_oadp_resources'] },
@@ -111,7 +123,7 @@
 			summary: 'Assess whether the platform is ready for an upgrade or change window across version, operators, nodes, and machine pools.',
 			promptLead: 'Act as an OpenShift platform lifecycle lead preparing a change window. Build a lifecycle-readiness review using the selected evidence and focus on upgrade blockers, operator risk, machine-pool rollout safety, and dependencies across baremetal, ROSA, ARO, and IBM Z patterns when relevant.',
 			questions: ['What would block the next controlled upgrade or maintenance window?', 'Which operator or machine-pool signals look most likely to elongate the change window?', 'What should the platform team validate before approving the next step?'],
-			features: ['get_cluster_identity', 'list_cluster_infrastructure', 'list_projects', 'list_cluster_version', 'list_cluster_operators', 'list_cluster_network_config', 'list_ingress_controllers', 'list_nodes', 'list_node_pressure', 'list_machine_config_pools', 'list_machine_sets', 'list_operator_subscriptions', 'list_cluster_service_versions']
+			features: ['get_cluster_identity', 'list_cluster_infrastructure', 'list_projects', 'list_cluster_version', 'list_cluster_operators', 'list_cluster_network_config', 'list_ingress_controllers', 'list_cluster_proxy_config', 'list_cluster_dns_config', 'list_feature_gate_config', 'list_scheduler_config', 'list_nodes', 'list_node_pressure', 'list_machine_config_pools', 'list_machine_sets', 'list_machine_health_checks', 'list_cluster_autoscaling', 'list_operator_subscriptions', 'list_cluster_service_versions']
 		},
 		dr: {
 			title: 'Disaster recovery and failover posture',

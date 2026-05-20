@@ -117,7 +117,7 @@ Those pages continue to use the live FastAPI endpoints and the shared React oper
 
 The `Platform Console` now also follows the same landing-shell visual language as the main `Agent Console`, with a platform-specific indigo accent and a runway-style launcher section that stays aligned with the shared operator shell patterns.
 
-Its `Selected platform checks` catalog now exposes the broader OpenShift inspection surface as well, including cluster identity, project inventory, node pressure, pod and event risk, SCC and network-policy posture, resource quotas, image streams, and build signals alongside the existing lifecycle, ACM, ACS, OADP, DR, and CNV checks.
+Its `Selected platform checks` catalog now exposes the broader OpenShift inspection surface as well, including cluster identity, project inventory, node pressure, pod and event risk, SCC and network-policy posture, resource quotas, image streams, build signals, and deeper core lifecycle signals such as cluster proxy, DNS operator, feature gate, scheduler, machine health check, and autoscaling posture alongside the existing lifecycle, ACM, ACS, OADP, DR, and CNV checks.
 
 The page now also includes:
 
@@ -126,7 +126,7 @@ The page now also includes:
 - run-to-run comparison and readiness scoring inside the platform lane
 - a multi-cluster sweep lane powered by the platform sweep API
 - optional streaming review execution for live evidence visibility
-- a searchable feature selector that now covers cluster networking, ingress controllers, HPAs, PDBs, CronJobs, volume snapshots, RBAC bindings, service accounts, limit ranges, BuildConfigs, DeploymentConfigs, Knative services, VM snapshots, and Migration Toolkit resources
+- a searchable feature selector that now covers cluster networking, ingress controllers, cluster proxy, DNS operator settings, feature gates, scheduler posture, machine health checks, cluster autoscaling, HPAs, PDBs, CronJobs, volume snapshots, RBAC bindings, service accounts, limit ranges, BuildConfigs, DeploymentConfigs, Knative services, VM snapshots, and Migration Toolkit resources
 
 The `Security and governance` lane in the Platform Console now exposes the full platform-facing governance surface already available in the backend, including OAuth/LDAP posture, SCCs, RBAC bindings, service accounts, limit ranges, network policies, resource quotas, ACM fleet governance, and ACS rollout coverage.
 

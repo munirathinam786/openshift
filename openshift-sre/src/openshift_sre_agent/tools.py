@@ -141,6 +141,30 @@ class OpenShiftSreToolkit:
                 {},
                 self.list_ingress_controllers,
             ),
+            "list_cluster_proxy_config": ToolSpec(
+                "list_cluster_proxy_config",
+                "Inspect the cluster proxy configuration to summarize HTTP/HTTPS proxy posture, no-proxy coverage, trusted CA wiring, and readiness endpoints.",
+                {},
+                self.list_cluster_proxy_config,
+            ),
+            "list_cluster_dns_config": ToolSpec(
+                "list_cluster_dns_config",
+                "Inspect the OpenShift DNS operator configuration to summarize resolver posture, node placement, log level, and zone wiring.",
+                {},
+                self.list_cluster_dns_config,
+            ),
+            "list_feature_gate_config": ToolSpec(
+                "list_feature_gate_config",
+                "Inspect cluster feature gate configuration to summarize the active feature set and any custom no-upgrade features enabled for lifecycle planning.",
+                {},
+                self.list_feature_gate_config,
+            ),
+            "list_scheduler_config": ToolSpec(
+                "list_scheduler_config",
+                "Inspect cluster scheduler configuration to summarize profile count, default node selector, and master schedulability posture.",
+                {},
+                self.list_scheduler_config,
+            ),
             "list_nodes": ToolSpec(
                 "list_nodes",
                 "List cluster nodes with roles, readiness, taints, and kubelet versions.",
@@ -236,6 +260,18 @@ class OpenShiftSreToolkit:
                 "Inspect machine sets in the machine API namespace and summarize replica drift or readiness gaps.",
                 {},
                 self.list_machine_sets,
+            ),
+            "list_machine_health_checks": ToolSpec(
+                "list_machine_health_checks",
+                "Inspect machine health checks to summarize remediation posture, selector coverage, and max-unhealthy guardrails for machine lifecycle safety.",
+                {},
+                self.list_machine_health_checks,
+            ),
+            "list_cluster_autoscaling": ToolSpec(
+                "list_cluster_autoscaling",
+                "Inspect cluster autoscaler and machine autoscaler resources to summarize fleet capacity guardrails, scale-down posture, and node-pool scaling ranges.",
+                {},
+                self.list_cluster_autoscaling,
             ),
             "list_operator_subscriptions": ToolSpec(
                 "list_operator_subscriptions",
@@ -802,6 +838,98 @@ class OpenShiftSreToolkit:
             )
         return {"count": len(rows), "available_count": available_count, "unavailable_count": unavailable_count, "ingress_controllers": rows}
 
+    def list_cluster_proxy_config(self) -> dict[str, Any]:
+        items = self._list_custom(group="config.openshift.io", version="v1", plural="proxies")
+        item = next((entry for entry in items if (entry.get("metadata") or {}).get("name") == "cluster"), None)
+        if item is None:
+            return {"count": 0, "cluster_proxies": []}
+        spec = item.get("spec") or {}
+        status = item.get("status") or {}
+        no_proxy = spec.get("noProxy") or status.get("noProxy") or ""
+        return {
+            "count": 1,
+            "cluster_proxies": [
+                {
+                    "http_proxy_configured": bool(spec.get("httpProxy") or status.get("httpProxy")),
+                    "https_proxy_configured": bool(spec.get("httpsProxy") or status.get("httpsProxy")),
+                    "readiness_endpoint_count": len(spec.get("readinessEndpoints") or []),
+                    "no_proxy_entry_count": len([entry for entry in str(no_proxy).split(",") if entry.strip()]),
+                    "trusted_ca_name": ((spec.get("trustedCA") or {}).get("name")),
+                    "readiness_endpoints": spec.get("readinessEndpoints") or [],
+                    "status": status,
+                }
+            ],
+        }
+
+    def list_cluster_dns_config(self) -> dict[str, Any]:
+        items = self._list_custom(group="operator.openshift.io", version="v1", plural="dnses")
+        item = next((entry for entry in items if (entry.get("metadata") or {}).get("name") == "default"), None) or (items[0] if items else None)
+        if item is None:
+            return {"count": 0, "dns_configurations": []}
+        metadata = item.get("metadata") or {}
+        spec = item.get("spec") or {}
+        status = item.get("status") or {}
+        return {
+            "count": 1,
+            "dns_configurations": [
+                {
+                    "dns_name": metadata.get("name"),
+                    "namespace": metadata.get("namespace"),
+                    "base_domain": spec.get("baseDomain") or status.get("clusterDomain"),
+                    "log_level": spec.get("logLevel"),
+                    "upstream_resolver_count": len(spec.get("upstreamResolvers") or []),
+                    "upstream_resolvers": spec.get("upstreamResolvers") or [],
+                    "server_count": len(spec.get("servers") or []),
+                    "node_placement_configured": bool(spec.get("nodePlacement")),
+                    "public_zone": spec.get("publicZone") or status.get("publicZone"),
+                    "private_zone": spec.get("privateZone") or status.get("privateZone"),
+                }
+            ],
+        }
+
+    def list_feature_gate_config(self) -> dict[str, Any]:
+        items = self._list_custom(group="config.openshift.io", version="v1", plural="featuregates")
+        item = next((entry for entry in items if (entry.get("metadata") or {}).get("name") == "cluster"), None)
+        if item is None:
+            return {"count": 0, "feature_gates": []}
+        spec = item.get("spec") or {}
+        custom = spec.get("customNoUpgrade") or {}
+        enabled = custom.get("enabled") or []
+        disabled = custom.get("disabled") or []
+        return {
+            "count": 1,
+            "feature_gates": [
+                {
+                    "feature_set": spec.get("featureSet"),
+                    "enabled_custom_feature_count": len(enabled),
+                    "disabled_custom_feature_count": len(disabled),
+                    "enabled_custom_features": enabled,
+                    "disabled_custom_features": disabled,
+                }
+            ],
+        }
+
+    def list_scheduler_config(self) -> dict[str, Any]:
+        items = self._list_custom(group="config.openshift.io", version="v1", plural="schedulers")
+        item = next((entry for entry in items if (entry.get("metadata") or {}).get("name") == "cluster"), None)
+        if item is None:
+            return {"count": 0, "scheduler_configurations": []}
+        spec = item.get("spec") or {}
+        policy = spec.get("policy") or {}
+        profiles = spec.get("profiles") or []
+        return {
+            "count": 1,
+            "scheduler_configurations": [
+                {
+                    "policy_name": policy.get("name") if isinstance(policy, dict) else policy,
+                    "profile_count": len(profiles),
+                    "profiles": profiles,
+                    "default_node_selector": spec.get("defaultNodeSelector"),
+                    "masters_schedulable": spec.get("mastersSchedulable"),
+                }
+            ],
+        }
+
     def list_nodes(self) -> dict[str, Any]:
         self._ensure_clients()
         assert self._core is not None
@@ -1220,6 +1348,96 @@ class OpenShiftSreToolkit:
                 }
             )
         return {"count": len(rows), "machine_sets": rows}
+
+    def list_machine_health_checks(self) -> dict[str, Any]:
+        namespace = "openshift-machine-api"
+        rows = []
+        remediation_enabled_count = 0
+        for item in self._list_custom_any_version(
+            group="machine.openshift.io",
+            versions=("v1beta1", "v1"),
+            plural="machinehealthchecks",
+            namespace=namespace,
+        ):
+            metadata = item.get("metadata") or {}
+            spec = item.get("spec") or {}
+            status = item.get("status") or {}
+            remediation = spec.get("remediationTemplate") or {}
+            if remediation:
+                remediation_enabled_count += 1
+            rows.append(
+                {
+                    "namespace": namespace,
+                    "machine_health_check_name": metadata.get("name"),
+                    "selector": spec.get("selector") or {},
+                    "max_unhealthy": spec.get("maxUnhealthy"),
+                    "node_startup_timeout": spec.get("nodeStartupTimeout"),
+                    "unhealthy_condition_count": len(spec.get("unhealthyConditions") or []),
+                    "current_healthy": status.get("currentHealthy"),
+                    "expected_machines": status.get("expectedMachines"),
+                    "remediations_allowed": status.get("remediationsAllowed"),
+                    "remediation_template": remediation,
+                }
+            )
+        return {
+            "count": len(rows),
+            "remediation_enabled_count": remediation_enabled_count,
+            "machine_health_checks": rows,
+        }
+
+    def list_cluster_autoscaling(self) -> dict[str, Any]:
+        cluster_autoscaler_rows = []
+        machine_autoscaler_rows = []
+        machine_autoscaler_enabled_count = 0
+        for item in self._list_custom_any_version(
+            group="autoscaling.openshift.io",
+            versions=("v1", "v1beta1"),
+            plural="clusterautoscalers",
+        ):
+            metadata = item.get("metadata") or {}
+            spec = item.get("spec") or {}
+            cluster_autoscaler_rows.append(
+                {
+                    "cluster_autoscaler_name": metadata.get("name"),
+                    "pod_priority_threshold": spec.get("podPriorityThreshold"),
+                    "max_node_provision_time": spec.get("maxNodeProvisionTime"),
+                    "balance_similar_node_groups": spec.get("balanceSimilarNodeGroups"),
+                    "scale_down_enabled": ((spec.get("scaleDown") or {}).get("enabled")),
+                    "scale_down_delay_after_add": ((spec.get("scaleDown") or {}).get("delayAfterAdd")),
+                    "scale_down_unneeded_time": ((spec.get("scaleDown") or {}).get("unneededTime")),
+                    "resource_limits": spec.get("resourceLimits") or {},
+                }
+            )
+        for item in self._list_custom_any_version(
+            group="autoscaling.openshift.io",
+            versions=("v1beta1", "v1"),
+            plural="machineautoscalers",
+            namespace="openshift-machine-api",
+        ):
+            metadata = item.get("metadata") or {}
+            spec = item.get("spec") or {}
+            min_replicas = spec.get("minReplicas")
+            max_replicas = spec.get("maxReplicas")
+            if min_replicas is not None or max_replicas is not None:
+                machine_autoscaler_enabled_count += 1
+            rows_target = spec.get("scaleTargetRef") or {}
+            machine_autoscaler_rows.append(
+                {
+                    "namespace": "openshift-machine-api",
+                    "machine_autoscaler_name": metadata.get("name"),
+                    "target_kind": rows_target.get("kind"),
+                    "target_name": rows_target.get("name"),
+                    "min_replicas": min_replicas,
+                    "max_replicas": max_replicas,
+                }
+            )
+        return {
+            "cluster_autoscaler_count": len(cluster_autoscaler_rows),
+            "machine_autoscaler_count": len(machine_autoscaler_rows),
+            "machine_autoscaler_enabled_count": machine_autoscaler_enabled_count,
+            "cluster_autoscalers": cluster_autoscaler_rows,
+            "machine_autoscalers": machine_autoscaler_rows,
+        }
 
     def list_operator_subscriptions(self) -> dict[str, Any]:
         rows = []
