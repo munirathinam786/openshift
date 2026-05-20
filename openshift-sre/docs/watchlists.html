@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>AWS SRE Watchlists</title>
+    <title>OpenShift SRE Watchlists</title>
     <link rel="stylesheet" href="assets/stylesheets/agent-console.css">
   </head>
   <body dir="ltr">
@@ -70,7 +70,7 @@
               <label class="agent-console__label" for="investigation-category">Category</label>
               <input id="investigation-category" class="agent-console__input" data-investigation-category type="text" value="platform">
               <label class="agent-console__label" for="investigation-regions">Default regions</label>
-              <input id="investigation-regions" class="agent-console__input" data-investigation-regions type="text" placeholder="us-east-1,us-west-2">
+              <input id="investigation-regions" class="agent-console__input" data-investigation-regions type="text" placeholder="local-cluster,us-west-2">
               <label class="agent-console__label" for="investigation-tags">Default tags</label>
               <input id="investigation-tags" class="agent-console__input" data-investigation-tags type="text" placeholder="network,weekly-review">
               <label class="agent-console__label" for="investigation-prompt">Prompt</label>
@@ -89,7 +89,7 @@
             <section class="agent-console__panel" id="watchlists-runs">
               <h2>Watchlists</h2>
               <details class="agent-console__table-block">
-                <summary>Run-time LLM and AWS overrides</summary>
+                <summary>Run-time LLM and cluster overrides</summary>
                 <div class="agent-console__grid">
                   <div>
                     <label class="agent-console__label" for="watchlist-llm-provider">LLM provider</label>
@@ -128,24 +128,24 @@
                     <input id="watchlist-external-api-version" class="agent-console__input" data-watchlist-external-api-version type="text" placeholder="Optional API version">
                   </div>
                   <div>
-                    <label class="agent-console__label" for="watchlist-aws-profile">AWS profile</label>
-                    <input id="watchlist-aws-profile" class="agent-console__input" data-watchlist-aws-profile type="text" placeholder="default">
+                    <label class="agent-console__label" for="watchlist-kube-context">Kube context</label>
+                    <input id="watchlist-kube-context" class="agent-console__input" data-watchlist-kube-context type="text" placeholder="default">
                   </div>
                   <div>
-                    <label class="agent-console__label" for="watchlist-aws-access-key-id">AWS access key ID</label>
-                    <input id="watchlist-aws-access-key-id" class="agent-console__input" data-watchlist-aws-access-key-id type="text" placeholder="AKIA...">
+                    <label class="agent-console__label" for="watchlist-openshift-api-url">OpenShift API URL</label>
+                    <input id="watchlist-openshift-api-url" class="agent-console__input" data-watchlist-openshift-api-url type="text" placeholder="https://api...">
                   </div>
                   <div>
-                    <label class="agent-console__label" for="watchlist-aws-secret-access-key">AWS secret access key</label>
-                    <input id="watchlist-aws-secret-access-key" class="agent-console__input" data-watchlist-aws-secret-access-key type="password" placeholder="Optional per-run override">
+                    <label class="agent-console__label" for="watchlist-openshift-token">OpenShift token</label>
+                    <input id="watchlist-openshift-token" class="agent-console__input" data-watchlist-openshift-token type="password" placeholder="Optional per-run token override">
                   </div>
                   <div>
-                    <label class="agent-console__label" for="watchlist-aws-session-token">AWS session token</label>
-                    <input id="watchlist-aws-session-token" class="agent-console__input" data-watchlist-aws-session-token type="password" placeholder="Optional STS session token">
+                    <label class="agent-console__label" for="watchlist-openshift-namespace">OpenShift namespace</label>
+                    <input id="watchlist-openshift-namespace" class="agent-console__input" data-watchlist-openshift-namespace type="password" placeholder="Optional namespace scope">
                   </div>
                   <label class="agent-console__checkbox agent-console__grid-span-2">
-                    <input data-watchlist-aws-verify-ssl type="checkbox" checked>
-                    <span>Verify AWS SSL certificates</span>
+                    <input data-watchlist-verify-ssl type="checkbox" checked>
+                    <span>Verify SSL certificates</span>
                   </label>
                 </div>
                 <p class="agent-console__meta" data-watchlist-llm-provider-note>Manual watchlist runs can use the local Ollama model or an external provider like OpenAI, Azure OpenAI, Anthropic, Gemini, or OpenRouter.</p>
@@ -155,9 +155,9 @@
               <label class="agent-console__label" for="watchlist-investigation">Saved investigation</label>
               <select id="watchlist-investigation" class="agent-console__input" data-watchlist-investigation></select>
               <label class="agent-console__label" for="watchlist-regions">Regions</label>
-              <input id="watchlist-regions" class="agent-console__input" data-watchlist-regions type="text" placeholder="us-east-1,us-west-2">
+              <input id="watchlist-regions" class="agent-console__input" data-watchlist-regions type="text" placeholder="local-cluster,us-west-2">
               <label class="agent-console__label" for="watchlist-roles">Role ARNs (optional, one per line)</label>
-              <textarea id="watchlist-roles" class="agent-console__textarea" data-watchlist-roles placeholder="arn:aws:iam::111111111111:role/ReadOnlyAudit"></textarea>
+              <textarea id="watchlist-roles" class="agent-console__textarea" data-watchlist-roles placeholder="cluster:role/readonly-sre-audit"></textarea>
               <label class="agent-console__label" for="watchlist-notes">Operator notes</label>
               <textarea id="watchlist-notes" class="agent-console__textarea" data-watchlist-notes placeholder="Run every Monday after patching."></textarea>
               <div class="agent-console__actions">

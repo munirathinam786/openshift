@@ -1,18 +1,18 @@
 # Cost Impact & Potentially Billable Tools
 
-This page gives a **practical billing-risk label for every agent tool**. It is meant for operator awareness, not as a substitute for the official AWS pricing pages.
+This page gives a **practical billing-risk label for every agent tool**. It is meant for operator awareness, not as a substitute for the official OpenShift resource pages.
 
 ## Labels used on this page
 
 - **likely free control-plane read** — usually a metadata or inventory API call; typically low risk for direct per-call billing
-- **may incur request charges** — can trigger metered request pricing depending on the target AWS service or object/API class
+- **may incur request charges** — can trigger metered request pricing depending on the target platform service or object/API class
 - **may incur query/analysis charges** — can trigger metered analytics, scanning, query, or billing-analysis charges
 
 ## Read this before using the table
 
-- These labels describe the **tool call itself**, not the baseline cost of keeping a service enabled in your AWS account.
-- A tool can be a `likely free control-plane read` and still surface data from a service that is already billing you separately, such as `GuardDuty`, `Macie`, `Inspector`, `AWS Config`, or `Security Hub`.
-- AWS pricing can change. Treat this page as **operator guidance**, not a contractual billing statement.
+- These labels describe the **tool call itself**, not the baseline cost of keeping a service enabled in your cluster.
+- A tool can be a `likely free control-plane read` and still surface data from a service that is already billing you separately, such as `GuardDuty`, `Macie`, `Inspector`, `OpenShift Config`, or `Security Hub`.
+- OpenShift resource can change. Treat this page as **operator guidance**, not a contractual billing statement.
 
 ## Tool-by-tool cost impact
 
@@ -47,7 +47,7 @@ This page gives a **practical billing-risk label for every agent tool**. It is m
 | `list_secrets_manager_secrets` | likely free control-plane read | secret metadata only, not secret value retrieval |
 | `list_cloudtrail_trails` | likely free control-plane read | CloudTrail trail metadata |
 | `list_cloudtrail_event_selectors` | likely free control-plane read | CloudTrail selector metadata |
-| `list_config_rules` | likely free control-plane read | AWS Config metadata read; Config itself may already be billing |
+| `list_config_rules` | likely free control-plane read | OpenShift Config metadata read; Config itself may already be billing |
 | `list_config_compliance_summary` | likely free control-plane read | compliance metadata read; Config service billing may still exist |
 | `list_guardduty_detectors` | likely free control-plane read | GuardDuty posture metadata read |
 | `list_guardduty_findings` | likely free control-plane read | finding retrieval; GuardDuty service charges may already apply |
@@ -76,7 +76,7 @@ This page gives a **practical billing-risk label for every agent tool**. It is m
 | `list_backup_vaults` | likely free control-plane read | Backup metadata inventory |
 | `list_backup_recovery_points` | likely free control-plane read | Backup metadata read |
 | `list_backup_plan_vault_mappings` | likely free control-plane read | Backup plan metadata read |
-| `list_network_firewalls` | likely free control-plane read | AWS Network Firewall firewall and policy metadata inventory |
+| `list_network_firewalls` | likely free control-plane read | OpenShift Network Policy firewall and policy metadata inventory |
 | `list_firewall_manager_policies` | likely free control-plane read | Firewall Manager policy metadata and remediation posture read |
 | `list_controltower_controls` | likely free control-plane read | Control Tower landing-zone and enabled-control metadata inventory |
 | `list_organization_accounts` | likely free control-plane read | Organizations metadata inventory |
@@ -86,7 +86,7 @@ This page gives a **practical billing-risk label for every agent tool**. It is m
 | `list_eventbridge_rules` | likely free control-plane read | EventBridge rule metadata |
 | `list_ecr_repositories` | likely free control-plane read | ECR repository metadata |
 | `list_waf_web_acls` | likely free control-plane read | WAF ACL metadata inventory |
-| `run_read_only_aws_cli` | may incur query/analysis charges | fallback path depends on the specific AWS CLI command and target service |
+| `run_read_only_oc_cli` | may incur query/analysis charges | fallback path depends on the specific oc CLI command and target service |
 
 ## Practical guidance
 
@@ -95,4 +95,4 @@ If you want the lowest billing risk when using this agent:
 - prefer inventory prompts first
 - treat `query_logs_insights` and all FinOps tools as **potentially billable analysis paths**
 - use extra care with `S3`-related inspection in large environments
-- remember that querying enabled security/governance services does not turn them on, but those services may already have their own standing AWS charges
+- remember that querying enabled security/governance services does not turn them on, but those services may already have their own standing platform charges

@@ -11,11 +11,11 @@
 - CSV export for run history (`GET /history/export`)
 - Graceful shutdown with in-flight request draining
 
-### AWS Tools
+### Platform Tools
 - ACM certificate listing
 - Route 53 health checks
 - SSM Automation execution history
-- AWS Health Dashboard events
+- OpenShift cluster health events
 - Trusted Advisor check results
 - Service Quotas lookup
 - IAM credential report with MFA analysis
@@ -70,4 +70,4 @@
 
 ## 0.2.0
 
-- Initial public release with core SRE agent, 22 AWS tools, troubleshooting workflows, FinOps module, and MkDocs dashboard.
+- Initial public release with core SRE agent, 22 OpenShift tools, troubleshooting workflows, FinOps module, and MkDocs dashboard.

@@ -89,7 +89,7 @@
     const pptx = new PptxGenJS();
     pptx.layout = 'LAYOUT_WIDE';
     pptx.author = 'GitHub Copilot';
-    pptx.company = 'AWS SRE Local Agent';
+    pptx.company = 'OpenShift SRE Local Agent';
     pptx.subject = `${operation.label} report export`;
     pptx.title = `${operation.label} – FinOps report`;
     pptx.lang = 'en-US';
@@ -116,7 +116,7 @@
 
     const titleSlide = pptx.addSlide();
     addTitle(titleSlide, `${operation.label}`, 'FinOps executive export');
-    titleSlide.addText('AWS SRE Local Agent FinOps workspace export', { x: 0.78, y: 1.6, w: 5.5, h: 0.3, fontSize: 14, color: '67E8F9', bold: true });
+    titleSlide.addText('OpenShift SRE Local Agent FinOps workspace export', { x: 0.78, y: 1.6, w: 5.5, h: 0.3, fontSize: 14, color: '67E8F9', bold: true });
     titleSlide.addText([
       { text: 'Generated report includes:\n', options: { bold: true, color: 'E2E8F0' } },
       { text: '• executive summary bullets\n• workflow KPIs and savings posture\n• top recommendations\n• approval queue alignment' }
@@ -291,8 +291,8 @@
     doc.save(`finops-${slug(operation.id || operation.label)}-${generatedAt.toISOString().replace(/[:.]/g, '-')}.pdf`);
   };
   /**
-   * Classify an AWS service name into an opportunity category.
-   * @param {string} s - AWS service name (e.g. "Amazon EC2").
+   * Classify an platform service name into an opportunity category.
+   * @param {string} s - platform service name (e.g. "Amazon EC2").
    * @returns {'compute'|'storage'|'network'|'database'|'serverless'|null}
    */
   const svcCat = (s = '') => {
@@ -317,22 +317,22 @@
    */
   const FINOPS_OPERATIONS = [
     /* ── Workflows ──────────────────────────────────────────────── */
-    { id: 'full-optimizer',          label: 'Full Advanced Optimizer',                group: 'Workflows',                prompt: 'Act as an advanced AWS FinOps optimizer. Review cost and usage summary, cost by service, cost by tag for Environment, cost forecast, Savings Plans coverage, rightsizing recommendations, and cost anomalies. Then produce a workflow-ready response with: 1) opportunity categories for compute, storage, commitment, and idle, 2) proposed actions, 3) estimated savings or impacted spend for each item, 4) operational risk, 5) rollback guidance, 6) an approval queue recommendation for future safe execution, and 7) the exact AWS data points that justify each recommendation.' },
-    { id: 'quick-wins',             label: 'FinOps Quick Wins',                      group: 'Workflows',                prompt: 'Review AWS spend for the last 30 days and identify immediate cost actions across EC2, EBS, RDS, EKS, data platforms, and idle resources. Separate findings into quick wins, medium-risk changes, and commitment-based optimizations.' },
+    { id: 'full-optimizer',          label: 'Full Advanced Optimizer',                group: 'Workflows',                prompt: 'Act as an advanced OpenShift FinOps optimizer. Review cost and usage summary, cost by service, cost by tag for Environment, cost forecast, Savings Plans coverage, rightsizing recommendations, and cost anomalies. Then produce a workflow-ready response with: 1) opportunity categories for compute, storage, commitment, and idle, 2) proposed actions, 3) estimated savings or impacted spend for each item, 4) operational risk, 5) rollback guidance, 6) an approval queue recommendation for future safe execution, and 7) the exact cluster data points that justify each recommendation.' },
+    { id: 'quick-wins',             label: 'FinOps Quick Wins',                      group: 'Workflows',                prompt: 'Review cluster spend for the last 30 days and identify immediate cost actions across EC2, EBS, RDS, EKS, data platforms, and idle resources. Separate findings into quick wins, medium-risk changes, and commitment-based optimizations.' },
     { id: 'monthly-review',         label: 'Monthly FinOps Review',                  group: 'Workflows',                prompt: 'Perform a comprehensive monthly FinOps review: summarize total spend vs. budget/forecast, highlight top 5 cost movers, review commitment utilization, assess tagging compliance, list open action items from last month, and produce a prioritized action plan for the coming month.' },
     { id: 'incident-cost',          label: 'Cost Incident Investigation',            group: 'Workflows',                prompt: 'Investigate recent cost spikes: run cost anomaly detection, correlate with CloudTrail events and deployment timelines, identify root cause services and accounts, quantify the dollar impact, and recommend preventive guardrails.' },
-    { id: 'well-architected-cost',  label: 'Well-Architected Cost Pillar',           group: 'Workflows',                prompt: 'Evaluate the AWS environment against the Well-Architected Framework Cost Optimization pillar. Check expenditure awareness, cost-effective resources, matching supply and demand, and optimizing over time. Provide a scored assessment with specific remediation steps.' },
+    { id: 'well-architected-cost',  label: 'Well-Architected Cost Pillar',           group: 'Workflows',                prompt: 'Evaluate the OpenShift environment against the Well-Architected Framework Cost Optimization pillar. Check expenditure awareness, cost-effective resources, matching supply and demand, and optimizing over time. Provide a scored assessment with specific remediation steps.' },
 
     /* ── Cost Analysis ──────────────────────────────────────────── */
     { id: 'cost-summary',           label: 'Cost & Usage Summary',                   group: 'Cost Analysis',            prompt: 'Run list_cost_and_usage_summary for the last 30 days with MONTHLY granularity and summarize total unblended cost, trends, and the top cost drivers.' },
-    { id: 'cost-by-service',        label: 'Cost by Service',                        group: 'Cost Analysis',            prompt: 'Run list_cost_by_service for the last 30 days and break down spending by AWS service. Highlight the top 10 services by cost and flag any unexpected growth.' },
+    { id: 'cost-by-service',        label: 'Cost by Service',                        group: 'Cost Analysis',            prompt: 'Run list_cost_by_service for the last 30 days and break down spending by platform service. Highlight the top 10 services by cost and flag any unexpected growth.' },
     { id: 'cost-by-tag',            label: 'Cost by Tag (Environment)',              group: 'Cost Analysis',            prompt: 'Run list_cost_by_tag with tag_key=Environment for the last 30 days. Identify unallocated or weakly-tagged spend and suggest tagging improvements.' },
     { id: 'cost-forecast',          label: 'Cost Forecast',                          group: 'Cost Analysis',            prompt: 'Run get_cost_forecast for the next month. Compare the forecast to current spend and highlight if the trajectory is above or below recent averages.' },
     { id: 'data-transfer',          label: 'Data Transfer Cost Review',              group: 'Cost Analysis',            prompt: 'Analyze data transfer costs across regions, AZs, NAT gateways, VPC endpoints, and internet egress. Identify the top transfer cost categories and recommend architectural changes to reduce cross-boundary traffic.' },
-    { id: 'cost-by-account',        label: 'Cost by Linked Account',                 group: 'Cost Analysis',            prompt: 'Break down costs by linked AWS account for the last 30 days. Rank accounts by spend, identify accounts with the highest month-over-month growth, and flag accounts that exceed their allocated budget.' },
-    { id: 'cost-by-region',         label: 'Cost by Region',                         group: 'Cost Analysis',            prompt: 'Analyze spend distribution across AWS regions for the last 30 days. Identify regions with unexpectedly high costs, highlight workloads that could be relocated to cheaper regions, and flag any cross-region data transfer overhead.' },
+    { id: 'cost-by-account',        label: 'Cost by Linked Account',                 group: 'Cost Analysis',            prompt: 'Break down costs by linked cluster project for the last 30 days. Rank accounts by spend, identify accounts with the highest month-over-month growth, and flag accounts that exceed their allocated budget.' },
+    { id: 'cost-by-region',         label: 'Cost by Region',                         group: 'Cost Analysis',            prompt: 'Analyze spend distribution across Cluster scopes for the last 30 days. Identify regions with unexpectedly high costs, highlight workloads that could be relocated to cheaper regions, and flag any cross-region data transfer overhead.' },
     { id: 'cost-trend-90d',         label: '90-Day Cost Trend Analysis',             group: 'Cost Analysis',            prompt: 'Run cost and usage summary for the last 90 days at DAILY granularity. Identify week-over-week and month-over-month trends, seasonal patterns, inflection points, and correlate cost changes with known deployments or scaling events.' },
-    { id: 'marketplace-spend',      label: 'Marketplace & 3rd-Party Spend',          group: 'Cost Analysis',            prompt: 'Analyze AWS Marketplace subscription costs and third-party SaaS charges. Identify underutilized licenses, duplicate tools, and opportunities to consolidate or renegotiate vendor contracts.' },
+    { id: 'marketplace-spend',      label: 'Marketplace & 3rd-Party Spend',          group: 'Cost Analysis',            prompt: 'Analyze Operator Hub subscription costs and third-party SaaS charges. Identify underutilized licenses, duplicate tools, and opportunities to consolidate or renegotiate vendor contracts.' },
 
     /* ── Chargeback & Showback ──────────────────────────────────── */
     { id: 'chargeback-tags',        label: 'Chargeback by Cost Allocation Tags',     group: 'Chargeback & Showback',    prompt: 'Run list_cost_by_tag for each of the cost allocation tags (CostCenter, Team, Project, Owner, Environment) over the last 30 days. Produce a chargeback report that maps every dollar of spend to the responsible team or cost center. Flag any untagged or unallocated spend and recommend tagging remediation.' },
@@ -341,8 +341,8 @@
     { id: 'chargeback-project',     label: 'Chargeback by Project',                  group: 'Chargeback & Showback',    prompt: 'Run list_cost_by_tag with tag_key=Project for the last 30 days. Produce a project-level chargeback report showing spend per project, allocated vs. unallocated costs, and the percentage of total spend each project consumes. Recommend a fair-share model for shared infrastructure costs.' },
     { id: 'shared-cost-allocation', label: 'Shared Services Cost Allocation',        group: 'Chargeback & Showback',    prompt: 'Identify shared infrastructure costs (networking, security tools, logging, monitoring, CI/CD) that cannot be directly attributed to a single team. Propose allocation strategies: proportional by usage, headcount-weighted, or equal-split. Calculate the impact of each model and recommend the fairest approach.' },
     { id: 'chargeback-k8s',         label: 'Kubernetes Namespace Chargeback',        group: 'Chargeback & Showback',    prompt: 'Analyze EKS/Kubernetes cluster costs and produce a chargeback report by namespace. Estimate compute, memory, and storage costs per namespace using resource requests and limits. Identify namespaces with over-provisioned resources and recommend right-sizing for fairer cost distribution.' },
-    { id: 'untagged-spend',         label: 'Untagged Spend Remediation',             group: 'Chargeback & Showback',    prompt: 'Quantify all untagged or unallocated AWS spend across the organization. Identify the top 20 untagged resources by cost, determine the likely owner using CloudTrail or account mapping, and produce a remediation plan with specific tagging actions and an enforcement policy recommendation.' },
-    { id: 'budget-variance',        label: 'Budget vs. Actual Variance',             group: 'Chargeback & Showback',    prompt: 'Compare actual spend against AWS Budgets for each team, project, or cost center over the last 30 days. Highlight any team exceeding 80% of their budget, calculate month-end projected variance, and recommend corrective actions for teams trending over budget.' },
+    { id: 'untagged-spend',         label: 'Untagged Spend Remediation',             group: 'Chargeback & Showback',    prompt: 'Quantify all untagged or unallocated cluster spend across the organization. Identify the top 20 untagged resources by cost, determine the likely owner using CloudTrail or account mapping, and produce a remediation plan with specific tagging actions and an enforcement policy recommendation.' },
+    { id: 'budget-variance',        label: 'Budget vs. Actual Variance',             group: 'Chargeback & Showback',    prompt: 'Compare actual spend against resource quotas for each team, project, or cost center over the last 30 days. Highlight any team exceeding 80% of their budget, calculate month-end projected variance, and recommend corrective actions for teams trending over budget.' },
 
     /* ── Commitment & Purchasing ────────────────────────────────── */
     { id: 'savings-plans',          label: 'Savings Plans Coverage',                 group: 'Commitment & Purchasing',  prompt: 'Run list_savings_plans_coverage for the last 30 days. Analyze coverage percentage, uncovered on-demand spend, and recommend whether to purchase or rebalance commitments.' },
@@ -351,33 +351,33 @@
     { id: 'spot-strategy',          label: 'Spot Instance Strategy',                 group: 'Commitment & Purchasing',  prompt: 'Analyze current EC2 and ECS workloads to identify candidates for Spot Instances. For each candidate, evaluate interruption tolerance, instance type diversification options, Spot placement score, and estimated savings vs. on-demand. Recommend a Spot fleet configuration with fallback to on-demand for critical workloads.' },
     { id: 'sp-purchase-rec',        label: 'Savings Plans Purchase Planner',         group: 'Commitment & Purchasing',  prompt: 'Analyze the last 90 days of compute usage (EC2, Fargate, Lambda). Recommend Compute Savings Plans vs. EC2 Instance Savings Plans, optimal commitment amount ($), term (1yr vs. 3yr), payment option (all-upfront, partial, no-upfront), with break-even timeline and projected annual savings.' },
     { id: 'commitment-expiry',      label: 'Commitment Expiry & Renewal',            group: 'Commitment & Purchasing',  prompt: 'List all Reserved Instances and Savings Plans expiring in the next 90 days. For each, analyze current utilization, whether the workload still justifies renewal, and recommend renew, convert, or let-expire with the financial impact of each option.' },
-    { id: 'graviton-migration',     label: 'Graviton Migration Savings',             group: 'Commitment & Purchasing',  prompt: 'Identify EC2, RDS, and ElastiCache instances running on x86 (Intel/AMD) that could migrate to AWS Graviton (ARM) processors. Estimate per-instance savings (typically 20-40%), migration complexity, and application compatibility considerations. Prioritize by savings potential.' },
+    { id: 'graviton-migration',     label: 'Graviton Migration Savings',             group: 'Commitment & Purchasing',  prompt: 'Identify EC2, RDS, and ElastiCache instances running on x86 (Intel/AMD) that could migrate to ARM-based (ARM) processors. Estimate per-instance savings (typically 20-40%), migration complexity, and application compatibility considerations. Prioritize by savings potential.' },
 
     /* ── Optimization ───────────────────────────────────────────── */
     { id: 'rightsizing',            label: 'Rightsizing Recommendations',            group: 'Optimization',             prompt: 'Run list_rightsizing_recommendations and summarize each recommendation with current instance type, recommended target, estimated monthly savings, and validation steps.' },
     { id: 'cost-anomalies',         label: 'Cost Anomaly Detection',                 group: 'Optimization',             prompt: 'Run list_cost_anomalies for the last 30 days. Summarize detected anomalies with root service, impact amount, start/end dates, and recommended investigation steps.' },
-    { id: 'idle-resources',         label: 'Idle Resource Scan',                     group: 'Optimization',             prompt: 'Identify idle and underutilized AWS resources across EC2 (low CPU/network), unused EBS volumes, unattached Elastic IPs, empty S3 buckets, and idle RDS instances. Estimate potential monthly savings from cleanup.' },
+    { id: 'idle-resources',         label: 'Idle Resource Scan',                     group: 'Optimization',             prompt: 'Identify idle and underutilized cluster resources across EC2 (low CPU/network), unused EBS volumes, unattached Elastic IPs, empty S3 buckets, and idle RDS instances. Estimate potential monthly savings from cleanup.' },
     { id: 'storage-optimization',   label: 'Storage Lifecycle & Tiering',            group: 'Optimization',             prompt: 'Review S3 storage classes, EBS volume types, EFS throughput modes, and snapshot retention policies. Recommend lifecycle transitions, tier downgrades, and stale snapshot cleanup with estimated savings.' },
     { id: 'rds-optimization',       label: 'RDS & Database Optimization',            group: 'Optimization',             prompt: 'Review all RDS, Aurora, DynamoDB, and ElastiCache instances. Check for over-provisioned instances, idle read replicas, unused databases, excessive provisioned IOPS, and DynamoDB tables with low utilization. Recommend rightsizing, Aurora Serverless migration, and on-demand capacity mode where appropriate.' },
-    { id: 'lambda-optimization',    label: 'Lambda & Serverless Optimization',       group: 'Optimization',             prompt: 'Analyze Lambda function configurations: identify over-provisioned memory, excessive timeouts, functions with low invocation rates, and high-error-rate functions wasting retries. Recommend memory tuning via AWS Lambda Power Tuning, provisioned concurrency adjustments, and architecture changes for cost efficiency.' },
+    { id: 'lambda-optimization',    label: 'Lambda & Serverless Optimization',       group: 'Optimization',             prompt: 'Analyze Lambda function configurations: identify over-provisioned memory, excessive timeouts, functions with low invocation rates, and high-error-rate functions wasting retries. Recommend memory tuning via pod resource tuning, provisioned concurrency adjustments, and architecture changes for cost efficiency.' },
     { id: 'container-optimization', label: 'ECS/EKS Container Optimization',        group: 'Optimization',             prompt: 'Analyze ECS and EKS cluster utilization. Identify over-provisioned task definitions, underutilized node groups, idle Fargate tasks, and opportunities for Spot-backed node pools. Recommend Karpenter or Cluster Autoscaler tuning, right-sized task definitions, and bin-packing improvements.' },
     { id: 'network-optimization',   label: 'Network & NAT Gateway Optimization',    group: 'Optimization',             prompt: 'Analyze NAT Gateway, VPC endpoint, Elastic IP, and load balancer costs. Identify NAT Gateways processing excessive traffic, recommend VPC endpoints for S3/DynamoDB to eliminate NAT charges, flag unused load balancers, and estimate savings from architecture changes.' },
     { id: 'ebs-snapshot-cleanup',   label: 'EBS Snapshot & AMI Cleanup',            group: 'Optimization',             prompt: 'List all EBS snapshots and custom AMIs. Identify orphaned snapshots (no associated volume), stale AMIs older than 90 days, and excessive snapshot retention. Calculate storage costs and recommend a cleanup plan with estimated savings.' },
     { id: 'scheduling-automation',  label: 'Start/Stop Scheduling',                 group: 'Optimization',             prompt: 'Identify non-production EC2, RDS, and EKS resources that run 24/7 but could be scheduled to stop during off-hours (nights/weekends). Estimate savings from implementing Instance Scheduler or custom Lambda-based start/stop automation. Provide a scheduling policy recommendation per environment tag.' },
 
     /* ── Governance ─────────────────────────────────────────────── */
-    { id: 'tagging-governance',     label: 'Tagging & Governance Audit',             group: 'Governance',               prompt: 'Audit AWS resource tagging compliance. Identify resources missing required tags (Environment, Owner, CostCenter), quantify unallocated spend, and recommend a tagging enforcement strategy.' },
+    { id: 'tagging-governance',     label: 'Tagging & Governance Audit',             group: 'Governance',               prompt: 'Audit cluster resource labeling compliance. Identify resources missing required tags (Environment, Owner, CostCenter), quantify unallocated spend, and recommend a tagging enforcement strategy.' },
     { id: 'service-quotas',         label: 'Service Quota Review',                   group: 'Governance',               prompt: 'Run list_service_quotas for key services (EC2, Lambda, RDS, ECS). Flag quotas approaching limits and recommend proactive increase requests.' },
     { id: 'policy-compliance',      label: 'Cost Policy Compliance',                 group: 'Governance',               prompt: 'Evaluate compliance with organizational cost policies: check for resources launched without required tags, instances exceeding approved sizes, unencrypted volumes, public S3 buckets adding risk-cost, and services deployed in non-approved regions. Produce a compliance scorecard with remediation priorities.' },
-    { id: 'budget-alerts',          label: 'Budget & Alert Configuration',           group: 'Governance',               prompt: 'Review AWS Budgets and Cost Anomaly Detection alert configurations. Identify accounts or services without budget alerts, recommend threshold levels (80%, 90%, 100% of budget), and suggest SNS/Slack notification targets for each team.' },
-    { id: 'org-guardrails',         label: 'Organization Cost Guardrails',           group: 'Governance',               prompt: 'Review AWS Organizations SCPs, IAM policies, and Config rules related to cost governance. Recommend guardrails to prevent: launching expensive instance types without approval, creating resources in non-approved regions, and provisioning without required cost-allocation tags.' },
+    { id: 'budget-alerts',          label: 'Budget & Alert Configuration',           group: 'Governance',               prompt: 'Review resource quotas and Cost Anomaly Detection alert configurations. Identify accounts or services without budget alerts, recommend threshold levels (80%, 90%, 100% of budget), and suggest SNS/Slack notification targets for each team.' },
+    { id: 'org-guardrails',         label: 'Organization Cost Guardrails',           group: 'Governance',               prompt: 'Review RBAC policies, IAM policies, and Config rules related to cost governance. Recommend guardrails to prevent: launching expensive instance types without approval, creating resources in non-approved regions, and provisioning without required cost-allocation tags.' },
 
     /* ── Reporting & Executive ──────────────────────────────────── */
-    { id: 'exec-summary',           label: 'Executive Cost Summary',                 group: 'Reporting & Executive',    prompt: 'Produce a C-level executive summary of AWS cloud costs: total monthly spend, month-over-month trend, forecast for next quarter, top 3 cost optimization opportunities with dollar impact, commitment coverage health, and a one-paragraph strategic recommendation. Format for a slide deck with key metrics, bullet points, and a traffic-light status for each area.' },
+    { id: 'exec-summary',           label: 'Executive Cost Summary',                 group: 'Reporting & Executive',    prompt: 'Produce a C-level executive summary of cluster costs: total monthly spend, month-over-month trend, forecast for next quarter, top 3 cost optimization opportunities with dollar impact, commitment coverage health, and a one-paragraph strategic recommendation. Format for a slide deck with key metrics, bullet points, and a traffic-light status for each area.' },
     { id: 'board-presentation',     label: 'Board-Ready Cost Presentation',          group: 'Reporting & Executive',    prompt: 'Generate a board-ready cloud cost presentation outline: 1) Total cloud spend vs. revenue/budget ratio, 2) Year-over-year cost trend, 3) Unit economics (cost per transaction/user/request), 4) Savings achieved this quarter, 5) Top risks and mitigation plan, 6) Strategic recommendations. Include suggested chart types and talking points for each slide.' },
     { id: 'weekly-digest',          label: 'Weekly FinOps Digest',                   group: 'Reporting & Executive',    prompt: 'Generate a weekly FinOps digest email: summarize the last 7 days of spend by service and account, highlight any anomalies or budget breaches, list actions completed from the approval queue, show week-over-week cost delta, and provide 3 focus items for the coming week.' },
     { id: 'savings-report',         label: 'Savings Achievement Report',             group: 'Reporting & Executive',    prompt: 'Produce a savings achievement report: total savings realized this month from rightsizing, commitment discounts, idle resource cleanup, and architectural changes. Compare against savings targets, calculate ROI of FinOps program investment, and project annualized savings at current trajectory.' },
-    { id: 'unit-economics',         label: 'Unit Economics & Cost per Transaction',  group: 'Reporting & Executive',    prompt: 'Calculate unit economics for the AWS environment: cost per API request, cost per active user, cost per GB processed, and cost per deployment. Trend these metrics over the last 90 days, identify if unit costs are improving or degrading, and recommend architectural changes to improve cost efficiency at scale.' },
+    { id: 'unit-economics',         label: 'Unit Economics & Cost per Transaction',  group: 'Reporting & Executive',    prompt: 'Calculate unit economics for the OpenShift environment: cost per API request, cost per active user, cost per GB processed, and cost per deployment. Trend these metrics over the last 90 days, identify if unit costs are improving or degrading, and recommend architectural changes to improve cost efficiency at scale.' },
     { id: 'team-scorecard',         label: 'Team FinOps Scorecard',                  group: 'Reporting & Executive',    prompt: 'Generate a FinOps scorecard for each team: rate them on tagging compliance, budget adherence, commitment coverage, rightsizing adoption, idle resource ratio, and month-over-month cost trend. Rank teams from most to least cost-efficient and highlight best practices from top performers.' },
     { id: 'forecast-scenario',      label: 'What-If Forecast Scenarios',             group: 'Reporting & Executive',    prompt: 'Run cost forecast and model three scenarios: 1) Baseline (current trajectory), 2) Optimized (apply all identified savings), 3) Growth (projected usage increase of 20%). For each scenario, show monthly cost projection for the next 6 months, total spend, and the delta between scenarios. Recommend which levers to pull first.' },
   ];
@@ -393,7 +393,7 @@
   /**
    * Send a prompt to the `/chat` endpoint with optional credential overrides.
    * @param {string} prompt - The user/operation prompt.
-   * @param {Object} [overrides] - Optional connection settings (ollamaBaseUrl, modelName, awsRegion, etc.).
+   * @param {Object} [overrides] - Optional connection settings (ollamaBaseUrl, modelName, clusterScope, etc.).
    * @returns {Promise<Object>} Parsed JSON response with `answer`, `steps`, `run_id`.
    */
   const apiChat = async (prompt, overrides = {}) => {
@@ -410,12 +410,12 @@
         externalOrganization: overrides.externalOrganization,
       }, overrides.providerCatalog) || {})
     };
-    if (overrides.awsRegion) runtime.aws_region = overrides.awsRegion;
-    if (overrides.awsProfile) runtime.aws_profile = overrides.awsProfile;
-    if (overrides.awsAccessKeyId) runtime.aws_access_key_id = overrides.awsAccessKeyId;
-    if (overrides.awsSecretAccessKey) runtime.aws_secret_access_key = overrides.awsSecretAccessKey;
-    if (overrides.awsSessionToken) runtime.aws_session_token = overrides.awsSessionToken;
-    if (overrides.awsVerifySsl !== undefined) runtime.aws_verify_ssl = overrides.awsVerifySsl;
+    if (overrides.clusterScope) runtime.cluster_scope = overrides.clusterScope;
+    if (overrides.kubeContext) runtime.kube_context_name = overrides.kubeContext;
+    if (overrides.openshiftApiUrl) runtime.openshift_api_url = overrides.openshiftApiUrl;
+    if (overrides.openshiftToken) runtime.openshift_token = overrides.openshiftToken;
+    if (overrides.openshiftNamespace) runtime.openshift_namespace = overrides.openshiftNamespace;
+    if (overrides.verifySsl !== undefined) runtime.verify_ssl = overrides.verifySsl;
     if (Object.keys(runtime).length > 0) body.runtime = runtime;
     const res = await fetch(`${API_BASE}/chat`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
     let payload = null;
@@ -488,7 +488,7 @@
   /* ── FinOps workflow builder (mirrors agent-console.js logic) ── */
 
   /**
-   * Set of AWS FinOps tool names the agent can invoke.
+   * Set of OpenShift FinOps tool names the agent can invoke.
    * Used by `buildWorkflow()` to filter relevant tool-call steps.
    * @type {Set<string>}
    */
@@ -608,7 +608,7 @@
 
   /**
    * Collapsible settings panel for connection credentials (Ollama URL,
-   * model name, AWS region/profile/keys, SSL toggle).
+   * model name, Cluster scope/profile/keys, SSL toggle).
    * @param {Object} props
    * @param {Object} props.settings - Current settings state object.
    * @param {Function} props.onChange - Called with updated settings on any change.
@@ -654,12 +654,12 @@
             )
           )
         ),
-        h('label', null, 'AWS Region', h('input', { className: 'agent-console__input', type: 'text', placeholder: 'us-east-1', value: settings.awsRegion, onChange: set('awsRegion') })),
-        h('label', null, 'AWS Profile', h('input', { className: 'agent-console__input', type: 'text', placeholder: 'default', value: settings.awsProfile, onChange: set('awsProfile') })),
-        h('label', null, 'Access Key ID', h('input', { className: 'agent-console__input', type: 'text', placeholder: 'AKIA...', value: settings.awsAccessKeyId, onChange: set('awsAccessKeyId') })),
-        h('label', null, 'Secret Access Key', h('input', { className: 'agent-console__input', type: 'password', placeholder: 'Optional', value: settings.awsSecretAccessKey, onChange: set('awsSecretAccessKey') })),
-        h('label', null, 'Session Token', h('input', { className: 'agent-console__input', type: 'password', placeholder: 'Optional STS token', value: settings.awsSessionToken, onChange: set('awsSessionToken') })),
-        h('label', { className: 'agent-console__checkbox' }, h('input', { type: 'checkbox', checked: settings.awsVerifySsl, onChange: set('awsVerifySsl') }), h('span', null, 'Verify SSL')),
+        h('label', null, 'Cluster Scope', h('input', { className: 'agent-console__input', type: 'text', placeholder: 'local-cluster', value: settings.clusterScope, onChange: set('clusterScope') })),
+        h('label', null, 'Kube Context', h('input', { className: 'agent-console__input', type: 'text', placeholder: 'default', value: settings.kubeContext, onChange: set('kubeContext') })),
+        h('label', null, 'OpenShift API URL', h('input', { className: 'agent-console__input', type: 'text', placeholder: 'https://api...', value: settings.openshiftApiUrl, onChange: set('openshiftApiUrl') })),
+        h('label', null, 'OpenShift Token', h('input', { className: 'agent-console__input', type: 'password', placeholder: 'Optional', value: settings.openshiftToken, onChange: set('openshiftToken') })),
+        h('label', null, 'Namespace Scope', h('input', { className: 'agent-console__input', type: 'password', placeholder: 'Optional namespace', value: settings.openshiftNamespace, onChange: set('openshiftNamespace') })),
+        h('label', { className: 'agent-console__checkbox' }, h('input', { type: 'checkbox', checked: settings.verifySsl, onChange: set('verifySsl') }), h('span', null, 'Verify SSL')),
         h('p', { className: 'agent-console__meta' }, provider.description || 'Choose the local Ollama model or an external provider like OpenAI, Azure OpenAI, Anthropic, Gemini, or OpenRouter.')
       )
     );
@@ -919,7 +919,7 @@
    */
   function FinOpsApp() {
     const [selectedOp, setSelectedOp] = useState('full-optimizer');
-    const [settings, setSettings] = useState({ provider: 'ollama', ollamaBaseUrl: '', modelName: '', externalModelName: '', externalBaseUrl: '', externalApiKey: '', externalApiVersion: '', externalOrganization: '', awsRegion: '', awsProfile: '', awsAccessKeyId: '', awsSecretAccessKey: '', awsSessionToken: '', awsVerifySsl: true });
+    const [settings, setSettings] = useState({ provider: 'ollama', ollamaBaseUrl: '', modelName: '', externalModelName: '', externalBaseUrl: '', externalApiKey: '', externalApiVersion: '', externalOrganization: '', clusterScope: '', kubeContext: '', openshiftApiUrl: '', openshiftToken: '', openshiftNamespace: '', verifySsl: true });
     const [modelCatalog, setModelCatalog] = useState({ configured_model_name: 'gpt-oss:20b', models: [] });
     const [providerCatalog, setProviderCatalog] = useState(llmRuntime.fallbackCatalog || { configured_provider: 'ollama', configured_model_name: 'gpt-oss:20b', providers: [{ id: 'ollama', label: 'Local Ollama', default_model: 'gpt-oss:20b', default_base_url: 'http://localhost:11434', supports_catalog_refresh: true, suggested_models: ['gpt-oss:20b'] }] });
     const [modelsLoading, setModelsLoading] = useState(false);

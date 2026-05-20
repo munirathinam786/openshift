@@ -1,6 +1,6 @@
 # API reference
 
-This page documents the live HTTP surface exposed by `src/aws_sre_agent/api.py`.
+This page documents the live HTTP surface exposed by `src/openshift_sre_agent/api.py`.
 
 The FastAPI application serves two roles:
 
@@ -51,7 +51,7 @@ The FastAPI application serves two roles:
 
 ### Chat purpose
 
-Runs a single operator prompt through `AwsSreAgent`, stores the run through `HistoryStore`, and returns both the final answer and the reasoning/tool trace.
+Runs a single operator prompt through `OpenShiftSreAgent`, stores the run through `HistoryStore`, and returns both the final answer and the reasoning/tool trace.
 
 ### Request body
 
@@ -66,10 +66,10 @@ Runs a single operator prompt through `AwsSreAgent`, stores the run through `His
     "llm_organization": "optional-org-id",
     "ollama_base_url": "http://host.containers.internal:11434",
     "local_model_name": "gpt-oss:20b",
-    "aws_region": "us-east-1",
-    "aws_profile": "default",
+    "cluster_scope": "local-cluster",
+    "kube_context_name": "default",
     "agent_max_steps": 12,
-    "aws_verify_ssl": true
+    "verify_ssl": true
   }
 }
 ```
@@ -78,7 +78,7 @@ Runs a single operator prompt through `AwsSreAgent`, stores the run through `His
 
 ```json
 {
-  "answer": "FinOps drilldown completed.\n\nObserved service states:\n- Cost And Usage Summary: estimated 100.00 USD across the last 30 day(s).\n\nWhat I can do next:\n- Translate the collected FinOps signals into a prioritized cost-optimization plan with risk, approval, and rollback guidance.\n\nApproval options:\n- Reply with `Approve fix plan` and I will turn the current findings into a service-by-service remediation plan with validation and rollback guidance.\n- Reply with `Approve supported execution plan` and I will prepare approval-gated execution guidance for supported workflows while keeping direct AWS mutations disabled.",
+  "answer": "FinOps drilldown completed.\n\nObserved service states:\n- Cost And Usage Summary: estimated 100.00 USD across the last 30 day(s).\n\nWhat I can do next:\n- Translate the collected FinOps signals into a prioritized cost-optimization plan with risk, approval, and rollback guidance.\n\nApproval options:\n- Reply with `Approve fix plan` and I will turn the current findings into a service-by-service remediation plan with validation and rollback guidance.\n- Reply with `Approve supported execution plan` and I will prepare approval-gated execution guidance for supported workflows while keeping direct cluster mutations disabled.",
   "run_id": 42,
   "steps": [
     {
@@ -106,12 +106,12 @@ Runs a single operator prompt through `AwsSreAgent`, stores the run through `His
 The `answer` field is not just the model's raw final text. The backend may augment it with operator-friendly sections such as:
 
 - **Observed service states** — a normalized summary of tool results and service posture
-- **What I can do next** — generic recovery or remediation actions derived from missing checks, AWS errors, and collected findings
+- **What I can do next** — generic recovery or remediation actions derived from missing checks, cluster errors, and collected findings
 - **Approval options** — explicit phrases the operator can send next, such as `Approve follow-up` or `Approve fix plan`
 
 This makes incomplete or blocked runs actionable instead of ending with a bare step-limit failure.
 
-For prompts that explicitly require certain AWS checks, the backend can also recover before step exhaustion. If the model returns repeated invalid or empty turns, or tries to finalize before all required checks are complete, the agent may automatically invoke the next missing required tool and continue the run from that evidence.
+For prompts that explicitly require certain cluster checks, the backend can also recover before step exhaustion. If the model returns repeated invalid or empty turns, or tries to finalize before all required checks are complete, the agent may automatically invoke the next missing required tool and continue the run from that evidence.
 
 Those recovery steps are included in the `steps` trace and are marked with `"auto_recovery": true` so the UI can show that the backend intervened to keep the investigation moving.
 
@@ -123,7 +123,7 @@ Because this behavior lives behind `POST /chat`, it applies across all chat-back
 
 Runs a batched control review for the **Security Console** without waiting for the model to decide on each tool one-by-one.
 
-This endpoint is designed for larger audit presets such as **SOX** and **HIPAA**, where the UI already knows which AWS security controls to inspect and can ask the backend to execute them directly.
+This endpoint is designed for larger audit presets such as **SOX** and **HIPAA**, where the UI already knows which platform security controls to inspect and can ask the backend to execute them directly.
 
 ### Security-audit request body
 
@@ -140,7 +140,7 @@ This endpoint is designed for larger audit presets such as **SOX** and **HIPAA**
   ],
   "operator_notes": "Validate logging, encryption, and findings coverage.",
   "runtime": {
-    "aws_region": "us-east-1",
+    "cluster_scope": "local-cluster",
     "llm_provider": "ollama",
     "local_model_name": "gpt-oss:20b"
   },
@@ -151,7 +151,7 @@ This endpoint is designed for larger audit presets such as **SOX** and **HIPAA**
 ### Security-audit behavior
 
 - validates each requested feature against the live toolkit
-- runs the selected AWS inspection tools directly in sequence
+- runs the selected cluster inspection tools directly in sequence
 - captures per-tool success or error details in the returned `steps`
 - stores the audit run through `HistoryStore` like other operator workflows
 - returns the same `ChatResponse` shape used by `/chat`, so the browser console can reuse its result rendering
@@ -168,12 +168,12 @@ Important behavior:
 
 - `llm_provider` switches the request between local Ollama and hosted providers such as OpenAI, Azure OpenAI, Anthropic, Gemini, and OpenRouter
 - `llm_model_name`, `llm_base_url`, `llm_api_key`, `llm_api_version`, and `llm_organization` are provider-specific hosted-model overrides
-- explicit access keys clear the configured AWS profile for that request
+- explicit tokens clear the configured kube context for that request
 - the Ollama base URL is normalized to remove a trailing slash
 - the override affects only the current request and does not mutate `.env`
-- `aws_regions` can provide a comma-separated sweep scope that the watchlist and platform sweep workflows reuse
-- `aws_assume_role_arn`, `aws_assume_role_external_id`, and `aws_role_session_name` allow cross-account sweeps without changing the base process configuration
-- `aws_ca_bundle` and `aws_verify_ssl` let operators deal with private trust chains and enterprise proxy certificates on a per-request basis
+- `cluster_scopes` can provide a comma-separated sweep scope that the watchlist and platform sweep workflows reuse
+- `reserved_role_arn`, `reserved_role_external_id`, and `agent_session_name` allow cross-cluster sweeps without changing the base process configuration
+- `tls_ca_bundle` and `verify_ssl` let operators deal with private trust chains and enterprise proxy certificates on a per-request basis
 
 ### External-provider example runtime
 
@@ -186,7 +186,7 @@ Important behavior:
     "llm_base_url": "https://your-resource-name.openai.azure.com",
     "llm_api_key": "azure-api-key",
     "llm_api_version": "2024-06-01",
-    "aws_region": "us-east-1",
+    "cluster_scope": "local-cluster",
     "agent_max_steps": 12
   }
 }
@@ -243,7 +243,7 @@ Provides the aggregated payload used by `docs/assets/javascripts/history-dashboa
 | --- | --- |
 | `time_range` | One of `24h`, `7d`, `30d`, `90d`, `all` |
 | `model_names` / `model_name` | Filter to one or more model names |
-| `aws_regions` / `aws_region` | Filter to one or more AWS regions |
+| `cluster_scopes` / `cluster_scope` | Filter to one or more cluster scopes |
 | `tool_names` | Filter to runs that used one or more tools |
 | `run_limit` | Maximum number of recent runs returned |
 | `point_limit` | Maximum points per metric series |
@@ -273,7 +273,7 @@ Provides the aggregated payload used by `docs/assets/javascripts/history-dashboa
       "run_id": 42,
       "status": "completed",
       "model_name": "gpt-oss:20b",
-      "aws_region": "us-east-1"
+      "cluster_scope": "local-cluster"
     }
   ]
 }
@@ -327,7 +327,7 @@ Creates a saved investigation.
   "prompt": "Inspect caller identity, network posture, S3 posture, IAM role posture, and Lambda posture.",
   "description": "Repeatable baseline review for production shared services.",
   "category": "platform",
-  "default_regions": ["us-east-1", "us-west-2"],
+  "default_regions": ["local-cluster", "us-west-2"],
   "default_tags": ["weekly-review", "platform"],
   "default_tools": ["get_caller_identity", "list_network_posture", "list_s3_posture"]
 }
@@ -355,8 +355,8 @@ Creates a watchlist that references an investigation and optionally narrows regi
   "investigation_id": 7,
   "notes": "Run before the weekly ops review.",
   "schedule_hint": "weekly",
-  "regions": ["us-east-1", "eu-west-1"],
-  "role_arns": ["arn:aws:iam::123456789012:role/ReadOnlyOps"],
+  "regions": ["local-cluster", "eu-west-1"],
+  "role_arns": ["cluster:role/readonly-sre"],
   "tags": ["prod", "watchlist"],
   "enabled": true
 }
@@ -378,22 +378,22 @@ The backend resolves the effective scope in this order:
 3. investigation defaults
 4. base settings from `.env`
 
-Each region/role combination runs the saved prompt through `AwsSreAgent`, then the response list is returned together with the updated watchlist metadata.
+Each region/role combination runs the saved prompt through `OpenShiftSreAgent`, then the response list is returned together with the updated watchlist metadata.
 
 ## `POST /platform/sweep`
 
-Executes a list of tool names directly via `AwsSreToolkit` across the requested regions and optional role ARNs.
+Executes a list of tool names directly via `OpenShiftSreToolkit` across the requested regions and optional role ARNs.
 
 ### FinOps queue stage update example request
 
 ```json
 {
   "tool_names": ["get_caller_identity", "list_network_posture", "list_s3_posture"],
-  "regions": ["us-east-1", "us-west-2"],
-  "role_arns": ["arn:aws:iam::123456789012:role/ReadOnlyOps"],
+  "regions": ["local-cluster", "us-west-2"],
+  "role_arns": ["cluster:role/readonly-sre"],
   "runtime": {
-    "aws_verify_ssl": true,
-    "aws_role_session_name": "weekly-platform-sweep"
+    "verify_ssl": true,
+    "agent_session_name": "weekly-platform-sweep"
   }
 }
 ```
@@ -509,8 +509,8 @@ Returns the live runtime payload used by the **Agent Console** to show:
     "source": "container-cli",
     "containers": [
       {
-        "name": "aws-sre-agent",
-        "image": "localhost/aws-sre-agent-local:dev",
+        "name": "openshift-sre-agent",
+        "image": "localhost/openshift-sre-agent-local:dev",
         "status": "Up 2 minutes",
         "size": "145MB (virtual 1.2GB)",
         "cpu_percent": 3.5,
@@ -523,7 +523,7 @@ Returns the live runtime payload used by the **Agent Console** to show:
   "database": {
     "enabled": true,
     "dialect": "mysql",
-    "database_name": "aws_sre_agent",
+    "database_name": "openshift_sre_agent",
     "utilization": {
       "table_count": 6,
       "database_size_bytes": 1048576,

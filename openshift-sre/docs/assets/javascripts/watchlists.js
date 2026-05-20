@@ -30,11 +30,11 @@
   const externalApiKeyInput = root.querySelector('[data-watchlist-external-api-key]');
   const externalApiVersionInput = root.querySelector('[data-watchlist-external-api-version]');
   const externalOrganizationInput = root.querySelector('[data-watchlist-external-organization]');
-  const awsProfileInput = root.querySelector('[data-watchlist-aws-profile]');
-  const awsAccessKeyIdInput = root.querySelector('[data-watchlist-aws-access-key-id]');
-  const awsSecretAccessKeyInput = root.querySelector('[data-watchlist-aws-secret-access-key]');
-  const awsSessionTokenInput = root.querySelector('[data-watchlist-aws-session-token]');
-  const awsVerifySslInput = root.querySelector('[data-watchlist-aws-verify-ssl]');
+  const kubeContextInput = root.querySelector('[data-watchlist-kube-context]');
+  const openshiftApiUrlInput = root.querySelector('[data-watchlist-openshift-api-url]');
+  const openshiftTokenInput = root.querySelector('[data-watchlist-openshift-token]');
+  const openshiftNamespaceInput = root.querySelector('[data-watchlist-openshift-namespace]');
+  const verifySslInput = root.querySelector('[data-watchlist-verify-ssl]');
   const providerNote = root.querySelector('[data-watchlist-llm-provider-note]');
   const ollamaFields = root.querySelectorAll('[data-watchlist-ollama-field]');
   const externalFields = root.querySelectorAll('[data-watchlist-external-llm-field]');
@@ -145,11 +145,11 @@
         externalApiVersion: externalApiVersionInput?.value.trim() || '',
         externalOrganization: externalOrganizationInput?.value.trim() || '',
       }, providerCatalog) || {}),
-      ...(awsProfileInput?.value.trim() ? { aws_profile: awsProfileInput.value.trim() } : {}),
-      ...(awsAccessKeyIdInput?.value.trim() ? { aws_access_key_id: awsAccessKeyIdInput.value.trim() } : {}),
-      ...(awsSecretAccessKeyInput?.value ? { aws_secret_access_key: awsSecretAccessKeyInput.value } : {}),
-      ...(awsSessionTokenInput?.value ? { aws_session_token: awsSessionTokenInput.value } : {}),
-      ...(awsVerifySslInput ? { aws_verify_ssl: awsVerifySslInput.checked } : {}),
+      ...(kubeContextInput?.value.trim() ? { kube_context_name: kubeContextInput.value.trim() } : {}),
+      ...(openshiftApiUrlInput?.value.trim() ? { openshift_api_url: openshiftApiUrlInput.value.trim() } : {}),
+      ...(openshiftTokenInput?.value ? { openshift_token: openshiftTokenInput.value } : {}),
+      ...(openshiftNamespaceInput?.value ? { openshift_namespace: openshiftNamespaceInput.value } : {}),
+      ...(verifySslInput ? { verify_ssl: verifySslInput.checked } : {}),
     };
   }
 
@@ -283,13 +283,13 @@
       if (button.dataset.investigationExample === 'network') {
         investigationName.value = 'Regional network hygiene review';
         investigationCategory.value = 'platform';
-        investigationRegions.value = 'us-east-1,us-west-2';
+        investigationRegions.value = 'local-cluster,us-west-2';
         investigationTags.value = 'network,governance';
         investigationPrompt.value = 'Review security groups, route tables, NAT gateways, and VPC endpoints. Highlight internet exposure, blackhole routes, missing private connectivity, and cross-region drift.';
       } else {
         investigationName.value = 'Storage governance review';
         investigationCategory.value = 'storage';
-        investigationRegions.value = 'us-east-1,eu-west-1';
+        investigationRegions.value = 'local-cluster,eu-west-1';
         investigationTags.value = 'storage,governance';
         investigationPrompt.value = 'Inspect S3 governance posture, RDS failover posture, and RDS event subscriptions. Highlight public buckets, missing encryption, weak failover posture, and absent notification coverage.';
       }

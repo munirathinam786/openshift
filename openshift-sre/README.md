@@ -2,7 +2,7 @@
 
 `OpenShift SRE Local Agent` is a Python-based AI agent that can connect to either a **local Ollama model** or a **hosted external LLM provider** and perform **guarded Red Hat OpenShift operational investigations**.
 
-It keeps the same product shape as the AWS build you created earlier:
+It keeps the same product shape as the initial proof-of-concept:
 
 - a CLI for direct operator use
 - an HTTP API that runs on port `8000`
@@ -97,7 +97,7 @@ For the normal rebuild-and-refresh flow, run:
 
 The MkDocs site under `docs/` is kept as a first-class operator surface.
 
-The OpenShift version retains the same major feature lanes as the AWS agent:
+The OpenShift SRE retains the same major feature lanes:
 
 - `Agent Console`
 - `Troubleshooting`

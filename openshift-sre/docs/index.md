@@ -55,7 +55,7 @@ The full project source is documented directly in MkDocs with explanations:
 
 Those pages cover:
 
-- all modules in `src/aws_sre_agent/`
+- all modules in `src/openshift_sre_agent/`
 - the HTTP endpoint contracts and example payloads
 - the persisted queue and history lifecycle
 - the main public functions and important internal helpers used across the agent runtime
@@ -67,6 +67,20 @@ For operator workflows and service-specific runbooks, see:
 - [`Capacity & Optimization`](playbook-finops.md)
 - [`Platform & Automation`](playbook-platform-automation.md)
 - [`Storage & Governance`](playbook-storage-governance.md)
+
+## Supported infrastructure platforms
+
+This SRE agent is designed to operate across the full multi-cluster OpenShift estate managed by this repository:
+
+| Platform | Deployment Method | Location |
+|----------|------------------|----------|
+| **Bare-metal IPI** | Installer-Provisioned Infrastructure | `ipi-method/` |
+| **Bare-metal UPI** | User-Provisioned Infrastructure | `upi-method/` |
+| **AWS ROSA** | Red Hat OpenShift on AWS (managed) | `aws-rosa/` |
+| **Azure ARO** | Azure Red Hat OpenShift (managed) | `azure-aro/` |
+| **IBM Z** | OpenShift on IBM Z/LinuxONE | `ibm-z/` |
+
+The agent connects to any of these clusters via `KUBECONFIG` or explicit API URL + token and performs the same read-only operational investigations regardless of the underlying infrastructure provider.
 
 ## System overview diagram
 

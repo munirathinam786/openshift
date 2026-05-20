@@ -55,7 +55,7 @@
   let selectedMetricKey = null;
   let selectedRunId = null;
   let sparklineSequence = 0;
-  const themeStorageKey = 'aws-sre-history-theme';
+  const themeStorageKey = 'openshift-sre-history-theme';
 
   const rangeLabels = {
     '24h': 'Last 24 hours',
@@ -848,7 +848,7 @@
     return `
       <svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
         <rect width="${width}" height="${height}" fill="#f8fafc" />
-        <text x="40" y="54" font-size="34" font-weight="700" fill="#0f172a">AWS SRE Historical Dashboard</text>
+        <text x="40" y="54" font-size="34" font-weight="700" fill="#0f172a">OpenShift SRE Historical Dashboard</text>
         <text x="40" y="84" font-size="18" fill="#475569">Range: ${escapeHtml(rangeLabels[rangeSelect.value] || rangeSelect.value)} · Layout: ${escapeHtml(exportLayoutLabels[layout] || layout)} · Exported ${escapeHtml(new Date().toLocaleString())}</text>
         ${cardMarkup}
         <rect x="40" y="350" width="620" height="320" rx="24" fill="#ffffff" stroke="#dbe4f0" />
@@ -909,7 +909,7 @@
       ['summary', 'time_range', context.rangeLabel],
       ['summary', 'layout', context.layoutLabel],
       ['summary', 'model_names', (context.filters.model_names || []).join('|')],
-      ['summary', 'aws_regions', (context.filters.aws_regions || []).join('|')],
+      ['summary', 'cluster_scopes', (context.filters.cluster_scopes || []).join('|')],
       ['summary', 'tool_names', (context.filters.tool_names || []).join('|')],
       ['summary', 'total_runs', context.summary.total_runs ?? 0],
       ['summary', 'failed_runs', context.summary.failed_runs ?? 0],
@@ -933,10 +933,10 @@
       ['exceptions', 'severity', 'title', 'summary', 'detail'],
       ...context.exceptions.map((item) => ['exceptions', item.severity || '', item.title || '', item.summary || '', item.detail || '']),
       [],
-      ['recent_runs', 'created_at', 'status', 'model_name', 'aws_region', 'duration_ms', 'prompt_excerpt'],
-      ...context.recentRuns.map((run) => ['recent_runs', run.created_at || '', run.status || '', run.model_name || '', run.aws_region || '', run.duration_ms ?? '', run.prompt_excerpt || ''])
+      ['recent_runs', 'created_at', 'status', 'model_name', 'cluster_scope', 'duration_ms', 'prompt_excerpt'],
+      ...context.recentRuns.map((run) => ['recent_runs', run.created_at || '', run.status || '', run.model_name || '', run.cluster_scope || '', run.duration_ms ?? '', run.prompt_excerpt || ''])
     ];
-    downloadBlob(`aws-sre-history-${context.reportType}-${createTimestampSlug()}.csv`, new Blob([toCsv(rows)], { type: 'text/csv;charset=utf-8' }));
+    downloadBlob(`openshift-sre-history-${context.reportType}-${createTimestampSlug()}.csv`, new Blob([toCsv(rows)], { type: 'text/csv;charset=utf-8' }));
   }
 
   async function exportHistoryPpt(context) {
@@ -947,7 +947,7 @@
     const pptx = new PptxGenJS();
     pptx.layout = 'LAYOUT_WIDE';
     pptx.author = 'GitHub Copilot';
-    pptx.company = 'AWS SRE Local Agent';
+    pptx.company = 'OpenShift SRE Local Agent';
     pptx.subject = context.reportLabel;
     pptx.title = `${context.reportLabel} - ${context.rangeLabel}`;
 
@@ -978,7 +978,7 @@
     reviewSlide.addText(buildHistorySectionText('Executive exceptions', context.exceptions.length > 0 ? context.exceptions.map((item) => `${item.title}: ${item.summary}${item.detail ? ` — ${item.detail}` : ''}`) : ['No exception rollups were available.']), { x: 0.5, y: 1.0, w: 5.8, h: 4.8, fontSize: 12, color: '0F172A', margin: 0.12, fill: { color: 'FFFFFF' }, line: { color: 'CBD5E1' } });
     reviewSlide.addText(buildHistorySectionText('Recent runs', context.recentRuns.length > 0 ? context.recentRuns.map((run) => `${formatTimestamp(run.created_at)} · ${run.status} · ${run.model_name} · ${formatDuration(run.duration_ms)}`) : ['No recent runs were available.']), { x: 6.7, y: 1.0, w: 5.4, h: 4.8, fontSize: 12, color: '0F172A', margin: 0.12, fill: { color: 'FFFFFF' }, line: { color: 'CBD5E1' } });
 
-    await pptx.writeFile({ fileName: `aws-sre-history-${context.reportType}-${createTimestampSlug()}.pptx` });
+    await pptx.writeFile({ fileName: `openshift-sre-history-${context.reportType}-${createTimestampSlug()}.pptx` });
   }
 
   async function exportHistoryPdf(context) {
@@ -1033,7 +1033,7 @@
     addBlock('Top tools', context.topTools.length > 0 ? context.topTools.map((item) => `${item.label}: ${formatNumber(item.count)} invocations`) : ['No tool activity was available.']);
     addBlock('Latest metrics', context.latestMetrics.length > 0 ? context.latestMetrics.map((metric) => `${metric.metric_label}: ${formatMetricValue(metric.metric_value, metric.unit)}`) : ['No latest metrics were available.']);
     addBlock('Executive exceptions', context.exceptions.length > 0 ? context.exceptions.map((item) => `${item.title}: ${item.summary}${item.detail ? ` — ${item.detail}` : ''}`) : ['No exception rollups were available.']);
-    doc.save(`aws-sre-history-${context.reportType}-${createTimestampSlug()}.pdf`);
+    doc.save(`openshift-sre-history-${context.reportType}-${createTimestampSlug()}.pdf`);
   }
 
   async function exportHistoryWord(context) {
@@ -1083,7 +1083,7 @@
     </div>
   </body>
 </html>`;
-    downloadBlob(`aws-sre-history-${context.reportType}-${createTimestampSlug()}.doc`, new Blob([html], { type: 'application/msword' }));
+    downloadBlob(`openshift-sre-history-${context.reportType}-${createTimestampSlug()}.doc`, new Blob([html], { type: 'application/msword' }));
   }
 
   function updateHistoryReportState() {
@@ -1159,7 +1159,7 @@
     badges.push({ label: `SLA ${formatPercent(sla.successTarget)} / ${formatDuration(sla.durationTargetMs)}`, kind: 'neutral' });
     badges.push({ label: exportLayoutLabels[getSelectedExportLayout()] || getSelectedExportLayout(), kind: 'neutral' });
     const modelNames = payload.filters?.model_names || [];
-    const regions = payload.filters?.aws_regions || [];
+    const regions = payload.filters?.cluster_scopes || [];
     const tools = payload.filters?.tool_names || [];
     if (modelNames.length > 0) {
       badges.push({ label: formatSelectionLabel(modelNames, ''), kind: 'neutral' });
@@ -1499,7 +1499,7 @@
                 <td>${formatMetricValue(record.metric_value, detail.unit)}</td>
                 <td>${escapeHtml(stringifyCompactJson(record.dimensions) || '—')}</td>
                 <td>${escapeHtml(record.model_name)}</td>
-                <td>${escapeHtml(record.aws_region)}</td>
+                <td>${escapeHtml(record.cluster_scope)}</td>
                 <td><button class="agent-console__link-button" type="button" data-metric-run-id="${record.run_id}">Open run ${record.run_id}</button></td>
               </tr>
             `).join('')}
@@ -1538,7 +1538,7 @@
       const modelNames = getSelectedValues(modelSelect);
       const regionNames = getSelectedValues(regionSelect);
       if (modelNames.length > 0) query.set('model_names', modelNames.join(','));
-      if (regionNames.length > 0) query.set('aws_regions', regionNames.join(','));
+      if (regionNames.length > 0) query.set('cluster_scopes', regionNames.join(','));
       const response = await fetch(`/history/metrics/${encodeURIComponent(metricKey)}?${query.toString()}`);
       const payload = await response.json();
       if (!response.ok) {
@@ -1569,7 +1569,7 @@
     updateMultiSelectOptions(regionSelect, payload.filter_options?.regions || []);
     updateMultiSelectOptions(toolSelect, payload.filter_options?.tools || []);
     setSelectedValues(modelSelect, payload.filters?.model_names || getSelectedValues(modelSelect));
-    setSelectedValues(regionSelect, payload.filters?.aws_regions || getSelectedValues(regionSelect));
+    setSelectedValues(regionSelect, payload.filters?.cluster_scopes || getSelectedValues(regionSelect));
     setSelectedValues(toolSelect, payload.filters?.tool_names || getSelectedValues(toolSelect));
     updateActiveLabels();
   }
@@ -1601,7 +1601,7 @@
                 <td><button class="agent-console__link-button" type="button">${escapeHtml(formatTimestamp(run.created_at))}</button></td>
                 <td><span class="agent-console__status-pill agent-console__status-pill--${run.status === 'completed' ? 'ok' : 'error'}">${escapeHtml(run.status)}</span></td>
                 <td>${escapeHtml(run.model_name)}</td>
-                <td>${escapeHtml(run.aws_region)}</td>
+                <td>${escapeHtml(run.cluster_scope)}</td>
                 <td>${escapeHtml(run.prompt_excerpt || '—')}</td>
                 <td>${formatDuration(run.duration_ms)}</td>
                 <td>${escapeHtml(run.error_message || '—')}</td>
@@ -1624,7 +1624,7 @@
           <h3>Run summary</h3>
           <p><strong>Status:</strong> ${escapeHtml(detail.status)}</p>
           <p><strong>Model:</strong> ${escapeHtml(detail.model_name)}</p>
-          <p><strong>Region:</strong> ${escapeHtml(detail.aws_region)}</p>
+          <p><strong>Region:</strong> ${escapeHtml(detail.cluster_scope)}</p>
           <p><strong>Duration:</strong> ${formatDuration(detail.duration_ms)}</p>
           <p><strong>Steps:</strong> ${formatNumber(detail.step_count)}</p>
           <p><strong>Created:</strong> ${formatTimestamp(detail.created_at)}</p>
@@ -1736,7 +1736,7 @@
       ['Section', 'Field', 'Value'],
       ['summary', 'time_range', lastPayload.filters?.time_range || rangeSelect.value],
       ['summary', 'model_names', (lastPayload.filters?.model_names || []).join('|')],
-      ['summary', 'aws_regions', (lastPayload.filters?.aws_regions || []).join('|')],
+      ['summary', 'cluster_scopes', (lastPayload.filters?.cluster_scopes || []).join('|')],
       ['summary', 'tool_names', (lastPayload.filters?.tool_names || []).join('|')],
       ['summary', 'total_runs', summary.total_runs ?? 0],
       ['summary', 'failed_runs', summary.failed_runs ?? 0],
@@ -1763,19 +1763,19 @@
       ['executive_exception_rollup', 'severity', 'title', 'summary', 'detail'],
       ...(exceptions.map((item) => ['executive_exception_rollup', item.severity || '', item.title || '', item.summary || '', item.detail || ''])),
       [],
-      ['recent_runs', 'created_at', 'status', 'model_name', 'aws_region', 'duration_ms', 'prompt_excerpt', 'error_message'],
+      ['recent_runs', 'created_at', 'status', 'model_name', 'cluster_scope', 'duration_ms', 'prompt_excerpt', 'error_message'],
       ...((lastPayload.recent_runs || []).map((run) => [
         'recent_runs',
         run.created_at || '',
         run.status,
         run.model_name,
-        run.aws_region,
+        run.cluster_scope,
         run.duration_ms,
         run.prompt_excerpt || '',
         run.error_message || '',
       ])),
     ];
-    downloadBlob(`aws-sre-history-${rangeSelect.value}.csv`, new Blob([toCsv(rows)], { type: 'text/csv;charset=utf-8' }));
+    downloadBlob(`openshift-sre-history-${rangeSelect.value}.csv`, new Blob([toCsv(rows)], { type: 'text/csv;charset=utf-8' }));
     setStatus('CSV export downloaded.', 'ok');
   }
 
@@ -1796,7 +1796,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <title>AWS SRE Weekly Ops Review</title>
+    <title>OpenShift SRE Weekly Ops Review</title>
     <style>
       body { font-family: Inter, Arial, sans-serif; margin: 0; padding: 32px; background: #f8fafc; color: #0f172a; }
       .sheet { max-width: 1100px; margin: 0 auto; }
@@ -1831,8 +1831,8 @@
     <div class="sheet">
       <section class="hero">
         <p class="kicker">Weekly ops review</p>
-        <h1>AWS SRE operator storytelling packet</h1>
-        <p class="meta">Exported ${escapeHtml(new Date().toLocaleString())}. Filters: range ${escapeHtml(rangeLabels[rangeSelect.value] || rangeSelect.value)}, models ${escapeHtml((filters.model_names || []).join(', ') || 'All models')}, regions ${escapeHtml((filters.aws_regions || []).join(', ') || 'All regions')}, tools ${escapeHtml((filters.tool_names || []).join(', ') || 'All tools')}.</p>
+        <h1>OpenShift SRE operator storytelling packet</h1>
+        <p class="meta">Exported ${escapeHtml(new Date().toLocaleString())}. Filters: range ${escapeHtml(rangeLabels[rangeSelect.value] || rangeSelect.value)}, models ${escapeHtml((filters.model_names || []).join(', ') || 'All models')}, regions ${escapeHtml((filters.cluster_scopes || []).join(', ') || 'All regions')}, tools ${escapeHtml((filters.tool_names || []).join(', ') || 'All tools')}.</p>
       </section>
       <section class="panel">
         <p class="kicker">Headline metrics</p>
@@ -1892,7 +1892,7 @@
 </html>`;
 
     downloadBlob(
-      `aws-sre-weekly-ops-review-${new Date().toISOString().slice(0, 10)}.html`,
+      `openshift-sre-weekly-ops-review-${new Date().toISOString().slice(0, 10)}.html`,
       new Blob([html], { type: 'text/html;charset=utf-8' }),
     );
     setStatus('Weekly ops review export downloaded.', 'ok');
@@ -1910,13 +1910,13 @@
       ['summary', 'tool_name', selectedMetricDetail.tool_name || ''],
       ['summary', 'time_range', selectedMetricDetail.filters?.time_range || rangeSelect.value],
       ['summary', 'model_names', (selectedMetricDetail.filters?.model_names || []).join('|')],
-      ['summary', 'aws_regions', (selectedMetricDetail.filters?.aws_regions || []).join('|')],
+      ['summary', 'cluster_scopes', (selectedMetricDetail.filters?.cluster_scopes || []).join('|')],
       ['summary', 'sample_count', selectedMetricDetail.summary?.sample_count ?? 0],
       ['summary', 'distinct_runs', selectedMetricDetail.summary?.distinct_runs ?? 0],
       ['summary', 'latest_value', selectedMetricDetail.summary?.latest_value ?? ''],
       ['summary', 'latest_recorded_at', selectedMetricDetail.summary?.latest_recorded_at || ''],
       [],
-      ['records', 'run_id', 'step_number', 'recorded_at', 'metric_value', 'dimensions', 'model_name', 'aws_region', 'status', 'prompt_excerpt', 'tool_arguments', 'tool_result', 'tool_error'],
+      ['records', 'run_id', 'step_number', 'recorded_at', 'metric_value', 'dimensions', 'model_name', 'cluster_scope', 'status', 'prompt_excerpt', 'tool_arguments', 'tool_result', 'tool_error'],
       ...((selectedMetricDetail.records || []).map((record) => [
         'records',
         record.run_id,
@@ -1925,7 +1925,7 @@
         record.metric_value,
         stringifyCompactJson(record.dimensions),
         record.model_name || '',
-        record.aws_region || '',
+        record.cluster_scope || '',
         record.status || '',
         record.prompt_excerpt || '',
         stringifyCompactJson(record.tool_arguments),
@@ -1934,7 +1934,7 @@
       ])),
     ];
     const safeMetricKey = selectedMetricDetail.metric_key.replace(/[^a-z0-9._-]+/gi, '-');
-    downloadBlob(`aws-sre-metric-${safeMetricKey}.csv`, new Blob([toCsv(rows)], { type: 'text/csv;charset=utf-8' }));
+    downloadBlob(`openshift-sre-metric-${safeMetricKey}.csv`, new Blob([toCsv(rows)], { type: 'text/csv;charset=utf-8' }));
     setStatus(`Metric CSV exported for ${selectedMetricDetail.metric_label}.`, 'ok');
   }
 
@@ -1971,7 +1971,7 @@
         setStatus('Unable to generate PNG export.', 'error');
         return;
       }
-      downloadBlob(`aws-sre-history-${rangeSelect.value}.png`, pngBlob);
+      downloadBlob(`openshift-sre-history-${rangeSelect.value}.png`, pngBlob);
       setStatus('PNG export downloaded.', 'ok');
     }, 'image/png');
   }
@@ -2006,7 +2006,7 @@
       const regionNames = getSelectedValues(regionSelect);
       const toolNames = getSelectedValues(toolSelect);
       if (modelNames.length > 0) query.set('model_names', modelNames.join(','));
-      if (regionNames.length > 0) query.set('aws_regions', regionNames.join(','));
+      if (regionNames.length > 0) query.set('cluster_scopes', regionNames.join(','));
       if (toolNames.length > 0) query.set('tool_names', toolNames.join(','));
       const response = await fetch(`/history/overview?${query.toString()}`);
       const payload = await response.json();
@@ -2025,7 +2025,7 @@
       renderRunHealthCharts(payload);
       renderUsageCharts(payload);
       renderComparisonBreakdown(modelComparisonNode, 'Model comparison', payload.model_breakdown || [], 'model_name', 'Compare how each visible model performs across success rate, run volume, and average duration.');
-      renderComparisonBreakdown(regionComparisonNode, 'Region comparison', payload.region_breakdown || [], 'aws_region', 'Compare run outcomes across regions for the currently selected tools and models.');
+      renderComparisonBreakdown(regionComparisonNode, 'Region comparison', payload.region_breakdown || [], 'cluster_scope', 'Compare run outcomes across regions for the currently selected tools and models.');
       renderTrends(payload);
       renderLatestMetrics(payload);
       renderRuns(payload);
@@ -2095,7 +2095,7 @@
       renderBenchmarkBoard(lastPayload);
       renderRunHealthCharts(lastPayload);
       renderComparisonBreakdown(modelComparisonNode, 'Model comparison', lastPayload.model_breakdown || [], 'model_name', 'Compare how each visible model performs across success rate, run volume, and average duration.');
-      renderComparisonBreakdown(regionComparisonNode, 'Region comparison', lastPayload.region_breakdown || [], 'aws_region', 'Compare run outcomes across regions for the currently selected tools and models.');
+      renderComparisonBreakdown(regionComparisonNode, 'Region comparison', lastPayload.region_breakdown || [], 'cluster_scope', 'Compare run outcomes across regions for the currently selected tools and models.');
     }
   });
   slaDurationInput.addEventListener('change', () => {
@@ -2106,7 +2106,7 @@
       renderBenchmarkBoard(lastPayload);
       renderRunHealthCharts(lastPayload);
       renderComparisonBreakdown(modelComparisonNode, 'Model comparison', lastPayload.model_breakdown || [], 'model_name', 'Compare how each visible model performs across success rate, run volume, and average duration.');
-      renderComparisonBreakdown(regionComparisonNode, 'Region comparison', lastPayload.region_breakdown || [], 'aws_region', 'Compare run outcomes across regions for the currently selected tools and models.');
+      renderComparisonBreakdown(regionComparisonNode, 'Region comparison', lastPayload.region_breakdown || [], 'cluster_scope', 'Compare run outcomes across regions for the currently selected tools and models.');
     }
   });
   exportLayoutSelect.addEventListener('change', () => {

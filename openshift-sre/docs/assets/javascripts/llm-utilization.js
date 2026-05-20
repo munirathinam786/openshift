@@ -13,7 +13,7 @@
   const themeToggleButton = root.querySelector('[data-llm-theme-toggle]');
   const reportExportButtons = root.querySelectorAll('[data-llm-export-report]');
   const reportStatusNode = root.querySelector('[data-llm-report-status]');
-  const themeStorageKey = 'aws-sre-history-theme';
+  const themeStorageKey = 'openshift-sre-history-theme';
   let lastPayload = null;
 
   function escapeHtml(value) {
@@ -308,7 +308,7 @@
       ['recommended_host_commands', 'command'],
       ...context.commands.map((command) => ['recommended_host_commands', command])
     ];
-    downloadBlob(`aws-sre-llm-${context.reportType}-${createTimestampSlug()}.csv`, new Blob([toCsv(rows)], { type: 'text/csv;charset=utf-8' }));
+    downloadBlob(`openshift-sre-llm-${context.reportType}-${createTimestampSlug()}.csv`, new Blob([toCsv(rows)], { type: 'text/csv;charset=utf-8' }));
   }
 
   async function exportLlmPpt(context) {
@@ -319,7 +319,7 @@
     const pptx = new PptxGenJS();
     pptx.layout = 'LAYOUT_WIDE';
     pptx.author = 'GitHub Copilot';
-    pptx.company = 'AWS SRE Local Agent';
+    pptx.company = 'OpenShift SRE Local Agent';
     pptx.subject = context.reportLabel;
     pptx.title = `${context.reportLabel} - ${context.configuredModelName}`;
 
@@ -335,7 +335,7 @@
     inventorySlide.addText((context.models.length > 0 ? context.models : [{ name: 'No models loaded', parameter_size: '—', quantization_level: '—', size_vram_gib: '—', context_length: '—' }]).map((model) => `• ${model.name} — ${model.parameter_size || '—'} · ${model.quantization_level || '—'} · VRAM ${model.size_vram_gib == null ? '—' : `${formatNumber(model.size_vram_gib)} GiB`} · Context ${model.context_length == null ? '—' : formatNumber(model.context_length)}`).join('\n'), { x: 0.5, y: 1.0, w: 5.8, h: 4.8, fontSize: 12, color: '0F172A', margin: 0.12, fill: { color: 'FFFFFF' }, line: { color: 'CBD5E1' } });
     inventorySlide.addText((context.commands.length > 0 ? context.commands : ['No host commands were returned.']).map((command) => `• ${command}`).join('\n'), { x: 6.7, y: 1.0, w: 5.4, h: 4.8, fontSize: 11, color: '0F172A', margin: 0.12, fill: { color: 'FFFFFF' }, line: { color: 'CBD5E1' } });
 
-    await pptx.writeFile({ fileName: `aws-sre-llm-${context.reportType}-${createTimestampSlug()}.pptx` });
+    await pptx.writeFile({ fileName: `openshift-sre-llm-${context.reportType}-${createTimestampSlug()}.pptx` });
   }
 
   async function exportLlmPdf(context) {
@@ -386,7 +386,7 @@
       context.processMetrics.note || ''
     ]);
     addBlock('Host inspection commands', context.commands.length > 0 ? context.commands : ['No host commands were returned.']);
-    doc.save(`aws-sre-llm-${context.reportType}-${createTimestampSlug()}.pdf`);
+    doc.save(`openshift-sre-llm-${context.reportType}-${createTimestampSlug()}.pdf`);
   }
 
   async function exportLlmWord(context) {
@@ -431,7 +431,7 @@
     </div>
   </body>
 </html>`;
-    downloadBlob(`aws-sre-llm-${context.reportType}-${createTimestampSlug()}.doc`, new Blob([html], { type: 'application/msword' }));
+    downloadBlob(`openshift-sre-llm-${context.reportType}-${createTimestampSlug()}.doc`, new Blob([html], { type: 'application/msword' }));
   }
 
   function updateReportExportState() {

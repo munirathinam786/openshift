@@ -35,7 +35,7 @@ class AgentRunRecord(Base):
     answer: Mapped[str] = mapped_column(Text, default="")
     status: Mapped[str] = mapped_column(String(32), default="completed")
     model_name: Mapped[str] = mapped_column(String(255))
-    aws_region: Mapped[str] = mapped_column(String(64))
+    cluster_scope: Mapped[str] = mapped_column(String(64))
     step_count: Mapped[int] = mapped_column(Integer, default=0)
     duration_ms: Mapped[int] = mapped_column(Integer, default=0)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
@@ -252,7 +252,7 @@ class HistoryStore:
         answer: str,
         steps: list[dict[str, Any]],
         model_name: str,
-        aws_region: str,
+        cluster_scope: str,
         duration_ms: int,
         status: str = "completed",
         error_message: str | None = None,
@@ -272,7 +272,7 @@ class HistoryStore:
                 answer=answer,
                 status=status,
                 model_name=model_name,
-                aws_region=aws_region,
+                cluster_scope=cluster_scope,
                 step_count=len(steps),
                 duration_ms=duration_ms,
                 created_at=normalized_created_at,
@@ -326,8 +326,8 @@ class HistoryStore:
         time_range: str = "all",
         model_name: str | None = None,
         model_names: list[str] | None = None,
-        aws_region: str | None = None,
-        aws_regions: list[str] | None = None,
+        cluster_scope: str | None = None,
+        cluster_scopes: list[str] | None = None,
         tool_names: list[str] | None = None,
         run_limit: int = 15,
         point_limit: int = 12,
@@ -355,9 +355,9 @@ class HistoryStore:
             if legacy_model_name is not None:
                 normalized_model_names = [legacy_model_name]
 
-        normalized_regions = self._normalize_filter_values(aws_regions)
+        normalized_regions = self._normalize_filter_values(cluster_scopes)
         if not normalized_regions:
-            legacy_region = self._normalize_filter_value(aws_region)
+            legacy_region = self._normalize_filter_value(cluster_scope)
             if legacy_region is not None:
                 normalized_regions = [legacy_region]
 
@@ -370,7 +370,7 @@ class HistoryStore:
         if normalized_model_names:
             selected_run_conditions.append(AgentRunRecord.model_name.in_(normalized_model_names))
         if normalized_regions:
-            selected_run_conditions.append(AgentRunRecord.aws_region.in_(normalized_regions))
+            selected_run_conditions.append(AgentRunRecord.cluster_scope.in_(normalized_regions))
         if normalized_tool_names:
             selected_run_conditions.append(
                 AgentRunRecord.id.in_(
@@ -382,7 +382,7 @@ class HistoryStore:
         if normalized_model_names:
             tool_option_conditions.append(AgentRunRecord.model_name.in_(normalized_model_names))
         if normalized_regions:
-            tool_option_conditions.append(AgentRunRecord.aws_region.in_(normalized_regions))
+            tool_option_conditions.append(AgentRunRecord.cluster_scope.in_(normalized_regions))
 
         with self._session_factory() as session:
             total_runs_query = select(func.count(AgentRunRecord.id)).where(*selected_run_conditions)
@@ -417,10 +417,10 @@ class HistoryStore:
                 .order_by(AgentRunRecord.model_name)
             )
             filter_regions_query = (
-                select(AgentRunRecord.aws_region)
+                select(AgentRunRecord.cluster_scope)
                 .where(*base_run_conditions)
-                .group_by(AgentRunRecord.aws_region)
-                .order_by(AgentRunRecord.aws_region)
+                .group_by(AgentRunRecord.cluster_scope)
+                .order_by(AgentRunRecord.cluster_scope)
             )
             filter_tools_query = (
                 select(AgentStepRecord.tool_name)
@@ -444,15 +444,15 @@ class HistoryStore:
             )
             region_breakdown_query = (
                 select(
-                    AgentRunRecord.aws_region.label("group_value"),
+                    AgentRunRecord.cluster_scope.label("group_value"),
                     func.count(AgentRunRecord.id).label("total_runs"),
                     func.sum(case((AgentRunRecord.status != "completed", 1), else_=0)).label("failed_runs"),
                     func.avg(AgentRunRecord.duration_ms).label("average_duration_ms"),
                     func.max(AgentRunRecord.created_at).label("last_run_at"),
                 )
                 .where(*selected_run_conditions)
-                .group_by(AgentRunRecord.aws_region)
-                .order_by(desc(func.count(AgentRunRecord.id)), AgentRunRecord.aws_region)
+                .group_by(AgentRunRecord.cluster_scope)
+                .order_by(desc(func.count(AgentRunRecord.id)), AgentRunRecord.cluster_scope)
             )
 
             if normalized_tool_names:
@@ -475,7 +475,7 @@ class HistoryStore:
                     AgentRunRecord.error_message,
                     AgentRunRecord.created_at,
                     AgentRunRecord.model_name,
-                    AgentRunRecord.aws_region,
+                    AgentRunRecord.cluster_scope,
                 )
                 .where(*selected_run_conditions)
                 .order_by(desc(AgentRunRecord.created_at))
@@ -507,7 +507,7 @@ class HistoryStore:
                 start=week_windows["current_week"]["start"],
                 end=week_windows["current_week"]["end"],
                 model_names=normalized_model_names,
-                aws_regions=normalized_regions,
+                cluster_scopes=normalized_regions,
                 tool_names=normalized_tool_names,
                 label="This week",
             )
@@ -516,7 +516,7 @@ class HistoryStore:
                 start=week_windows["previous_week"]["start"],
                 end=week_windows["previous_week"]["end"],
                 model_names=normalized_model_names,
-                aws_regions=normalized_regions,
+                cluster_scopes=normalized_regions,
                 tool_names=normalized_tool_names,
                 label="Last week",
             )
@@ -581,8 +581,8 @@ class HistoryStore:
                 "time_range": time_range,
                 "model_name": normalized_model_names[0] if len(normalized_model_names) == 1 else None,
                 "model_names": normalized_model_names,
-                "aws_region": normalized_regions[0] if len(normalized_regions) == 1 else None,
-                "aws_regions": normalized_regions,
+                "cluster_scope": normalized_regions[0] if len(normalized_regions) == 1 else None,
+                "cluster_scopes": normalized_regions,
                 "tool_names": normalized_tool_names,
                 "applied_since": since.isoformat() if since is not None else None,
                 "run_limit": run_limit,
@@ -608,7 +608,7 @@ class HistoryStore:
                     "created_at": run.created_at.isoformat(),
                     "status": run.status,
                     "model_name": run.model_name,
-                    "aws_region": run.aws_region,
+                    "cluster_scope": run.cluster_scope,
                     "step_count": run.step_count,
                     "duration_ms": run.duration_ms,
                     "prompt_excerpt": self._trim_text(run.prompt, 120),
@@ -630,7 +630,7 @@ class HistoryStore:
                 for row in model_breakdown_rows
             ],
             "region_breakdown": [
-                self._serialize_breakdown_row("aws_region", row.group_value, row.total_runs, row.failed_runs, row.average_duration_ms, row.last_run_at)
+                self._serialize_breakdown_row("cluster_scope", row.group_value, row.total_runs, row.failed_runs, row.average_duration_ms, row.last_run_at)
                 for row in region_breakdown_rows
             ],
             "time_window_comparison": comparison,
@@ -645,7 +645,7 @@ class HistoryStore:
                     for row in model_breakdown_rows
                 ],
                 region_breakdown=[
-                    self._serialize_breakdown_row("aws_region", row.group_value, row.total_runs, row.failed_runs, row.average_duration_ms, row.last_run_at)
+                    self._serialize_breakdown_row("cluster_scope", row.group_value, row.total_runs, row.failed_runs, row.average_duration_ms, row.last_run_at)
                     for row in region_breakdown_rows
                 ],
             ),
@@ -660,15 +660,15 @@ class HistoryStore:
         start: datetime,
         end: datetime,
         model_names: list[str] | None,
-        aws_regions: list[str] | None,
+        cluster_scopes: list[str] | None,
         tool_names: list[str] | None,
         label: str,
     ) -> dict[str, Any]:
         conditions = [AgentRunRecord.created_at >= start, AgentRunRecord.created_at < end]
         if model_names:
             conditions.append(AgentRunRecord.model_name.in_(model_names))
-        if aws_regions:
-            conditions.append(AgentRunRecord.aws_region.in_(aws_regions))
+        if cluster_scopes:
+            conditions.append(AgentRunRecord.cluster_scope.in_(cluster_scopes))
         if tool_names:
             conditions.append(
                 AgentRunRecord.id.in_(select(AgentStepRecord.run_id).where(AgentStepRecord.tool_name.in_(tool_names)))
@@ -862,7 +862,7 @@ class HistoryStore:
             "created_at": run.created_at.isoformat(),
             "status": run.status,
             "model_name": run.model_name,
-            "aws_region": run.aws_region,
+            "cluster_scope": run.cluster_scope,
             "duration_ms": run.duration_ms,
             "step_count": run.step_count,
             "tags": self._json_load(run.tags_json) or [],
@@ -903,7 +903,7 @@ class HistoryStore:
         *,
         time_range: str = "all",
         model_names: list[str] | None = None,
-        aws_regions: list[str] | None = None,
+        cluster_scopes: list[str] | None = None,
         run_limit: int = 20,
         point_limit: int = 24,
     ) -> dict[str, Any] | None:
@@ -916,7 +916,7 @@ class HistoryStore:
 
         since = self._resolve_since(time_range)
         normalized_model_names = self._normalize_filter_values(model_names)
-        normalized_regions = self._normalize_filter_values(aws_regions)
+        normalized_regions = self._normalize_filter_values(cluster_scopes)
 
         base_run_conditions = []
         if since is not None:
@@ -924,7 +924,7 @@ class HistoryStore:
         if normalized_model_names:
             base_run_conditions.append(AgentRunRecord.model_name.in_(normalized_model_names))
         if normalized_regions:
-            base_run_conditions.append(AgentRunRecord.aws_region.in_(normalized_regions))
+            base_run_conditions.append(AgentRunRecord.cluster_scope.in_(normalized_regions))
 
         with self._session_factory() as session:
             invocation_rows = session.execute(
@@ -974,12 +974,12 @@ class HistoryStore:
             available_regions = [
                 row[0]
                 for row in session.execute(
-                    select(AgentRunRecord.aws_region)
+                    select(AgentRunRecord.cluster_scope)
                     .join(AgentStepRecord, AgentStepRecord.run_id == AgentRunRecord.id)
                     .where(AgentStepRecord.tool_name == normalized_tool_name)
                     .where(*( [AgentRunRecord.created_at >= since] if since is not None else [] ))
-                    .group_by(AgentRunRecord.aws_region)
-                    .order_by(AgentRunRecord.aws_region)
+                    .group_by(AgentRunRecord.cluster_scope)
+                    .order_by(AgentRunRecord.cluster_scope)
                 ).all()
                 if row[0]
             ]
@@ -1031,7 +1031,7 @@ class HistoryStore:
             "filters": {
                 "time_range": time_range,
                 "model_names": normalized_model_names,
-                "aws_regions": normalized_regions,
+                "cluster_scopes": normalized_regions,
                 "applied_since": since.isoformat() if since is not None else None,
             },
             "filter_options": {
@@ -1052,7 +1052,7 @@ class HistoryStore:
                     "run_created_at": run.created_at.isoformat(),
                     "status": run.status,
                     "model_name": run.model_name,
-                    "aws_region": run.aws_region,
+                    "cluster_scope": run.cluster_scope,
                     "duration_ms": run.duration_ms,
                     "thought": step.thought,
                     "tool_arguments": self._json_load(step.tool_arguments_json),
@@ -1072,7 +1072,7 @@ class HistoryStore:
         *,
         time_range: str = "all",
         model_names: list[str] | None = None,
-        aws_regions: list[str] | None = None,
+        cluster_scopes: list[str] | None = None,
         record_limit: int = 40,
     ) -> dict[str, Any] | None:
         if not self.enabled or self._session_factory is None:
@@ -1084,7 +1084,7 @@ class HistoryStore:
 
         since = self._resolve_since(time_range)
         normalized_model_names = self._normalize_filter_values(model_names)
-        normalized_regions = self._normalize_filter_values(aws_regions)
+        normalized_regions = self._normalize_filter_values(cluster_scopes)
 
         base_run_conditions = []
         if since is not None:
@@ -1092,7 +1092,7 @@ class HistoryStore:
         if normalized_model_names:
             base_run_conditions.append(AgentRunRecord.model_name.in_(normalized_model_names))
         if normalized_regions:
-            base_run_conditions.append(AgentRunRecord.aws_region.in_(normalized_regions))
+            base_run_conditions.append(AgentRunRecord.cluster_scope.in_(normalized_regions))
 
         with self._session_factory() as session:
             metric_rows = session.execute(
@@ -1138,7 +1138,7 @@ class HistoryStore:
                 "dimensions": self._json_load(metric.dimensions_json),
                 "status": run.status,
                 "model_name": run.model_name,
-                "aws_region": run.aws_region,
+                "cluster_scope": run.cluster_scope,
                 "duration_ms": run.duration_ms,
                 "prompt_excerpt": self._trim_text(run.prompt, 120),
                 "tool_arguments": self._json_load(step.tool_arguments_json) if step is not None else None,
@@ -1164,7 +1164,7 @@ class HistoryStore:
             "filters": {
                 "time_range": time_range,
                 "model_names": normalized_model_names,
-                "aws_regions": normalized_regions,
+                "cluster_scopes": normalized_regions,
                 "applied_since": since.isoformat() if since is not None else None,
                 "record_limit": record_limit,
             },
@@ -1724,7 +1724,7 @@ class HistoryStore:
                 "created_at": left["created_at"],
                 "status": left["status"],
                 "model_name": left["model_name"],
-                "aws_region": left["aws_region"],
+                "cluster_scope": left["cluster_scope"],
                 "duration_ms": left["duration_ms"],
                 "step_count": left["step_count"],
             },
@@ -1733,7 +1733,7 @@ class HistoryStore:
                 "created_at": right["created_at"],
                 "status": right["status"],
                 "model_name": right["model_name"],
-                "aws_region": right["aws_region"],
+                "cluster_scope": right["cluster_scope"],
                 "duration_ms": right["duration_ms"],
                 "step_count": right["step_count"],
             },
@@ -2023,9 +2023,9 @@ class HistoryStore:
     def _humanize_tool_name(tool_name: str) -> str:
         name = tool_name.removeprefix("list_").removeprefix("get_").removeprefix("run_")
         label = name.replace("_", " ").strip().title()
-        label = label.replace("Aws", "AWS").replace("Ec2", "EC2").replace("Efs", "EFS").replace("Kms", "KMS")
-        label = label.replace("Vpc", "VPC").replace("Tgw", "TGW").replace("Ssm", "SSM")
-        label = label.replace("Waf", "WAF").replace("Api", "API").replace("Controltower", "Control Tower")
+        label = label.replace("Scc", "SCC").replace("Pvc", "PVC").replace("Mcp", "MCP")
+        label = label.replace("Api", "API").replace("Csv", "CSV").replace("Olm", "OLM")
+        label = label.replace("Oc", "OC").replace("Tls", "TLS")
         return label
 
     @staticmethod
@@ -2075,7 +2075,7 @@ class HistoryStore:
 
     def export_runs_csv(self, *, time_range: str = "all", limit: int = 500) -> str:
         if not self.enabled or self._session_factory is None:
-            return "run_id,created_at,status,model_name,aws_region,duration_ms,step_count,prompt_excerpt\n"
+            return "run_id,created_at,status,model_name,cluster_scope,duration_ms,step_count,prompt_excerpt\n"
         since = self._resolve_since(time_range)
         conditions = []
         if since is not None:
@@ -2084,14 +2084,14 @@ class HistoryStore:
             rows = session.scalars(
                 select(AgentRunRecord).where(*conditions).order_by(desc(AgentRunRecord.created_at)).limit(limit)
             ).all()
-        lines = ["run_id,created_at,status,model_name,aws_region,duration_ms,step_count,tokens,tags,prompt_excerpt"]
+        lines = ["run_id,created_at,status,model_name,cluster_scope,duration_ms,step_count,tokens,tags,prompt_excerpt"]
         for r in rows:
             excerpt = self._trim_text(r.prompt, 80).replace('"', '""')
             tags_str = (self._json_load(r.tags_json) if r.tags_json else "") or ""
             if isinstance(tags_str, list):
                 tags_str = ";".join(tags_str)
             lines.append(
-                f'{r.id},{r.created_at.isoformat()},{r.status},{r.model_name},{r.aws_region},'
+                f'{r.id},{r.created_at.isoformat()},{r.status},{r.model_name},{r.cluster_scope},'
                 f'{r.duration_ms},{r.step_count},{r.token_total},"{tags_str}","{excerpt}"'
             )
         return "\n".join(lines) + "\n"

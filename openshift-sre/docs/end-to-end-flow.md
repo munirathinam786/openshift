@@ -1,6 +1,6 @@
 # End-to-End Code Flow
 
-This page maps the complete repository flow from operator input to AWS data collection, persistence, dashboard drilldown, and CSV export.
+This page maps the complete repository flow from operator input to cluster data collection, persistence, dashboard drilldown, and CSV export.
 
 ## End-to-end diagram
 
@@ -16,14 +16,14 @@ This page maps the complete repository flow from operator input to AWS data coll
 │ Entry points                 │
 │ - ui/src/app-shell.jsx       │
 │ - docs/console.html          │
-│ - src/aws_sre_agent/cli.py   │
-│ - src/aws_sre_agent/api.py   │
+│ - src/openshift_sre_agent/cli.py   │
+│ - src/openshift_sre_agent/api.py   │
 └──────────────┬───────────────┘
                │ POST /chat
                ▼
 ┌──────────────────────────────┐
-│ AwsSreAgent                  │
-│ src/aws_sre_agent/agent.py   │
+│ OpenShiftSreAgent                  │
+│ src/openshift_sre_agent/agent.py   │
 │ - prompt assembly            │
 │ - reasoning loop             │
 │ - tool call orchestration    │
@@ -34,7 +34,7 @@ This page maps the complete repository flow from operator input to AWS data coll
      ▼                   ▼
 ┌───────────────┐   ┌─────────────────────┐
 │ model_client  │   │ tools.py            │
-│ Ollama chat   │   │ boto3 / AWS CLI     │
+│ Ollama chat   │   │ kubernetes / oc CLI     │
 └──────┬────────┘   └─────────┬───────────┘
        │                      │
        └────────────┬─────────┘
@@ -80,18 +80,18 @@ This page maps the complete repository flow from operator input to AWS data coll
 
 ### 1. Runtime configuration
 
-- `src/aws_sre_agent/config.py`
+- `src/openshift_sre_agent/config.py`
   - Loads `.env`
-  - Defines runtime defaults for Ollama, AWS region, DB, and step limits
+  - Defines runtime defaults for Ollama, cluster scope, DB, and step limits
 - `.env` / `.env.example`
   - Runtime knobs for local and container execution
 
 ### 2. Operator entry points
 
-- `src/aws_sre_agent/cli.py`
+- `src/openshift_sre_agent/cli.py`
   - `ask` for direct terminal use
   - `serve` for API mode on port `8000`
-- `src/aws_sre_agent/api.py`
+- `src/openshift_sre_agent/api.py`
   - FastAPI entrypoint
   - Mounts the generated docs site at `/guide`
   - Exposes `/chat` plus all history endpoints
@@ -102,25 +102,25 @@ This page maps the complete repository flow from operator input to AWS data coll
 
 ### 3. Agent reasoning layer
 
-- `src/aws_sre_agent/prompts.py`
+- `src/openshift_sre_agent/prompts.py`
   - System instructions and structured envelope contract
-- `src/aws_sre_agent/model_client.py`
+- `src/openshift_sre_agent/model_client.py`
   - Ollama request wrapper
-- `src/aws_sre_agent/agent.py`
+- `src/openshift_sre_agent/agent.py`
   - Main reasoning loop
   - Tool selection, retry handling, final answer production
-- `src/aws_sre_agent/safety.py`
+- `src/openshift_sre_agent/safety.py`
   - Read-only safety checks for CLI-style calls
 
-### 4. AWS collection layer
+### 4. Cluster collection layer
 
-- `src/aws_sre_agent/tools.py`
-  - AWS data collection helpers across FinOps, security, platform, network, and data services
+- `src/openshift_sre_agent/tools.py`
+  - cluster data collection helpers across FinOps, security, platform, network, and data services
   - Returns structured result payloads that the agent can reason over
 
 ### 5. Persistence and aggregation layer
 
-- `src/aws_sre_agent/persistence.py`
+- `src/openshift_sre_agent/persistence.py`
   - Stores runs in `agent_runs`
   - Stores reasoning/tool steps in `agent_steps`
   - Extracts numeric metrics into `metric_snapshots`
@@ -151,7 +151,7 @@ This page maps the complete repository flow from operator input to AWS data coll
 3. `api.py` or `cli.py` creates runtime settings.
 4. `agent.py` sends the structured request to Ollama.
 5. The model either asks for a tool or returns a final answer.
-6. `tools.py` collects AWS data.
+6. `tools.py` collects cluster data.
 7. `agent.py` loops until a final answer is produced.
 8. `persistence.py` stores:
    - prompt and final answer
@@ -207,7 +207,7 @@ history.html
 config.py ───────┐
                  ├── api.py ──> agent.py ──> model_client.py
 .env(.example) ──┘        │          │
-                          │          └──> tools.py ──> AWS APIs
+                          │          └──> tools.py ──> OpenShift APIs
                           │
 ui/src/app-shell.jsx ──> ui/build.mjs ──> docs/assets/javascripts/app-shell.js
                           │

@@ -1,8 +1,8 @@
 from datetime import datetime, timedelta, timezone
 
-from aws_sre_agent.agent import AgentEnvelope, AwsSreAgent
-from aws_sre_agent.config import Settings
-from aws_sre_agent.tools import AwsSreToolkit
+from openshift_sre_agent.agent import AgentEnvelope, OpenShiftSreAgent
+from openshift_sre_agent.config import Settings
+from openshift_sre_agent.tools import OpenShiftSreToolkit
 
 
 class StubModel:
@@ -106,7 +106,7 @@ class FinopsCoverageToolkit:
 class CliDetourToolkit:
     def tool_manifest(self) -> list[dict]:
         return [
-            {"name": "run_read_only_aws_cli", "description": "test tool", "arguments": {}},
+            {"name": "run_read_only_oc_cli", "description": "test tool", "arguments": {}},
             {"name": "list_cost_and_usage_summary", "description": "test tool", "arguments": {}},
             {"name": "list_cost_by_service", "description": "test tool", "arguments": {}},
             {"name": "list_cost_by_tag", "description": "test tool", "arguments": {}},
@@ -116,13 +116,13 @@ class CliDetourToolkit:
         ]
 
     def invoke(self, name: str, arguments: dict) -> dict:
-        if name == "run_read_only_aws_cli":
+        if name == "run_read_only_oc_cli":
             raise AssertionError("CLI fallback should have been blocked before invocation")
         return {"count": 1}
 
 
 def test_parse_envelope() -> None:
-    envelope = AwsSreAgent._parse_envelope(
+    envelope = OpenShiftSreAgent._parse_envelope(
         '{"thought":"inspect","tool_call":null,"final_answer":"all good"}'
     )
     assert isinstance(envelope, AgentEnvelope)
@@ -130,7 +130,7 @@ def test_parse_envelope() -> None:
 
 
 def test_parse_envelope_recovers_json_from_chatty_response() -> None:
-    envelope = AwsSreAgent._parse_envelope(
+    envelope = OpenShiftSreAgent._parse_envelope(
         """Hello operator, here's the result.
 
 ```json
@@ -154,7 +154,7 @@ Please let me know if you'd like to continue.
 
 
 def test_parse_envelope_normalizes_model_specific_aliases() -> None:
-    envelope = AwsSreAgent._parse_envelope(
+    envelope = OpenShiftSreAgent._parse_envelope(
         '{"reasoning":"Need EC2 state","tool":{"tool_name":"list_ec2_instances","parameters":{"state_filter":"running"}},"answer":""}'
     )
 
@@ -166,7 +166,7 @@ def test_parse_envelope_normalizes_model_specific_aliases() -> None:
 
 
 def test_parse_envelope_normalizes_stringified_tool_arguments() -> None:
-    envelope = AwsSreAgent._parse_envelope(
+    envelope = OpenShiftSreAgent._parse_envelope(
         '{"thought":"Need EC2 state","function_call":{"name":"list_ec2_instances","arguments":"{\\"state_filter\\": \\"running\\"}"},"final_answer":""}'
     )
 
@@ -180,17 +180,17 @@ def test_agent_recovers_from_unknown_tool() -> None:
     settings = Settings(
         ollama_base_url="http://localhost:11434",
         local_model_name="test-model",
-        aws_region="us-east-1",
-        aws_profile=None,
-        aws_access_key_id=None,
-        aws_secret_access_key=None,
-        aws_session_token=None,
-        aws_ca_bundle=None,
-        aws_verify_ssl=True,
+        cluster_scope="us-east-1",
+        kube_context_name=None,
+        openshift_api_url_field=None,
+        openshift_token_field=None,
+        openshift_namespace_field=None,
+        tls_ca_bundle=None,
+        verify_ssl=True,
         allow_mutating_actions=False,
         agent_max_steps=4,
     )
-    agent = AwsSreAgent(settings)
+    agent = OpenShiftSreAgent(settings)
     agent.model = StubModel(
         [
             '{"thought":"Need subnet data","tool_call":{"name":"list_nonexistent_tool","arguments":{}},"final_answer":""}',
@@ -209,17 +209,17 @@ def test_agent_completes_tool_loop() -> None:
     settings = Settings(
         ollama_base_url="http://localhost:11434",
         local_model_name="test-model",
-        aws_region="us-east-1",
-        aws_profile=None,
-        aws_access_key_id=None,
-        aws_secret_access_key=None,
-        aws_session_token=None,
-        aws_ca_bundle=None,
-        aws_verify_ssl=True,
+        cluster_scope="us-east-1",
+        kube_context_name=None,
+        openshift_api_url_field=None,
+        openshift_token_field=None,
+        openshift_namespace_field=None,
+        tls_ca_bundle=None,
+        verify_ssl=True,
         allow_mutating_actions=False,
         agent_max_steps=4,
     )
-    agent = AwsSreAgent(settings)
+    agent = OpenShiftSreAgent(settings)
     agent.model = StubModel(
         [
             '{"thought":"Need EC2 state","tool_call":{"name":"list_ec2_instances","arguments":{"state_filter":"running"}},"final_answer":""}',
@@ -239,17 +239,17 @@ def test_agent_accepts_gpt_oss_style_envelope_aliases() -> None:
     settings = Settings(
         ollama_base_url="http://localhost:11434",
         local_model_name="test-model",
-        aws_region="us-east-1",
-        aws_profile=None,
-        aws_access_key_id=None,
-        aws_secret_access_key=None,
-        aws_session_token=None,
-        aws_ca_bundle=None,
-        aws_verify_ssl=True,
+        cluster_scope="us-east-1",
+        kube_context_name=None,
+        openshift_api_url_field=None,
+        openshift_token_field=None,
+        openshift_namespace_field=None,
+        tls_ca_bundle=None,
+        verify_ssl=True,
         allow_mutating_actions=False,
         agent_max_steps=4,
     )
-    agent = AwsSreAgent(settings)
+    agent = OpenShiftSreAgent(settings)
     agent.model = StubModel(
         [
             '{"reasoning":"Need EC2 state","tool":{"tool_name":"list_ec2_instances","parameters":{"state_filter":"running"}},"answer":""}',
@@ -269,17 +269,17 @@ def test_agent_augments_final_answer_with_service_state_summary() -> None:
     settings = Settings(
         ollama_base_url="http://localhost:11434",
         local_model_name="test-model",
-        aws_region="us-east-1",
-        aws_profile=None,
-        aws_access_key_id=None,
-        aws_secret_access_key=None,
-        aws_session_token=None,
-        aws_ca_bundle=None,
-        aws_verify_ssl=True,
+        cluster_scope="us-east-1",
+        kube_context_name=None,
+        openshift_api_url_field=None,
+        openshift_token_field=None,
+        openshift_namespace_field=None,
+        tls_ca_bundle=None,
+        verify_ssl=True,
         allow_mutating_actions=False,
         agent_max_steps=4,
     )
-    agent = AwsSreAgent(settings)
+    agent = OpenShiftSreAgent(settings)
     agent.model = StubModel(
         [
             '{"thought":"Check Security Hub findings","tool_call":{"name":"list_securityhub_findings","arguments":{}},"final_answer":""}',
@@ -300,7 +300,7 @@ def test_agent_augments_final_answer_with_service_state_summary() -> None:
                 return {
                     "count": 0,
                     "findings": [],
-                    "error": "An error occurred (InvalidAccessException) when calling the GetFindings operation: Account is not subscribed to AWS Security Hub",
+                    "error": "An error occurred (InvalidAccessException) when calling the GetFindings operation: Account is not subscribed to OpenShift Security",
                 }
             if name == "list_guardduty_findings":
                 return {"count": 0, "severity_counts": {}, "findings": []}
@@ -319,22 +319,22 @@ def test_agent_augments_final_answer_with_auth_summary() -> None:
     settings = Settings(
         ollama_base_url="http://localhost:11434",
         local_model_name="test-model",
-        aws_region="us-east-1",
-        aws_profile=None,
-        aws_access_key_id=None,
-        aws_secret_access_key=None,
-        aws_session_token=None,
-        aws_ca_bundle=None,
-        aws_verify_ssl=True,
+        cluster_scope="us-east-1",
+        kube_context_name=None,
+        openshift_api_url_field=None,
+        openshift_token_field=None,
+        openshift_namespace_field=None,
+        tls_ca_bundle=None,
+        verify_ssl=True,
         allow_mutating_actions=False,
         agent_max_steps=4,
     )
-    agent = AwsSreAgent(settings)
+    agent = OpenShiftSreAgent(settings)
     agent.model = StubModel(
         [
             '{"thought":"Check Security Hub findings","tool_call":{"name":"list_securityhub_findings","arguments":{}},"final_answer":""}',
             '{"thought":"Check GuardDuty findings","tool_call":{"name":"list_guardduty_findings","arguments":{}},"final_answer":""}',
-            '{"thought":"Summarize","tool_call":null,"final_answer":"Please verify your AWS credentials before retrying."}',
+            '{"thought":"Summarize","tool_call":null,"final_answer":"Please verify your cluster credentials before retrying."}',
         ]
     )
 
@@ -362,8 +362,8 @@ def test_agent_augments_final_answer_with_auth_summary() -> None:
 
     result = agent.ask("Summarize Security Hub findings and GuardDuty findings.")
 
-    assert "AWS credentials or the security token were rejected" in result.answer
-    assert "credentials or the security token were rejected by AWS" in result.answer
+    assert "cluster credentials or the security token were rejected" in result.answer
+    assert "credentials or the token were rejected by the cluster" in result.answer
     assert "Securityhub Findings" in result.answer
     assert "Guardduty Findings" in result.answer
     assert "Approve follow-up" in result.answer
@@ -376,19 +376,19 @@ def test_classify_error_message_distinguishes_auth_from_not_enabled() -> None:
     )
     not_enabled_message = (
         "An error occurred (InvalidAccessException) when calling the GetFindings operation: "
-        "Account is not subscribed to AWS Security Hub"
+        "Account is not subscribed to OpenShift Security"
     )
 
-    assert AwsSreAgent._classify_error_message(auth_message) == (
-        "credentials or the security token were rejected by AWS (UnrecognizedClientException)."
+    assert OpenShiftSreAgent._classify_error_message(auth_message) == (
+        "credentials or the token were rejected by the cluster (UnrecognizedClientException)."
     )
-    assert AwsSreAgent._classify_error_message(not_enabled_message) == (
+    assert OpenShiftSreAgent._classify_error_message(not_enabled_message) == (
         "not enabled or unsubscribed in this account/region (InvalidAccessException)."
     )
 
 
 def test_required_tools_for_finops_prompt() -> None:
-    required_tools = AwsSreAgent._required_tools_for_prompt(
+    required_tools = OpenShiftSreAgent._required_tools_for_prompt(
         "Run a FinOps drilldown with cost and usage summary, cost by service, cost by tag for Environment, cost forecast, Savings Plans coverage, and rightsizing recommendations."
     )
 
@@ -404,17 +404,17 @@ def test_system_prompt_limits_manifest_to_required_tools() -> None:
     settings = Settings(
         ollama_base_url="http://localhost:11434",
         local_model_name="test-model",
-        aws_region="us-east-1",
-        aws_profile=None,
-        aws_access_key_id=None,
-        aws_secret_access_key=None,
-        aws_session_token=None,
-        aws_ca_bundle=None,
-        aws_verify_ssl=True,
+        cluster_scope="us-east-1",
+        kube_context_name=None,
+        openshift_api_url_field=None,
+        openshift_token_field=None,
+        openshift_namespace_field=None,
+        tls_ca_bundle=None,
+        verify_ssl=True,
         allow_mutating_actions=False,
         agent_max_steps=4,
     )
-    agent = AwsSreAgent(settings)
+    agent = OpenShiftSreAgent(settings)
 
     class PromptToolkit:
         def tool_manifest(self, names=None) -> list[dict]:
@@ -437,8 +437,8 @@ def test_system_prompt_limits_manifest_to_required_tools() -> None:
 
 
 def test_required_tools_for_firewall_governance_prompt() -> None:
-    required_tools = AwsSreAgent._required_tools_for_prompt(
-        "Review AWS Network Firewall, AWS Firewall Manager, AWS Control Tower, and AWS Organizations posture."
+    required_tools = OpenShiftSreAgent._required_tools_for_prompt(
+        "Review OpenShift Network Policy, Network Policy Manager, Platform Control, and Platform Governance posture."
     )
 
     assert "list_network_firewalls" in required_tools
@@ -448,7 +448,7 @@ def test_required_tools_for_firewall_governance_prompt() -> None:
 
 
 def test_required_tools_for_container_runtime_prompt() -> None:
-    required_tools = AwsSreAgent._required_tools_for_prompt(
+    required_tools = OpenShiftSreAgent._required_tools_for_prompt(
         "Investigate ECS service degradation with pending tasks and review EKS nodegroups and cluster addons for workload readiness."
     )
 
@@ -459,7 +459,7 @@ def test_required_tools_for_container_runtime_prompt() -> None:
 
 
 def test_required_tools_for_failover_and_target_health_prompts() -> None:
-    required_tools = AwsSreAgent._required_tools_for_prompt(
+    required_tools = OpenShiftSreAgent._required_tools_for_prompt(
         "Review RDS failover posture, Aurora replica readiness, ALB target health, and EKS workload readiness with Fargate profiles and cluster insights."
     )
 
@@ -472,7 +472,7 @@ def test_required_tools_for_failover_and_target_health_prompts() -> None:
 
 
 def test_summarize_tool_result_for_finops_outputs() -> None:
-    cost_summary = AwsSreAgent._summarize_tool_result(
+    cost_summary = OpenShiftSreAgent._summarize_tool_result(
         "list_cost_by_service",
         "Cost By Service",
         {
@@ -483,7 +483,7 @@ def test_summarize_tool_result_for_finops_outputs() -> None:
             ],
         },
     )
-    rightsizing_summary = AwsSreAgent._summarize_tool_result(
+    rightsizing_summary = OpenShiftSreAgent._summarize_tool_result(
         "list_rightsizing_recommendations",
         "Rightsizing Recommendations",
         {
@@ -502,7 +502,7 @@ def test_summarize_tool_result_for_finops_outputs() -> None:
 
 
 def test_summarize_tool_result_for_container_runtime_outputs() -> None:
-    ecs_summary = AwsSreAgent._summarize_tool_result(
+    ecs_summary = OpenShiftSreAgent._summarize_tool_result(
         "list_ecs_services",
         "ECS Services",
         {
@@ -513,7 +513,7 @@ def test_summarize_tool_result_for_container_runtime_outputs() -> None:
             ],
         },
     )
-    eks_summary = AwsSreAgent._summarize_tool_result(
+    eks_summary = OpenShiftSreAgent._summarize_tool_result(
         "list_eks_nodegroups",
         "EKS Nodegroups",
         {
@@ -537,7 +537,7 @@ def test_summarize_tool_result_for_container_runtime_outputs() -> None:
 
 
 def test_summarize_tool_result_for_failover_and_target_health_outputs() -> None:
-    alb_summary = AwsSreAgent._summarize_tool_result(
+    alb_summary = OpenShiftSreAgent._summarize_tool_result(
         "list_alb_target_health",
         "ALB Target Health",
         {
@@ -549,7 +549,7 @@ def test_summarize_tool_result_for_failover_and_target_health_outputs() -> None:
             ],
         },
     )
-    rds_summary = AwsSreAgent._summarize_tool_result(
+    rds_summary = OpenShiftSreAgent._summarize_tool_result(
         "list_rds_failover_posture",
         "RDS Failover Posture",
         {
@@ -559,7 +559,7 @@ def test_summarize_tool_result_for_failover_and_target_health_outputs() -> None:
             "at_risk_cluster_count": 1,
         },
     )
-    eks_workload_summary = AwsSreAgent._summarize_tool_result(
+    eks_workload_summary = OpenShiftSreAgent._summarize_tool_result(
         "list_eks_workload_readiness",
         "EKS Workload Readiness",
         {
@@ -581,17 +581,17 @@ def test_agent_recovers_when_model_returns_empty_turn() -> None:
     settings = Settings(
         ollama_base_url="http://localhost:11434",
         local_model_name="test-model",
-        aws_region="us-east-1",
-        aws_profile=None,
-        aws_access_key_id=None,
-        aws_secret_access_key=None,
-        aws_session_token=None,
-        aws_ca_bundle=None,
-        aws_verify_ssl=True,
+        cluster_scope="us-east-1",
+        kube_context_name=None,
+        openshift_api_url_field=None,
+        openshift_token_field=None,
+        openshift_namespace_field=None,
+        tls_ca_bundle=None,
+        verify_ssl=True,
         allow_mutating_actions=False,
         agent_max_steps=4,
     )
-    agent = AwsSreAgent(settings)
+    agent = OpenShiftSreAgent(settings)
     agent.model = StubModel(
         [
             '{"thought":"","tool_call":null,"final_answer":""}',
@@ -611,17 +611,17 @@ def test_agent_recovers_when_model_returns_invalid_json() -> None:
     settings = Settings(
         ollama_base_url="http://localhost:11434",
         local_model_name="test-model",
-        aws_region="us-east-1",
-        aws_profile=None,
-        aws_access_key_id=None,
-        aws_secret_access_key=None,
-        aws_session_token=None,
-        aws_ca_bundle=None,
-        aws_verify_ssl=True,
+        cluster_scope="us-east-1",
+        kube_context_name=None,
+        openshift_api_url_field=None,
+        openshift_token_field=None,
+        openshift_namespace_field=None,
+        tls_ca_bundle=None,
+        verify_ssl=True,
         allow_mutating_actions=False,
         agent_max_steps=4,
     )
-    agent = AwsSreAgent(settings)
+    agent = OpenShiftSreAgent(settings)
     agent.model = StubModel(
         [
             'thinking... maybe I should inspect something first',
@@ -641,17 +641,17 @@ def test_agent_requires_requested_service_check_before_finalizing() -> None:
     settings = Settings(
         ollama_base_url="http://localhost:11434",
         local_model_name="test-model",
-        aws_region="us-east-1",
-        aws_profile=None,
-        aws_access_key_id=None,
-        aws_secret_access_key=None,
-        aws_session_token=None,
-        aws_ca_bundle=None,
-        aws_verify_ssl=True,
+        cluster_scope="us-east-1",
+        kube_context_name=None,
+        openshift_api_url_field=None,
+        openshift_token_field=None,
+        openshift_namespace_field=None,
+        tls_ca_bundle=None,
+        verify_ssl=True,
         allow_mutating_actions=False,
         agent_max_steps=4,
     )
-    agent = AwsSreAgent(settings)
+    agent = OpenShiftSreAgent(settings)
     agent.model = StubModel(
         [
             '{"thought":"I can summarize immediately","tool_call":null,"final_answer":"No critical findings detected."}',
@@ -672,17 +672,17 @@ def test_agent_requires_all_requested_services_for_multi_service_prompt() -> Non
     settings = Settings(
         ollama_base_url="http://localhost:11434",
         local_model_name="test-model",
-        aws_region="us-east-1",
-        aws_profile=None,
-        aws_access_key_id=None,
-        aws_secret_access_key=None,
-        aws_session_token=None,
-        aws_ca_bundle=None,
-        aws_verify_ssl=True,
+        cluster_scope="us-east-1",
+        kube_context_name=None,
+        openshift_api_url_field=None,
+        openshift_token_field=None,
+        openshift_namespace_field=None,
+        tls_ca_bundle=None,
+        verify_ssl=True,
         allow_mutating_actions=False,
         agent_max_steps=6,
     )
-    agent = AwsSreAgent(settings)
+    agent = OpenShiftSreAgent(settings)
     agent.model = StubModel(
         [
             '{"thought":"Start with Security Hub","tool_call":{"name":"list_securityhub_findings","arguments":{}},"final_answer":""}',
@@ -704,17 +704,17 @@ def test_agent_adapts_step_budget_for_finops_drilldown() -> None:
     settings = Settings(
         ollama_base_url="http://localhost:11434",
         local_model_name="test-model",
-        aws_region="us-east-1",
-        aws_profile=None,
-        aws_access_key_id=None,
-        aws_secret_access_key=None,
-        aws_session_token=None,
-        aws_ca_bundle=None,
-        aws_verify_ssl=True,
+        cluster_scope="us-east-1",
+        kube_context_name=None,
+        openshift_api_url_field=None,
+        openshift_token_field=None,
+        openshift_namespace_field=None,
+        tls_ca_bundle=None,
+        verify_ssl=True,
         allow_mutating_actions=False,
         agent_max_steps=4,
     )
-    agent = AwsSreAgent(settings)
+    agent = OpenShiftSreAgent(settings)
     agent.model = StubModel(
         [
             '{"thought":"summary first","tool_call":null,"final_answer":"Done early."}',
@@ -741,20 +741,20 @@ def test_agent_blocks_unprompted_cli_detour_for_finops_prompt() -> None:
     settings = Settings(
         ollama_base_url="http://localhost:11434",
         local_model_name="test-model",
-        aws_region="us-east-1",
-        aws_profile=None,
-        aws_access_key_id=None,
-        aws_secret_access_key=None,
-        aws_session_token=None,
-        aws_ca_bundle=None,
-        aws_verify_ssl=True,
+        cluster_scope="us-east-1",
+        kube_context_name=None,
+        openshift_api_url_field=None,
+        openshift_token_field=None,
+        openshift_namespace_field=None,
+        tls_ca_bundle=None,
+        verify_ssl=True,
         allow_mutating_actions=False,
         agent_max_steps=8,
     )
-    agent = AwsSreAgent(settings)
+    agent = OpenShiftSreAgent(settings)
     agent.model = StubModel(
         [
-            '{"thought":"try cli first","tool_call":{"name":"run_read_only_aws_cli","arguments":{"command":"aws s3 ls"}},"final_answer":""}',
+            '{"thought":"try cli first","tool_call":{"name":"run_read_only_oc_cli","arguments":{"command":"oc get pods"}},"final_answer":""}',
             '{"thought":"cost summary instead","tool_call":{"name":"list_cost_and_usage_summary","arguments":{}},"final_answer":""}',
             '{"thought":"cost by service","tool_call":{"name":"list_cost_by_service","arguments":{}},"final_answer":""}',
             '{"thought":"cost by tag","tool_call":{"name":"list_cost_by_tag","arguments":{}},"final_answer":""}',
@@ -771,7 +771,7 @@ def test_agent_blocks_unprompted_cli_detour_for_finops_prompt() -> None:
     )
 
     assert "FinOps done." in result.answer
-    assert result.steps[0]["tool_error"].startswith("Use the named AWS inspection tools")
+    assert result.steps[0]["tool_error"].startswith("Use the named OpenShift inspection tools")
     assert result.steps[1]["tool_call"]["name"] == "list_cost_and_usage_summary"
 
 
@@ -779,17 +779,17 @@ def test_agent_returns_fallback_answer_when_step_limit_is_reached() -> None:
     settings = Settings(
         ollama_base_url="http://localhost:11434",
         local_model_name="test-model",
-        aws_region="us-east-1",
-        aws_profile=None,
-        aws_access_key_id=None,
-        aws_secret_access_key=None,
-        aws_session_token=None,
-        aws_ca_bundle=None,
-        aws_verify_ssl=True,
+        cluster_scope="us-east-1",
+        kube_context_name=None,
+        openshift_api_url_field=None,
+        openshift_token_field=None,
+        openshift_namespace_field=None,
+        tls_ca_bundle=None,
+        verify_ssl=True,
         allow_mutating_actions=False,
         agent_max_steps=3,
     )
-    agent = AwsSreAgent(settings)
+    agent = OpenShiftSreAgent(settings)
     agent.model = StubModel(
         [
             '{"thought":"","tool_call":null,"final_answer":""}',
@@ -813,17 +813,17 @@ def test_agent_step_limit_answer_mentions_missing_required_tools() -> None:
     settings = Settings(
         ollama_base_url="http://localhost:11434",
         local_model_name="test-model",
-        aws_region="us-east-1",
-        aws_profile=None,
-        aws_access_key_id=None,
-        aws_secret_access_key=None,
-        aws_session_token=None,
-        aws_ca_bundle=None,
-        aws_verify_ssl=True,
+        cluster_scope="us-east-1",
+        kube_context_name=None,
+        openshift_api_url_field=None,
+        openshift_token_field=None,
+        openshift_namespace_field=None,
+        tls_ca_bundle=None,
+        verify_ssl=True,
         allow_mutating_actions=False,
         agent_max_steps=2,
     )
-    agent = AwsSreAgent(settings)
+    agent = OpenShiftSreAgent(settings)
     agent.model = StubModel(
         [
             '{"thought":"Summarize immediately","tool_call":null,"final_answer":"No issues found."}',
@@ -855,17 +855,17 @@ def test_agent_auto_invokes_missing_required_tool_after_premature_final_answer()
     settings = Settings(
         ollama_base_url="http://localhost:11434",
         local_model_name="test-model",
-        aws_region="us-east-1",
-        aws_profile=None,
-        aws_access_key_id=None,
-        aws_secret_access_key=None,
-        aws_session_token=None,
-        aws_ca_bundle=None,
-        aws_verify_ssl=True,
+        cluster_scope="us-east-1",
+        kube_context_name=None,
+        openshift_api_url_field=None,
+        openshift_token_field=None,
+        openshift_namespace_field=None,
+        tls_ca_bundle=None,
+        verify_ssl=True,
         allow_mutating_actions=False,
         agent_max_steps=4,
     )
-    agent = AwsSreAgent(settings)
+    agent = OpenShiftSreAgent(settings)
     agent.model = StubModel(
         [
             '{"thought":"I can summarize now","tool_call":null,"final_answer":"No major issues detected yet."}',
@@ -887,17 +887,17 @@ def test_agent_auto_invokes_missing_required_security_tool_after_repeated_invali
     settings = Settings(
         ollama_base_url="http://localhost:11434",
         local_model_name="test-model",
-        aws_region="us-east-1",
-        aws_profile=None,
-        aws_access_key_id=None,
-        aws_secret_access_key=None,
-        aws_session_token=None,
-        aws_ca_bundle=None,
-        aws_verify_ssl=True,
+        cluster_scope="us-east-1",
+        kube_context_name=None,
+        openshift_api_url_field=None,
+        openshift_token_field=None,
+        openshift_namespace_field=None,
+        tls_ca_bundle=None,
+        verify_ssl=True,
         allow_mutating_actions=False,
         agent_max_steps=8,
     )
-    agent = AwsSreAgent(settings)
+    agent = OpenShiftSreAgent(settings)
     agent.model = StubModel(
         [
             '{"thought":"Start with CloudTrail trails","tool_call":{"name":"list_cloudtrail_trails","arguments":{}},"final_answer":""}',
@@ -910,7 +910,7 @@ def test_agent_auto_invokes_missing_required_security_tool_after_repeated_invali
     agent.toolkit = SecurityCoverageToolkit()
 
     result = agent.ask(
-        "Perform an AWS security review covering CloudTrail trails, Security Hub standards, and Security Hub findings."
+        "Perform an OpenShift security review covering CloudTrail trails, Security Hub standards, and Security Hub findings."
     )
 
     auto_recovery_steps = [step for step in result.steps if step.get("auto_recovery")]
@@ -924,17 +924,17 @@ def test_agent_augments_finops_recommendations_with_fix_plan_and_execution_appro
     settings = Settings(
         ollama_base_url="http://localhost:11434",
         local_model_name="test-model",
-        aws_region="us-east-1",
-        aws_profile=None,
-        aws_access_key_id=None,
-        aws_secret_access_key=None,
-        aws_session_token=None,
-        aws_ca_bundle=None,
-        aws_verify_ssl=True,
+        cluster_scope="us-east-1",
+        kube_context_name=None,
+        openshift_api_url_field=None,
+        openshift_token_field=None,
+        openshift_namespace_field=None,
+        tls_ca_bundle=None,
+        verify_ssl=True,
         allow_mutating_actions=False,
         agent_max_steps=4,
     )
-    agent = AwsSreAgent(settings)
+    agent = OpenShiftSreAgent(settings)
     agent.model = StubModel(
         [
             '{"thought":"Need rightsizing data","tool_call":{"name":"list_rightsizing_recommendations","arguments":{}},"final_answer":""}',
@@ -970,25 +970,25 @@ def test_agent_augments_finops_recommendations_with_fix_plan_and_execution_appro
 
 
 def test_prompt_allows_cli_only_when_explicit() -> None:
-    assert AwsSreAgent._prompt_allows_cli("Run a read-only AWS CLI command to inspect S3.") is True
-    assert AwsSreAgent._prompt_allows_cli("Run a FinOps drilldown with cost by service.") is False
+    assert OpenShiftSreAgent._prompt_allows_cli("Run a read-only oc CLI command to inspect S3.") is True
+    assert OpenShiftSreAgent._prompt_allows_cli("Run a FinOps drilldown with cost by service.") is False
 
 
 def test_list_cost_by_tag_defaults_environment_tag() -> None:
     settings = Settings(
         ollama_base_url="http://localhost:11434",
         local_model_name="test-model",
-        aws_region="us-east-1",
-        aws_profile=None,
-        aws_access_key_id=None,
-        aws_secret_access_key=None,
-        aws_session_token=None,
-        aws_ca_bundle=None,
-        aws_verify_ssl=True,
+        cluster_scope="us-east-1",
+        kube_context_name=None,
+        openshift_api_url_field=None,
+        openshift_token_field=None,
+        openshift_namespace_field=None,
+        tls_ca_bundle=None,
+        verify_ssl=True,
         allow_mutating_actions=False,
         agent_max_steps=8,
     )
-    toolkit = AwsSreToolkit(settings)
+    toolkit = OpenShiftSreToolkit(settings)
 
     class FakeCeClient:
         def __init__(self) -> None:
@@ -1023,17 +1023,17 @@ def test_list_rightsizing_recommendations_uses_supported_api_shape() -> None:
     settings = Settings(
         ollama_base_url="http://localhost:11434",
         local_model_name="test-model",
-        aws_region="us-east-1",
-        aws_profile=None,
-        aws_access_key_id=None,
-        aws_secret_access_key=None,
-        aws_session_token=None,
-        aws_ca_bundle=None,
-        aws_verify_ssl=True,
+        cluster_scope="us-east-1",
+        kube_context_name=None,
+        openshift_api_url_field=None,
+        openshift_token_field=None,
+        openshift_namespace_field=None,
+        tls_ca_bundle=None,
+        verify_ssl=True,
         allow_mutating_actions=False,
         agent_max_steps=8,
     )
-    toolkit = AwsSreToolkit(settings)
+    toolkit = OpenShiftSreToolkit(settings)
 
     class FakeCeClient:
         def __init__(self) -> None:
@@ -1059,17 +1059,17 @@ def test_get_cost_forecast_uses_current_day_as_start() -> None:
     settings = Settings(
         ollama_base_url="http://localhost:11434",
         local_model_name="test-model",
-        aws_region="us-east-1",
-        aws_profile=None,
-        aws_access_key_id=None,
-        aws_secret_access_key=None,
-        aws_session_token=None,
-        aws_ca_bundle=None,
-        aws_verify_ssl=True,
+        cluster_scope="us-east-1",
+        kube_context_name=None,
+        openshift_api_url_field=None,
+        openshift_token_field=None,
+        openshift_namespace_field=None,
+        tls_ca_bundle=None,
+        verify_ssl=True,
         allow_mutating_actions=False,
         agent_max_steps=8,
     )
-    toolkit = AwsSreToolkit(settings)
+    toolkit = OpenShiftSreToolkit(settings)
 
     class FakeCeClient:
         def __init__(self) -> None:
@@ -1100,35 +1100,35 @@ def test_list_network_firewalls_returns_inventory_summary() -> None:
     settings = Settings(
         ollama_base_url="http://localhost:11434",
         local_model_name="test-model",
-        aws_region="us-east-1",
-        aws_profile=None,
-        aws_access_key_id=None,
-        aws_secret_access_key=None,
-        aws_session_token=None,
-        aws_ca_bundle=None,
-        aws_verify_ssl=True,
+        cluster_scope="us-east-1",
+        kube_context_name=None,
+        openshift_api_url_field=None,
+        openshift_token_field=None,
+        openshift_namespace_field=None,
+        tls_ca_bundle=None,
+        verify_ssl=True,
         allow_mutating_actions=False,
         agent_max_steps=8,
     )
-    toolkit = AwsSreToolkit(settings)
+    toolkit = OpenShiftSreToolkit(settings)
 
     class FakeNetworkFirewallClient:
         def list_firewalls(self, **kwargs):
             assert kwargs["MaxResults"] == 50
-            return {"Firewalls": [{"FirewallName": "corp-egress", "FirewallArn": "arn:aws:network-firewall:::firewall/corp-egress"}]}
+            return {"Firewalls": [{"FirewallName": "corp-egress", "FirewallArn": "openshift:network-policy:::firewall/corp-egress"}]}
 
         def list_firewall_policies(self, **kwargs):
             assert kwargs["MaxResults"] == 50
-            return {"FirewallPolicies": [{"Name": "corp-policy", "Arn": "arn:aws:network-firewall:::policy/corp-policy"}]}
+            return {"FirewallPolicies": [{"Name": "corp-policy", "Arn": "openshift:network-policy:::policy/corp-policy"}]}
 
         def describe_firewall(self, **kwargs):
-            assert kwargs["FirewallArn"] == "arn:aws:network-firewall:::firewall/corp-egress"
+            assert kwargs["FirewallArn"] == "openshift:network-policy:::firewall/corp-egress"
             return {
                 "Firewall": {
                     "FirewallName": "corp-egress",
                     "FirewallId": "fw-123",
                     "VpcId": "vpc-123",
-                    "FirewallPolicyArn": "arn:aws:network-firewall:::policy/corp-policy",
+                    "FirewallPolicyArn": "openshift:network-policy:::policy/corp-policy",
                     "SubnetMappings": [{"SubnetId": "subnet-1"}, {"SubnetId": "subnet-2"}],
                     "DeleteProtection": True,
                     "FirewallPolicyChangeProtection": True,
@@ -1152,17 +1152,17 @@ def test_list_firewall_manager_policies_returns_policy_summary() -> None:
     settings = Settings(
         ollama_base_url="http://localhost:11434",
         local_model_name="test-model",
-        aws_region="us-east-1",
-        aws_profile=None,
-        aws_access_key_id=None,
-        aws_secret_access_key=None,
-        aws_session_token=None,
-        aws_ca_bundle=None,
-        aws_verify_ssl=True,
+        cluster_scope="us-east-1",
+        kube_context_name=None,
+        openshift_api_url_field=None,
+        openshift_token_field=None,
+        openshift_namespace_field=None,
+        tls_ca_bundle=None,
+        verify_ssl=True,
         allow_mutating_actions=False,
         agent_max_steps=8,
     )
-    toolkit = AwsSreToolkit(settings)
+    toolkit = OpenShiftSreToolkit(settings)
 
     class FakeFmsClient:
         def list_policies(self, **kwargs):
@@ -1171,9 +1171,9 @@ def test_list_firewall_manager_policies_returns_policy_summary() -> None:
                 "PolicyList": [
                     {
                         "PolicyId": "policy-123",
-                        "PolicyArn": "arn:aws:fms:::policy/policy-123",
+                        "PolicyArn": "openshift:policy:::policy/policy-123",
                         "PolicyName": "global-waf-policy",
-                        "ResourceType": "AWS::ElasticLoadBalancingV2::LoadBalancer",
+                        "ResourceType": "Route",
                         "SecurityServiceType": "WAFV2",
                         "RemediationEnabled": True,
                         "PolicyStatus": "ACTIVE",
@@ -1187,7 +1187,7 @@ def test_list_firewall_manager_policies_returns_policy_summary() -> None:
             return {
                 "Policy": {
                     "PolicyId": "policy-123",
-                    "ResourceTypeList": ["AWS::ElasticLoadBalancingV2::LoadBalancer"],
+                    "ResourceTypeList": ["Route"],
                     "SecurityServicePolicyData": {"Type": "WAFV2"},
                     "PolicyStatus": "ACTIVE",
                 }
@@ -1207,28 +1207,28 @@ def test_list_controltower_controls_returns_landing_zone_and_controls() -> None:
     settings = Settings(
         ollama_base_url="http://localhost:11434",
         local_model_name="test-model",
-        aws_region="us-east-1",
-        aws_profile=None,
-        aws_access_key_id=None,
-        aws_secret_access_key=None,
-        aws_session_token=None,
-        aws_ca_bundle=None,
-        aws_verify_ssl=True,
+        cluster_scope="us-east-1",
+        kube_context_name=None,
+        openshift_api_url_field=None,
+        openshift_token_field=None,
+        openshift_namespace_field=None,
+        tls_ca_bundle=None,
+        verify_ssl=True,
         allow_mutating_actions=False,
         agent_max_steps=8,
     )
-    toolkit = AwsSreToolkit(settings)
+    toolkit = OpenShiftSreToolkit(settings)
 
     class FakeControlTowerClient:
         def list_landing_zones(self, **kwargs):
             assert kwargs["maxResults"] == 20
-            return {"landingZones": [{"arn": "arn:aws:controltower:us-east-1:123456789012:landingzone/lz-123"}]}
+            return {"landingZones": [{"arn": ""openshift:resource/placeholder"}]}
 
         def get_landing_zone(self, **kwargs):
-            assert kwargs["landingZoneIdentifier"] == "arn:aws:controltower:us-east-1:123456789012:landingzone/lz-123"
+            assert kwargs["landingZoneIdentifier"] == ""openshift:resource/placeholder"
             return {
                 "landingZone": {
-                    "arn": "arn:aws:controltower:us-east-1:123456789012:landingzone/lz-123",
+                    "arn": ""openshift:resource/placeholder",
                     "status": "ACTIVE",
                     "driftStatus": "IN_SYNC",
                     "version": "3.3",
@@ -1237,14 +1237,14 @@ def test_list_controltower_controls_returns_landing_zone_and_controls() -> None:
             }
 
         def list_enabled_controls(self, **kwargs):
-            assert kwargs["targetIdentifier"] == "arn:aws:controltower:us-east-1:123456789012:landingzone/lz-123"
+            assert kwargs["targetIdentifier"] == ""openshift:resource/placeholder"
             assert kwargs["maxResults"] == 50
             return {
                 "enabledControls": [
                     {
-                        "arn": "arn:aws:controltower:us-east-1:123456789012:enabledcontrol/ec-123",
-                        "controlIdentifier": "AWS-GR_ENCRYPTED_VOLUMES",
-                        "targetIdentifier": "arn:aws:controltower:us-east-1:123456789012:landingzone/lz-123",
+                        "arn": ""openshift:resource/placeholder",
+                        "controlIdentifier": "OCP-ETCD-ENCRYPTION",
+                        "targetIdentifier": ""openshift:resource/placeholder",
                         "statusSummary": {"status": "SUCCEEDED"},
                         "driftStatusSummary": {"driftStatus": "IN_SYNC"},
                     }
@@ -1266,33 +1266,33 @@ def test_list_ecs_services_returns_runtime_health_summary() -> None:
     settings = Settings(
         ollama_base_url="http://localhost:11434",
         local_model_name="test-model",
-        aws_region="us-east-1",
-        aws_profile=None,
-        aws_access_key_id=None,
-        aws_secret_access_key=None,
-        aws_session_token=None,
-        aws_ca_bundle=None,
-        aws_verify_ssl=True,
+        cluster_scope="us-east-1",
+        kube_context_name=None,
+        openshift_api_url_field=None,
+        openshift_token_field=None,
+        openshift_namespace_field=None,
+        tls_ca_bundle=None,
+        verify_ssl=True,
         allow_mutating_actions=False,
         agent_max_steps=8,
     )
-    toolkit = AwsSreToolkit(settings)
+    toolkit = OpenShiftSreToolkit(settings)
 
     class FakeEcsClient:
         def list_clusters(self):
-            return {"clusterArns": ["arn:aws:ecs:us-east-1:123456789012:cluster/prod-cluster"]}
+            return {"clusterArns": [""openshift:resource/placeholder"]}
 
         def list_services(self, **kwargs):
-            assert kwargs["cluster"] == "arn:aws:ecs:us-east-1:123456789012:cluster/prod-cluster"
+            assert kwargs["cluster"] == ""openshift:resource/placeholder"
             return {
                 "serviceArns": [
-                    "arn:aws:ecs:us-east-1:123456789012:service/prod-cluster/orders",
-                    "arn:aws:ecs:us-east-1:123456789012:service/prod-cluster/payments",
+                    ""openshift:resource/placeholder",
+                    ""openshift:resource/placeholder",
                 ]
             }
 
         def describe_services(self, **kwargs):
-            assert kwargs["cluster"] == "arn:aws:ecs:us-east-1:123456789012:cluster/prod-cluster"
+            assert kwargs["cluster"] == ""openshift:resource/placeholder"
             return {
                 "services": [
                     {
@@ -1337,17 +1337,17 @@ def test_list_eks_nodegroups_returns_nodegroup_and_addon_posture() -> None:
     settings = Settings(
         ollama_base_url="http://localhost:11434",
         local_model_name="test-model",
-        aws_region="us-east-1",
-        aws_profile=None,
-        aws_access_key_id=None,
-        aws_secret_access_key=None,
-        aws_session_token=None,
-        aws_ca_bundle=None,
-        aws_verify_ssl=True,
+        cluster_scope="us-east-1",
+        kube_context_name=None,
+        openshift_api_url_field=None,
+        openshift_token_field=None,
+        openshift_namespace_field=None,
+        tls_ca_bundle=None,
+        verify_ssl=True,
         allow_mutating_actions=False,
         agent_max_steps=8,
     )
-    toolkit = AwsSreToolkit(settings)
+    toolkit = OpenShiftSreToolkit(settings)
 
     class FakeEksClient:
         def list_clusters(self):
@@ -1384,7 +1384,7 @@ def test_list_eks_nodegroups_returns_nodegroup_and_addon_posture() -> None:
                 "addon": {
                     "status": "DEGRADED",
                     "addonVersion": "v1.18.0-eksbuild.1",
-                    "serviceAccountRoleArn": "arn:aws:iam::123456789012:role/eks-addon",
+                    "serviceAccountRoleArn": ""openshift:resource/placeholder",
                     "health": {"issues": [{"code": "InsufficientNumberOfReplicas"}]},
                 }
             }
@@ -1405,17 +1405,17 @@ def test_list_alb_target_health_returns_unhealthy_target_summary() -> None:
     settings = Settings(
         ollama_base_url="http://localhost:11434",
         local_model_name="test-model",
-        aws_region="us-east-1",
-        aws_profile=None,
-        aws_access_key_id=None,
-        aws_secret_access_key=None,
-        aws_session_token=None,
-        aws_ca_bundle=None,
-        aws_verify_ssl=True,
+        cluster_scope="us-east-1",
+        kube_context_name=None,
+        openshift_api_url_field=None,
+        openshift_token_field=None,
+        openshift_namespace_field=None,
+        tls_ca_bundle=None,
+        verify_ssl=True,
         allow_mutating_actions=False,
         agent_max_steps=8,
     )
-    toolkit = AwsSreToolkit(settings)
+    toolkit = OpenShiftSreToolkit(settings)
 
     class FakeElbv2Client:
         def describe_target_groups(self):
@@ -1423,13 +1423,13 @@ def test_list_alb_target_health_returns_unhealthy_target_summary() -> None:
                 "TargetGroups": [
                     {
                         "TargetGroupName": "orders-blue",
-                        "TargetGroupArn": "arn:aws:elasticloadbalancing:us-east-1:123456789012:targetgroup/orders-blue/abc",
+                        "TargetGroupArn": ""openshift:resource/placeholder",
                         "TargetType": "ip",
                         "Protocol": "HTTP",
                         "Port": 80,
                         "HealthCheckProtocol": "HTTP",
                         "HealthCheckPath": "/healthz",
-                        "LoadBalancerArns": ["arn:aws:elasticloadbalancing:us-east-1:123456789012:loadbalancer/app/orders/xyz"],
+                        "LoadBalancerArns": [""openshift:resource/placeholder"],
                     }
                 ]
             }
@@ -1459,17 +1459,17 @@ def test_list_rds_failover_posture_returns_instance_and_cluster_summary() -> Non
     settings = Settings(
         ollama_base_url="http://localhost:11434",
         local_model_name="test-model",
-        aws_region="us-east-1",
-        aws_profile=None,
-        aws_access_key_id=None,
-        aws_secret_access_key=None,
-        aws_session_token=None,
-        aws_ca_bundle=None,
-        aws_verify_ssl=True,
+        cluster_scope="us-east-1",
+        kube_context_name=None,
+        openshift_api_url_field=None,
+        openshift_token_field=None,
+        openshift_namespace_field=None,
+        tls_ca_bundle=None,
+        verify_ssl=True,
         allow_mutating_actions=False,
         agent_max_steps=8,
     )
-    toolkit = AwsSreToolkit(settings)
+    toolkit = OpenShiftSreToolkit(settings)
 
     class FakeRdsClient:
         def describe_db_instances(self):
@@ -1477,7 +1477,7 @@ def test_list_rds_failover_posture_returns_instance_and_cluster_summary() -> Non
                 "DBInstances": [
                     {
                         "DBInstanceIdentifier": "orders-db",
-                        "DBInstanceArn": "arn:aws:rds:us-east-1:123456789012:db:orders-db",
+                        "DBInstanceArn": ""openshift:resource/placeholder",
                         "Engine": "postgres",
                         "DBInstanceStatus": "available",
                         "MultiAZ": False,
@@ -1516,7 +1516,7 @@ def test_list_rds_failover_posture_returns_instance_and_cluster_summary() -> Non
             return {
                 "PendingMaintenanceActions": [
                     {
-                        "ResourceIdentifier": "arn:aws:rds:us-east-1:123456789012:db:orders-db",
+                        "ResourceIdentifier": ""openshift:resource/placeholder",
                         "PendingMaintenanceActionDetails": [{"Action": "system-update"}],
                     }
                 ]
@@ -1538,17 +1538,17 @@ def test_list_eks_workload_readiness_returns_fargate_profiles_and_insights() -> 
     settings = Settings(
         ollama_base_url="http://localhost:11434",
         local_model_name="test-model",
-        aws_region="us-east-1",
-        aws_profile=None,
-        aws_access_key_id=None,
-        aws_secret_access_key=None,
-        aws_session_token=None,
-        aws_ca_bundle=None,
-        aws_verify_ssl=True,
+        cluster_scope="us-east-1",
+        kube_context_name=None,
+        openshift_api_url_field=None,
+        openshift_token_field=None,
+        openshift_namespace_field=None,
+        tls_ca_bundle=None,
+        verify_ssl=True,
         allow_mutating_actions=False,
         agent_max_steps=8,
     )
-    toolkit = AwsSreToolkit(settings)
+    toolkit = OpenShiftSreToolkit(settings)
 
     class FakeEksWorkloadClient:
         def list_clusters(self):
@@ -1564,7 +1564,7 @@ def test_list_eks_workload_readiness_returns_fargate_profiles_and_insights() -> 
             return {
                 "fargateProfile": {
                     "status": "ACTIVE",
-                    "podExecutionRoleArn": "arn:aws:iam::123456789012:role/eks-fargate",
+                    "podExecutionRoleArn": ""openshift:resource/placeholder",
                     "subnets": ["subnet-1", "subnet-2"],
                     "selectors": [{"namespace": "payments"}, {"namespace": "checkout"}],
                 }
@@ -1602,13 +1602,13 @@ def test_settings_with_overrides_prefers_request_values() -> None:
     base = Settings(
         ollama_base_url="http://localhost:11434",
         local_model_name="base-model",
-        aws_region="us-east-1",
-        aws_profile="default",
-        aws_access_key_id=None,
-        aws_secret_access_key=None,
-        aws_session_token=None,
-        aws_ca_bundle=None,
-        aws_verify_ssl=True,
+        cluster_scope="us-east-1",
+        kube_context_name="default",
+        openshift_api_url_field=None,
+        openshift_token_field=None,
+        openshift_namespace_field=None,
+        tls_ca_bundle=None,
+        verify_ssl=True,
         allow_mutating_actions=False,
         agent_max_steps=8,
     )
@@ -1616,20 +1616,20 @@ def test_settings_with_overrides_prefers_request_values() -> None:
     overridden = base.with_overrides(
         ollama_base_url="http://host.containers.internal:11434",
         local_model_name="qwen3:8b",
-        aws_region="eu-west-1",
-        aws_access_key_id="test-access-key",
-        aws_secret_access_key="test-secret",
-        aws_session_token="test-token",
-        aws_ca_bundle="/tmp/test-ca.pem",
-        aws_verify_ssl=False,
+        cluster_scope="eu-west-1",
+        openshift_api_url_field="test-access-key",
+        openshift_token_field="test-secret",
+        openshift_namespace_field="test-token",
+        tls_ca_bundle="/tmp/test-ca.pem",
+        verify_ssl=False,
     )
 
     assert overridden.ollama_base_url == "http://host.containers.internal:11434"
     assert overridden.local_model_name == "qwen3:8b"
-    assert overridden.aws_region == "eu-west-1"
-    assert overridden.aws_profile is None
-    assert overridden.aws_access_key_id == "test-access-key"
-    assert overridden.aws_secret_access_key == "test-secret"
-    assert overridden.aws_session_token == "test-token"
-    assert overridden.aws_ca_bundle == "/tmp/test-ca.pem"
-    assert overridden.aws_verify_ssl is False
+    assert overridden.cluster_scope == "eu-west-1"
+    assert overridden.kube_context_name is None
+    assert overridden.openshift_api_url_field == "test-access-key"
+    assert overridden.openshift_token_field == "test-secret"
+    assert overridden.openshift_namespace_field == "test-token"
+    assert overridden.tls_ca_bundle == "/tmp/test-ca.pem"
+    assert overridden.verify_ssl is False

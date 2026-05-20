@@ -14,7 +14,7 @@ That folder contains the complete runtime:
 ## Where the code lives
 
 - Application root: `openshift-sre/`
-- Runtime source: `openshift-sre/src/aws_sre_agent/`
+- Runtime source: `openshift-sre/src/openshift_sre_agent/`
 - Operator docs and consoles: `openshift-sre/docs/`
 - Container workflow: `openshift-sre/compose.yaml` and `openshift-sre/Containerfile`
 

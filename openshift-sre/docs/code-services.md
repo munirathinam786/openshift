@@ -1,10 +1,10 @@
 # Service & API Files
 
-This page covers the AWS service toolkit, HTTP API, and CLI entry points.
+This page covers the platform service toolkit, HTTP API, and CLI entry points.
 
 It now also covers the historical persistence layer that stores prompt runs and extracted metrics for the browser dashboard.
 
-## `src/aws_sre_agent/persistence.py`
+## `src/openshift_sre_agent/persistence.py`
 
 This module turns ephemeral tool output into a historical telemetry store.
 
@@ -27,7 +27,7 @@ The extractor intentionally stores:
 
 The persistence layer now also stores FinOps queue items and their execution-planning state, which lets the browser queue survive refreshes and container restarts.
 
-## `src/aws_sre_agent/api.py`
+## `src/openshift_sre_agent/api.py`
 
 This module is the FastAPI entry point.
 
@@ -54,11 +54,11 @@ The historical overview payload now includes:
 
 For concrete request and response examples, see [`API reference`](api-reference.md).
 
-## `src/aws_sre_agent/tools.py`
+## `src/openshift_sre_agent/tools.py`
 
-This is the largest file in the project because it contains the actual AWS inspection capabilities. Each tool is explicitly registered, discoverable by the model through the tool manifest, and executed through guarded `boto3` clients or the restricted AWS CLI fallback.
+This is the largest file in the project because it contains the actual cluster inspection capabilities. Each tool is explicitly registered, discoverable by the model through the tool manifest, and executed through guarded kubernetes clients or the restricted oc CLI fallback.
 
-The current live toolkit also includes `SSM`, `Parameter Store`, `Secrets Manager`, `EventBridge`, `ECR`, `WAF`, `AWS Network Firewall`, `AWS Firewall Manager`, `AWS Control Tower`, ALB/NLB `target group` coverage, FinOps helpers like `Cost Explorer` summary/service/tag drilldowns, `cost forecast`, `Savings Plans coverage`, and `rightsizing recommendations`, capacity/infrastructure helpers like `Auto Scaling`, `EBS`, and `CloudFormation`, and governance/security domains like `CloudTrail`, `AWS Config`, `GuardDuty`, `Detective`, `Inspector`, `Macie`, `IAM Access Analyzer`, `KMS`, `Security Hub`, `EFS`, `Backup`, and `AWS Organizations`, including deeper findings/compliance and mapping summaries, on top of the compute, data, and network helpers shown below.
+The current live toolkit also includes `SSM`, `Parameter Store`, `Secrets Manager`, `EventBridge`, `ECR`, `WAF`, `OpenShift Network Policy`, `Network Policy Manager`, `Platform Control`, ALB/NLB `target group` coverage, FinOps helpers like `Cost Explorer` summary/service/tag drilldowns, `cost forecast`, `Savings Plans coverage`, and `rightsizing recommendations`, capacity/infrastructure helpers like `Auto Scaling`, `EBS`, and `CloudFormation`, and governance/security domains like `CloudTrail`, `OpenShift Config`, `GuardDuty`, `Detective`, `Inspector`, `Macie`, `IAM Access Analyzer`, `KMS`, `Security Hub`, `EFS`, `Backup`, and `Platform Governance`, including deeper findings/compliance and mapping summaries, on top of the compute, data, and network helpers shown below.
 
 For the FinOps path specifically, the live code now defaults `cost by tag` drilldowns to the `Environment` tag when the model omits a key, and the rightsizing helper uses the currently supported Cost Explorer request shape instead of the older invalid lookback parameter that caused runtime validation failures.
 
@@ -67,9 +67,9 @@ For the FinOps path specifically, the live code now defaults `cost by tag` drill
 The key moving parts are:
 
 - `ToolSpec` for the manifest entries sent to the model
-- `AwsSessionFactory` for consistent boto3 session creation
-- `AwsSreToolkit.tool_manifest()` to expose available tools and argument shapes
-- `AwsSreToolkit.invoke(...)` to dispatch a named tool call
+- `AwsSessionFactory` for consistent kubernetes session creation
+- `OpenShiftSreToolkit.tool_manifest()` to expose available tools and argument shapes
+- `OpenShiftSreToolkit.invoke(...)` to dispatch a named tool call
 - `_client(...)` and the FinOps helper methods for shared client and money handling
 
 ### Service groupings in the live toolkit
@@ -94,12 +94,12 @@ from datetime import datetime, timedelta, timezone
 from time import sleep
 from typing import Any, Callable
 
-import boto3
+import kubernetes
 from botocore.config import Config
 from botocore.session import Session as BotocoreSession
 
 from .config import Settings
-from .safety import ensure_read_only_aws_cli
+from .safety import ensure_read_only_oc_cli
 
 
 ToolHandler = Callable[..., dict[str, Any]]
@@ -114,25 +114,25 @@ class ToolSpec:
 
 
 class AwsSessionFactory:
-    """Creates boto3 sessions with a consistent region/profile configuration."""
+    """Creates kubernetes sessions with a consistent region/profile configuration."""
 
     def __init__(self, settings: Settings) -> None:
         self._settings = settings
 
-    def create(self) -> boto3.Session:
+    def create(self) -> kubernetes.Session:
         botocore_session = BotocoreSession()
-        if self._settings.aws_profile:
-            botocore_session.set_config_variable("profile", self._settings.aws_profile)
-        return boto3.Session(
+        if self._settings.kube_context_name:
+            botocore_session.set_config_variable("profile", self._settings.kube_context_name)
+        return kubernetes.Session(
             botocore_session=botocore_session,
-            region_name=self._settings.aws_region,
-            aws_access_key_id=self._settings.aws_access_key_id,
-            aws_secret_access_key=self._settings.aws_secret_access_key,
-            aws_session_token=self._settings.aws_session_token,
+            region_name=self._settings.cluster_scope,
+            openshift_api_url_field=self._settings.openshift_api_url_field,
+            openshift_token_field=self._settings.openshift_token_field,
+            openshift_namespace_field=self._settings.openshift_namespace_field,
         )
 
 
-class AwsSreToolkit:
+class OpenShiftSreToolkit:
     def __init__(self, settings: Settings) -> None:
         self._settings = settings
         self._session_factory = AwsSessionFactory(settings)
@@ -172,7 +172,7 @@ class AwsSreToolkit:
                 name="get_cloudwatch_metric",
                 description="Fetch CloudWatch datapoints for a named metric and namespace.",
                 arguments={
-                    "namespace": "CloudWatch namespace, for example AWS/EC2 or AWS/ApplicationELB.",
+                    "namespace": "OpenShift monitoring namespace.",
                     "metric_name": "Metric name, for example CPUUtilization.",
                     "dimensions": "Optional dictionary of dimension name/value pairs.",
                     "stat": "Statistic such as Average, Maximum, Sum, or p99.",
@@ -317,11 +317,11 @@ class AwsSreToolkit:
                 arguments={},
                 handler=self.list_emr_clusters,
             ),
-            "run_read_only_aws_cli": ToolSpec(
-                name="run_read_only_aws_cli",
-                description="Run a read-only AWS CLI command for edge-case diagnostics.",
-                arguments={"command": "Full AWS CLI command starting with aws."},
-                handler=self.run_read_only_aws_cli,
+            "run_read_only_oc_cli": ToolSpec(
+                name="run_read_only_oc_cli",
+                description="Run a read-only oc CLI command for edge-case diagnostics.",
+                arguments={"command": "Full oc CLI command starting with oc."},
+                handler=self.run_read_only_oc_cli,
             ),
         }
 
@@ -342,9 +342,9 @@ class AwsSreToolkit:
         return tool.handler(**arguments)
 
     def _client(self, service_name: str):
-        verify: bool | str = self._settings.aws_verify_ssl
-        if self._settings.aws_ca_bundle:
-            verify = self._settings.aws_ca_bundle
+        verify: bool | str = self._settings.verify_ssl
+        if self._settings.tls_ca_bundle:
+            verify = self._settings.tls_ca_bundle
         return self._session_factory.create().client(service_name, config=self._client_config, verify=verify)
 
     def list_ec2_instances(self, state_filter: str | None = None) -> dict[str, Any]:
@@ -693,7 +693,7 @@ class AwsSreToolkit:
         for bucket in buckets:
             bucket_name = bucket.get("Name")
             try:
-                location = s3.get_bucket_location(Bucket=bucket_name).get("LocationConstraint") or "us-east-1"
+                location = s3.get_bucket_location(Bucket=bucket_name).get("LocationConstraint") or "local-cluster"
             except Exception:  # noqa: BLE001
                 location = "unknown"
             rows.append(
@@ -941,26 +941,26 @@ class AwsSreToolkit:
         ]
         return {"count": len(rows), "clusters": rows}
 
-    def run_read_only_aws_cli(self, command: str) -> dict[str, Any]:
-        parts = ensure_read_only_aws_cli(command)
+    def run_read_only_oc_cli(self, command: str) -> dict[str, Any]:
+        parts = ensure_read_only_oc_cli(command)
         env = os.environ.copy()
-        env["AWS_REGION"] = self._settings.aws_region
-        env["AWS_DEFAULT_REGION"] = self._settings.aws_region
-        if self._settings.aws_profile:
-            env["AWS_PROFILE"] = self._settings.aws_profile
-        elif "AWS_PROFILE" in env:
-            env.pop("AWS_PROFILE")
-        if self._settings.aws_access_key_id:
-            env["AWS_ACCESS_KEY_ID"] = self._settings.aws_access_key_id
-        if self._settings.aws_secret_access_key:
-            env["AWS_SECRET_ACCESS_KEY"] = self._settings.aws_secret_access_key
-        if self._settings.aws_session_token:
-            env["AWS_SESSION_TOKEN"] = self._settings.aws_session_token
-        if self._settings.aws_ca_bundle:
-            env["AWS_CA_BUNDLE"] = self._settings.aws_ca_bundle
-        elif "AWS_CA_BUNDLE" in env:
-            env.pop("AWS_CA_BUNDLE")
-        if not self._settings.aws_verify_ssl and "--no-verify-ssl" not in parts:
+        env["OPENSHIFT_CLUSTER"] = self._settings.cluster_scope
+        env["OPENSHIFT_CLUSTER"] = self._settings.cluster_scope
+        if self._settings.kube_context_name:
+            env["KUBECONFIG_CONTEXT"] = self._settings.kube_context_name
+        elif "KUBECONFIG_CONTEXT" in env:
+            env.pop("KUBECONFIG_CONTEXT")
+        if self._settings.openshift_api_url_field:
+            env["OPENSHIFT_API_URL"] = self._settings.openshift_api_url_field
+        if self._settings.openshift_token_field:
+            env["OPENSHIFT_TOKEN"] = self._settings.openshift_token_field
+        if self._settings.openshift_namespace_field:
+            env["OPENSHIFT_NAMESPACE"] = self._settings.openshift_namespace_field
+        if self._settings.tls_ca_bundle:
+            env["OPENSHIFT_CA_BUNDLE"] = self._settings.tls_ca_bundle
+        elif "OPENSHIFT_CA_BUNDLE" in env:
+            env.pop("OPENSHIFT_CA_BUNDLE")
+        if not self._settings.verify_ssl and "--no-verify-ssl" not in parts:
             parts.insert(1, "--no-verify-ssl")
         completed = subprocess.run(
             parts,
@@ -984,7 +984,7 @@ class AwsSreToolkit:
         }
 ````
 
-## `src/aws_sre_agent/api.py`
+## `src/openshift_sre_agent/api.py`
 
 This file exposes the agent over HTTP, mounts the generated MkDocs site, and lets callers provide per-request runtime overrides.
 
@@ -1000,7 +1000,7 @@ from fastapi.responses import RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
-from .agent import AwsSreAgent
+from .agent import OpenShiftSreAgent
 from .config import Settings
 
 
@@ -1019,9 +1019,9 @@ def _resolve_site_dir() -> Path | None:
 SITE_DIR = _resolve_site_dir()
 
 app = FastAPI(
-    title="AWS SRE Local Agent",
+    title="OpenShift SRE Local Agent",
     version="0.1.0",
-    description="Local-model AWS SRE assistant with guarded AWS operational tools.",
+    description="Local-model OpenShift SRE assistant with guarded OpenShift operational tools.",
 )
 
 if SITE_DIR is not None:
@@ -1033,13 +1033,13 @@ BASE_SETTINGS = Settings.load()
 class RuntimeConfig(BaseModel):
     ollama_base_url: str | None = Field(default=None, description="Optional Ollama base URL override.")
     local_model_name: str | None = Field(default=None, description="Optional local model name override.")
-    aws_region: str | None = Field(default=None, description="Optional AWS region override.")
-    aws_profile: str | None = Field(default=None, description="Optional AWS profile override.")
-    aws_access_key_id: str | None = Field(default=None, description="Optional AWS access key ID.")
-    aws_secret_access_key: str | None = Field(default=None, description="Optional AWS secret access key.")
-    aws_session_token: str | None = Field(default=None, description="Optional AWS session token.")
-    aws_ca_bundle: str | None = Field(default=None, description="Optional CA bundle path override.")
-    aws_verify_ssl: bool | None = Field(default=None, description="Optional AWS SSL verification override.")
+    cluster_scope: str | None = Field(default=None, description="Optional cluster scope override.")
+    kube_context_name: str | None = Field(default=None, description="Optional kube context override.")
+    openshift_api_url_field: str | None = Field(default=None, description="Optional OpenShift API URL.")
+    openshift_token_field: str | None = Field(default=None, description="Optional OpenShift token.")
+    openshift_namespace_field: str | None = Field(default=None, description="Optional OpenShift namespace.")
+    tls_ca_bundle: str | None = Field(default=None, description="Optional CA bundle path override.")
+    verify_ssl: bool | None = Field(default=None, description="Optional TLS verification override.")
     agent_max_steps: int | None = Field(default=None, ge=1, le=20, description="Optional reasoning step limit.")
 
 
@@ -1058,7 +1058,7 @@ def root():
     if SITE_DIR is not None:
         return RedirectResponse(url="/guide/")
     return {
-        "name": "AWS SRE Local Agent",
+        "name": "OpenShift SRE Local Agent",
         "status": "ok",
         "endpoints": {
             "health": "/health",
@@ -1077,17 +1077,17 @@ def health() -> dict[str, str]:
 def chat(request: ChatRequest) -> ChatResponse:
     try:
         runtime = request.runtime or RuntimeConfig()
-        agent = AwsSreAgent(
+        agent = OpenShiftSreAgent(
             BASE_SETTINGS.with_overrides(
                 ollama_base_url=runtime.ollama_base_url,
                 local_model_name=runtime.local_model_name,
-                aws_region=runtime.aws_region,
-                aws_profile=runtime.aws_profile,
-                aws_access_key_id=runtime.aws_access_key_id,
-                aws_secret_access_key=runtime.aws_secret_access_key,
-                aws_session_token=runtime.aws_session_token,
-                aws_ca_bundle=runtime.aws_ca_bundle,
-                aws_verify_ssl=runtime.aws_verify_ssl,
+                cluster_scope=runtime.cluster_scope,
+                kube_context_name=runtime.kube_context_name,
+                openshift_api_url_field=runtime.openshift_api_url_field,
+                openshift_token_field=runtime.openshift_token_field,
+                openshift_namespace_field=runtime.openshift_namespace_field,
+                tls_ca_bundle=runtime.tls_ca_bundle,
+                verify_ssl=runtime.verify_ssl,
                 agent_max_steps=runtime.agent_max_steps,
             )
         )
@@ -1097,7 +1097,7 @@ def chat(request: ChatRequest) -> ChatResponse:
     return ChatResponse(answer=result.answer, steps=result.steps)
 ````
 
-## `src/aws_sre_agent/cli.py`
+## `src/openshift_sre_agent/cli.py`
 
 The CLI offers a one-shot terminal mode and the HTTP server mode used by the container.
 
@@ -1110,19 +1110,19 @@ import typer
 from rich.console import Console
 from rich.panel import Panel
 
-from .agent import AwsSreAgent
+from .agent import OpenShiftSreAgent
 from .config import Settings
 
-app = typer.Typer(help="AWS SRE local-model agent")
+app = typer.Typer(help="OpenShift SRE local-model agent")
 console = Console()
 
 
 @app.command()
 def ask(prompt: str, show_steps: bool = typer.Option(True, help="Show the reasoning/tool trace.")) -> None:
-    """Ask the agent to investigate an AWS SRE question."""
-    agent = AwsSreAgent(Settings.load())
+    """Ask the agent to investigate an OpenShift SRE question."""
+    agent = OpenShiftSreAgent(Settings.load())
     result = agent.ask(prompt)
-    console.print(Panel.fit(result.answer, title="AWS SRE Agent"))
+    console.print(Panel.fit(result.answer, title="OpenShift SRE Agent"))
     if show_steps:
         console.print_json(json.dumps(result.steps, default=str))
 
@@ -1132,16 +1132,16 @@ def serve(host: str = "0.0.0.0", port: int = 8000) -> None:
     """Run the HTTP API that can be containerized or called from other tools."""
     import uvicorn
 
-    uvicorn.run("aws_sre_agent.api:app", host=host, port=port, reload=False)
+    uvicorn.run("openshift_sre_agent.api:app", host=host, port=port, reload=False)
 
 
 if __name__ == "__main__":
     app()
 ````
 
-## `src/aws_sre_agent/__main__.py`
+## `src/openshift_sre_agent/__main__.py`
 
-This file makes `python -m aws_sre_agent` work by delegating directly to the Typer app.
+This file makes `python -m openshift_sre_agent` work by delegating directly to the Typer app.
 
 ````python
 from .cli import app
@@ -1149,14 +1149,14 @@ from .cli import app
 app()
 ````
 
-## `src/aws_sre_agent/__init__.py`
+## `src/openshift_sre_agent/__init__.py`
 
-This is the package export file. It keeps the top-level import clean so callers can import `AwsSreAgent` directly from `aws_sre_agent` instead of reaching into module internals.
+This is the package export file. It keeps the top-level import clean so callers can import `OpenShiftSreAgent` directly from `openshift_sre_agent` instead of reaching into module internals.
 
 ````python
-"""AWS SRE local-model agent."""
+"""OpenShift SRE local-model agent."""
 
-from .agent import AwsSreAgent
+from .agent import OpenShiftSreAgent
 
-__all__ = ["AwsSreAgent"]
+__all__ = ["OpenShiftSreAgent"]
 ````

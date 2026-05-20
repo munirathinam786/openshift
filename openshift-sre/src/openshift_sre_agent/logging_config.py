@@ -1,4 +1,4 @@
-"""Structured JSON logging for the AWS SRE agent."""
+"""Structured JSON logging for the OpenShift SRE agent."""
 from __future__ import annotations
 
 import json
@@ -33,7 +33,7 @@ class JsonFormatter(logging.Formatter):
             payload["request_id"] = request_id
         if record.exc_info and record.exc_info[1]:
             payload["exception"] = self.formatException(record.exc_info)
-        for attr in ("tool_name", "step", "duration_ms", "model_name", "aws_region", "status_code"):
+        for attr in ("tool_name", "step", "duration_ms", "model_name", "cluster_scope", "status_code"):
             value = getattr(record, attr, None)
             if value is not None:
                 payload[attr] = value

@@ -2,15 +2,15 @@ from __future__ import annotations
 
 from unittest.mock import MagicMock, patch
 
-from aws_sre_agent.config import Settings
-from aws_sre_agent.model_client import ModelClient
+from openshift_sre_agent.config import Settings
+from openshift_sre_agent.model_client import ModelClient
 
 
 def test_model_client_openai_chat_request() -> None:
     settings = Settings(
         ollama_base_url="http://localhost:11434",
         local_model_name="gpt-oss:20b",
-        aws_region="us-east-1",
+        cluster_scope="us-east-1",
         llm_provider="openai",
         llm_model_name="gpt-4.1-mini",
         llm_base_url="https://api.openai.com/v1",
@@ -23,7 +23,7 @@ def test_model_client_openai_chat_request() -> None:
         "usage": {"prompt_tokens": 12, "completion_tokens": 8, "total_tokens": 20},
     }
 
-    with patch("aws_sre_agent.model_client.httpx.Client") as mock_client:
+    with patch("openshift_sre_agent.model_client.httpx.Client") as mock_client:
         client = mock_client.return_value.__enter__.return_value
         client.post.return_value = response
 
@@ -45,7 +45,7 @@ def test_model_client_gemini_chat_request() -> None:
     settings = Settings(
         ollama_base_url="http://localhost:11434",
         local_model_name="gpt-oss:20b",
-        aws_region="us-east-1",
+        cluster_scope="us-east-1",
         llm_provider="gemini",
         llm_model_name="gemini-2.0-flash",
         llm_base_url="https://generativelanguage.googleapis.com/v1beta",
@@ -58,7 +58,7 @@ def test_model_client_gemini_chat_request() -> None:
         "usageMetadata": {"promptTokenCount": 9, "candidatesTokenCount": 5, "totalTokenCount": 14},
     }
 
-    with patch("aws_sre_agent.model_client.httpx.Client") as mock_client:
+    with patch("openshift_sre_agent.model_client.httpx.Client") as mock_client:
         client = mock_client.return_value.__enter__.return_value
         client.post.return_value = response
 

@@ -1,5 +1,5 @@
 """Tests for middleware components (v0.3.0)."""
-from aws_sre_agent.middleware import detect_prompt_injection, RateLimitMiddleware
+from openshift_sre_agent.middleware import detect_prompt_injection, RateLimitMiddleware
 
 
 def test_detect_clean_prompt():

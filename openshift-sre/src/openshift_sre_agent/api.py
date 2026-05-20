@@ -21,7 +21,7 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 from starlette.responses import StreamingResponse
 
-from .agent import AwsSreAgent
+from .agent import OpenShiftSreAgent
 from .config import LLM_PROVIDER_METADATA, Settings, get_llm_provider_defaults, normalize_llm_provider
 from .logging_config import setup_logging
 from .middleware import (
@@ -35,11 +35,11 @@ from .middleware import (
 )
 from .model_client import CircuitOpen, OllamaClient
 from .persistence import HistoryStore
-from .tools import AwsSreToolkit
+from .tools import OpenShiftSreToolkit
 
 logger = logging.getLogger(__name__)
 STACK_CONTAINER_NAMES = {"openshift-sre-agent", "openshift-sre-agent-db"}
-AGENT_HELPERS = AwsSreAgent
+AGENT_HELPERS = OpenShiftSreAgent
 
 
 def _resolve_site_dir() -> Path | None:
@@ -169,17 +169,17 @@ class RuntimeConfig(BaseModel):
     kube_context: str | None = Field(default=None, description="Optional kube context override.")
     oc_cli_path: str | None = Field(default=None, description="Optional oc CLI path override.")
     openshift_verify_ssl: bool | None = Field(default=None, description="Optional cluster SSL verification override.")
-    aws_region: str | None = Field(default=None, description="Backward-compatible alias for cluster name.")
-    aws_regions: str | None = Field(default=None, description="Backward-compatible alias for project sweep scope.")
-    aws_profile: str | None = Field(default=None, description="Backward-compatible alias for kube context.")
-    aws_access_key_id: str | None = Field(default=None, description="Backward-compatible alias for API endpoint.")
-    aws_secret_access_key: str | None = Field(default=None, description="Backward-compatible alias for bearer token.")
-    aws_session_token: str | None = Field(default=None, description="Backward-compatible alias for namespace.")
-    aws_assume_role_arn: str | None = Field(default=None, description="Retained for compatibility; unused for OpenShift runtime.")
-    aws_assume_role_external_id: str | None = Field(default=None, description="Retained for compatibility; unused for OpenShift runtime.")
-    aws_role_session_name: str | None = Field(default=None, description="Retained for compatibility with historical API clients.")
-    aws_ca_bundle: str | None = Field(default=None, description="Retained for compatibility; prefer kubeconfig trust settings.")
-    aws_verify_ssl: bool | None = Field(default=None, description="Backward-compatible alias for cluster SSL verification override.")
+    cluster_scope: str | None = Field(default=None, description="Backward-compatible alias for cluster name.")
+    cluster_scopes: str | None = Field(default=None, description="Backward-compatible alias for project sweep scope.")
+    kube_context_name: str | None = Field(default=None, description="Backward-compatible alias for kube context.")
+    openshift_api_url_field: str | None = Field(default=None, description="Backward-compatible alias for API endpoint.")
+    openshift_token_field: str | None = Field(default=None, description="Backward-compatible alias for bearer token.")
+    openshift_namespace_field: str | None = Field(default=None, description="Backward-compatible alias for namespace.")
+    reserved_role_arn: str | None = Field(default=None, description="Retained for compatibility; unused for OpenShift runtime.")
+    reserved_role_external_id: str | None = Field(default=None, description="Retained for compatibility; unused for OpenShift runtime.")
+    agent_session_name: str | None = Field(default=None, description="Retained for compatibility with historical API clients.")
+    tls_ca_bundle: str | None = Field(default=None, description="Retained for compatibility; prefer kubeconfig trust settings.")
+    verify_ssl: bool | None = Field(default=None, description="Backward-compatible alias for cluster SSL verification override.")
     agent_max_steps: int | None = Field(default=None, ge=1, le=20, description="Optional reasoning step limit.")
 
 
@@ -312,17 +312,17 @@ def _runtime_settings(runtime: RuntimeConfig | None) -> Settings:
         kube_context=resolved_runtime.kube_context,
         oc_cli_path=resolved_runtime.oc_cli_path,
         openshift_verify_ssl=resolved_runtime.openshift_verify_ssl,
-        aws_region=resolved_runtime.aws_region,
-        aws_regions=resolved_runtime.aws_regions,
-        aws_profile=resolved_runtime.aws_profile,
-        aws_access_key_id=resolved_runtime.aws_access_key_id,
-        aws_secret_access_key=resolved_runtime.aws_secret_access_key,
-        aws_session_token=resolved_runtime.aws_session_token,
-        aws_assume_role_arn=resolved_runtime.aws_assume_role_arn,
-        aws_assume_role_external_id=resolved_runtime.aws_assume_role_external_id,
-        aws_role_session_name=resolved_runtime.aws_role_session_name,
-        aws_ca_bundle=resolved_runtime.aws_ca_bundle,
-        aws_verify_ssl=resolved_runtime.aws_verify_ssl,
+        cluster_scope=resolved_runtime.cluster_scope,
+        cluster_scopes=resolved_runtime.cluster_scopes,
+        kube_context_name=resolved_runtime.kube_context_name,
+        openshift_api_url_field=resolved_runtime.openshift_api_url_field,
+        openshift_token_field=resolved_runtime.openshift_token_field,
+        openshift_namespace_field=resolved_runtime.openshift_namespace_field,
+        reserved_role_arn=resolved_runtime.reserved_role_arn,
+        reserved_role_external_id=resolved_runtime.reserved_role_external_id,
+        agent_session_name=resolved_runtime.agent_session_name,
+        tls_ca_bundle=resolved_runtime.tls_ca_bundle,
+        verify_ssl=resolved_runtime.verify_ssl,
         agent_max_steps=resolved_runtime.agent_max_steps,
     )
 
@@ -339,7 +339,7 @@ def _execute_agent_prompt(
     settings = _runtime_settings(runtime)
     started_at = perf_counter()
     try:
-        agent = AwsSreAgent(settings)
+        agent = OpenShiftSreAgent(settings)
         if tags:
             agent.set_tags(tags)
         if conversation_id:
@@ -352,7 +352,7 @@ def _execute_agent_prompt(
             answer="",
             steps=[],
             model_name=settings.effective_model_name,
-            aws_region=settings.aws_region,
+            cluster_scope=settings.cluster_scope,
             duration_ms=int((perf_counter() - started_at) * 1000),
             status="failed",
             error_message=detail,
@@ -365,7 +365,7 @@ def _execute_agent_prompt(
         answer=result.answer,
         steps=result.steps,
         model_name=settings.effective_model_name,
-        aws_region=settings.aws_region,
+        cluster_scope=settings.cluster_scope,
         duration_ms=duration_ms,
         conversation_id=conversation_id,
         token_usage=result.token_usage,
@@ -503,7 +503,7 @@ def _build_security_audit_answer(
 
 def _run_batched_security_audit(request: SecurityAuditRequest) -> tuple[ChatResponse, Settings, int]:
     settings = _runtime_settings(request.runtime)
-    toolkit = AwsSreToolkit(settings)
+    toolkit = OpenShiftSreToolkit(settings)
     selected_features: list[str] = []
     invalid_features: list[str] = []
     for tool_name in request.selected_features:
@@ -524,7 +524,7 @@ def _run_batched_security_audit(request: SecurityAuditRequest) -> tuple[ChatResp
     prompt = _build_security_audit_prompt(
         profile_label=request.profile_label,
         focus_label=request.focus_label,
-        region=settings.aws_region,
+        region=settings.cluster_scope,
         selected_features=selected_features,
         operator_notes=request.operator_notes,
     )
@@ -549,7 +549,7 @@ def _run_batched_security_audit(request: SecurityAuditRequest) -> tuple[ChatResp
     answer = _build_security_audit_answer(
         profile_label=request.profile_label,
         focus_label=request.focus_label,
-        region=settings.aws_region,
+        region=settings.cluster_scope,
         operator_notes=request.operator_notes,
         steps=steps,
     )
@@ -561,7 +561,7 @@ def _run_batched_security_audit(request: SecurityAuditRequest) -> tuple[ChatResp
         answer=answer,
         steps=steps,
         model_name=settings.effective_model_name,
-        aws_region=settings.aws_region,
+        cluster_scope=settings.cluster_scope,
         duration_ms=duration_ms,
         token_usage={"prompt_tokens": 0, "completion_tokens": 0, "total_tokens": 0},
         tags=audit_tags,
@@ -756,7 +756,7 @@ def _get_container_observability() -> dict:
             }
             for row in ps_rows:
                 name = row.get("Names") or row.get("Name") or row.get("Container") or row.get("ContainerName")
-                if not name or (STACK_CONTAINER_NAMES and name not in STACK_CONTAINER_NAMES and not name.startswith("aws-sre-agent")):
+                if not name or (STACK_CONTAINER_NAMES and name not in STACK_CONTAINER_NAMES and not name.startswith("openshift-sre-agent")):
                     continue
                 stats = stats_by_name.get(name, {})
                 containers.append(
@@ -788,15 +788,15 @@ def _get_container_observability() -> dict:
         if _running_in_container():
             containers.append(
                 _build_container_stub(
-                    os.environ.get("HOSTNAME") or "aws-sre-agent",
-                    image="localhost/aws-sre-agent-local:dev",
+                    os.environ.get("HOSTNAME") or "openshift-sre-agent",
+                    image="localhost/openshift-sre-agent-local:dev",
                     note="This is the current application container. CPU usage requires Podman or Docker CLI visibility from the host.",
                     include_memory=True,
                 )
             )
         containers.append(
             _build_container_stub(
-                "aws-sre-agent-db",
+                "openshift-sre-agent-db",
                 image="docker.io/library/mariadb:11.4",
                 note="Database-specific utilization is reported in the database section below.",
             )
@@ -1255,8 +1255,8 @@ def history_overview(
     time_range: str = Query(default="all", pattern="^(24h|7d|30d|90d|all)$"),
     model_names: str | None = Query(default=None),
     model_name: str | None = Query(default=None, max_length=255),
-    aws_regions: str | None = Query(default=None),
-    aws_region: str | None = Query(default=None, max_length=64),
+    cluster_scopes: str | None = Query(default=None),
+    cluster_scope: str | None = Query(default=None, max_length=64),
     tool_names: str | None = Query(default=None),
     run_limit: int = Query(default=100, ge=1, le=500),
     run_offset: int = Query(default=0, ge=0, description="Pagination offset for recent_runs."),
@@ -1264,12 +1264,12 @@ def history_overview(
     series_limit: int = Query(default=12, ge=1, le=50),
 ) -> dict:
     parsed_model_names = _parse_csv_query(model_names) or _parse_csv_query(model_name)
-    parsed_regions = _parse_csv_query(aws_regions) or _parse_csv_query(aws_region)
+    parsed_regions = _parse_csv_query(cluster_scopes) or _parse_csv_query(cluster_scope)
     parsed_tool_names = _parse_csv_query(tool_names)
     return HISTORY_STORE.get_overview(
         time_range=time_range,
         model_names=parsed_model_names,
-        aws_regions=parsed_regions,
+        cluster_scopes=parsed_regions,
         tool_names=parsed_tool_names,
         run_limit=run_limit,
         point_limit=point_limit,
@@ -1291,8 +1291,8 @@ def history_tool_detail(
     time_range: str = Query(default="all", pattern="^(24h|7d|30d|90d|all)$"),
     model_names: str | None = Query(default=None),
     model_name: str | None = Query(default=None, max_length=255),
-    aws_regions: str | None = Query(default=None),
-    aws_region: str | None = Query(default=None, max_length=64),
+    cluster_scopes: str | None = Query(default=None),
+    cluster_scope: str | None = Query(default=None, max_length=64),
     run_limit: int = Query(default=25, ge=1, le=100),
     point_limit: int = Query(default=24, ge=1, le=120),
 ) -> dict:
@@ -1300,7 +1300,7 @@ def history_tool_detail(
         tool_name,
         time_range=time_range,
         model_names=_parse_csv_query(model_names) or _parse_csv_query(model_name),
-        aws_regions=_parse_csv_query(aws_regions) or _parse_csv_query(aws_region),
+        cluster_scopes=_parse_csv_query(cluster_scopes) or _parse_csv_query(cluster_scope),
         run_limit=run_limit,
         point_limit=point_limit,
     )
@@ -1315,15 +1315,15 @@ def history_metric_detail(
     time_range: str = Query(default="all", pattern="^(24h|7d|30d|90d|all)$"),
     model_names: str | None = Query(default=None),
     model_name: str | None = Query(default=None, max_length=255),
-    aws_regions: str | None = Query(default=None),
-    aws_region: str | None = Query(default=None, max_length=64),
+    cluster_scopes: str | None = Query(default=None),
+    cluster_scope: str | None = Query(default=None, max_length=64),
     record_limit: int = Query(default=40, ge=1, le=200),
 ) -> dict:
     detail = HISTORY_STORE.get_metric_detail(
         metric_key,
         time_range=time_range,
         model_names=_parse_csv_query(model_names) or _parse_csv_query(model_name),
-        aws_regions=_parse_csv_query(aws_regions) or _parse_csv_query(aws_region),
+        cluster_scopes=_parse_csv_query(cluster_scopes) or _parse_csv_query(cluster_scope),
         record_limit=record_limit,
     )
     if detail is None:
@@ -1367,7 +1367,7 @@ def chat_stream(request: ChatRequest) -> StreamingResponse:
     async def _generate() -> AsyncGenerator[str, None]:
         started_at = perf_counter()
         try:
-            agent = AwsSreAgent(settings)
+            agent = OpenShiftSreAgent(settings)
             if request.conversation_id:
                 agent.set_conversation_context(
                     HISTORY_STORE.get_conversation_turns(request.conversation_id, limit=5)
@@ -1381,7 +1381,7 @@ def chat_stream(request: ChatRequest) -> StreamingResponse:
                 answer=result.answer,
                 steps=result.steps,
                 model_name=settings.effective_model_name,
-                aws_region=settings.aws_region,
+                cluster_scope=settings.cluster_scope,
                 duration_ms=duration_ms,
                 conversation_id=request.conversation_id,
             )
@@ -1574,13 +1574,13 @@ def run_watchlist(watchlist_id: int, request: WatchlistRunRequest) -> dict:
         raise HTTPException(status_code=400, detail="Watchlist is missing a saved investigation")
 
     base_runtime = request.runtime or RuntimeConfig()
-    regions = watchlist.get("regions") or investigation.get("default_regions") or _parse_csv_query(BASE_SETTINGS.aws_regions) or [BASE_SETTINGS.aws_region]
-    role_arns = watchlist.get("role_arns") or [base_runtime.aws_assume_role_arn or BASE_SETTINGS.aws_assume_role_arn or None]
+    regions = watchlist.get("regions") or investigation.get("default_regions") or _parse_csv_query(BASE_SETTINGS.cluster_scopes) or [BASE_SETTINGS.cluster_scope]
+    role_arns = watchlist.get("role_arns") or [base_runtime.reserved_role_arn or BASE_SETTINGS.reserved_role_arn or None]
     tags = list(dict.fromkeys((watchlist.get("tags") or []) + (investigation.get("default_tags") or [])))
     results = []
     for region in regions:
         for role_arn in role_arns:
-            runtime = base_runtime.model_copy(update={"aws_region": region, "aws_assume_role_arn": role_arn})
+            runtime = base_runtime.model_copy(update={"cluster_scope": region, "reserved_role_arn": role_arn})
             response, _, _ = _execute_agent_prompt(prompt=investigation.get("prompt", ""), runtime=runtime, tags=tags)
             results.append(
                 {
@@ -1600,14 +1600,14 @@ def run_watchlist(watchlist_id: int, request: WatchlistRunRequest) -> dict:
 @app.post("/platform/sweep")
 def platform_sweep(request: PlatformSweepRequest) -> dict:
     settings = _runtime_settings(request.runtime)
-    regions = request.regions or _parse_csv_query(settings.aws_regions) or [settings.aws_region]
-    role_arns = request.role_arns or [settings.aws_assume_role_arn or None]
+    regions = request.regions or _parse_csv_query(settings.cluster_scopes) or [settings.cluster_scope]
+    role_arns = request.role_arns or [settings.reserved_role_arn or None]
 
     results = []
     for region in regions:
         for role_arn in role_arns:
-            scoped_settings = settings.with_overrides(aws_region=region, aws_assume_role_arn=role_arn)
-            toolkit = AwsSreToolkit(scoped_settings)
+            scoped_settings = settings.with_overrides(cluster_scope=region, reserved_role_arn=role_arn)
+            toolkit = OpenShiftSreToolkit(scoped_settings)
             invalid_tools = [tool_name for tool_name in request.tool_names if tool_name not in toolkit.tools]
             if invalid_tools:
                 raise HTTPException(status_code=400, detail=f"Unsupported tools requested: {', '.join(invalid_tools)}")

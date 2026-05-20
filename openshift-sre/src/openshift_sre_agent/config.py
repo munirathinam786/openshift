@@ -1,7 +1,7 @@
 """Runtime configuration and provider metadata for the OpenShift SRE agent.
 
-This module keeps the existing provider-catalog support while shifting the
-platform runtime from AWS to Red Hat OpenShift / Kubernetes access patterns.
+This module manages provider-catalog support and the platform runtime
+configuration for Red Hat OpenShift / Kubernetes access patterns.
 """
 
 from __future__ import annotations
@@ -124,23 +124,23 @@ class Settings:
 
     ollama_base_url: str
     local_model_name: str
-    aws_region: str
+    cluster_scope: str
     llm_provider: str = "ollama"
     llm_model_name: str | None = None
     llm_base_url: str | None = None
     llm_api_key: str | None = None
     llm_api_version: str | None = None
     llm_organization: str | None = None
-    aws_regions: str | None = None
-    aws_profile: str | None = None
-    aws_access_key_id: str | None = None
-    aws_secret_access_key: str | None = None
-    aws_session_token: str | None = None
-    aws_assume_role_arn: str | None = None
-    aws_assume_role_external_id: str | None = None
-    aws_role_session_name: str = "openshift-sre-local-agent"
-    aws_ca_bundle: str | None = None
-    aws_verify_ssl: bool = True
+    cluster_scopes: str | None = None
+    kube_context_name: str | None = None
+    openshift_api_url_field: str | None = None
+    openshift_token_field: str | None = None
+    openshift_namespace_field: str | None = None
+    reserved_role_arn: str | None = None
+    reserved_role_external_id: str | None = None
+    agent_session_name: str = "openshift-sre-local-agent"
+    tls_ca_bundle: str | None = None
+    verify_ssl: bool = True
     allow_mutating_actions: bool = False
     agent_max_steps: int = 8
     fallback_models: str | None = None
@@ -184,13 +184,13 @@ class Settings:
             encoded_password = quote_plus(db_password)
             database_url = f"mysql+pymysql://{db_user}:{encoded_password}@{db_host}:{db_port}/{db_name}"
 
-        openshift_cluster = getenv("OPENSHIFT_CLUSTER", getenv("AWS_REGION", "local-cluster"))
+        openshift_cluster = getenv("OPENSHIFT_CLUSTER", "local-cluster")
         openshift_namespace = getenv("OPENSHIFT_NAMESPACE", "openshift-monitoring")
-        openshift_projects = getenv("OPENSHIFT_PROJECTS") or getenv("AWS_SWEEP_REGIONS") or None
-        kube_context = getenv("KUBECONFIG_CONTEXT") or getenv("AWS_PROFILE") or None
+        openshift_projects = getenv("OPENSHIFT_PROJECTS") or None
+        kube_context = getenv("KUBECONFIG_CONTEXT") or None
         openshift_api_url = getenv("OPENSHIFT_API_URL") or None
         openshift_token = getenv("OPENSHIFT_TOKEN") or None
-        openshift_verify_ssl = getenv("OPENSHIFT_VERIFY_SSL", getenv("AWS_VERIFY_SSL", "true")).lower() != "false"
+        openshift_verify_ssl = getenv("OPENSHIFT_VERIFY_SSL", "true").lower() != "false"
         kubeconfig_path = getenv("KUBECONFIG_PATH") or None
         oc_cli_path = getenv("OC_CLI_PATH", "oc")
 
@@ -213,23 +213,23 @@ class Settings:
         return cls(
             ollama_base_url=getenv("OLLAMA_BASE_URL", "http://localhost:11434").rstrip("/"),
             local_model_name=getenv("LOCAL_MODEL_NAME", "gpt-oss:20b"),
-            aws_region=openshift_cluster,
+            cluster_scope=openshift_cluster,
             llm_provider=llm_provider,
             llm_model_name=llm_model_name,
             llm_base_url=llm_base_url,
             llm_api_key=llm_api_key,
             llm_api_version=llm_api_version,
             llm_organization=llm_organization,
-            aws_regions=openshift_projects,
-            aws_profile=kube_context,
-            aws_access_key_id=openshift_api_url,
-            aws_secret_access_key=openshift_token,
-            aws_session_token=openshift_namespace,
-            aws_assume_role_arn=None,
-            aws_assume_role_external_id=None,
-            aws_role_session_name=getenv("AWS_ROLE_SESSION_NAME", "openshift-sre-local-agent"),
-            aws_ca_bundle=None,
-            aws_verify_ssl=openshift_verify_ssl,
+            cluster_scopes=openshift_projects,
+            kube_context_name=kube_context,
+            openshift_api_url_field=openshift_api_url,
+            openshift_token_field=openshift_token,
+            openshift_namespace_field=openshift_namespace,
+            reserved_role_arn=None,
+            reserved_role_external_id=None,
+            agent_session_name=getenv("AGENT_SESSION_NAME", "openshift-sre-local-agent"),
+            tls_ca_bundle=None,
+            verify_ssl=openshift_verify_ssl,
             allow_mutating_actions=getenv("ALLOW_MUTATING_ACTIONS", "false").lower() == "true",
             agent_max_steps=int(getenv("AGENT_MAX_STEPS", "8")),
             fallback_models=fallback_models,
@@ -270,17 +270,17 @@ class Settings:
         llm_organization: str | None = None,
         ollama_base_url: str | None = None,
         local_model_name: str | None = None,
-        aws_region: str | None = None,
-        aws_regions: str | None = None,
-        aws_profile: str | None = None,
-        aws_access_key_id: str | None = None,
-        aws_secret_access_key: str | None = None,
-        aws_session_token: str | None = None,
-        aws_assume_role_arn: str | None = None,
-        aws_assume_role_external_id: str | None = None,
-        aws_role_session_name: str | None = None,
-        aws_ca_bundle: str | None = None,
-        aws_verify_ssl: bool | None = None,
+        cluster_scope: str | None = None,
+        cluster_scopes: str | None = None,
+        kube_context_name: str | None = None,
+        openshift_api_url_field: str | None = None,
+        openshift_token_field: str | None = None,
+        openshift_namespace_field: str | None = None,
+        reserved_role_arn: str | None = None,
+        reserved_role_external_id: str | None = None,
+        agent_session_name: str | None = None,
+        tls_ca_bundle: str | None = None,
+        verify_ssl: bool | None = None,
         agent_max_steps: int | None = None,
         database_enabled: bool | None = None,
         database_url: str | None = None,
@@ -303,42 +303,42 @@ class Settings:
     ) -> "Settings":
         normalized_provider = normalize_llm_provider(llm_provider or self.llm_provider)
         normalized_ollama_url = (ollama_base_url or self.ollama_base_url).rstrip("/")
-        resolved_cluster = openshift_cluster or aws_region or self.openshift_cluster
-        resolved_projects = openshift_projects if openshift_projects not in (None, "") else aws_regions
+        resolved_cluster = openshift_cluster or cluster_scope or self.openshift_cluster
+        resolved_projects = openshift_projects if openshift_projects not in (None, "") else cluster_scopes
         if resolved_projects in (None, ""):
             resolved_projects = self.openshift_projects
-        resolved_namespace = openshift_namespace or aws_session_token or self.openshift_namespace
-        resolved_context = kube_context or aws_profile or self.kube_context
-        resolved_api_url = openshift_api_url or aws_access_key_id or self.openshift_api_url
-        resolved_token = openshift_token or aws_secret_access_key or self.openshift_token
+        resolved_namespace = openshift_namespace or openshift_namespace_field or self.openshift_namespace
+        resolved_context = kube_context or kube_context_name or self.kube_context
+        resolved_api_url = openshift_api_url or openshift_api_url_field or self.openshift_api_url
+        resolved_token = openshift_token or openshift_token_field or self.openshift_token
         resolved_verify_ssl = self.openshift_verify_ssl
         if openshift_verify_ssl is not None:
             resolved_verify_ssl = openshift_verify_ssl
-        elif aws_verify_ssl is not None:
-            resolved_verify_ssl = aws_verify_ssl
+        elif verify_ssl is not None:
+            resolved_verify_ssl = verify_ssl
 
         return Settings(
             ollama_base_url=normalized_ollama_url,
             local_model_name=local_model_name or self.local_model_name,
-            aws_region=resolved_cluster,
+            cluster_scope=resolved_cluster,
             llm_provider=normalized_provider,
             llm_model_name=llm_model_name if llm_model_name not in (None, "") else self.llm_model_name,
             llm_base_url=llm_base_url if llm_base_url not in (None, "") else self.llm_base_url,
             llm_api_key=llm_api_key if llm_api_key not in (None, "") else self.llm_api_key,
             llm_api_version=llm_api_version if llm_api_version not in (None, "") else self.llm_api_version,
             llm_organization=llm_organization if llm_organization not in (None, "") else self.llm_organization,
-            aws_regions=resolved_projects,
-            aws_profile=resolved_context,
-            aws_access_key_id=resolved_api_url,
-            aws_secret_access_key=resolved_token,
-            aws_session_token=resolved_namespace,
-            aws_assume_role_arn=aws_assume_role_arn if aws_assume_role_arn not in (None, "") else self.aws_assume_role_arn,
-            aws_assume_role_external_id=(
-                aws_assume_role_external_id if aws_assume_role_external_id not in (None, "") else self.aws_assume_role_external_id
+            cluster_scopes=resolved_projects,
+            kube_context_name=resolved_context,
+            openshift_api_url_field=resolved_api_url,
+            openshift_token_field=resolved_token,
+            openshift_namespace_field=resolved_namespace,
+            reserved_role_arn=reserved_role_arn if reserved_role_arn not in (None, "") else self.reserved_role_arn,
+            reserved_role_external_id=(
+                reserved_role_external_id if reserved_role_external_id not in (None, "") else self.reserved_role_external_id
             ),
-            aws_role_session_name=aws_role_session_name or self.aws_role_session_name,
-            aws_ca_bundle=aws_ca_bundle if aws_ca_bundle not in (None, "") else self.aws_ca_bundle,
-            aws_verify_ssl=resolved_verify_ssl,
+            agent_session_name=agent_session_name or self.agent_session_name,
+            tls_ca_bundle=tls_ca_bundle if tls_ca_bundle not in (None, "") else self.tls_ca_bundle,
+            verify_ssl=resolved_verify_ssl,
             allow_mutating_actions=self.allow_mutating_actions,
             agent_max_steps=agent_max_steps or self.agent_max_steps,
             fallback_models=fallback_models if fallback_models not in (None, "") else self.fallback_models,
@@ -386,4 +386,4 @@ class Settings:
 
     @property
     def platform_scope(self) -> str:
-        return self.openshift_cluster or self.aws_region
+        return self.openshift_cluster or self.cluster_scope

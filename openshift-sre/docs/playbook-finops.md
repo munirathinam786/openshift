@@ -14,7 +14,7 @@ What to look for:
 
 Suggested prompts:
 
-- `Summarize AWS spend over the last 30 days and call out any obvious spikes.`
+- `Summarize cluster resource utilization over the last 30 days and call out any obvious spikes.`
 
 ## Cost by service
 

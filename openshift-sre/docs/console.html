@@ -272,27 +272,27 @@
                   <input id="external-api-version" class="agent-console__input" data-agent-external-api-version type="text" placeholder="Optional API version">
                 </div>
                 <div>
-                  <label class="agent-console__label" for="aws-region">Cluster name</label>
-                  <input id="aws-region" class="agent-console__input" data-agent-aws-region type="text" placeholder="prod-ocp-east">
+                  <label class="agent-console__label" for="cluster-scope">Cluster name</label>
+                  <input id="cluster-scope" class="agent-console__input" data-agent-cluster-scope type="text" placeholder="prod-ocp-east">
                 </div>
                 <div>
-                  <label class="agent-console__label" for="aws-profile">Namespace / project</label>
-                  <input id="aws-profile" class="agent-console__input" data-agent-aws-profile type="text" placeholder="openshift-ingress">
+                  <label class="agent-console__label" for="kube-context">Namespace / project</label>
+                  <input id="kube-context" class="agent-console__input" data-agent-kube-context type="text" placeholder="openshift-ingress">
                 </div>
                 <div>
-                  <label class="agent-console__label" for="aws-access-key-id">Kube context</label>
-                  <input id="aws-access-key-id" class="agent-console__input" data-agent-aws-access-key-id type="text" placeholder="admin@prod-ocp-east">
+                  <label class="agent-console__label" for="openshift-api-url">Kube context</label>
+                  <input id="openshift-api-url" class="agent-console__input" data-agent-openshift-api-url type="text" placeholder="admin@prod-ocp-east">
                 </div>
                 <div>
-                  <label class="agent-console__label" for="aws-secret-access-key">API token</label>
-                  <input id="aws-secret-access-key" class="agent-console__input" data-agent-aws-secret-access-key type="password" placeholder="Optional per-request override">
+                  <label class="agent-console__label" for="openshift-token">API token</label>
+                  <input id="openshift-token" class="agent-console__input" data-agent-openshift-token type="password" placeholder="Optional per-request override">
                 </div>
                 <div class="agent-console__grid-span-2">
-                  <label class="agent-console__label" for="aws-session-token">Kubeconfig path</label>
-                  <input id="aws-session-token" class="agent-console__input" data-agent-aws-session-token type="text" placeholder="~/.kube/config">
+                  <label class="agent-console__label" for="openshift-namespace">Kubeconfig path</label>
+                  <input id="openshift-namespace" class="agent-console__input" data-agent-openshift-namespace type="text" placeholder="~/.kube/config">
                 </div>
                 <label class="agent-console__checkbox agent-console__grid-span-2">
-                  <input data-agent-aws-verify-ssl type="checkbox" checked>
+                  <input data-agent-verify-ssl type="checkbox" checked>
                   <span>Verify cluster API certificates</span>
                 </label>
               </div>

@@ -5,11 +5,11 @@
   const toolsSelect = root.querySelector('[data-radar-tools]');
   const regionsInput = root.querySelector('[data-radar-regions]');
   const rolesInput = root.querySelector('[data-radar-roles]');
-  const awsProfileInput = root.querySelector('[data-radar-aws-profile]');
-  const awsAccessKeyIdInput = root.querySelector('[data-radar-aws-access-key-id]');
-  const awsSecretAccessKeyInput = root.querySelector('[data-radar-aws-secret-access-key]');
-  const awsSessionTokenInput = root.querySelector('[data-radar-aws-session-token]');
-  const awsVerifySslInput = root.querySelector('[data-radar-aws-verify-ssl]');
+  const kubeContextInput = root.querySelector('[data-radar-kube-context]');
+  const openshiftApiUrlInput = root.querySelector('[data-radar-openshift-api-url]');
+  const openshiftTokenInput = root.querySelector('[data-radar-openshift-token]');
+  const openshiftNamespaceInput = root.querySelector('[data-radar-openshift-namespace]');
+  const verifySslInput = root.querySelector('[data-radar-verify-ssl]');
   const runButton = root.querySelector('[data-radar-run]');
   const status = root.querySelector('[data-radar-status]');
   const reportStatus = root.querySelector('[data-radar-report-status]');
@@ -44,11 +44,11 @@
 
   function buildRuntime() {
     const runtime = {};
-    if (awsProfileInput?.value.trim()) runtime.aws_profile = awsProfileInput.value.trim();
-    if (awsAccessKeyIdInput?.value.trim()) runtime.aws_access_key_id = awsAccessKeyIdInput.value.trim();
-    if (awsSecretAccessKeyInput?.value.trim()) runtime.aws_secret_access_key = awsSecretAccessKeyInput.value.trim();
-    if (awsSessionTokenInput?.value.trim()) runtime.aws_session_token = awsSessionTokenInput.value.trim();
-    if (awsVerifySslInput) runtime.aws_verify_ssl = Boolean(awsVerifySslInput.checked);
+    if (kubeContextInput?.value.trim()) runtime.kube_context_name = kubeContextInput.value.trim();
+    if (openshiftApiUrlInput?.value.trim()) runtime.openshift_api_url = openshiftApiUrlInput.value.trim();
+    if (openshiftTokenInput?.value.trim()) runtime.openshift_token = openshiftTokenInput.value.trim();
+    if (openshiftNamespaceInput?.value.trim()) runtime.openshift_namespace = openshiftNamespaceInput.value.trim();
+    if (verifySslInput) runtime.verify_ssl = Boolean(verifySslInput.checked);
     return Object.keys(runtime).length ? runtime : undefined;
   }
 
@@ -166,7 +166,7 @@
       ['raw_tool_results', 'region', 'role_arn', 'tool_name', 'payload'],
       ...context.results.flatMap((target) => Object.entries(target.tool_results || {}).map(([toolName, payload]) => ['raw_tool_results', target.region || '', target.role_arn || '', toolName, JSON.stringify(payload)]))
     ];
-    downloadBlob(`aws-sre-posture-radar-${createTimestampSlug()}.csv`, new Blob([toCsv(rows)], { type: 'text/csv;charset=utf-8' }));
+    downloadBlob(`openshift-sre-posture-radar-${createTimestampSlug()}.csv`, new Blob([toCsv(rows)], { type: 'text/csv;charset=utf-8' }));
   }
 
   async function exportRadarPpt(context) {
@@ -175,7 +175,7 @@
     const pptx = new PptxGenJS();
     pptx.layout = 'LAYOUT_WIDE';
     pptx.author = 'GitHub Copilot';
-    pptx.company = 'AWS SRE Local Agent';
+    pptx.company = 'OpenShift SRE Local Agent';
     pptx.subject = context.reportLabel;
     pptx.title = context.reportLabel;
 
@@ -190,7 +190,7 @@
     detailSlide.addText('Target summary', { x: 0.5, y: 0.4, w: 6.0, h: 0.4, fontSize: 20, bold: true, color: '0F172A' });
     detailSlide.addText((context.summaries.length ? context.summaries : [{ account: 'No targets', region: '—', riskyGroups: '—', blackholeRoutes: '—', bucketRisk: '—', budgets: '—', spend: '—' }]).map((item) => `• ${item.account} (${item.region})\n  Role: ${item.roleArn}\n  Risky SGs: ${item.riskyGroups} · Blackhole routes: ${item.blackholeRoutes} · Bucket risk: ${item.bucketRisk} · Budgets: ${item.budgets} · Spend: ${item.spend}`).join('\n'), { x: 0.5, y: 1.0, w: 11.4, h: 5.6, fontSize: 11, color: '0F172A', margin: 0.12, fill: { color: 'FFFFFF' }, line: { color: 'CBD5E1' } });
 
-    await pptx.writeFile({ fileName: `aws-sre-posture-radar-${createTimestampSlug()}.pptx` });
+    await pptx.writeFile({ fileName: `openshift-sre-posture-radar-${createTimestampSlug()}.pptx` });
   }
 
   async function exportRadarPdf(context) {
@@ -231,7 +231,7 @@
       `Tools: ${context.toolNames.join(', ') || '—'}`
     ]);
     addBlock('Target summary', context.summaries.length ? context.summaries.map((item) => `${item.account} (${item.region}) — Role: ${item.roleArn}; Risky SGs: ${item.riskyGroups}; Blackhole routes: ${item.blackholeRoutes}; Bucket risk: ${item.bucketRisk}; Budgets: ${item.budgets}; Spend: ${item.spend}`) : ['No sweep targets were returned.']);
-    doc.save(`aws-sre-posture-radar-${createTimestampSlug()}.pdf`);
+    doc.save(`openshift-sre-posture-radar-${createTimestampSlug()}.pdf`);
   }
 
   async function exportRadarWord(context) {
@@ -264,7 +264,7 @@
     </div>
   </body>
 </html>`;
-    downloadBlob(`aws-sre-posture-radar-${createTimestampSlug()}.doc`, new Blob([html], { type: 'application/msword' }));
+    downloadBlob(`openshift-sre-posture-radar-${createTimestampSlug()}.doc`, new Blob([html], { type: 'application/msword' }));
   }
 
   async function handleExport(button) {

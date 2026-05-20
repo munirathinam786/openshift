@@ -14,7 +14,7 @@ It now supports:
 - a backend-persisted approval queue for future safe execution planning
 - explicit stage transitions for change control
 
-The queue is still **planning-only**. No AWS mutation is executed by the current UI or backend.
+The queue is still **planning-only**. No cluster mutation is executed by the current UI or backend.
 
 ## End-to-end flow
 
@@ -23,8 +23,8 @@ The queue is still **planning-only**. No AWS mutation is executed by the current
 3. `docs/assets/javascripts/agent-console.js` builds a workflow from the returned tool results
 4. the UI renders category summaries, savings tables, and action cards
 5. when the operator queues an action, the browser calls `POST /finops/queue`
-6. `src/aws_sre_agent/api.py` validates the request and forwards it to `HistoryStore.create_finops_queue_item(...)`
-7. `src/aws_sre_agent/persistence.py` stores the item in `FinopsQueueRecord`
+6. `src/openshift_sre_agent/api.py` validates the request and forwards it to `HistoryStore.create_finops_queue_item(...)`
+7. `src/openshift_sre_agent/persistence.py` stores the item in `FinopsQueueRecord`
 8. subsequent stage changes call `PATCH /finops/queue/{item_id}`
 9. the queue can be reloaded at any time with `GET /finops/queue`
 
@@ -45,7 +45,7 @@ The UI does not store queue state in browser-local storage anymore. Refreshing t
 
 ## Backend responsibilities
 
-### `src/aws_sre_agent/api.py`
+### `src/openshift_sre_agent/api.py`
 
 Owns the HTTP contract:
 
@@ -54,7 +54,7 @@ Owns the HTTP contract:
 - persistence availability checks
 - translating Python exceptions into FastAPI responses
 
-### `src/aws_sre_agent/persistence.py`
+### `src/openshift_sre_agent/persistence.py`
 
 Owns the durable storage contract:
 
@@ -85,7 +85,7 @@ If the operator enables **Auto approve queued FinOps actions** in the UI:
 - the request sets `auto_approve: true`
 - the backend stores the item directly in the `approved` stage
 
-This is a planning convenience only. It does **not** imply direct AWS execution.
+This is a planning convenience only. It does **not** imply direct cluster execution.
 
 ## Persistence model
 
@@ -126,7 +126,7 @@ The current implementation stops at planning and documentation.
 
 That means:
 
-- the browser never sends direct AWS mutation requests
+- the browser never sends direct cluster mutation requests
 - `allow_mutating_actions` is still effectively reserved for future expansion
 - the queue documents what should happen later, not what is happening automatically now
 

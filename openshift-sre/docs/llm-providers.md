@@ -1,6 +1,6 @@
 # LLM provider guide
 
-This page documents how the AWS SRE agent now supports both the original local Ollama workflow and hosted providers.
+This page documents how the OpenShift SRE agent now supports both the original local Ollama workflow and hosted providers.
 
 ## Supported providers
 
@@ -124,7 +124,7 @@ LLM_API_KEY=replace-me
     "llm_base_url": "https://api.anthropic.com",
     "llm_api_key": "replace-me",
     "llm_api_version": "2023-06-01",
-    "aws_region": "us-east-1",
+    "cluster_scope": "local-cluster",
     "agent_max_steps": 12
   }
 }

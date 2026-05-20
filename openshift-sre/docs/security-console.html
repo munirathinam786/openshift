@@ -32,7 +32,7 @@
             { "label": "Audit profiles", "value": "Hardening + governance", "detail": "Run focused reviews for cluster hardening, namespace guardrails, operator lifecycle health, ingress exposure, and storage governance." },
             { "label": "Report delivery", "value": "CSV + PPT + PDF + Word", "detail": "Export the latest audit run as an executive pack or handoff-ready compliance summary." }
           ],
-          "workspaceSignals": ["Audit profile dropdown", "AWS security feature picker", "3D operator shell", "Executive export packs", "Live batched audit analysis"],
+          "workspaceSignals": ["Audit profile dropdown", "platform security feature picker", "3D operator shell", "Executive export packs", "Live batched audit analysis"],
           "sectionNav": [
             { "label": "Audit launcher", "href": "#security-launcher" },
             { "label": "Latest results", "href": "#security-results" },
@@ -57,7 +57,7 @@
               "description": "The page is built for control owners, cloud security teams, platform engineers, and audit responders who need both summary and evidence depth.",
               "items": [
                 { "title": "Audit profile selector", "description": "Load SOX, CIS, PCI DSS, SOC 2, ISO 27001, NIST CSF, IAM hygiene, or resilience governance narratives into the prompt builder.", "meta": "Launcher", "href": "#security-launcher" },
-                { "title": "Security feature multi-select", "description": "Pick the AWS security services and governance controls you want included, from CloudTrail and Config to Security Hub, Backup, and Control Tower.", "meta": "Coverage", "href": "#security-launcher" },
+                { "title": "Security feature multi-select", "description": "Pick the OpenShift security controls you want included, from SCC and network policies to operator subscriptions and RBAC.", "meta": "Coverage", "href": "#security-launcher" },
                 { "title": "Executive report packs", "description": "Turn a live review into stakeholder-ready exports without copying findings into slides by hand.", "meta": "Delivery", "href": "#security-exports" }
               ]
             }

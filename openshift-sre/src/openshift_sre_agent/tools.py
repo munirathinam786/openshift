@@ -57,7 +57,7 @@ class _ToolResultCache:
 _tool_cache = _ToolResultCache(ttl_seconds=60.0)
 
 
-class AwsSreToolkit:
+class OpenShiftSreToolkit:
     """OpenShift / Kubernetes inspection toolkit behind the existing agent contract."""
 
     _READ_ONLY_OC_VERBS = {"get", "describe", "logs", "whoami", "api-resources", "api-versions", "version", "explain", "adm"}

@@ -1,6 +1,6 @@
 # Function and module reference
 
-This page is a practical source-level reference for the important modules and functions in `src/aws_sre_agent/`.
+This page is a practical source-level reference for the important modules and functions in `src/openshift_sre_agent/`.
 
 It focuses on:
 
@@ -12,8 +12,8 @@ It focuses on:
 
 | Module | Symbol | Purpose |
 | --- | --- | --- |
-| `__init__.py` | `AwsSreAgent` | Re-exports the main agent class for package consumers |
-| `__main__.py` | `app()` | Lets `python -m aws_sre_agent` behave like the CLI entry point |
+| `__init__.py` | `OpenShiftSreAgent` | Re-exports the main agent class for package consumers |
+| `__main__.py` | `app()` | Lets `python -m openshift_sre_agent` behave like the CLI entry point |
 | `cli.py` | `ask(...)` | Runs one prompt locally and optionally prints the reasoning steps |
 | `cli.py` | `serve(...)` | Starts the FastAPI server with Uvicorn |
 
@@ -25,11 +25,11 @@ It focuses on:
 | `config.py` | `Settings.with_overrides(...)` | Applies request-scoped runtime overrides without mutating the base settings |
 | `config.py` | `normalize_llm_provider(...)` / `get_llm_provider_defaults(...)` | Normalizes provider IDs and resolves provider metadata/defaults |
 | `model_client.py` | `ModelClient.chat(...)` | Sends the agent conversation to the configured provider and returns the assistant text |
-| `prompts.py` | `SYSTEM_PROMPT` | Defines the JSON-envelope contract and the AWS-SRE operating rules |
+| `prompts.py` | `SYSTEM_PROMPT` | Defines the JSON-envelope contract and the OpenShift-SRE operating rules |
 
 ### Notes
 
-- `Settings.with_overrides(...)` clears `aws_profile` when explicit credentials are passed, avoiding mixed-auth ambiguity.
+- `Settings.with_overrides(...)` clears `kube_context_name` when explicit credentials are passed, avoiding mixed-auth ambiguity.
 - `ModelClient.chat(...)` selects the provider from `Settings.llm_provider` and supports Ollama, OpenAI, Azure OpenAI, Anthropic, Gemini, and OpenRouter.
 - `OllamaClient` remains as a compatibility alias to `ModelClient` so older imports keep working.
 
@@ -38,31 +38,31 @@ It focuses on:
 | Module | Symbol | Purpose |
 | --- | --- | --- |
 | `safety.py` | `ensure_no_shell_operators(...)` | Rejects shell chaining, redirection, pipes, and multiline commands |
-| `safety.py` | `parse_aws_cli_command(...)` | Parses and validates the `aws <service> <operation>` structure |
-| `safety.py` | `aws_cli_operation(...)` | Extracts the operation token from an AWS CLI command |
-| `safety.py` | `ensure_read_only_aws_cli(...)` | Allows only `describe`, `get`, `head`, and `list` AWS CLI verbs |
+| `safety.py` | `parse_oc_cli_command(...)` | Parses and validates the `oc <verb> <resource>` structure |
+| `safety.py` | `oc_cli_verb(...)` | Extracts the operation token from an oc CLI command |
+| `safety.py` | `ensure_read_only_oc_cli(...)` | Allows only `describe`, `get`, `head`, and `list` oc CLI verbs |
 
 ## Agent reasoning loop
 
 | Module | Symbol | Purpose |
 | --- | --- | --- |
-| `agent.py` | `AwsSreAgent.ask(...)` | Main reasoning loop: prompt model, call tools, recover from failures, finalize answer |
-| `agent.py` | `AwsSreAgent._system_prompt()` | Injects the live tool manifest into the system prompt |
-| `agent.py` | `AwsSreAgent._required_tools_for_prompt(...)` | Derives required tools from prompt content for service-coverage enforcement |
-| `agent.py` | `AwsSreAgent._prompt_allows_cli(...)` | Allows CLI fallback only when the operator explicitly asks for it |
-| `agent.py` | `AwsSreAgent._missing_required_tools(...)` | Checks whether explicitly requested services were actually inspected |
-| `agent.py` | `AwsSreAgent._auto_invoke_missing_required_tool(...)` | Auto-runs the next missing required tool when the model stalls or finalizes too early |
-| `agent.py` | `AwsSreAgent._build_auto_recovery_prompt(...)` | Builds the follow-up user turn that resumes the model from auto-recovered evidence |
-| `agent.py` | `AwsSreAgent._build_step_limit_answer(...)` | Produces a useful fallback answer when the step budget is exhausted |
-| `agent.py` | `AwsSreAgent._parse_envelope(...)` | Parses and validates model JSON output |
-| `agent.py` | `AwsSreAgent._normalize_payload(...)` | Accepts alternate model envelope shapes such as `answer`, `response`, or `tool` |
-| `agent.py` | `AwsSreAgent._normalize_tool_call(...)` | Normalizes tool-call aliases and stringified payloads |
-| `agent.py` | `AwsSreAgent._decode_json_payload(...)` | Recovers JSON from chatty or fenced model responses |
-| `agent.py` | `AwsSreAgent._augment_final_answer(...)` | Appends auth/service-state summaries to the final answer |
-| `agent.py` | `AwsSreAgent._build_follow_up_section(...)` | Builds the generic approval-based continuation block for incomplete or actionable runs |
-| `agent.py` | `AwsSreAgent._collect_follow_up_actions(...)` | Derives next-step actions from missing tools, AWS errors, and recommendation-bearing results |
-| `agent.py` | `AwsSreAgent._summarize_tool_result(...)` | Produces operator-readable service-state summaries from tool outputs |
-| `agent.py` | `AwsSreAgent._classify_error_message(...)` | Distinguishes auth, access-denied, not-enabled, and unsupported service errors |
+| `agent.py` | `OpenShiftSreAgent.ask(...)` | Main reasoning loop: prompt model, call tools, recover from failures, finalize answer |
+| `agent.py` | `OpenShiftSreAgent._system_prompt()` | Injects the live tool manifest into the system prompt |
+| `agent.py` | `OpenShiftSreAgent._required_tools_for_prompt(...)` | Derives required tools from prompt content for service-coverage enforcement |
+| `agent.py` | `OpenShiftSreAgent._prompt_allows_cli(...)` | Allows CLI fallback only when the operator explicitly asks for it |
+| `agent.py` | `OpenShiftSreAgent._missing_required_tools(...)` | Checks whether explicitly requested services were actually inspected |
+| `agent.py` | `OpenShiftSreAgent._auto_invoke_missing_required_tool(...)` | Auto-runs the next missing required tool when the model stalls or finalizes too early |
+| `agent.py` | `OpenShiftSreAgent._build_auto_recovery_prompt(...)` | Builds the follow-up user turn that resumes the model from auto-recovered evidence |
+| `agent.py` | `OpenShiftSreAgent._build_step_limit_answer(...)` | Produces a useful fallback answer when the step budget is exhausted |
+| `agent.py` | `OpenShiftSreAgent._parse_envelope(...)` | Parses and validates model JSON output |
+| `agent.py` | `OpenShiftSreAgent._normalize_payload(...)` | Accepts alternate model envelope shapes such as `answer`, `response`, or `tool` |
+| `agent.py` | `OpenShiftSreAgent._normalize_tool_call(...)` | Normalizes tool-call aliases and stringified payloads |
+| `agent.py` | `OpenShiftSreAgent._decode_json_payload(...)` | Recovers JSON from chatty or fenced model responses |
+| `agent.py` | `OpenShiftSreAgent._augment_final_answer(...)` | Appends auth/service-state summaries to the final answer |
+| `agent.py` | `OpenShiftSreAgent._build_follow_up_section(...)` | Builds the generic approval-based continuation block for incomplete or actionable runs |
+| `agent.py` | `OpenShiftSreAgent._collect_follow_up_actions(...)` | Derives next-step actions from missing tools, cluster errors, and recommendation-bearing results |
+| `agent.py` | `OpenShiftSreAgent._summarize_tool_result(...)` | Produces operator-readable service-state summaries from tool outputs |
+| `agent.py` | `OpenShiftSreAgent._classify_error_message(...)` | Distinguishes auth, access-denied, not-enabled, and unsupported service errors |
 
 ### Why these helpers matter
 
@@ -84,7 +84,7 @@ That recovery logic is shared by every page that uses `POST /chat`, so it protec
 | --- | --- | --- |
 | `api.py` | `_resolve_site_dir()` | Finds the generated MkDocs `site/` directory for static mounting |
 | `api.py` | `_parse_csv_query(...)` | Normalizes comma-separated filter query parameters |
-| `api.py` | `_runtime_settings(...)` | Applies request-scoped provider, AWS, and agent overrides to the base settings |
+| `api.py` | `_runtime_settings(...)` | Applies request-scoped provider, cluster, and agent overrides to the base settings |
 | `api.py` | `_get_llm_provider_catalog()` | Produces the provider metadata payload consumed by the UI |
 | `api.py` | `_get_container_observability()` / `_get_runtime_observability_snapshot()` | Collects stack container metrics and pairs them with database telemetry for the main console |
 | `api.py` | `root()` | Redirects to `/guide/` when docs are present |
@@ -153,10 +153,10 @@ Important SQLAlchemy models:
 | Module | Symbol | Purpose |
 | --- | --- | --- |
 | `tools.py` | `ToolSpec` | Declares the tool name, description, arguments, and handler |
-| `tools.py` | `AwsSessionFactory.create()` | Builds a boto3 session using the configured region/profile/credentials |
-| `tools.py` | `AwsSreToolkit.tool_manifest()` | Returns the tool schema sent to the model |
-| `tools.py` | `AwsSreToolkit.invoke(...)` | Resolves and executes one tool call |
-| `tools.py` | `AwsSreToolkit._client(...)` | Creates a boto3 client with shared retry and TLS settings |
+| `tools.py` | `AwsSessionFactory.create()` | Builds a kubernetes session using the configured region/profile/credentials |
+| `tools.py` | `OpenShiftSreToolkit.tool_manifest()` | Returns the tool schema sent to the model |
+| `tools.py` | `OpenShiftSreToolkit.invoke(...)` | Resolves and executes one tool call |
+| `tools.py` | `OpenShiftSreToolkit._client(...)` | Creates a kubernetes client with shared retry and TLS settings |
 | `tools.py` | `_cost_time_period(...)`, `_normalize_granularity(...)`, `_money_value(...)`, `_money_dict(...)` | Shared helpers for FinOps tools |
 | `model_client.py` | `_chat_ollama(...)`, `_chat_openai_compatible(...)`, `_chat_azure_openai(...)`, `_chat_anthropic(...)`, `_chat_gemini(...)` | Provider-specific request/response adapters with normalized token tracking |
 
@@ -249,12 +249,12 @@ Important SQLAlchemy models:
 
 ### Guarded CLI fallback
 
-- `run_read_only_aws_cli`
+- `run_read_only_oc_cli`
 
 This method is intentionally special:
 
-- it is only allowed when the operator explicitly asks for an AWS CLI command
-- it is filtered through `ensure_read_only_aws_cli(...)`
+- it is only allowed when the operator explicitly asks for an oc CLI command
+- it is filtered through `ensure_read_only_oc_cli(...)`
 - the agent discourages model detours into it when a named SDK-backed tool is more appropriate
 
 ## Tests that define expected behavior

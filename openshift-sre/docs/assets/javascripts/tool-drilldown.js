@@ -21,7 +21,7 @@
   const lastRefreshNode = document.querySelector('[data-tool-last-refresh]');
   const reportExportButtons = document.querySelectorAll('[data-tool-export-report]');
   const reportStatusNode = document.querySelector('[data-tool-report-status]');
-  const themeStorageKey = 'aws-sre-history-theme';
+  const themeStorageKey = 'openshift-sre-history-theme';
   const params = new URLSearchParams(window.location.search);
   let lastToolPayload = null;
 
@@ -291,7 +291,7 @@
                 <td>${formatTimestamp(row.created_at)}</td>
                 <td>${escapeHtml(row.status)}</td>
                 <td>${escapeHtml(row.model_name)}</td>
-                <td>${escapeHtml(row.aws_region)}</td>
+                <td>${escapeHtml(row.cluster_scope)}</td>
                 <td>${escapeHtml(row.prompt_excerpt || '—')}</td>
                 <td>
                   <details class="agent-console__step">
@@ -344,7 +344,7 @@
       ['summary', 'tool_label', context.toolLabel],
       ['summary', 'time_range', context.filters.time_range || rangeSelect.value],
       ['summary', 'model_names', (context.filters.model_names || []).join('|')],
-      ['summary', 'aws_regions', (context.filters.aws_regions || []).join('|')],
+      ['summary', 'cluster_scopes', (context.filters.cluster_scopes || []).join('|')],
       ['summary', 'invocation_count', context.summary.invocation_count ?? 0],
       ['summary', 'distinct_runs', context.summary.distinct_runs ?? 0],
       ['summary', 'failed_invocations', context.summary.failed_invocations ?? 0],
@@ -353,10 +353,10 @@
       ['latest_metrics', 'metric_label', 'metric_value', 'unit', 'recorded_at'],
       ...context.latestMetrics.map((metric) => ['latest_metrics', metric.metric_label, metric.metric_value, metric.unit || '', metric.recorded_at || '']),
       [],
-      ['invocations', 'created_at', 'status', 'model_name', 'aws_region', 'prompt_excerpt', 'thought', 'tool_error'],
-      ...context.invocations.map((row) => ['invocations', row.created_at || '', row.status || '', row.model_name || '', row.aws_region || '', row.prompt_excerpt || '', row.thought || '', row.tool_error || ''])
+      ['invocations', 'created_at', 'status', 'model_name', 'cluster_scope', 'prompt_excerpt', 'thought', 'tool_error'],
+      ...context.invocations.map((row) => ['invocations', row.created_at || '', row.status || '', row.model_name || '', row.cluster_scope || '', row.prompt_excerpt || '', row.thought || '', row.tool_error || ''])
     ];
-    downloadBlob(`aws-sre-tool-${context.toolName || 'selected'}-${context.reportType}-${createTimestampSlug()}.csv`, new Blob([toCsv(rows)], { type: 'text/csv;charset=utf-8' }));
+    downloadBlob(`openshift-sre-tool-${context.toolName || 'selected'}-${context.reportType}-${createTimestampSlug()}.csv`, new Blob([toCsv(rows)], { type: 'text/csv;charset=utf-8' }));
   }
 
   async function exportToolPpt(context) {
@@ -367,7 +367,7 @@
     const pptx = new PptxGenJS();
     pptx.layout = 'LAYOUT_WIDE';
     pptx.author = 'GitHub Copilot';
-    pptx.company = 'AWS SRE Local Agent';
+    pptx.company = 'OpenShift SRE Local Agent';
     pptx.subject = context.reportLabel;
     pptx.title = `${context.reportLabel} - ${context.toolLabel}`;
 
@@ -381,9 +381,9 @@
     const metricsSlide = pptx.addSlide();
     metricsSlide.addText('Metric trends and latest signals', { x: 0.5, y: 0.4, w: 6.4, h: 0.4, fontSize: 20, bold: true, color: '0F172A' });
     metricsSlide.addText((context.metricSeries.length > 0 ? context.metricSeries.map((seriesItem) => `${seriesItem.metric_label}: ${seriesItem.points?.length || 0} samples`) : ['No trend series were available.']).map((line) => `• ${line}`).join('\n'), { x: 0.5, y: 1.0, w: 5.8, h: 4.8, fontSize: 12, color: '0F172A', margin: 0.12, fill: { color: 'FFFFFF' }, line: { color: 'CBD5E1' } });
-    metricsSlide.addText((context.invocations.length > 0 ? context.invocations.map((row) => `${formatTimestamp(row.created_at)} · ${row.status} · ${row.model_name} · ${row.aws_region}`) : ['No invocation evidence was available.']).map((line) => `• ${line}`).join('\n'), { x: 6.7, y: 1.0, w: 5.4, h: 4.8, fontSize: 11, color: '0F172A', margin: 0.12, fill: { color: 'FFFFFF' }, line: { color: 'CBD5E1' } });
+    metricsSlide.addText((context.invocations.length > 0 ? context.invocations.map((row) => `${formatTimestamp(row.created_at)} · ${row.status} · ${row.model_name} · ${row.cluster_scope}`) : ['No invocation evidence was available.']).map((line) => `• ${line}`).join('\n'), { x: 6.7, y: 1.0, w: 5.4, h: 4.8, fontSize: 11, color: '0F172A', margin: 0.12, fill: { color: 'FFFFFF' }, line: { color: 'CBD5E1' } });
 
-    await pptx.writeFile({ fileName: `aws-sre-tool-${context.toolName || 'selected'}-${context.reportType}-${createTimestampSlug()}.pptx` });
+    await pptx.writeFile({ fileName: `openshift-sre-tool-${context.toolName || 'selected'}-${context.reportType}-${createTimestampSlug()}.pptx` });
   }
 
   async function exportToolPdf(context) {
@@ -428,8 +428,8 @@
       `Average duration: ${context.summary.average_duration_ms == null ? '—' : formatDuration(context.summary.average_duration_ms)}`
     ]);
     addBlock('Latest metrics', context.latestMetrics.length > 0 ? context.latestMetrics.map((metric) => `${metric.metric_label}: ${formatMetricValue(metric.metric_value, metric.unit)}`) : ['No latest metrics were available.']);
-    addBlock('Recent invocations', context.invocations.length > 0 ? context.invocations.map((row) => `${formatTimestamp(row.created_at)} · ${row.status} · ${row.model_name} · ${row.aws_region} · ${row.prompt_excerpt || 'No prompt excerpt'}`) : ['No invocation evidence was available.']);
-    doc.save(`aws-sre-tool-${context.toolName || 'selected'}-${context.reportType}-${createTimestampSlug()}.pdf`);
+    addBlock('Recent invocations', context.invocations.length > 0 ? context.invocations.map((row) => `${formatTimestamp(row.created_at)} · ${row.status} · ${row.model_name} · ${row.cluster_scope} · ${row.prompt_excerpt || 'No prompt excerpt'}`) : ['No invocation evidence was available.']);
+    doc.save(`openshift-sre-tool-${context.toolName || 'selected'}-${context.reportType}-${createTimestampSlug()}.pdf`);
   }
 
   async function exportToolWord(context) {
@@ -462,11 +462,11 @@
     </div>
     <div class="section">
       <h2>Recent invocations</h2>
-      <ul>${(context.invocations.length > 0 ? context.invocations.map((row) => `${formatTimestamp(row.created_at)} · ${row.status} · ${row.model_name} · ${row.aws_region} · ${row.prompt_excerpt || 'No prompt excerpt'}`) : ['No invocation evidence was available.']).map((line) => `<li>${escapeHtml(line)}</li>`).join('')}</ul>
+      <ul>${(context.invocations.length > 0 ? context.invocations.map((row) => `${formatTimestamp(row.created_at)} · ${row.status} · ${row.model_name} · ${row.cluster_scope} · ${row.prompt_excerpt || 'No prompt excerpt'}`) : ['No invocation evidence was available.']).map((line) => `<li>${escapeHtml(line)}</li>`).join('')}</ul>
     </div>
   </body>
 </html>`;
-    downloadBlob(`aws-sre-tool-${context.toolName || 'selected'}-${context.reportType}-${createTimestampSlug()}.doc`, new Blob([html], { type: 'application/msword' }));
+    downloadBlob(`openshift-sre-tool-${context.toolName || 'selected'}-${context.reportType}-${createTimestampSlug()}.doc`, new Blob([html], { type: 'application/msword' }));
   }
 
   function updateReportExportState() {
@@ -531,7 +531,7 @@
       const modelNames = getSelectedValues(modelSelect);
       const regionNames = getSelectedValues(regionSelect);
       if (modelNames.length > 0) query.set('model_names', modelNames.join(','));
-      if (regionNames.length > 0) query.set('aws_regions', regionNames.join(','));
+      if (regionNames.length > 0) query.set('cluster_scopes', regionNames.join(','));
       const response = await fetch(`/history/tools/${encodeURIComponent(toolSelect.value)}?${query.toString()}`);
       const payload = await response.json();
       if (!response.ok) {
@@ -541,7 +541,7 @@
       updateOptions(modelSelect, payload.filter_options?.models || []);
       updateOptions(regionSelect, payload.filter_options?.regions || []);
       setSelectedValues(modelSelect, payload.filters?.model_names || getSelectedValues(modelSelect));
-      setSelectedValues(regionSelect, payload.filters?.aws_regions || getSelectedValues(regionSelect));
+      setSelectedValues(regionSelect, payload.filters?.cluster_scopes || getSelectedValues(regionSelect));
       renderSummary(payload);
       renderLatestMetrics(payload);
       renderTrends(payload);

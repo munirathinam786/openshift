@@ -1,20 +1,20 @@
 from datetime import datetime, timedelta, timezone
 
-from aws_sre_agent.persistence import HistoryStore
-from aws_sre_agent.config import Settings
+from openshift_sre_agent.persistence import HistoryStore
+from openshift_sre_agent.config import Settings
 
 
 def build_settings(database_url: str) -> Settings:
     return Settings(
         ollama_base_url="http://localhost:11434",
         local_model_name="test-model",
-        aws_region="us-east-1",
-        aws_profile=None,
-        aws_access_key_id=None,
-        aws_secret_access_key=None,
-        aws_session_token=None,
-        aws_ca_bundle=None,
-        aws_verify_ssl=True,
+        cluster_scope="us-east-1",
+        kube_context_name=None,
+        openshift_api_url_field=None,
+        openshift_token_field=None,
+        openshift_namespace_field=None,
+        tls_ca_bundle=None,
+        verify_ssl=True,
         allow_mutating_actions=False,
         agent_max_steps=8,
         database_enabled=True,
@@ -35,7 +35,7 @@ def test_history_store_records_runs_and_metrics(tmp_path) -> None:
         prompt="Run a FinOps drilldown.",
         answer="FinOps drilldown completed.",
         model_name="test-model",
-        aws_region="us-east-1",
+        cluster_scope="us-east-1",
         duration_ms=1234,
         steps=[
             {
@@ -82,7 +82,7 @@ def test_history_store_applies_time_range_filters(tmp_path) -> None:
         prompt="Older run",
         answer="Older answer",
         model_name="test-model",
-        aws_region="us-east-1",
+        cluster_scope="us-east-1",
         duration_ms=200,
         created_at=datetime.now(timezone.utc) - timedelta(days=45),
         steps=[
@@ -99,7 +99,7 @@ def test_history_store_applies_time_range_filters(tmp_path) -> None:
         prompt="Recent run",
         answer="Recent answer",
         model_name="test-model",
-        aws_region="us-east-1",
+        cluster_scope="us-east-1",
         duration_ms=300,
         created_at=datetime.now(timezone.utc) - timedelta(days=2),
         steps=[
@@ -131,7 +131,7 @@ def test_history_store_supports_model_and_region_filters_and_breakdowns(tmp_path
         prompt="Model A east success",
         answer="ok",
         model_name="llama3:8b",
-        aws_region="us-east-1",
+        cluster_scope="us-east-1",
         duration_ms=210,
         created_at=datetime.now(timezone.utc) - timedelta(days=1),
         steps=[{"step": 1, "thought": "a", "tool_call": {"name": "list_cost_and_usage_summary", "arguments": {}}, "tool_result": {"count": 1}}],
@@ -140,7 +140,7 @@ def test_history_store_supports_model_and_region_filters_and_breakdowns(tmp_path
         prompt="Model A west fail",
         answer="",
         model_name="llama3:8b",
-        aws_region="us-west-2",
+        cluster_scope="us-west-2",
         duration_ms=410,
         status="failed",
         error_message="timed out",
@@ -151,7 +151,7 @@ def test_history_store_supports_model_and_region_filters_and_breakdowns(tmp_path
         prompt="Model B east success",
         answer="ok",
         model_name="gpt-oss:20b",
-        aws_region="us-east-1",
+        cluster_scope="us-east-1",
         duration_ms=305,
         created_at=datetime.now(timezone.utc) - timedelta(hours=6),
         steps=[{"step": 1, "thought": "b", "tool_call": {"name": "list_securityhub_findings", "arguments": {}}, "tool_result": {"count": 2}}],
@@ -160,7 +160,7 @@ def test_history_store_supports_model_and_region_filters_and_breakdowns(tmp_path
     filtered = store.get_overview(
         time_range="all",
         model_name="llama3:8b",
-        aws_region="us-east-1",
+        cluster_scope="us-east-1",
         run_limit=20,
         point_limit=20,
         series_limit=20,
@@ -168,14 +168,14 @@ def test_history_store_supports_model_and_region_filters_and_breakdowns(tmp_path
     unfiltered = store.get_overview(time_range="all", run_limit=20, point_limit=20, series_limit=20)
 
     assert filtered["filters"]["model_name"] == "llama3:8b"
-    assert filtered["filters"]["aws_region"] == "us-east-1"
+    assert filtered["filters"]["cluster_scope"] == "us-east-1"
     assert filtered["summary"]["total_runs"] == 1
     assert filtered["recent_runs"][0]["model_name"] == "llama3:8b"
-    assert filtered["recent_runs"][0]["aws_region"] == "us-east-1"
+    assert filtered["recent_runs"][0]["cluster_scope"] == "us-east-1"
     assert sorted(unfiltered["filter_options"]["models"]) == ["gpt-oss:20b", "llama3:8b"]
     assert sorted(unfiltered["filter_options"]["regions"]) == ["us-east-1", "us-west-2"]
     assert {row["model_name"] for row in unfiltered["model_breakdown"]} == {"llama3:8b", "gpt-oss:20b"}
-    assert {row["aws_region"] for row in unfiltered["region_breakdown"]} == {"us-east-1", "us-west-2"}
+    assert {row["cluster_scope"] for row in unfiltered["region_breakdown"]} == {"us-east-1", "us-west-2"}
     llama_row = next(row for row in unfiltered["model_breakdown"] if row["model_name"] == "llama3:8b")
     assert llama_row["failed_runs"] == 1
     assert llama_row["completed_runs"] == 1
@@ -190,7 +190,7 @@ def test_history_store_supports_multi_value_tool_filters(tmp_path) -> None:
         prompt="Run one",
         answer="ok",
         model_name="llama3:8b",
-        aws_region="us-east-1",
+        cluster_scope="us-east-1",
         duration_ms=111,
         steps=[
             {"step": 1, "thought": "cost", "tool_call": {"name": "list_cost_and_usage_summary", "arguments": {}}, "tool_result": {"count": 1}},
@@ -201,7 +201,7 @@ def test_history_store_supports_multi_value_tool_filters(tmp_path) -> None:
         prompt="Run two",
         answer="ok",
         model_name="gpt-oss:20b",
-        aws_region="us-west-2",
+        cluster_scope="us-west-2",
         duration_ms=222,
         steps=[
             {"step": 1, "thought": "security", "tool_call": {"name": "list_securityhub_findings", "arguments": {}}, "tool_result": {"count": 2}},
@@ -211,7 +211,7 @@ def test_history_store_supports_multi_value_tool_filters(tmp_path) -> None:
     overview = store.get_overview(
         time_range="all",
         model_names=["llama3:8b", "gpt-oss:20b"],
-        aws_regions=["us-east-1"],
+        cluster_scopes=["us-east-1"],
         tool_names=["get_cost_forecast"],
         run_limit=20,
         point_limit=20,
@@ -221,7 +221,7 @@ def test_history_store_supports_multi_value_tool_filters(tmp_path) -> None:
     assert overview["summary"]["total_runs"] == 1
     assert overview["filters"]["tool_names"] == ["get_cost_forecast"]
     assert overview["filters"]["model_names"] == ["llama3:8b", "gpt-oss:20b"]
-    assert overview["filters"]["aws_regions"] == ["us-east-1"]
+    assert overview["filters"]["cluster_scopes"] == ["us-east-1"]
     assert overview["recent_runs"][0]["model_name"] == "llama3:8b"
     assert overview["tool_usage"][0]["tool_name"] == "get_cost_forecast"
     assert "get_cost_forecast" in overview["filter_options"]["tools"]
@@ -236,7 +236,7 @@ def test_history_store_returns_storytelling_analytics_in_overview(tmp_path) -> N
         prompt="Current week success",
         answer="ok",
         model_name="llama3:8b",
-        aws_region="us-east-1",
+        cluster_scope="us-east-1",
         duration_ms=120,
         created_at=now - timedelta(days=1),
         steps=[
@@ -249,7 +249,7 @@ def test_history_store_returns_storytelling_analytics_in_overview(tmp_path) -> N
         prompt="Current week failure",
         answer="",
         model_name="llama3:8b",
-        aws_region="us-east-1",
+        cluster_scope="us-east-1",
         duration_ms=360,
         created_at=now - timedelta(days=2),
         status="failed",
@@ -260,7 +260,7 @@ def test_history_store_returns_storytelling_analytics_in_overview(tmp_path) -> N
         prompt="Last week baseline",
         answer="ok",
         model_name="llama3:8b",
-        aws_region="us-east-1",
+        cluster_scope="us-east-1",
         duration_ms=180,
         created_at=now - timedelta(days=8),
         steps=[
@@ -294,7 +294,7 @@ def test_history_store_returns_run_detail_and_tool_detail(tmp_path) -> None:
         prompt="Investigate cost posture",
         answer="Forecast is steady.",
         model_name="gpt-oss:20b",
-        aws_region="us-east-1",
+        cluster_scope="us-east-1",
         duration_ms=333,
         steps=[
             {
@@ -338,7 +338,7 @@ def test_history_store_returns_metric_detail_with_source_collection(tmp_path) ->
         prompt="Check savings plan coverage",
         answer="Coverage is flat.",
         model_name="gpt-oss:20b",
-        aws_region="us-east-1",
+        cluster_scope="us-east-1",
         duration_ms=444,
         steps=[
             {
@@ -362,7 +362,7 @@ def test_history_store_returns_metric_detail_with_source_collection(tmp_path) ->
         "list_savings_plans_coverage.average_coverage_percentage",
         time_range="all",
         model_names=["gpt-oss:20b"],
-        aws_regions=["us-east-1"],
+        cluster_scopes=["us-east-1"],
         record_limit=10,
     )
 
@@ -381,13 +381,13 @@ def test_history_store_returns_disabled_payload_when_not_configured() -> None:
     settings = Settings(
         ollama_base_url="http://localhost:11434",
         local_model_name="test-model",
-        aws_region="us-east-1",
-        aws_profile=None,
-        aws_access_key_id=None,
-        aws_secret_access_key=None,
-        aws_session_token=None,
-        aws_ca_bundle=None,
-        aws_verify_ssl=True,
+        cluster_scope="us-east-1",
+        kube_context_name=None,
+        openshift_api_url_field=None,
+        openshift_token_field=None,
+        openshift_namespace_field=None,
+        tls_ca_bundle=None,
+        verify_ssl=True,
         allow_mutating_actions=False,
         agent_max_steps=8,
     )
@@ -407,7 +407,7 @@ def test_history_store_persists_finops_queue_items_and_stage_transitions(tmp_pat
         prompt="Run a FinOps drilldown.",
         answer="Done.",
         model_name="test-model",
-        aws_region="us-east-1",
+        cluster_scope="us-east-1",
         duration_ms=123,
         steps=[],
     )
@@ -475,7 +475,7 @@ def test_history_store_returns_database_observability_for_sqlite(tmp_path) -> No
         prompt="Inspect persisted run schema.",
         answer="Stored.",
         model_name="test-model",
-        aws_region="us-east-1",
+        cluster_scope="us-east-1",
         duration_ms=250,
         steps=[
             {

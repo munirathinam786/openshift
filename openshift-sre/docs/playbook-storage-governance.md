@@ -18,7 +18,7 @@ Suggested prompts:
 
 - `Inspect EFS posture and summarize encryption and throughput concerns.`
 
-## AWS Backup
+## Storage Backup
 
 Use:
 
@@ -33,7 +33,7 @@ What to look for:
 
 Suggested prompts:
 
-- `Review AWS Backup vaults and plans for governance gaps.`
+- `Review Storage Backup vaults and plans for governance gaps.`
 - `Inspect backup recovery-point posture and identify weak coverage areas.`
 
 ## Organizations
@@ -51,14 +51,14 @@ What to look for:
 
 Suggested prompts:
 
-- `Inspect AWS Organizations accounts and summarize governance drift.`
+- `Inspect Platform Governance accounts and summarize governance drift.`
 - `Summarize Organizations roots, top-level OUs, and SCP inventory for governance drift.`
 
 ## Combined storage/governance workflow
 
 Suggested prompt:
 
-- `Inspect EFS, AWS Backup, and Organizations data for storage and governance posture issues.`
+- `Inspect EFS, Storage Backup, and Organizations data for storage and governance posture issues.`
 
 Operator actions:
 

@@ -11,7 +11,7 @@ from pydantic import BaseModel, Field, ValidationError
 from .config import Settings
 from .model_client import OllamaClient
 from .prompts import get_system_prompt
-from .tools import AwsSreToolkit
+from .tools import OpenShiftSreToolkit
 
 
 class ToolCall(BaseModel):
@@ -34,7 +34,7 @@ class AgentResult:
     tags: list[str] | None = None
 
 
-class AwsSreAgent:
+class OpenShiftSreAgent:
     """Reasoning loop for OpenShift SRE analysis using guarded read-only tools."""
 
     _RETRY_PROMPT = (
@@ -80,7 +80,7 @@ class AwsSreAgent:
     def __init__(self, settings: Settings | None = None) -> None:
         self.settings = settings or Settings.load()
         self.model = OllamaClient(self.settings)
-        self.toolkit = AwsSreToolkit(self.settings)
+        self.toolkit = OpenShiftSreToolkit(self.settings)
         self._conversation_context: list[dict[str, str]] = []
         self._tags: list[str] = []
 
@@ -355,7 +355,7 @@ class AwsSreAgent:
             cleaned = cleaned.strip("`")
             if cleaned.startswith("json"):
                 cleaned = cleaned[4:].strip()
-        payload = AwsSreAgent._normalize_payload(AwsSreAgent._decode_json_payload(cleaned))
+        payload = OpenShiftSreAgent._normalize_payload(OpenShiftSreAgent._decode_json_payload(cleaned))
         try:
             return AgentEnvelope.model_validate(payload)
         except ValidationError as error:
@@ -592,7 +592,7 @@ class AwsSreAgent:
 
     @staticmethod
     def _classify_error_message(error: str) -> str:
-        classification = AwsSreAgent._error_classification(error)
+        classification = OpenShiftSreAgent._error_classification(error)
         if classification == "auth":
             return "credentials or cluster authentication were rejected."
         if classification == "access_denied":

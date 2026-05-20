@@ -18,21 +18,21 @@ graph TD
     API --> Health[GET /healthz /readyz]
     
     Chat --> PIDetect{Prompt Injection<br/>Detection}
-    PIDetect -->|Clean| Agent[AwsSreAgent]
+    PIDetect -->|Clean| Agent[OpenShiftSreAgent]
     PIDetect -->|Blocked| Reject[400 Bad Request]
     
     Agent --> Prompts[Prompt Templates<br/>5 personas]
     Agent --> ModelClient[OllamaClient<br/>Token Tracking]
-    Agent --> Toolkit[AwsSreToolkit<br/>32 tools]
+    Agent --> Toolkit[OpenShiftSreToolkit<br/>32 tools]
     
     ModelClient --> Ollama[Ollama LLM]
-    Toolkit --> AWS[AWS APIs via boto3]
+    Toolkit --> OCP[OpenShift APIs via kubernetes client]
     
     Agent --> Persist[HistoryStore<br/>SQLAlchemy]
     Persist --> DB[(MariaDB)]
 ```
 
-## New AWS tools (v0.3.0)
+## New platform tools (v0.3.0)
 
 ```mermaid
 graph LR

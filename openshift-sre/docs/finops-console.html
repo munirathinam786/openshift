@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>FinOps Console – AWS SRE Local Agent</title>
+    <title>FinOps Console – OpenShift SRE Local Agent</title>
     <link rel="stylesheet" href="assets/stylesheets/agent-console.css">
     <link rel="stylesheet" href="assets/stylesheets/finops-console.css">
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
@@ -16,7 +16,7 @@
           "key": "finops",
           "eyebrow": "Cloud financial operations",
           "title": "FinOps Console",
-          "description": "Dedicated workspace for AWS cost optimization, chargeback & showback, reserved/spot instance purchasing, executive reporting, rightsizing, anomaly detection, and approval-queue-driven safe execution planning.",
+          "description": "Dedicated workspace for cluster cost optimization, chargeback & showback, reserved/spot instance purchasing, executive reporting, rightsizing, anomaly detection, and approval-queue-driven safe execution planning.",
           "badges": ["React", "45+ operations", "Chargeback", "RI/Spot purchasing", "Executive reports", "Approval queue"],
           "actions": [
             { "label": "Agent console", "href": "console.html" },
@@ -28,7 +28,7 @@
           ],
           "stats": [
             { "label": "FinOps tools", "value": "45+ operations", "detail": "Cost analysis, chargeback by tags/account/project, RI & Spot purchasing, storage & network optimization, executive summaries, team scorecards, and more." },
-            { "label": "Execution model", "value": "Proposal-only", "detail": "All recommendations are queued for human review before any AWS mutation." },
+            { "label": "Execution model", "value": "Proposal-only", "detail": "All recommendations are queued for human review before any cluster mutation." },
             { "label": "Approval queue", "value": "Persistent stages", "detail": "Items progress through planned → approved → precheck → ready → executed → rolled back." }
           ],
           "workspaceSignals": ["45+ FinOps operations", "Chargeback and showback lenses", "Persistent approval queue", "Executive reporting templates"],
@@ -83,7 +83,7 @@
         <article class="md-content__inner md-typeset">
           <section class="agent-shell__fallback">
             <h1>FinOps Console</h1>
-            <p>Dedicated workspace for AWS cost optimization, chargeback & showback, reserved/spot instance purchasing, executive reporting, and approval-queue-driven safe execution planning.</p>
+            <p>Dedicated workspace for cluster cost optimization, chargeback & showback, reserved/spot instance purchasing, executive reporting, and approval-queue-driven safe execution planning.</p>
             <ul>
               <li>Select from 45+ FinOps operations across 8 groups (Workflows, Cost Analysis, Chargeback, Commitment & Purchasing, Optimization, Governance, Reporting & Executive).</li>
               <li>The page calls the live <code>POST /chat</code> endpoint on the same origin.</li>

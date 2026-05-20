@@ -112,7 +112,7 @@ Suggested prompts:
 
 - `Review Security Hub findings and summarize the most urgent cross-service posture issues.`
 
-## AWS Config compliance summary
+## OpenShift Config compliance summary
 
 Use:
 
@@ -127,7 +127,7 @@ What to look for:
 
 Suggested prompts:
 
-- `Summarize AWS Config compliance by rule and highlight the most important non-compliant controls.`
+- `Summarize OpenShift Config compliance by rule and highlight the most important non-compliant controls.`
 
 ## CloudTrail event selectors
 

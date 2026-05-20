@@ -1,4 +1,4 @@
-"""Locust load test for the AWS SRE Local Agent API.
+"""Locust load test for the OpenShift SRE Local Agent API.
 
 Run with:
     locust -f tests/locustfile.py --host http://127.0.0.1:8000 --headless -u 10 -r 2 -t 60s

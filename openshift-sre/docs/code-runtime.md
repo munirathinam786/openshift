@@ -41,9 +41,9 @@ It defines:
 
 - the project name and metadata
 - the Python version floor (`>=3.10`)
-- runtime dependencies such as `fastapi`, `boto3`, `sqlalchemy`, `httpx`, and `typer`
+- runtime dependencies such as `fastapi`, `kubernetes`, `sqlalchemy`, `httpx`, and `typer`
 - optional development dependencies used for tests and docs
-- the console entrypoint `aws-sre-agent`
+- the console entrypoint `openshift-sre-agent`
 - pytest configuration so tests run against `src/`
 
 In practice, this is what makes both of these workflows possible:
@@ -51,11 +51,11 @@ In practice, this is what makes both of these workflows possible:
 - local development with `pip install -e .[dev]`
 - container installation from the same source tree
 
-### `src/aws_sre_agent/__main__.py` and `src/aws_sre_agent/cli.py`
+### `src/openshift_sre_agent/__main__.py` and `src/openshift_sre_agent/cli.py`
 
 These files are covered in the core docs, but from a runtime point of view they are the main execution boundary.
 
-- `__main__.py` enables `python -m aws_sre_agent`
+- `__main__.py` enables `python -m openshift_sre_agent`
 - `cli.py` provides `ask` and `serve`
 
 That means the same codebase supports:
@@ -153,10 +153,10 @@ This is the browser console for `POST /chat`.
 
 It includes:
 
-- runtime override inputs for Ollama and AWS settings
+- runtime override inputs for Ollama and cluster settings
 - prompt templates for common investigations
 - runtime-depth shortcuts for ECS service health and EKS nodegroup/add-on readiness checks
-- deeper investigation shortcuts for RDS failover posture, ALB target health, and AWS-native EKS workload readiness
+- deeper investigation shortcuts for operator health, route exposure, and OpenShift-native workload readiness
 - final answer rendering
 - reasoning trace rendering
 - approval-oriented follow-up choices when the backend offers them
@@ -231,7 +231,7 @@ This page is the dedicated audit and cloud-security workspace.
 It now combines:
 
 - audit-profile launchers for SOX, CIS, PCI DSS, SOC 2, ISO 27001, NIST CSF, IAM hygiene, and resilience/governance review flows
-- FinOps-style **Connection & credentials** controls so operators can choose the Ollama endpoint and model, plus request-scoped AWS region/profile/credential overrides
+- FinOps-style **Connection & credentials** controls so operators can choose the Ollama endpoint and model, plus request-scoped cluster scope/profile/credential overrides
 - a dedicated security review launcher that turns the selected controls into a `/chat` request with runtime overrides
 - a presentation/export lane for CSV, PowerPoint, PDF, and Word-compatible handoff packs
 - clickable export buttons even before a review has been run, so the UI can explain the prerequisite instead of rendering the controls inert
@@ -312,9 +312,9 @@ This script implements the Security Console React workspace.
 It handles:
 
 - audit profile selection and prompt generation for security/compliance review runs
-- FinOps-style connection and credentials controls for Ollama URL, model selection, AWS region/profile, temporary credentials, and SSL verification
+- FinOps-style connection and credentials controls for Ollama URL, model selection, cluster scope/profile, temporary credentials, and SSL verification
 - dynamic model discovery through `/ollama/models`
-- `/chat` submission with request-scoped runtime overrides so the security workflow can target a different model or AWS credential context without restarting the stack
+- `/chat` submission with request-scoped runtime overrides so the security workflow can target a different model or cluster credential context without restarting the stack
 - summary cards, findings cards, evidence trace rendering, and export status handling
 - client-side CSV, PowerPoint, PDF, and Word-compatible export generation for security handoff packs
 - export-button interaction that stays clickable and shows guidance when no completed review is available yet
@@ -323,23 +323,23 @@ In practical terms, the security console now constructs a request body shaped li
 
 ```json
 {
-  "prompt": "Perform an AWS security review using the selected audit profile...",
+  "prompt": "Perform an platform security review using the selected audit profile...",
   "runtime": {
-    "aws_region": "us-east-1",
+    "cluster_scope": "local-cluster",
     "local_model_name": "gpt-oss:20b",
     "ollama_base_url": "http://host.containers.internal:11434",
-    "aws_profile": "default",
-    "aws_access_key_id": "AKIA...",
-    "aws_secret_access_key": "***",
-    "aws_session_token": "***",
-    "aws_verify_ssl": true,
+    "kube_context_name": "default",
+    "openshift_api_url_field": "AKIA...",
+    "openshift_token_field": "***",
+    "openshift_namespace_field": "***",
+    "verify_ssl": true,
     "agent_max_steps": 20
   },
   "tags": ["security-console", "sox"]
 }
 ```
 
-That is the core implementation detail behind the new UI: the page is not just collecting fields, it is passing them directly into the backend runtime override model exposed by `src/aws_sre_agent/api.py`.
+That is the core implementation detail behind the new UI: the page is not just collecting fields, it is passing them directly into the backend runtime override model exposed by `src/openshift_sre_agent/api.py`.
 
 ### `docs/assets/javascripts/llm-utilization.js`
 
@@ -395,7 +395,7 @@ Its job is to keep only the security-page-specific layout hooks, while relying o
 That means it now owns:
 
 - the security launcher grid layout
-- the multi-select sizing for AWS security controls
+- the multi-select sizing for platform security controls
 - responsive layout behavior for the security review form
 - small hero overrides that let the Security Console keep the same FinOps visual language with security-specific copy and content density
 
@@ -413,7 +413,7 @@ At build time it:
 
 At runtime it launches:
 
-- `python -m aws_sre_agent.cli serve --host 0.0.0.0 --port 8000`
+- `python -m openshift_sre_agent.cli serve --host 0.0.0.0 --port 8000`
 
 That keeps the image simple: one service, one port, one bundled docs site.
 
@@ -460,7 +460,7 @@ This is especially important because the dashboard depends on shaped historical 
 
 ### `tests/test_safety.py`
 
-Validates the read-only AWS CLI safety boundary.
+Validates the read-only oc CLI safety boundary.
 
 These tests ensure the CLI fallback does not quietly turn into an unrestricted shell executor.
 

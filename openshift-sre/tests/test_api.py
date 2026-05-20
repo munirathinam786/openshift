@@ -11,9 +11,9 @@ from fastapi.testclient import TestClient
 @pytest.fixture()
 def api_mocks():
     """Create a reloaded API module with mocked dependencies."""
-    with patch("aws_sre_agent.model_client.OllamaClient") as mock_model, \
-         patch("aws_sre_agent.tools.AwsSreToolkit") as mock_toolkit, \
-         patch("aws_sre_agent.persistence.HistoryStore") as mock_history_store:
+    with patch("openshift_sre_agent.model_client.OllamaClient") as mock_model, \
+         patch("openshift_sre_agent.tools.OpenShiftSreToolkit") as mock_toolkit, \
+         patch("openshift_sre_agent.persistence.HistoryStore") as mock_history_store:
         mock_model.return_value = MagicMock()
         agent_instance = MagicMock()
         agent_result = SimpleNamespace(
@@ -90,11 +90,11 @@ def api_mocks():
         toolkit_instance.invoke.side_effect = lambda tool_name, _: {"tool": tool_name, "ok": True}
         mock_toolkit.return_value = toolkit_instance
 
-        import aws_sre_agent.api as api_module
+        import openshift_sre_agent.api as api_module
 
         api_module = importlib.reload(api_module)
-        api_module.AwsSreAgent = MagicMock(return_value=agent_instance)
-        api_module.AwsSreToolkit = MagicMock(return_value=toolkit_instance)
+        api_module.OpenShiftSreAgent = MagicMock(return_value=agent_instance)
+        api_module.OpenShiftSreToolkit = MagicMock(return_value=toolkit_instance)
         api_module.HISTORY_STORE = history_store_instance
         yield {
             "app": api_module.app,
@@ -193,7 +193,7 @@ def test_ollama_models_endpoint(client):
         ]
     }
 
-    with patch("aws_sre_agent.api.httpx.Client") as mock_client:
+    with patch("openshift_sre_agent.api.httpx.Client") as mock_client:
         http_client = mock_client.return_value.__enter__.return_value
 
         def fake_get(url):
@@ -230,14 +230,14 @@ def test_llm_providers_endpoint(client):
 def test_runtime_observability_endpoint(client, api_mocks):
     ps_output = "\n".join(
         [
-            '{"Names":"aws-sre-agent","Image":"localhost/aws-sre-agent-local:dev","State":"running","Status":"Up 2 minutes","Size":"145MB (virtual 1.2GB)"}',
-            '{"Names":"aws-sre-agent-db","Image":"docker.io/library/mariadb:11.4","State":"running","Status":"Up 2 minutes","Size":"210MB (virtual 400MB)"}',
+            '{"Names":"openshift-sre-agent","Image":"localhost/openshift-sre-agent-local:dev","State":"running","Status":"Up 2 minutes","Size":"145MB (virtual 1.2GB)"}',
+            '{"Names":"openshift-sre-agent-db","Image":"docker.io/library/mariadb:11.4","State":"running","Status":"Up 2 minutes","Size":"210MB (virtual 400MB)"}',
         ]
     )
     stats_output = "\n".join(
         [
-            '{"Name":"aws-sre-agent","CPU":"3.5%","MemUsage":"128MiB / 2GiB","MemPerc":"6.25%"}',
-            '{"Name":"aws-sre-agent-db","CPU":"1.25%","MemUsage":"96MiB / 2GiB","MemPerc":"4.69%"}',
+            '{"Name":"openshift-sre-agent","CPU":"3.5%","MemUsage":"128MiB / 2GiB","MemPerc":"6.25%"}',
+            '{"Name":"openshift-sre-agent-db","CPU":"1.25%","MemUsage":"96MiB / 2GiB","MemPerc":"4.69%"}',
         ]
     )
 
@@ -248,14 +248,14 @@ def test_runtime_observability_endpoint(client, api_mocks):
             return SimpleNamespace(stdout=stats_output)
         raise AssertionError(f"Unexpected container command: {command}")
 
-    with patch("aws_sre_agent.api.shutil.which", return_value="podman"), patch("aws_sre_agent.api.subprocess.run", side_effect=fake_run):
+    with patch("openshift_sre_agent.api.shutil.which", return_value="podman"), patch("openshift_sre_agent.api.subprocess.run", side_effect=fake_run):
         resp = client.get("/runtime/observability")
 
     assert resp.status_code == 200
     data = resp.json()
     assert data["containers"]["runtime"] == "podman"
     assert len(data["containers"]["containers"]) == 2
-    assert data["containers"]["containers"][0]["name"] == "aws-sre-agent"
+    assert data["containers"]["containers"][0]["name"] == "openshift-sre-agent"
     assert data["containers"]["containers"][0]["cpu_percent"] == 3.5
     assert data["database"]["enabled"] is True
     assert data["database"]["tables"][0]["table_name"] == "agent_runs"
@@ -294,7 +294,7 @@ def test_security_audit_endpoint_batches_selected_controls(client, api_mocks):
                 "list_kms_keys",
             ],
             "operator_notes": "Validate logging, encryption, and findings coverage.",
-            "runtime": {"aws_region": "us-east-1"},
+            "runtime": {"cluster_scope": "us-east-1"},
             "tags": ["security-console", "hipaa"],
         },
     )
@@ -312,10 +312,10 @@ def test_security_audit_endpoint_batches_selected_controls(client, api_mocks):
     assert set(data["tags"]) >= {"security-console", "hipaa", "security-audit"}
 
     recorded = api_mocks["history_store"].record_chat.call_args.kwargs
-    assert recorded["aws_region"] == "us-east-1"
+    assert recorded["cluster_scope"] == "us-east-1"
     assert recorded["model_name"] == "gpt-oss:20b"
     assert recorded["token_usage"] == {"prompt_tokens": 0, "completion_tokens": 0, "total_tokens": 0}
-    assert "Selected AWS security features" in recorded["prompt"]
+    assert "Selected platform security features" in recorded["prompt"]
     api_mocks["toolkit"].invoke.assert_any_call("list_cloudtrail_trails", {})
     api_mocks["toolkit"].invoke.assert_any_call("list_securityhub_findings", {})
 
@@ -324,7 +324,7 @@ def test_chat_with_external_llm_runtime_records_effective_model(client, api_mock
     resp = client.post(
         "/chat",
         json={
-            "prompt": "Review the current AWS posture and summarize the risks.",
+            "prompt": "Review the current cluster posture and summarize the risks.",
             "runtime": {
                 "llm_provider": "openai",
                 "llm_model_name": "gpt-4.1-mini",
@@ -335,20 +335,20 @@ def test_chat_with_external_llm_runtime_records_effective_model(client, api_mock
     )
     assert resp.status_code == 200
     kwargs = api_mocks["history_store"].record_chat.call_args.kwargs
-    assert kwargs["prompt"] == "Review the current AWS posture and summarize the risks."
+    assert kwargs["prompt"] == "Review the current cluster posture and summarize the risks."
     assert kwargs["answer"] == "test answer"
     assert kwargs["model_name"] == "gpt-4.1-mini"
-    assert kwargs["aws_region"] == "us-east-1"
+    assert kwargs["cluster_scope"] == "us-east-1"
     assert kwargs["token_usage"] == {"prompt": 10, "completion": 20, "total": 30}
 
 
 def test_chat_missing_external_api_key_returns_400(client, api_mocks):
-    api_mocks["module"].AwsSreAgent.return_value.ask.side_effect = RuntimeError("LLM provider gemini requires an API key")
+    api_mocks["module"].OpenShiftSreAgent.return_value.ask.side_effect = RuntimeError("LLM provider gemini requires an API key")
 
     resp = client.post(
         "/chat",
         json={
-            "prompt": "Summarize the AWS cost forecast.",
+            "prompt": "Summarize the cluster resource forecast.",
             "runtime": {
                 "llm_provider": "gemini",
                 "llm_model_name": "gemini-2.0-flash",
@@ -367,7 +367,7 @@ def test_chat_provider_http_status_error_returns_502_with_detail(client, api_moc
         request=request,
         text='{"error":{"message":"API key not valid. Please pass a valid API key."}}',
     )
-    api_mocks["module"].AwsSreAgent.return_value.ask.side_effect = httpx.HTTPStatusError(
+    api_mocks["module"].OpenShiftSreAgent.return_value.ask.side_effect = httpx.HTTPStatusError(
         "Bad Request",
         request=request,
         response=response,

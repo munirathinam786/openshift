@@ -18,22 +18,22 @@ If you prefer a guided UI instead of typing every prompt manually, use the dedic
 That page now gives you:
 
 - audit-profile launchers for SOX and related frameworks
-- a multi-select for AWS security and governance controls
+- a multi-select for platform security and governance controls
 - the same **Connection & credentials** panel used in the FinOps console
 - export actions for CSV, PowerPoint, PDF, and Word-compatible security handoff packs
 
-The important implementation detail is that the page sends request-scoped runtime overrides directly to `/chat`, so an operator can change model or AWS credential context for a single review without changing the global container environment.
+The important implementation detail is that the page sends request-scoped runtime overrides directly to `/chat`, so an operator can change model or cluster credential context for a single review without changing the global container environment.
 
 Example runtime shape used by the UI:
 
 ```json
 {
   "runtime": {
-    "aws_region": "us-east-1",
+    "cluster_scope": "local-cluster",
     "local_model_name": "gpt-oss:20b",
     "ollama_base_url": "http://host.containers.internal:11434",
-    "aws_profile": "default",
-    "aws_verify_ssl": true
+    "kube_context_name": "default",
+    "verify_ssl": true
   }
 }
 ```
@@ -63,7 +63,7 @@ Operator actions:
 3. verify `is_multi_region_trail`
 4. confirm central S3 destination is expected
 
-## AWS Config
+## OpenShift Config
 
 Use: `list_config_rules`
 
@@ -75,7 +75,7 @@ What to look for:
 
 Suggested prompts:
 
-- `Review AWS Config recorders and rules for compliance drift.`
+- `Review OpenShift Config recorders and rules for compliance drift.`
 - `Tell me whether Config is recording properly in this region.`
 
 Operator actions:

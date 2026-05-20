@@ -38,12 +38,12 @@
   const llmProviderNote = root.querySelector('[data-agent-llm-provider-note]');
   const ollamaFieldGroups = root.querySelectorAll('[data-agent-ollama-field]');
   const externalLlmFieldGroups = root.querySelectorAll('[data-agent-external-llm-field]');
-  const awsRegionInput = root.querySelector('[data-agent-aws-region]');
-  const awsProfileInput = root.querySelector('[data-agent-aws-profile]');
-  const awsAccessKeyIdInput = root.querySelector('[data-agent-aws-access-key-id]');
-  const awsSecretAccessKeyInput = root.querySelector('[data-agent-aws-secret-access-key]');
-  const awsSessionTokenInput = root.querySelector('[data-agent-aws-session-token]');
-  const awsVerifySslInput = root.querySelector('[data-agent-aws-verify-ssl]');
+  const clusterScopeInput = root.querySelector('[data-agent-cluster-scope]');
+  const kubeContextInput = root.querySelector('[data-agent-kube-context]');
+  const openshiftApiUrlInput = root.querySelector('[data-agent-openshift-api-url]');
+  const openshiftTokenInput = root.querySelector('[data-agent-openshift-token]');
+  const openshiftNamespaceInput = root.querySelector('[data-agent-openshift-namespace]');
+  const verifySslInput = root.querySelector('[data-agent-verify-ssl]');
   let modelRefreshHandle = null;
   let providerCatalog = llmRuntime.fallbackCatalog || {
     configured_provider: 'ollama',
@@ -1539,7 +1539,7 @@
         item.tool_error || item.tool_result?.error || ''
       ])
     ];
-    downloadBlob(`aws-sre-console-${context.reportType}-${createTimestampSlug()}.csv`, new Blob([toCsvText(rows)], { type: 'text/csv;charset=utf-8' }));
+    downloadBlob(`openshift-sre-console-${context.reportType}-${createTimestampSlug()}.csv`, new Blob([toCsvText(rows)], { type: 'text/csv;charset=utf-8' }));
   };
 
   const exportConsolePpt = async (context) => {
@@ -3057,12 +3057,12 @@
           externalApiVersion: externalApiVersionInput?.value.trim() || '',
           externalOrganization: externalOrganizationInput?.value.trim() || '',
         }, providerCatalog) || {}),
-        aws_region: awsRegionInput?.value.trim() || null,
-        aws_profile: awsProfileInput?.value.trim() || null,
-        aws_access_key_id: awsAccessKeyIdInput?.value.trim() || null,
-        aws_secret_access_key: awsSecretAccessKeyInput?.value || null,
-        aws_session_token: awsSessionTokenInput?.value || null,
-        aws_verify_ssl: awsVerifySslInput ? awsVerifySslInput.checked : null
+        cluster_scope: clusterScopeInput?.value.trim() || null,
+        kube_context_name: kubeContextInput?.value.trim() || null,
+        openshift_api_url: openshiftApiUrlInput?.value.trim() || null,
+        openshift_token: openshiftTokenInput?.value || null,
+        openshift_namespace: openshiftNamespaceInput?.value || null,
+        verify_ssl: verifySslInput ? verifySslInput.checked : null
       };
 
       const response = await fetch('/chat', {
@@ -3314,7 +3314,7 @@
   // ---------------------------------------------------------------------------
   // v0.3.0 — Prompt history (localStorage)
   // ---------------------------------------------------------------------------
-  const PROMPT_HISTORY_KEY = 'aws-sre-prompt-history-v1';
+  const PROMPT_HISTORY_KEY = 'openshift-sre-prompt-history-v1';
   const MAX_HISTORY = 50;
 
   function getPromptHistory() {
@@ -3407,8 +3407,8 @@
   // ---------------------------------------------------------------------------
   // v0.4.0 — Drafts, toolbars, session insights, and troubleshooting progress
   // ---------------------------------------------------------------------------
-  const DRAFT_STORAGE_KEY = `aws-sre-draft:${window.location.pathname}`;
-  const SESSION_STORAGE_KEY = `aws-sre-session:${window.location.pathname}`;
+  const DRAFT_STORAGE_KEY = `openshift-sre-draft:${window.location.pathname}`;
+  const SESSION_STORAGE_KEY = `openshift-sre-session:${window.location.pathname}`;
   let draftSaveTimer = null;
 
   const readStoredJson = (key, fallback) => {
@@ -3587,12 +3587,12 @@
     answerToolbar.querySelector('[data-agent-export-answer]')?.addEventListener('click', () => {
       const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
       const content = `# OpenShift SRE Agent Response\n\n## Prompt\n\n${lastRunContext?.prompt || ''}\n\n## Answer\n\n${lastRunContext?.answer || ''}\n`;
-      downloadTextFile(`aws-sre-answer-${timestamp}.md`, content);
+      downloadTextFile(`openshift-sre-answer-${timestamp}.md`, content);
       showToast('Answer exported as Markdown.', 'success');
     });
     answerToolbar.querySelector('[data-agent-export-trace]')?.addEventListener('click', () => {
       const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-      downloadTextFile(`aws-sre-trace-${timestamp}.json`, JSON.stringify(lastRunContext || {}, null, 2));
+      downloadTextFile(`openshift-sre-trace-${timestamp}.json`, JSON.stringify(lastRunContext || {}, null, 2));
       showToast('Trace exported as JSON.', 'success');
     });
     updateReportExportState();

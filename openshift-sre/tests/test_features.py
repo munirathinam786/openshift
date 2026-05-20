@@ -4,11 +4,11 @@ from __future__ import annotations
 import json
 import time
 
-from aws_sre_agent.agent import AwsSreAgent
-from aws_sre_agent.config import get_llm_provider_defaults
-from aws_sre_agent.logging_config import JsonFormatter, get_request_id, set_request_id
-from aws_sre_agent.model_client import ModelClient, _CircuitBreaker
-from aws_sre_agent.tools import _ToolResultCache
+from openshift_sre_agent.agent import OpenShiftSreAgent
+from openshift_sre_agent.config import get_llm_provider_defaults
+from openshift_sre_agent.logging_config import JsonFormatter, get_request_id, set_request_id
+from openshift_sre_agent.model_client import ModelClient, _CircuitBreaker
+from openshift_sre_agent.tools import _ToolResultCache
 
 
 # ---------------------------------------------------------------------------
@@ -96,7 +96,7 @@ def test_confidence_with_successful_tool_call() -> None:
         {"step": 1, "tool_call": {"name": "t"}, "tool_result": {"count": 1}},
         {"step": 2, "final_answer": "done"},
     ]
-    score = AwsSreAgent._compute_confidence(steps)
+    score = OpenShiftSreAgent._compute_confidence(steps)
     assert 0.5 <= score <= 1.0
 
 
@@ -105,12 +105,12 @@ def test_confidence_all_errors() -> None:
         {"step": 1, "tool_call": {"name": "t"}, "tool_error": "boom"},
         {"step": 2, "tool_error": "again"},
     ]
-    score = AwsSreAgent._compute_confidence(steps)
+    score = OpenShiftSreAgent._compute_confidence(steps)
     assert score == 0.0
 
 
 def test_confidence_empty_steps() -> None:
-    assert AwsSreAgent._compute_confidence([]) == 0.0
+    assert OpenShiftSreAgent._compute_confidence([]) == 0.0
 
 
 # ---------------------------------------------------------------------------
@@ -118,22 +118,22 @@ def test_confidence_empty_steps() -> None:
 # ---------------------------------------------------------------------------
 
 def test_conversation_context_injected() -> None:
-    from aws_sre_agent.config import Settings
+    from openshift_sre_agent.config import Settings
 
     settings = Settings(
         ollama_base_url="http://localhost:11434",
         local_model_name="test-model",
-        aws_region="us-east-1",
-        aws_profile=None,
-        aws_access_key_id=None,
-        aws_secret_access_key=None,
-        aws_session_token=None,
-        aws_ca_bundle=None,
-        aws_verify_ssl=True,
+        cluster_scope="us-east-1",
+        kube_context_name=None,
+        openshift_api_url_field=None,
+        openshift_token_field=None,
+        openshift_namespace_field=None,
+        tls_ca_bundle=None,
+        verify_ssl=True,
         allow_mutating_actions=False,
         agent_max_steps=2,
     )
-    agent = AwsSreAgent(settings)
+    agent = OpenShiftSreAgent(settings)
     agent.set_conversation_context([
         {"role": "user", "content": "Previous question"},
         {"role": "assistant", "content": "Previous answer"},
@@ -150,22 +150,22 @@ def test_gemini_defaults_use_supported_flash_model() -> None:
 
 
 def test_gemini_requests_use_header_api_key_not_query_param() -> None:
-    from aws_sre_agent.config import Settings
+    from openshift_sre_agent.config import Settings
 
     settings = Settings(
         ollama_base_url="http://localhost:11434",
         local_model_name="test-model",
-        aws_region="us-east-1",
+        cluster_scope="us-east-1",
         llm_provider="gemini",
         llm_model_name="gemini-2.0-flash",
         llm_base_url="https://generativelanguage.googleapis.com/v1beta",
         llm_api_key="AIza-test",
-        aws_profile=None,
-        aws_access_key_id=None,
-        aws_secret_access_key=None,
-        aws_session_token=None,
-        aws_ca_bundle=None,
-        aws_verify_ssl=True,
+        kube_context_name=None,
+        openshift_api_url_field=None,
+        openshift_token_field=None,
+        openshift_namespace_field=None,
+        tls_ca_bundle=None,
+        verify_ssl=True,
         allow_mutating_actions=False,
         agent_max_steps=2,
     )

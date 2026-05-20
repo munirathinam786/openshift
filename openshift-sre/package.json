@@ -1,5 +1,5 @@
 {
-  "name": "aws-sre-local-agent-ui",
+  "name": "openshift-sre-local-agent-ui",
   "private": true,
   "scripts": {
     "build:ui": "node ui/build.mjs"

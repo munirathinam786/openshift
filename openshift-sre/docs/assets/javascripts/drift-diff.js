@@ -16,7 +16,7 @@
   }
 
   function renderOptions(runs) {
-    const markup = runs.map((run) => `<option value="${run.run_id}">#${run.run_id} · ${run.model_name} · ${run.aws_region} · ${run.created_at}</option>`).join('');
+    const markup = runs.map((run) => `<option value="${run.run_id}">#${run.run_id} · ${run.model_name} · ${run.cluster_scope} · ${run.created_at}</option>`).join('');
     leftSelect.innerHTML = markup;
     rightSelect.innerHTML = markup;
     if (runs.length > 1) {
