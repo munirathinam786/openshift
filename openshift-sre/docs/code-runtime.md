@@ -90,6 +90,8 @@ It adds:
 
 The key script is the UI bundle step that compiles the authored shell source into a plain browser asset that the docs pages can load.
 
+It now also includes a `validate:docs-js` guard that runs `node --check` across the authored browser controllers under `docs/assets/javascripts/` before the UI bundle step proceeds.
+
 ### `ui/build.mjs`
 
 This is the bridge between authored React code and generated browser code.
@@ -475,11 +477,25 @@ This is the main rebuild path used in the project.
 
 It is the preferred workflow because it keeps the full system aligned:
 
+- validate authored docs JavaScript syntax first
 - rebuild frontend assets
 - rebuild the MkDocs site
 - refresh the Podman image and stack
 
 In other words, it validates the operator UX in the same shape that the container will serve.
+
+### `scripts/validate-docs-javascript.mjs`
+
+This guard script exists specifically to catch browser-side regressions before they ship into the docs runtime.
+
+It:
+
+- scans the authored controllers in `docs/assets/javascripts/`
+- skips the generated `app-shell.js` bundle
+- runs `node --check` against each authored file
+- fails the build immediately if any page controller has invalid syntax
+
+This was added after a Platform Console renderer regression caused the shell to load while the React workspace failed to mount, leaving the page looking empty below the header.
 
 ## Tests and validation
 

@@ -93,6 +93,8 @@ For the normal rebuild-and-refresh flow, run:
 
 - `bash ./scripts/podman-dev-refresh.sh`
 
+The UI build now runs a docs JavaScript syntax guard before bundling so render-breaking errors in pages like `docs/assets/javascripts/platform-console.js` fail fast instead of quietly shipping an empty console shell.
+
 ## Documentation site
 
 The MkDocs site under `docs/` is kept as a first-class operator surface.
@@ -131,5 +133,9 @@ The page now also includes:
 To rebuild the UI bundle, regenerate the site, and refresh the Podman stack:
 
 - `bash ./scripts/podman-dev-refresh.sh`
+
+If you only want to validate the authored docs controllers before a push, run:
+
+- `npm run validate:docs-js`
 
 That keeps the generated `site/` output aligned with the documented source under `docs/` and refreshes the app image in one pass.

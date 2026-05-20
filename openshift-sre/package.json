@@ -2,7 +2,8 @@
   "name": "openshift-sre-local-agent-ui",
   "private": true,
   "scripts": {
-    "build:ui": "node ui/build.mjs"
+	"validate:docs-js": "node scripts/validate-docs-javascript.mjs",
+	"build:ui": "npm run validate:docs-js && node ui/build.mjs"
   },
   "devDependencies": {
     "esbuild": "^0.25.5",
