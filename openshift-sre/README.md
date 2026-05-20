@@ -140,4 +140,14 @@ If you only want to validate the authored docs controllers before a push, run:
 
 - `npm run validate:docs-js`
 
+For container-first Python validation of the recent hardening work, run the focused suite from a Podman container with the repo bind-mounted:
+
+- `podman run --rm -v "$PWD":/app -w /app localhost/openshift-sre-agent-local:dev sh -lc "python -m pip install '.[dev]' >/tmp/pytest-dev-install.log && python -m pytest tests/test_config_validation.py tests/test_api.py tests/test_persistence.py --no-cov -q"`
+
+The API runtime now also exposes a richer operational health contract:
+
+- `GET /healthz` for lightweight liveness
+- `GET /readyz` for readiness across LLM and optional persistence dependencies
+- `GET /healthz/full` for subsystem-level detail including provider, database, and docs-site status
+
 That keeps the generated `site/` output aligned with the documented source under `docs/` and refreshes the app image in one pass.

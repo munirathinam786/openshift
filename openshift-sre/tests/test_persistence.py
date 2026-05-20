@@ -493,6 +493,7 @@ def test_history_store_returns_database_observability_for_sqlite(tmp_path) -> No
     assert telemetry["dialect"] == "sqlite"
     assert telemetry["database_name"] == "history-observability.db"
     assert telemetry["utilization"]["table_count"] >= 4
+    assert telemetry["utilization"]["pool"]["class_name"] is not None
     agent_runs = next(table for table in telemetry["tables"] if table["table_name"] == "agent_runs")
     assert agent_runs["row_count"] == 1
     assert "id" in agent_runs["primary_key"]

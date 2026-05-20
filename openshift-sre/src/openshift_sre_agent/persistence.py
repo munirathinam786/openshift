@@ -204,11 +204,13 @@ class HistoryStore:
 
     def _build_engine(self, database_url: str) -> Engine:
         connect_args: dict[str, Any] = {}
-        pool_kwargs: dict[str, Any] = {"pool_pre_ping": True}
+        pool_kwargs: dict[str, Any] = {"pool_pre_ping": True, "pool_use_lifo": True}
         if database_url.startswith("sqlite"):
             connect_args["check_same_thread"] = False
+            connect_args["timeout"] = 10
         else:
-            pool_kwargs.update({"pool_size": 5, "max_overflow": 10, "pool_recycle": 1800})
+            connect_args["connect_timeout"] = 10
+            pool_kwargs.update({"pool_size": 5, "max_overflow": 10, "pool_recycle": 1800, "pool_timeout": 10})
         return create_engine(database_url, connect_args=connect_args, **pool_kwargs)
 
     def _initialize_database(self) -> None:
@@ -1508,6 +1510,15 @@ class HistoryStore:
                 },
             }
 
+        pool = self._engine.pool
+        pool_snapshot = {
+            "class_name": pool.__class__.__name__,
+            "size": pool.size() if hasattr(pool, "size") else None,
+            "checked_in": pool.checkedin() if hasattr(pool, "checkedin") else None,
+            "checked_out": pool.checkedout() if hasattr(pool, "checkedout") else None,
+            "overflow": pool.overflow() if hasattr(pool, "overflow") else None,
+        }
+
         with self._engine.connect() as connection:
             dialect = connection.dialect.name
             inspector = inspect(connection)
@@ -1682,6 +1693,7 @@ class HistoryStore:
                 "free_bytes": free_bytes,
                 "tracked_run_count": latest_run_count,
                 "runtime_stats": runtime_stats,
+                "pool": pool_snapshot,
             },
             "tables": tables,
         }

@@ -10,13 +10,15 @@ from dataclasses import dataclass
 from os import getenv
 from pathlib import Path
 from typing import Any
-from urllib.parse import quote_plus
+from urllib.parse import quote_plus, urlparse
 
 from dotenv import load_dotenv
 
 
 ROOT_DIR = Path(__file__).resolve().parents[2]
 load_dotenv(ROOT_DIR / ".env")
+
+_VALID_LOG_LEVELS = {"CRITICAL", "ERROR", "WARNING", "INFO", "DEBUG"}
 
 
 LLM_PROVIDER_METADATA: dict[str, dict[str, Any]] = {
@@ -118,6 +120,33 @@ def get_llm_provider_defaults(provider: str) -> dict[str, Any]:
     return LLM_PROVIDER_METADATA.get(normalize_llm_provider(provider), LLM_PROVIDER_METADATA["ollama"])
 
 
+def _normalize_optional_text(value: str | None) -> str | None:
+    if value is None:
+        return None
+    normalized = value.strip()
+    return normalized or None
+
+
+def _validate_http_url(field_name: str, value: str | None) -> str | None:
+    normalized = _normalize_optional_text(value)
+    if normalized is None:
+        return None
+    parsed = urlparse(normalized)
+    if parsed.scheme not in {"http", "https"} or not parsed.netloc:
+        raise ValueError(f"{field_name} must be a valid http(s) URL.")
+    return normalized.rstrip("/")
+
+
+def _validate_database_url(value: str | None) -> str | None:
+    normalized = _normalize_optional_text(value)
+    if normalized is None:
+        return None
+    parsed = urlparse(normalized)
+    if not parsed.scheme:
+        raise ValueError("database_url must include a database scheme such as sqlite:/// or mysql+pymysql://.")
+    return normalized
+
+
 @dataclass(slots=True)
 class Settings:
     """Normalized runtime settings for provider, OpenShift access, persistence, and UI behavior."""
@@ -168,6 +197,47 @@ class Settings:
     kube_context: str | None = None
     oc_cli_path: str = "oc"
     openshift_verify_ssl: bool = True
+
+    def __post_init__(self) -> None:
+        self.llm_provider = normalize_llm_provider(self.llm_provider)
+        self.ollama_base_url = _validate_http_url("ollama_base_url", self.ollama_base_url) or "http://localhost:11434"
+        self.llm_base_url = _validate_http_url("llm_base_url", self.llm_base_url)
+        self.openshift_api_url = _validate_http_url("openshift_api_url", self.openshift_api_url)
+        self.openshift_api_url_field = _validate_http_url("openshift_api_url_field", self.openshift_api_url_field)
+        self.database_url = _validate_database_url(self.database_url)
+        self.cluster_scope = self.cluster_scope.strip()
+        self.openshift_cluster = self.openshift_cluster.strip()
+        self.openshift_namespace = self.openshift_namespace.strip()
+        self.local_model_name = self.local_model_name.strip()
+        self.oc_cli_path = self.oc_cli_path.strip()
+        self.log_level = (self.log_level or "INFO").strip().upper()
+
+        if not self.cluster_scope:
+            raise ValueError("cluster_scope cannot be empty.")
+        if not self.openshift_cluster:
+            raise ValueError("openshift_cluster cannot be empty.")
+        if not self.openshift_namespace:
+            raise ValueError("openshift_namespace cannot be empty.")
+        if not self.local_model_name:
+            raise ValueError("local_model_name cannot be empty.")
+        if not self.oc_cli_path:
+            raise ValueError("oc_cli_path cannot be empty.")
+        if self.log_level not in _VALID_LOG_LEVELS:
+            raise ValueError(f"log_level must be one of: {', '.join(sorted(_VALID_LOG_LEVELS))}.")
+        if not 1 <= self.agent_max_steps <= 20:
+            raise ValueError("agent_max_steps must be between 1 and 20.")
+        if self.context_window_tokens < 256:
+            raise ValueError("context_window_tokens must be at least 256.")
+        if self.temperature_override is not None and not 0.0 <= self.temperature_override <= 2.0:
+            raise ValueError("temperature_override must be between 0.0 and 2.0.")
+        if self.db_host and not 1 <= self.db_port <= 65535:
+            raise ValueError("db_port must be between 1 and 65535 when db_host is configured.")
+        if self.database_enabled and not self.database_url:
+            required_parts = [self.db_host, self.db_name, self.db_user, self.db_password]
+            if not all(required_parts):
+                raise ValueError(
+                    "database_enabled requires database_url or a complete DB_HOST/DB_NAME/DB_USER/DB_PASSWORD configuration."
+                )
 
     @classmethod
     def load(cls) -> "Settings":

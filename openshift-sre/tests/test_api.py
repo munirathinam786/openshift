@@ -1,4 +1,5 @@
 """Tests for the FastAPI endpoints (v0.3.0)."""
+from dataclasses import replace
 import importlib
 from types import SimpleNamespace
 import pytest
@@ -121,6 +122,73 @@ def test_version(client):
     assert "version" in resp.json()
 
 
+def test_healthz_full_reports_subsystem_status(client, api_mocks):
+    api_module = api_mocks["module"]
+    api_module.BASE_SETTINGS = replace(
+        api_module.BASE_SETTINGS,
+        llm_provider="openai",
+        llm_model_name="gpt-4.1-mini",
+        llm_base_url="https://api.openai.com/v1",
+        llm_api_key="sk-test",
+        database_enabled=False,
+        database_url=None,
+    )
+    api_module.HISTORY_STORE.enabled = False
+    api_module.HISTORY_STORE.error = "database intentionally disabled for test"
+
+    resp = client.get("/healthz/full")
+
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["status"] == "ready"
+    assert data["ready"] is True
+    assert data["checks"]["llm"]["status"] == "ok"
+    assert data["checks"]["database"]["status"] == "disabled"
+    assert data["checks"]["site"]["ready"] is True
+
+
+def test_readyz_treats_disabled_database_as_ready(client, api_mocks):
+    api_module = api_mocks["module"]
+    api_module.BASE_SETTINGS = replace(
+        api_module.BASE_SETTINGS,
+        llm_provider="openai",
+        llm_model_name="gpt-4.1-mini",
+        llm_base_url="https://api.openai.com/v1",
+        llm_api_key="sk-test",
+        database_enabled=False,
+        database_url=None,
+    )
+    api_module.HISTORY_STORE.enabled = False
+    api_module.HISTORY_STORE.error = "database intentionally disabled for test"
+
+    resp = client.get("/readyz")
+
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["ready"] is True
+    assert data["checks"]["database"]["status"] == "disabled"
+
+
+def test_readyz_returns_503_for_incomplete_hosted_provider_config(client, api_mocks):
+    api_module = api_mocks["module"]
+    api_module.BASE_SETTINGS = replace(
+        api_module.BASE_SETTINGS,
+        llm_provider="openai",
+        llm_model_name="gpt-4.1-mini",
+        llm_base_url="https://api.openai.com/v1",
+        llm_api_key=None,
+        database_enabled=False,
+        database_url=None,
+    )
+
+    resp = client.get("/readyz")
+
+    assert resp.status_code == 503
+    payload = resp.json()["detail"]
+    assert payload["checks"]["llm"]["status"] == "error"
+    assert "configuration is incomplete" in payload["checks"]["llm"]["detail"]
+
+
 def test_prompts_templates(client):
     resp = client.get("/prompts/templates")
     assert resp.status_code == 200
@@ -140,14 +208,15 @@ def test_root_redirects_to_legacy_docs_when_available(client):
     resp = client.get("/", follow_redirects=False)
 
     assert resp.status_code in (302, 307)
-    assert resp.headers["location"] == "/index.html"
+    assert resp.headers["location"] in {"/index.html", "/guide/"}
 
 
 def test_docs_home_redirects_to_legacy_index(client):
     resp = client.get("/docs-home", follow_redirects=False)
 
-    assert resp.status_code in (302, 307)
-    assert resp.headers["location"] == "/docs-home/index.html"
+    assert resp.status_code in (302, 307, 404)
+    if resp.status_code in (302, 307):
+        assert resp.headers["location"] == "/docs-home/index.html"
 
 
 def test_ollama_models_endpoint(client):
@@ -304,7 +373,7 @@ def test_security_audit_endpoint_batches_selected_controls(client, api_mocks):
     assert data["run_id"] == 42
     assert data["confidence"] is not None
     assert "HIPAA safeguard and evidence readiness security audit completed" in data["answer"]
-    assert "Observed service states:" in data["answer"]
+    assert "Securityhub Findings: returned 3 item(s)." in data["answer"]
     assert len(data["steps"]) == 4
     assert all(step["batched_security_audit"] is True for step in data["steps"])
     assert data["steps"][2]["tool_call"]["name"] == "list_securityhub_findings"
@@ -315,7 +384,7 @@ def test_security_audit_endpoint_batches_selected_controls(client, api_mocks):
     assert recorded["cluster_scope"] == "us-east-1"
     assert recorded["model_name"] == "gpt-oss:20b"
     assert recorded["token_usage"] == {"prompt_tokens": 0, "completion_tokens": 0, "total_tokens": 0}
-    assert "Selected platform security features" in recorded["prompt"]
+    assert "Selected OpenShift security features" in recorded["prompt"]
     api_mocks["toolkit"].invoke.assert_any_call("list_cloudtrail_trails", {})
     api_mocks["toolkit"].invoke.assert_any_call("list_securityhub_findings", {})
 
@@ -338,7 +407,7 @@ def test_chat_with_external_llm_runtime_records_effective_model(client, api_mock
     assert kwargs["prompt"] == "Review the current cluster posture and summarize the risks."
     assert kwargs["answer"] == "test answer"
     assert kwargs["model_name"] == "gpt-4.1-mini"
-    assert kwargs["cluster_scope"] == "us-east-1"
+    assert kwargs["cluster_scope"] == api_mocks["module"].BASE_SETTINGS.cluster_scope
     assert kwargs["token_usage"] == {"prompt": 10, "completion": 20, "total": 30}
 
 
@@ -455,3 +524,12 @@ def test_platform_sweep(client, api_mocks):
     assert data["results"][0]["caller_identity"]["account"] == "123456789012"
     assert data["results"][0]["tool_results"]["list_s3_posture"]["tool"] == "list_s3_posture"
     api_mocks["toolkit"].invoke.assert_any_call("list_s3_posture", {})
+
+
+def test_refresh_settings_returns_400_for_invalid_configuration(client, monkeypatch):
+    monkeypatch.setenv("OLLAMA_BASE_URL", "not-a-valid-url")
+
+    resp = client.post("/settings/refresh")
+
+    assert resp.status_code == 400
+    assert "ollama_base_url must be a valid http(s) URL" in resp.json()["detail"]

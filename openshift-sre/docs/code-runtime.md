@@ -485,6 +485,13 @@ It is the preferred workflow because it keeps the full system aligned:
 
 In other words, it validates the operator UX in the same shape that the container will serve.
 
+The backend runtime itself also gained more enterprise-style operational safeguards in this phase:
+
+- startup-time settings validation for malformed URLs, invalid ranges, and incomplete database configuration
+- richer readiness output through `GET /readyz`
+- a detailed subsystem snapshot through `GET /healthz/full`
+- stronger SQLAlchemy engine defaults such as connection timeouts, pool pre-ping, pool lifo usage, and pool telemetry in the database observability payload
+
 ### `scripts/validate-docs-javascript.mjs`
 
 This guard script exists specifically to catch browser-side regressions before they ship into the docs runtime.
@@ -509,6 +516,12 @@ Validates the reasoning loop, JSON envelope recovery, tool invocation behavior, 
 Validates the persistence layer, metric extraction, and dashboard aggregation behavior.
 
 This is especially important because the dashboard depends on shaped historical payloads rather than raw database rows.
+
+It now also covers the new database pool telemetry exposed through the observability snapshot.
+
+### `tests/test_config_validation.py`
+
+Validates enterprise-style runtime configuration rules so invalid URLs or incomplete database settings fail early instead of surfacing as delayed runtime errors.
 
 ### `tests/test_safety.py`
 

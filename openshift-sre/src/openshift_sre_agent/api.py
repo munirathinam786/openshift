@@ -33,7 +33,7 @@ from .middleware import (
     add_cors,
     detect_prompt_injection,
 )
-from .model_client import CircuitOpen, OllamaClient
+from .model_client import CircuitOpen, ModelClient, OllamaClient
 from .persistence import HistoryStore
 from .tools import OpenShiftSreToolkit
 
@@ -1057,6 +1057,114 @@ def _get_llm_provider_catalog() -> dict:
     }
 
 
+def _llm_health_snapshot(settings: Settings) -> dict[str, Any]:
+    client = ModelClient(settings)
+    base_payload: dict[str, Any] = {
+        "provider": settings.llm_provider,
+        "model": settings.effective_model_name,
+        "base_url": settings.effective_llm_base_url,
+        "api_key_configured": bool(settings.llm_api_key) if settings.llm_provider != "ollama" else None,
+    }
+
+    if settings.llm_provider != "ollama":
+        configured = client.ping()
+        return {
+            **base_payload,
+            "status": "ok" if configured else "error",
+            "ready": configured,
+            "mode": "configuration",
+            "detail": None if configured else "Hosted provider configuration is incomplete.",
+        }
+
+    reachable = client.ping()
+    detail: str | None = None
+    loaded_model_count = 0
+    configured_model_loaded = False
+    if reachable:
+        try:
+            with httpx.Client(timeout=5.0) as http_client:
+                response = http_client.get(f"{settings.ollama_base_url}/api/ps")
+                response.raise_for_status()
+                models = response.json().get("models", [])
+                loaded_names = {model.get("name") or model.get("model") for model in models}
+                loaded_model_count = len(models)
+                configured_model_loaded = settings.local_model_name in loaded_names
+        except Exception as error:  # noqa: BLE001
+            detail = f"Ollama model inventory could not be inspected: {error}"
+    else:
+        detail = "Ollama API is unreachable or misconfigured."
+
+    return {
+        **base_payload,
+        "status": "ok" if reachable else "error",
+        "ready": reachable,
+        "mode": "connectivity",
+        "detail": detail,
+        "loaded_model_count": loaded_model_count,
+        "configured_model_loaded": configured_model_loaded if reachable else False,
+    }
+
+
+def _database_health_snapshot(settings: Settings) -> dict[str, Any]:
+    if not settings.database_enabled:
+        return {
+            "status": "disabled",
+            "ready": True,
+            "configured": False,
+            "detail": "Historical storage is disabled by configuration.",
+        }
+    if HISTORY_STORE.enabled:
+        return {
+            "status": "ok",
+            "ready": True,
+            "configured": True,
+            "detail": None,
+            "database_url_present": bool(settings.database_url),
+        }
+    return {
+        "status": "error",
+        "ready": False,
+        "configured": True,
+        "detail": HISTORY_STORE.error or "Historical storage failed to initialize.",
+        "database_url_present": bool(settings.database_url),
+    }
+
+
+def _site_health_snapshot() -> dict[str, Any]:
+    return {
+        "status": "ok" if SITE_DIR is not None else "warning",
+        "ready": True,
+        "generated_docs_available": SITE_DIR is not None,
+        "legacy_docs_available": LEGACY_SITE_DIR is not None,
+        "site_dir": str(SITE_DIR) if SITE_DIR is not None else None,
+    }
+
+
+def _build_health_snapshot(settings: Settings) -> dict[str, Any]:
+    llm = _llm_health_snapshot(settings)
+    database = _database_health_snapshot(settings)
+    site = _site_health_snapshot()
+    ready = bool(llm["ready"] and database["ready"])
+    return {
+        "status": "ready" if ready else "degraded",
+        "ready": ready,
+        "version": "v0.3.0",
+        "runtime": {
+            "llm_provider": settings.llm_provider,
+            "effective_model_name": settings.effective_model_name,
+            "cluster_scope": settings.cluster_scope,
+            "prompt_template": settings.prompt_template,
+            "auth_enabled": settings.auth_enabled,
+            "prometheus_enabled": settings.enable_prometheus,
+        },
+        "checks": {
+            "llm": llm,
+            "database": database,
+            "site": site,
+        },
+    }
+
+
 def _redirect_site_page(target: str) -> RedirectResponse:
     """Redirect a friendly HTML alias to the generated guide site."""
 
@@ -1173,42 +1281,31 @@ def healthz() -> dict[str, str]:
     return {"status": "ok", "version": "v0.3.0"}
 
 
+@app.get("/healthz/full")
+def full_healthz() -> dict[str, Any]:
+    """Detailed subsystem health payload for operators and dashboards."""
+
+    return _build_health_snapshot(BASE_SETTINGS)
+
+
 @app.get("/readyz")
 def readyz() -> dict:
-    """Readiness probe — checks Ollama reachability, model availability, and DB connectivity."""
-    from .model_client import ModelClient
+    """Readiness probe — validates the configured LLM path and optional persistence layer."""
 
-    checks: dict[str, str] = {}
-    model_ok = ModelClient(BASE_SETTINGS).ping()
-    checks["llm_provider"] = BASE_SETTINGS.llm_provider
-    checks["llm"] = "ok" if model_ok else "unreachable_or_misconfigured"
-    # Model-loaded readiness check for Ollama only
-    if model_ok and BASE_SETTINGS.llm_provider == "ollama":
-        try:
-            with httpx.Client(timeout=5.0) as client:
-                resp = client.get(f"{BASE_SETTINGS.ollama_base_url}/api/ps")
-                if resp.status_code == 200:
-                    models = [m.get("name", "") for m in resp.json().get("models", [])]
-                    checks["model_loaded"] = "ok" if BASE_SETTINGS.local_model_name in " ".join(models) else "not_loaded"
-                else:
-                    checks["model_loaded"] = "unknown"
-        except Exception:  # noqa: BLE001
-            checks["model_loaded"] = "unknown"
-    elif BASE_SETTINGS.llm_provider != "ollama":
-        checks["model_loaded"] = "n/a"
-    checks["database"] = "ok" if HISTORY_STORE.enabled else (HISTORY_STORE.error or "disabled")
-    all_ok = model_ok and HISTORY_STORE.enabled
-    status_code = 200 if all_ok else 503
-    if status_code == 503:
-        raise HTTPException(status_code=503, detail=checks)
-    return {"status": "ready", "checks": checks}
+    snapshot = _build_health_snapshot(BASE_SETTINGS)
+    if not snapshot["ready"]:
+        raise HTTPException(status_code=503, detail=snapshot)
+    return snapshot
 
 
 @app.post("/settings/refresh")
 def refresh_settings() -> dict[str, str]:
     """Reload settings from environment variables without a restart (secrets rotation)."""
     global BASE_SETTINGS, HISTORY_STORE
-    BASE_SETTINGS = Settings.load()
+    try:
+        BASE_SETTINGS = Settings.load()
+    except ValueError as error:
+        raise HTTPException(status_code=400, detail=str(error)) from error
     HISTORY_STORE = HistoryStore(BASE_SETTINGS)
     logger.info("Settings refreshed from environment")
     return {"status": "refreshed"}
