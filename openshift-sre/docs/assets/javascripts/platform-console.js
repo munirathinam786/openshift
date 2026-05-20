@@ -75,12 +75,16 @@
 	};
 
 	const featureDescriptions = {
+		list_cluster_version: 'Tracks update posture, conditional risk, and upgradeability so preflight reviews can make a go/no-go recommendation with evidence instead of optimism.',
+		list_cluster_operators: 'Surfaces degraded or progressing operators that can expand upgrade blast radius across ingress, storage, auth, and workload paths.',
 		list_cluster_network_config: 'Checks cluster/service CIDRs, network type, and exposed network ranges before change windows.',
 		list_ingress_controllers: 'Surfaces domain, publishing strategy, and replica drift on cluster ingress control planes.',
 		list_cluster_proxy_config: 'Shows whether egress proxy settings, trusted CA wiring, and readiness endpoints are aligned before upgrades or disconnected-path changes.',
 		list_cluster_dns_config: 'Highlights DNS forwarding, zone configuration, and placement details that often break upgrades in subtle and deeply annoying ways.',
 		list_feature_gate_config: 'Flags non-default feature sets and custom no-upgrade features that should be explicitly reviewed before lifecycle changes.',
 		list_scheduler_config: 'Summarizes scheduler profiles, default selectors, and master schedulability so capacity assumptions are not based on vibes alone.',
+		list_pods: 'Highlights restart-heavy, pending, or crashlooping pods that often show where reliability and error-budget burn will surface first.',
+		list_workload_health: 'Captures rollout health across core workloads so SLO posture and operator-impact reviews are grounded in workload reality.',
 		list_horizontal_pod_autoscalers: 'Shows whether autoscaled workloads are pinned at min/max bounds or scaling normally.',
 		list_pod_disruption_budgets: 'Highlights workloads that may block draining, upgrades, or planned maintenance.',
 		list_cronjobs: 'Flags suspended or stale scheduled jobs that often get forgotten until a release weekend.',
@@ -92,6 +96,8 @@
 		list_operator_extension_readiness: 'Derives a fast readiness score from cluster operators, subscriptions, CSVs, APIService health, and webhook posture so extension drift is visible in one place.',
 		list_api_service_health: 'Surfaces unavailable aggregated APIs and fragile extension registrations that can quietly break operators, consoles, and upgrade workflows.',
 		list_certificatesigning_requests: 'Highlights pending or denied CSRs so node joins, kubelet rotation, and certificate approval bottlenecks stop being surprise outage lore.',
+		list_events: 'Pulls warning and recovery signals that help correlate live alerts with the most likely operational runbook or owning team.',
+		list_cluster_logging: 'Shows whether cluster logging and collection posture can support alert triage, evidence capture, and handoff quality during incidents.',
 		list_oauth_configuration: 'Summarizes cluster identity providers, LDAP posture, and authentication entry points used for platform access.',
 		list_admission_webhook_configurations: 'Shows mutating and validating webhook risk, including fail-open behavior and missing CA bundles that can destabilize admission paths.',
 		list_rbac_bindings: 'Surfaces cluster-admin, admin, and other elevated bindings that influence governance posture.',
@@ -135,20 +141,39 @@
 			summary: 'Assess whether the platform is ready for an upgrade or change window across version, operators, nodes, and machine pools.',
 			promptLead: 'Act as an OpenShift platform lifecycle lead preparing a change window. Build a lifecycle-readiness review using the selected evidence and focus on upgrade blockers, operator risk, machine-pool rollout safety, and dependencies across baremetal, ROSA, ARO, and IBM Z patterns when relevant.',
 			questions: ['What would block the next controlled upgrade or maintenance window?', 'Which operator or machine-pool signals look most likely to elongate the change window?', 'What should the platform team validate before approving the next step?'],
+			expectedOutputs: ['Lifecycle readiness score with go/no-go tone', 'Upgrade blockers and machine-pool dependencies', 'Affected platform patterns and next owner handoff'],
 			features: ['get_cluster_identity', 'list_cluster_infrastructure', 'list_projects', 'list_cluster_version', 'list_cluster_operators', 'list_cluster_network_config', 'list_ingress_controllers', 'list_cluster_proxy_config', 'list_cluster_dns_config', 'list_feature_gate_config', 'list_scheduler_config', 'list_nodes', 'list_node_pressure', 'list_machine_config_pools', 'list_machine_sets', 'list_machine_health_checks', 'list_cluster_autoscaling', 'list_operator_subscriptions', 'list_cluster_service_versions', 'list_monitoring_alert_posture', 'list_control_plane_certificates', 'list_operator_extension_readiness', 'list_api_service_health', 'list_certificatesigning_requests']
+		},
+		upgrade: {
+			title: 'Upgrade preflight scoring',
+			summary: 'Compute a preflight-style score for the next OpenShift upgrade window using lifecycle, alerting, and disruption-safety evidence.',
+			promptLead: 'Act as an OpenShift upgrade approval lead preparing a formal preflight review. Use the selected evidence to calculate an evidence-backed preflight score, identify blockers, map affected operator and workload surfaces, and recommend a go / hold / no-go posture for the next controlled upgrade window.',
+			questions: ['What is the current upgrade preflight score and what weighted factors are lowering it most?', 'Which operators, machine pools, admission paths, or disruption controls expand the blast radius if the upgrade proceeds now?', 'What exact remediation steps would move the score into a safe approval band?'],
+			expectedOutputs: ['Upgrade preflight score from 0-100 with go / hold / no-go guidance', 'Weighted blocker list covering operators, machine pools, alerts, and disruption controls', 'Blast-radius map showing which platform domains are most exposed'],
+			features: ['get_cluster_identity', 'list_cluster_infrastructure', 'list_projects', 'list_cluster_version', 'list_cluster_operators', 'list_cluster_network_config', 'list_ingress_controllers', 'list_cluster_proxy_config', 'list_cluster_dns_config', 'list_feature_gate_config', 'list_scheduler_config', 'list_nodes', 'list_node_pressure', 'list_machine_config_pools', 'list_machine_sets', 'list_machine_health_checks', 'list_cluster_autoscaling', 'list_operator_subscriptions', 'list_cluster_service_versions', 'list_monitoring_alert_posture', 'list_control_plane_certificates', 'list_operator_extension_readiness', 'list_api_service_health', 'list_certificatesigning_requests', 'list_workload_health', 'list_horizontal_pod_autoscalers', 'list_pod_disruption_budgets', 'list_events']
 		},
 		observability: {
 			title: 'Observability and extension advisory lane',
 			summary: 'Run a fast pre-change advisory across monitoring, alert posture, certificate trust, and extension readiness without waiting on the full LLM loop.',
 			promptLead: 'Act as an OpenShift observability and control-plane readiness lead. Use the selected evidence to assess monitoring stack health, alert coverage, control-plane certificate expiry, trust-bundle posture, operator dependencies, and extension API readiness before a maintenance window.',
 			questions: ['Which monitoring or extension signals are the best early-warning indicators for the next maintenance window?', 'Do certificate expiry or trust-bundle issues threaten control-plane or operator continuity?', 'What should platform engineering stabilize first before approving the next change?'],
+			expectedOutputs: ['Observability readiness summary', 'Early-warning indicator shortlist', 'Next stabilization actions for the platform team'],
 			features: ['get_cluster_identity', 'list_cluster_operators', 'list_operator_subscriptions', 'list_cluster_service_versions', 'list_monitoring_alert_posture', 'list_control_plane_certificates', 'list_operator_extension_readiness', 'list_api_service_health', 'list_certificatesigning_requests', 'list_admission_webhook_configurations']
+		},
+		reliability: {
+			title: 'SLO / error-budget posture',
+			summary: 'Review service reliability signals, alerting gaps, and rollout pressure to estimate whether the platform is burning error budget too fast.',
+			promptLead: 'Act as an OpenShift SRE reliability lead reviewing service posture before approving more change. Use the selected evidence to estimate SLO pressure, infer where error budget is being consumed, and identify the workload, traffic, and platform signals most likely to degrade customer outcomes.',
+			questions: ['Which signals suggest the platform or key services are burning error budget faster than intended?', 'Where do alerts, events, rollout health, or scaling posture imply latent SLO risk even if there is no declared incident?', 'What short-term protections should SREs apply before accepting more change on the estate?'],
+			expectedOutputs: ['SLO / error-budget posture with low / moderate / high burn-risk guidance', 'Top workload, alerting, and exposure signals shaping reliability risk', 'Suggested protections to preserve reliability before the next change window'],
+			features: ['get_cluster_identity', 'list_projects', 'list_cluster_operators', 'list_monitoring_alert_posture', 'list_cluster_logging', 'list_nodes', 'list_node_pressure', 'list_pods', 'list_workload_health', 'list_horizontal_pod_autoscalers', 'list_pod_disruption_budgets', 'list_services', 'list_routes', 'list_ingresses', 'list_events', 'list_persistent_storage', 'list_resource_quotas']
 		},
 		dr: {
 			title: 'Disaster recovery and failover posture',
 			summary: 'Review DR policy objects, failover intent, backup posture, and fleet dependencies before an exercise or event.',
 			promptLead: 'Act as an OpenShift resiliency lead preparing for a failover, relocate, or recovery exercise. Use the selected evidence to evaluate DR readiness, backup confidence, policy drift, and cross-cluster dependencies with operator-safe recommendations.',
 			questions: ['Which DR policy, placement, backup, or replication gaps reduce recovery confidence?', 'Do the current signals support a controlled failover rehearsal?', 'What should platform and app teams verify before a DR event is declared ready?'],
+			expectedOutputs: ['DR readiness summary', 'Recovery-confidence gaps', 'Shared platform/app handoff before rehearsal or event'],
 			features: ['get_cluster_identity', 'list_disaster_recovery_resources', 'list_oadp_resources', 'list_volume_snapshots', 'list_acm_managed_clusters', 'list_acm_policies', 'list_cluster_logging', 'list_persistent_storage', 'list_storage_classes', 'list_events']
 		},
 		migration: {
@@ -156,6 +181,7 @@
 			summary: 'Inspect application, network, storage, and platform prerequisites before moving workloads or clusters.',
 			promptLead: 'Act as an OpenShift migration architect reviewing workload migration readiness. Use the selected evidence to assess storage, routing, fleet governance, virtualization, and delivery dependencies for a migration wave or factory rollout.',
 			questions: ['Which dependencies would put the next migration wave at risk?', 'What application, storage, or routing constraints need attention first?', 'How should the migration sequence be staged to reduce blast radius?'],
+			expectedOutputs: ['Migration readiness summary', 'Highest-risk dependencies by wave', 'Blast-radius-aware staging guidance'],
 			features: ['get_cluster_identity', 'list_projects', 'list_virtualization_resources', 'list_virtual_machine_snapshots', 'list_migration_toolkit_resources', 'list_pods', 'list_workload_health', 'list_pod_disruption_budgets', 'list_services', 'list_routes', 'list_ingresses', 'list_events', 'list_persistent_storage', 'list_volume_snapshots', 'list_storage_classes', 'list_acm_managed_clusters']
 		},
 		virtualization: {
@@ -163,13 +189,23 @@
 			summary: 'Evaluate KubeVirt control-plane health, HyperConverged settings, VM readiness, DataVolume imports, and live migration activity.',
 			promptLead: 'Act as an OpenShift Virtualization / CNV platform engineer. Use the selected evidence to review KubeVirt readiness, HyperConverged posture, VM and DataVolume health, live migrations, storage dependencies, and node capacity signals.',
 			questions: ['Which CNV control-plane or VM signals need action before onboarding more workloads?', 'Are there any DataVolume or live-migration issues that threaten workload stability?', 'What are the safest next checks for the virtualization team?'],
+			expectedOutputs: ['CNV readiness summary', 'Control-plane and VM risk hotspots', 'Safest next checks for the virtualization team'],
 			features: ['get_cluster_identity', 'list_virtualization_resources', 'list_virtual_machine_snapshots', 'list_nodes', 'list_node_pressure', 'list_pods', 'list_machine_sets', 'list_persistent_storage', 'list_volume_snapshots', 'list_storage_classes', 'list_workload_health']
+		},
+		blastRadius: {
+			title: 'Operator upgrade blast-radius mapping',
+			summary: 'Map which platform surfaces are most likely to be affected when degraded operators, APIs, or webhooks collide with an upgrade.',
+			promptLead: 'Act as an OpenShift platform risk analyst preparing an operator-focused upgrade blast-radius map. Use the selected evidence to identify which operators, APIs, auth paths, ingress surfaces, workload controllers, and storage dependencies would be affected if upgrade-related operator issues worsened or spread.',
+			questions: ['Which operators or extension components have the broadest potential impact on the next upgrade window?', 'How would failures propagate across auth, ingress, workloads, storage, delivery, or fleet governance surfaces?', 'What sequencing or isolation steps would shrink the blast radius before proceeding?'],
+			expectedOutputs: ['Operator-centric blast-radius map across platform domains', 'Highest-risk dependencies and propagation paths', 'Sequencing steps to reduce exposure before change approval'],
+			features: ['get_cluster_identity', 'list_cluster_version', 'list_cluster_operators', 'list_operator_subscriptions', 'list_cluster_service_versions', 'list_operator_extension_readiness', 'list_api_service_health', 'list_admission_webhook_configurations', 'list_oauth_configuration', 'list_ingress_controllers', 'list_routes', 'list_persistent_storage', 'list_cluster_logging', 'list_gitops_applications', 'list_tekton_pipeline_runs', 'list_acm_managed_clusters', 'list_acm_policies', 'list_events', 'list_workload_health']
 		},
 		fleet: {
 			title: 'Fleet and platform-pattern review',
 			summary: 'Compare fleet-level dependencies, governance, and security rollout signals across managed OpenShift estate patterns.',
 			promptLead: 'Act as a fleet platform operations lead reviewing the health of a multi-platform OpenShift estate. Use the selected evidence to compare ACM governance, managed-cluster readiness, platform inventory, backup posture, and security rollout patterns across baremetal, ROSA, ARO, and IBM Z footprints where relevant.',
 			questions: ['Which fleet-level gaps threaten consistency across platforms?', 'Where should governance, backup, or security rollout be tightened first?', 'What handoff should go to platform owners versus security or app teams?'],
+			expectedOutputs: ['Fleet consistency summary', 'Cross-platform control gaps', 'Ownership handoff by team and platform pattern'],
 			features: ['get_cluster_identity', 'list_cluster_infrastructure', 'list_projects', 'list_api_service_health', 'list_certificatesigning_requests', 'list_admission_webhook_configurations', 'list_oauth_configuration', 'list_rbac_bindings', 'list_service_accounts', 'list_limit_ranges', 'list_network_policies', 'list_resource_quotas', 'list_acm_multicluster_hubs', 'list_acm_managed_clusters', 'list_acm_policies', 'list_oadp_resources', 'list_acs_central_services', 'list_acs_secured_clusters']
 		},
 		automation: {
@@ -177,11 +213,20 @@
 			summary: 'Check whether GitOps, Tekton, logging, and operator lifecycle signals support safe day-2 engineering.',
 			promptLead: 'Act as an OpenShift platform automation lead reviewing day-2 operational controls. Use the selected evidence to assess GitOps, Tekton, logging, backup, and operator lifecycle health before approving further automation or change work.',
 			questions: ['Which day-2 control gaps increase operational risk?', 'Are GitOps, delivery, logging, and backup signals aligned enough for the next change window?', 'What should be stabilized before more automation is rolled out?'],
+			expectedOutputs: ['Day-2 control summary', 'Operational control gaps', 'Stabilization checklist before further automation'],
 			features: ['get_cluster_identity', 'list_projects', 'list_gitops_argocds', 'list_gitops_applications', 'list_image_streams', 'list_builds', 'list_build_configs', 'list_deployment_configs', 'list_knative_services', 'list_tekton_configs', 'list_tekton_pipeline_runs', 'list_cluster_logging', 'list_oadp_resources', 'list_operator_subscriptions', 'list_cluster_service_versions', 'list_events']
+		},
+		runbook: {
+			title: 'Alert-to-runbook correlation',
+			summary: 'Correlate alert posture, warning events, and platform symptoms to the most relevant operational playbook and next owner handoff.',
+			promptLead: 'Act as an OpenShift incident command reviewer building an alert-to-runbook handoff. Use the selected evidence to correlate alert posture, warning events, rollout symptoms, and platform dependencies with the most relevant operational runbooks, then identify who should own the next action.',
+			questions: ['Which active alerting or event patterns most clearly map to an existing operational runbook?', 'Where do the current signals suggest missing, stale, or ambiguous runbook coverage?', 'What owner handoff should happen next so alerts become action instead of noise?'],
+			expectedOutputs: ['Alert-to-runbook correlation summary', 'Likely runbook destinations and coverage gaps', 'Clear next-owner handoff for the hottest alerts or symptoms'],
+			features: ['get_cluster_identity', 'list_cluster_operators', 'list_monitoring_alert_posture', 'list_cluster_logging', 'list_events', 'list_pods', 'list_workload_health', 'list_services', 'list_routes', 'list_ingresses', 'list_persistent_storage', 'list_disaster_recovery_resources', 'list_oadp_resources', 'list_migration_toolkit_resources']
 		}
 	};
 
-	const presetOrder = ['lifecycle', 'observability', 'dr', 'migration', 'virtualization', 'fleet', 'automation'];
+	const presetOrder = ['lifecycle', 'upgrade', 'observability', 'reliability', 'dr', 'migration', 'virtualization', 'blastRadius', 'fleet', 'automation', 'runbook'];
 	const defaultProfileKey = 'lifecycle';
 	const defaultStatus = 'Select a platform profile, adjust the checks, and run the review.';
 	const parseCsv = (value) => String(value || '').split(',').map((item) => item.trim()).filter(Boolean);
@@ -243,9 +288,64 @@
 			profile.promptLead,
 			`Prefer these OpenShift inspection areas and tools where relevant: ${selectedLabels.join('; ')}.`,
 			'Return: 1) executive summary, 2) highest-risk blockers or gaps, 3) evidence gathered, 4) blast radius or affected platform patterns, 5) recommended next safe checks, and 6) a clear handoff for the next owner.',
+			...(profile.expectedOutputs || []).map((item, index) => `Required output ${index + 1}: ${item}.`),
 			...profile.questions.map((question, index) => `${index + 1}. ${question}`),
 			...focusNotes
 		].join('\n\n');
+	};
+
+	const runbookCatalog = [
+		{ title: 'Platform & Automation', location: 'playbook-platform-automation.md', tools: ['list_cluster_version', 'list_cluster_operators', 'list_machine_config_pools', 'list_machine_sets', 'list_operator_subscriptions', 'list_cluster_service_versions', 'list_monitoring_alert_posture', 'list_operator_extension_readiness', 'list_api_service_health', 'list_gitops_argocds', 'list_gitops_applications', 'list_tekton_configs', 'list_tekton_pipeline_runs', 'list_cluster_logging', 'list_oadp_resources', 'list_disaster_recovery_resources'] },
+		{ title: 'Capacity & Optimization', location: 'playbook-finops.md', tools: ['list_nodes', 'list_node_pressure', 'list_projects', 'list_horizontal_pod_autoscalers', 'list_pod_disruption_budgets', 'list_resource_quotas', 'list_machine_sets', 'list_cluster_autoscaling'] },
+		{ title: 'Storage & Governance', location: 'playbook-storage-governance.md', tools: ['list_persistent_storage', 'list_storage_classes', 'list_volume_snapshots', 'list_resource_quotas'] },
+		{ title: 'Advanced Security & Governance', location: 'playbook-advanced-security-governance.md', tools: ['list_oauth_configuration', 'list_admission_webhook_configurations', 'list_rbac_bindings', 'list_service_accounts', 'list_limit_ranges', 'list_network_policies', 'list_acm_multicluster_hubs', 'list_acm_managed_clusters', 'list_acm_policies', 'list_acs_central_services', 'list_acs_secured_clusters'] },
+		{ title: 'Audit & Security', location: 'playbook-audit-security.md', tools: ['list_security_context_constraints', 'list_routes', 'list_cluster_operators', 'list_events'] }
+	];
+
+	const deriveImpactMap = ({ selectedFeatures, toolCards }) => {
+		const cardMap = new Map(toolCards.map((card) => [card.tool, card]));
+		return featureGroups.map((group) => {
+			const impactedCards = group.features
+				.filter((featureId) => selectedFeatures.includes(featureId))
+				.map((featureId) => cardMap.get(featureId))
+				.filter((card) => card && (card.error || countFlaggedEntries(card) > 0));
+			if (!impactedCards.length) return null;
+			return { domain: group.title, count: impactedCards.length, tools: impactedCards.map((card) => card.label).slice(0, 4) };
+		}).filter(Boolean);
+	};
+
+	const deriveRunbookCorrelations = (toolCards) => runbookCatalog.map((runbook) => {
+		const matchedTools = toolCards.filter((card) => runbook.tools.includes(card.tool) && (card.error || countFlaggedEntries(card) > 0));
+		if (!matchedTools.length) return null;
+		return { title: runbook.title, location: runbook.location, count: matchedTools.length, tools: matchedTools.map((card) => card.label).slice(0, 4) };
+	}).filter(Boolean);
+
+	const deriveProfileInsight = ({ profileKey, selectedFeatures, toolCards, scoreDetails }) => {
+		const impactMap = deriveImpactMap({ selectedFeatures, toolCards });
+		const runbookMatches = deriveRunbookCorrelations(toolCards);
+		const cardMap = new Map(toolCards.map((card) => [card.tool, card]));
+		const hasIssue = (tool) => {
+			const card = cardMap.get(tool);
+			return Boolean(card && (card.error || countFlaggedEntries(card) > 0));
+		};
+		if (profileKey === 'upgrade') {
+			const blockers = ['list_cluster_version', 'list_cluster_operators', 'list_machine_config_pools', 'list_machine_sets', 'list_monitoring_alert_posture', 'list_pod_disruption_budgets'].filter(hasIssue).length;
+			const goNoGo = scoreDetails.overall === null ? 'Awaiting run' : (scoreDetails.overall >= 85 ? 'GO' : scoreDetails.overall >= 70 ? 'HOLD' : 'NO-GO');
+			return { label: 'Upgrade preflight', value: scoreDetails.overall === null ? 'Awaiting run' : `${scoreDetails.overall}/100 · ${goNoGo}`, details: [`${blockers} core preflight blocker lane(s) detected`, `${impactMap.length} impacted platform domain(s)`] };
+		}
+		if (profileKey === 'reliability') {
+			const burnSignals = ['list_monitoring_alert_posture', 'list_events', 'list_workload_health', 'list_routes', 'list_ingresses', 'list_horizontal_pod_autoscalers', 'list_pod_disruption_budgets'].filter(hasIssue).length;
+			const posture = scoreDetails.overall === null ? 'Awaiting run' : (burnSignals >= 4 || scoreDetails.overall < 70 ? 'High burn risk' : burnSignals >= 2 || scoreDetails.overall < 85 ? 'Moderate burn risk' : 'Low burn risk');
+			return { label: 'Error-budget posture', value: posture, details: [`${burnSignals} reliability signal group(s) under pressure`, `${runbookMatches.length} likely playbook destination(s)`] };
+		}
+		if (profileKey === 'blastRadius') {
+			const topDomain = impactMap[0]?.domain || 'No impacted domain yet';
+			return { label: 'Blast radius', value: impactMap.length ? `${impactMap.length} impacted domain(s)` : 'Awaiting run', details: [`Top affected domain: ${topDomain}`, `${runbookMatches.length} runbook correlation(s)`] };
+		}
+		if (profileKey === 'runbook') {
+			return { label: 'Runbook matches', value: runbookMatches.length ? `${runbookMatches.length} correlated playbook(s)` : 'Awaiting run', details: [runbookMatches[0] ? `Top runbook: ${runbookMatches[0].title}` : 'Run a review to correlate alerts with playbooks', `${impactMap.length} impacted domain(s) in current evidence`] };
+		}
+		return { label: 'Blast radius', value: impactMap.length ? `${impactMap.length} impacted domain(s)` : 'Awaiting run', details: [runbookMatches[0] ? `Top runbook: ${runbookMatches[0].title}` : 'Run a review to derive playbook handoffs', `${scoreDetails.flagged || 0} flagged metric(s)`] };
 	};
 
 	const buildMarkdownPack = ({ prompt, answer, cards, toolCards, recommendations }) => {
@@ -357,8 +457,12 @@
 		const items = [];
 		if (scoreDetails.errors > 0) items.push('Re-run the checks that returned tool errors with the cluster override and kube context fields verified first so the evidence set is complete before the handoff leaves the room.');
 		if (profileKey === 'lifecycle' && (hasIssue('list_cluster_version') || hasIssue('list_cluster_operators') || hasIssue('list_machine_config_pools'))) items.push('Before the next upgrade window, validate cluster version posture, degraded operators, and MachineConfigPool rollout health together so upgrade blockers are not reviewed in isolation.');
+		if (profileKey === 'upgrade' && (hasIssue('list_cluster_version') || hasIssue('list_cluster_operators') || hasIssue('list_machine_config_pools') || hasIssue('list_monitoring_alert_posture') || hasIssue('list_pod_disruption_budgets'))) items.push('Treat this as an upgrade preflight gate: hold the window until version, operator, alert posture, and disruption-control signals can defend a clean go/no-go review.');
+		if (profileKey === 'reliability' && (hasIssue('list_monitoring_alert_posture') || hasIssue('list_events') || hasIssue('list_workload_health') || hasIssue('list_routes'))) items.push('Protect the error budget first: tighten noisy alert ownership, confirm rollout health, and reduce exposure-path instability before accepting more platform change.');
 		if (profileKey === 'dr' && (hasIssue('list_disaster_recovery_resources') || hasIssue('list_oadp_resources'))) items.push('Treat DR policy and OADP backup posture as a paired gate: confirm restore confidence and policy placement before approving a failover rehearsal.');
 		if ((profileKey === 'migration' || profileKey === 'virtualization') && (hasIssue('list_virtualization_resources') || hasIssue('list_persistent_storage') || hasIssue('list_storage_classes'))) items.push('Stabilize virtualization and storage dependencies before the next migration or CNV onboarding wave so DataVolume and storage-class assumptions do not break late in the sequence.');
+		if (profileKey === 'blastRadius' && (hasIssue('list_cluster_operators') || hasIssue('list_operator_extension_readiness') || hasIssue('list_api_service_health') || hasIssue('list_admission_webhook_configurations'))) items.push('Map operator issues to affected auth, ingress, workload, and storage surfaces before sequencing the upgrade so the team knows exactly where the blast radius could spread.');
+		if (profileKey === 'runbook' && (hasIssue('list_monitoring_alert_posture') || hasIssue('list_events') || hasIssue('list_cluster_logging'))) items.push('Turn the hot alerts into owner-ready action: correlate alert posture, events, and logging coverage with the closest playbook, then document where runbook coverage is stale or missing.');
 		if (selectedFeatures.includes('list_gitops_applications') && hasIssue('list_gitops_applications')) items.push('Review GitOps application drift alongside Tekton or build failures to separate control-plane drift from delivery-pipeline regressions.');
 		if (selectedFeatures.includes('list_network_policies') && hasIssue('list_network_policies')) items.push('Where network policy coverage is noisy, pair the route/service checks with namespace isolation posture so exposure risk and workload reachability are evaluated together.');
 		if (scoreDetails.overall !== null && scoreDetails.overall < 70) items.push('Use the compare lane against the previous successful run before approving the next change window, so the team can prove whether the platform is improving or regressing.');
@@ -434,6 +538,9 @@
 		const toolCards = useMemo(() => extractToolCards(lastRun.steps), [lastRun.steps]);
 		const filteredToolCards = useMemo(() => toolCards.filter((card) => toolFilter === 'all' || (toolFilter === 'attention' ? card.error || countFlaggedEntries(card) > 0 : !card.error && countFlaggedEntries(card) === 0)), [toolCards, toolFilter]);
 		const scoreDetails = useMemo(() => computeScoreDetails({ selectedFeatures, toolCards }), [selectedFeatures, toolCards]);
+		const profileInsight = useMemo(() => deriveProfileInsight({ profileKey, selectedFeatures, toolCards, scoreDetails }), [profileKey, selectedFeatures, toolCards, scoreDetails]);
+		const runbookCorrelations = useMemo(() => deriveRunbookCorrelations(toolCards), [toolCards]);
+		const impactMap = useMemo(() => deriveImpactMap({ selectedFeatures, toolCards }), [selectedFeatures, toolCards]);
 		const recommendations = useMemo(() => buildRecommendations({ profileKey, selectedFeatures, toolCards, scoreDetails }), [profileKey, selectedFeatures, toolCards, scoreDetails]);
 		const normalizedFeatureSearch = featureSearch.trim().toLowerCase();
 		const visibleFeatureGroups = useMemo(() => featureGroups.map((group) => ({
@@ -450,11 +557,11 @@
 		const summaryCards = useMemo(() => [
 			{ label: 'Profile', value: profile.title },
 			{ label: 'Checks selected', value: String(selectedFeatures.length) },
-			{ label: 'Readiness score', value: scoreDetails.overall === null ? 'Awaiting run' : `${scoreDetails.overall}/100` },
+			{ label: profileInsight.label, value: profileInsight.value },
 			{ label: 'Flagged metrics', value: String(scoreDetails.flagged || 0) },
 			{ label: 'Healthy signals', value: String(scoreDetails.healthy || 0) },
 			{ label: 'Tool errors', value: String(scoreDetails.errors || 0) }
-		], [profile.title, selectedFeatures.length, scoreDetails]);
+		], [profile.title, selectedFeatures.length, scoreDetails, profileInsight]);
 		const markdownPack = useMemo(() => buildMarkdownPack({ prompt: lastRun.prompt || prompt, answer: lastRun.answer, cards: summaryCards, toolCards, recommendations }), [lastRun.prompt, prompt, lastRun.answer, summaryCards, toolCards, recommendations]);
 		const selectedSweepTools = selectedFeatures.slice(0, maxSweepTools);
 
@@ -811,15 +918,16 @@
 				h('div', { className: 'platform-console__hero-grid' }, [
 					h('div', null, [
 						h('span', { className: 'platform-console__eyebrow' }, 'Platform operations runway'),
-						h('h2', null, 'Run lifecycle, DR, migration, CNV, comparison, and estate sweeps from one dedicated console.'),
-						h('p', null, 'This page now covers planned OpenShift readiness work end-to-end: reusable templates, watchlists, run comparison, streaming evidence, and multi-cluster sweeps.'),
-						h('ul', null, [h('li', { key: 'a' }, 'Profiles give you a strong starting point instead of another blank textarea.'), h('li', { key: 'b' }, 'Saved templates and watchlists turn one review into an operating motion.'), h('li', { key: 'c' }, 'Streaming mode and multi-cluster sweep keep the evidence path visible while you work.')])
+						h('h2', null, 'Run lifecycle, upgrade, reliability, runbook, DR, migration, CNV, comparison, and estate sweeps from one dedicated console.'),
+						h('p', null, 'This page now covers planned OpenShift readiness work end-to-end: upgrade preflight scoring, SLO / error-budget posture, operator blast-radius mapping, alert-to-runbook correlation, reusable templates, historical comparison, streaming evidence, and multi-cluster sweeps.'),
+						h('ul', null, [h('li', { key: 'a' }, 'Profiles give you a strong starting point instead of another blank textarea.'), h('li', { key: 'b' }, 'Upgrade, reliability, blast-radius, and runbook lanes make planned SRE work much easier to structure.'), h('li', { key: 'c' }, 'Saved templates, streaming mode, and estate sweeps keep the evidence path visible while you work.')])
 					]),
 					h('div', { className: 'platform-console__hero-note' }, [
 						h('span', { className: 'platform-console__badge platform-console__badge--ok' }, 'Expanded platform cockpit'),
 						h('h3', null, profile.title),
 						h('p', null, profile.summary),
-						h('p', { className: 'platform-console__meta' }, scoreDetails.overall === null ? 'Run the first review to compute readiness scoring and recommendations.' : `Current readiness tone: ${scoreDetails.tone.toUpperCase()} · ${scoreDetails.overall}/100.`)
+						h('p', { className: 'platform-console__meta' }, scoreDetails.overall === null ? 'Run the first review to compute profile scoring, blast-radius hints, and recommendations.' : `${profileInsight.label}: ${profileInsight.value} · Current tone: ${scoreDetails.tone.toUpperCase()}.`),
+						profileInsight.details?.length ? h('ul', null, profileInsight.details.map((item) => h('li', { key: item }, item))) : null
 					])
 				]),
 				h('div', { className: 'platform-console__metrics' }, summaryCards.map((card) => h('article', { className: 'platform-console__metric', key: card.label }, [h('span', { className: 'platform-console__meta' }, card.label), h('strong', null, card.value)]))),
@@ -884,6 +992,7 @@
 				h('section', { className: 'platform-console__card' }, [
 					h('div', { className: 'agent-console__queue-header' }, [h('div', null, [h('h3', null, 'Prompt builder'), h('p', { className: 'platform-console__meta' }, 'Adjust the context below if you want the agent to emphasize a specific change window, dependency set, or handoff audience.')]), h('span', { className: 'platform-console__pill' }, streamMode ? 'Live /chat/stream prompt' : 'Live /chat prompt')]),
 					h('div', { className: 'platform-console__question-grid' }, profile.questions.map((question) => h('div', { className: 'platform-console__hero-note', key: question }, [h('span', { className: 'platform-console__badge' }, 'Review question'), h('p', null, question)]))),
+					(profile.expectedOutputs || []).length ? h('div', { className: 'platform-console__question-grid' }, profile.expectedOutputs.map((item) => h('div', { className: 'platform-console__hero-note', key: item }, [h('span', { className: 'platform-console__badge platform-console__badge--ok' }, 'Expected output'), h('p', null, item)]))) : null,
 					h('label', { className: 'agent-console__label' }, ['Additional operator guidance', h('textarea', { className: 'agent-console__textarea', rows: 3, value: customPrompt, onChange: (event) => setCustomPrompt(event.target.value), placeholder: 'Optional extra instructions for this platform review.' })]),
 					h('label', { className: 'agent-console__label' }, ['Generated review prompt', h('textarea', { className: 'agent-console__textarea', rows: 11, value: prompt, readOnly: true, onKeyDown: (event) => { if ((event.metaKey || event.ctrlKey) && event.key === 'Enter') { event.preventDefault(); runPlatformReview(); } } })])
 				]),
@@ -941,14 +1050,15 @@
 				renderStatus(overviewStatus),
 				h('div', { className: 'platform-console__grid' }, [
 					h('article', { className: 'platform-console__card' }, [
-						h('h3', null, 'Latest readiness scorecard'),
+							h('h3', null, `${profileInsight.label} scorecard`),
 						scoreDetails.overall === null
-							? h('div', { className: 'platform-console__empty' }, 'Run a platform review to compute the readiness score and category breakdown.')
+								? h('div', { className: 'platform-console__empty' }, 'Run a platform review to compute the score, profile insight, and category breakdown.')
 							: h('div', { className: 'platform-console__score-grid' }, [
-								h('article', { className: `platform-console__score-card platform-console__score-card--${scoreDetails.tone}` }, [h('span', { className: 'platform-console__meta' }, 'Overall readiness'), h('strong', { className: 'platform-console__score-value' }, `${scoreDetails.overall}/100`), h('p', { className: 'platform-console__meta' }, `${scoreDetails.flagged} flagged metrics · ${scoreDetails.errors} tool errors · ${scoreDetails.healthy} healthy signals`)]),
+									h('article', { className: `platform-console__score-card platform-console__score-card--${scoreDetails.tone}` }, [h('span', { className: 'platform-console__meta' }, profileInsight.label), h('strong', { className: 'platform-console__score-value' }, `${scoreDetails.overall}/100`), h('p', { className: 'platform-console__meta' }, `${scoreDetails.flagged} flagged metrics · ${scoreDetails.errors} tool errors · ${scoreDetails.healthy} healthy signals`)]),
 								...scoreDetails.categoryScores.map((item) => h('article', { className: `platform-console__score-card platform-console__score-card--${item.tone}`, key: item.title }, [h('span', { className: 'platform-console__meta' }, item.title), h('strong', { className: 'platform-console__score-value' }, String(item.score)), h('p', { className: 'platform-console__meta' }, `${item.selectedCount} checks · ${item.errors} errors · ${item.flagged} flagged · ${item.healthy} healthy`)]))
 							]),
-						h('div', { className: 'platform-console__recommendations' }, [h('h4', null, 'Suggested next actions'), h('ul', null, recommendations.map((item, index) => h('li', { key: `${index}-${item}` }, item)))])
+							h('div', { className: 'platform-console__recommendations' }, [h('h4', null, 'Suggested next actions'), h('ul', null, recommendations.map((item, index) => h('li', { key: `${index}-${item}` }, item)))]),
+							h('div', { className: 'platform-console__recommendations' }, [h('h4', null, 'Blast radius and runbook signals'), h('ul', null, [(impactMap[0] ? `Top impacted domain: ${impactMap[0].domain} (${impactMap[0].count} hot checks)` : 'Run a review to derive impacted domains.'), (runbookCorrelations[0] ? `Top correlated playbook: ${runbookCorrelations[0].title}` : 'Run a review to derive playbook correlation.'), ...(profileInsight.details || [])].map((item, index) => h('li', { key: `insight-${index}-${item}` }, item)))])
 					]),
 					h('article', { className: 'platform-console__card' }, [
 						h('div', { className: 'agent-console__queue-header' }, [h('div', null, [h('h3', null, 'Recent platform run history'), h('p', { className: 'platform-console__meta' }, 'Quick access to recent runs and the latest numeric metrics extracted from persisted tool traces.')]), h('button', { className: 'agent-console__example', type: 'button', onClick: () => loadOverview().catch((error) => setOverviewStatus({ message: error.message, tone: 'error' })) }, 'Refresh history')]),
@@ -979,7 +1089,11 @@
 					? h('div', { className: 'platform-console__result-grid' }, [
 						h('article', { className: 'platform-console__summary' }, [h('span', { className: 'platform-console__badge platform-console__badge--ok' }, 'Executive summary'), h('p', null, lastRun.answer)]),
 						h('article', { className: 'platform-console__summary' }, [h('span', { className: 'platform-console__badge' }, 'At-a-glance'), h('ul', null, summaryCards.map((card) => h('li', { key: card.label }, [h('strong', null, `${card.label}: `), String(card.value)])))]),
-						h('article', { className: 'platform-console__summary' }, [h('span', { className: 'platform-console__badge' }, 'Next actions'), h('ul', null, recommendations.map((item, index) => h('li', { key: `${index}-${item}` }, item)))])
+						h('article', { className: 'platform-console__summary' }, [h('span', { className: 'platform-console__badge' }, 'Next actions'), h('ul', null, recommendations.map((item, index) => h('li', { key: `${index}-${item}` }, item)))]),
+						h('article', { className: 'platform-console__summary' }, [h('span', { className: 'platform-console__badge' }, 'Blast radius / runbook correlation'), h('ul', null, [
+							...(impactMap.length ? impactMap.slice(0, 3).map((item) => `${item.domain}: ${item.count} impacted check(s)`) : ['No impacted domains derived yet.']),
+							...(runbookCorrelations.length ? runbookCorrelations.slice(0, 3).map((item) => `${item.title}: ${item.count} correlated signal(s)`) : ['No runbook correlation derived yet.'])
+						].map((item, index) => h('li', { key: `correlation-${index}-${item}` }, item)))])
 					])
 					: h('div', { className: 'platform-console__empty' }, 'Run a platform review to populate the latest summary, readiness score, and evidence trace.'),
 				filteredToolCards.length ? h('div', { className: 'platform-console__grid' }, filteredToolCards.map((card) => h('article', { className: 'platform-console__tool-card', key: card.tool }, [h('div', { className: 'agent-console__queue-header' }, [h('div', null, [h('h3', null, card.label), h('p', { className: 'platform-console__meta' }, `Tool: ${card.tool}`)]), card.error ? h('span', { className: 'platform-console__badge platform-console__badge--warn' }, 'Needs attention') : h('span', { className: 'platform-console__badge platform-console__badge--ok' }, 'Evidence captured')]), card.error ? h('p', null, card.error) : null, card.counts.length ? h('ul', null, card.counts.map((entry) => h('li', { key: `${card.tool}-${entry.label}` }, `${entry.label}: ${entry.value}`))) : h('p', { className: 'platform-console__meta' }, 'No count-style metrics were extracted from this tool response.'), ...card.rowGroups.map((group) => h('details', { key: `${card.tool}-${group.key}` }, [h('summary', null, `${group.key.replace(/_/g, ' ')} sample rows`), h('pre', null, JSON.stringify(group.rows, null, 2))]))]))) : h('div', { className: 'platform-console__empty' }, toolCards.length ? 'No tool cards match the current filter.' : 'No tool trace yet. Run the review to populate evidence cards.')

@@ -26,6 +26,8 @@ If you want a dedicated audit and platform-security workspace with compliance pr
 
 If you want to inspect the **currently loaded Ollama model** and its live VRAM/context/runtime visibility, open [`LLM Utilization`](llm-utilization.html). The historical dashboard also links to this page and shows a compact live summary.
 
+If you want a dedicated planned-operations workspace for **upgrade preflight scoring**, **SLO / error-budget posture**, **operator upgrade blast-radius mapping**, and **alert-to-runbook correlation**, use the Platform Console lane inside the SRE UI. It complements troubleshooting and security by focusing on structured pre-change reviews and owner-ready handoffs.
+
 ## Design goals
 
 - **local reasoning**: keep model execution on your machine
@@ -73,7 +75,7 @@ For operator workflows and service-specific runbooks, see:
 This SRE agent is designed to operate across the full multi-cluster OpenShift estate managed by this repository:
 
 | Platform | Deployment Method | Location |
-|----------|------------------|----------|
+| -------- | ----------------- | -------- |
 | **Bare-metal IPI** | Installer-Provisioned Infrastructure | `ipi-method/` |
 | **Bare-metal UPI** | User-Provisioned Infrastructure | `upi-method/` |
 | **AWS ROSA** | Red Hat OpenShift on AWS (managed) | `aws-rosa/` |

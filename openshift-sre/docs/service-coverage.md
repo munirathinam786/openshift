@@ -71,6 +71,8 @@ Typical use cases:
 - operator lifecycle troubleshooting
 - machine config drift detection
 - cluster upgrade readiness review
+- upgrade preflight scoring before a controlled change window
+- operator upgrade blast-radius mapping across auth, ingress, storage, and workload surfaces
 - build and image pipeline visibility
 
 ## Security posture
@@ -86,6 +88,23 @@ Typical use cases:
 - namespace isolation review
 - insecure route detection
 - security-related operator health review
+- alert-to-runbook correlation when security, auth, or platform alerts need an owning playbook
+
+## Reliability, SLO, and runbook posture
+
+- `list_monitoring_alert_posture` — `moderate inventory read`
+- `list_cluster_logging` — `moderate inventory read`
+- `list_workload_health` — `moderate inventory read`
+- `list_horizontal_pod_autoscalers` — `moderate inventory read`
+- `list_pod_disruption_budgets` — `moderate inventory read`
+- `list_events` — `heavier troubleshooting read`
+
+Typical use cases:
+
+- SLO / error-budget posture reviews before approving more change
+- early detection of alert coverage gaps and noisy-burn patterns
+- workload and exposure-path checks that explain likely customer impact
+- alert-to-runbook correlation and owner handoff during live triage or pre-change review
 
 ## Fallback and safety
 
@@ -108,6 +127,10 @@ The browser console includes shortcut flows for common platform review paths suc
 - storage posture
 - security posture
 - operator lifecycle checks
+- upgrade preflight scoring
+- SLO / error-budget posture
+- operator upgrade blast-radius mapping
+- alert-to-runbook correlation
 
 ## Operator note
 

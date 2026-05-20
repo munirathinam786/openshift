@@ -234,9 +234,12 @@ It now combines:
 
 - the same shared React operator-shell language as `docs/console.html`, with platform-specific metadata, actions, stats, and shell-highlight copy
 - profile-driven lifecycle-readiness, observability/advisory, DR, migration, virtualization, and fleet posture launchers
+- dedicated SRE profiles for **upgrade preflight scoring**, **SLO / error-budget posture**, **operator upgrade blast-radius mapping**, and **alert-to-runbook correlation** so planned operations work can be framed without hand-writing the whole prompt each time
 - saved template and watchlist controls backed by `/investigations` and `/watchlists`
 - inline historical run comparison backed by `/history/compare` and recent-run loading from `/history/overview`
 - a readiness scorecard and recommendation lane derived from the most recent tool trace
+- profile-specific expected-output cards so the UI can explicitly ask for preflight scores, error-budget posture, blast-radius maps, and runbook correlations instead of leaving the response shape up to chance
+- blast-radius and playbook-correlation summaries derived from the latest tool trace so the result view can point operators toward the next likely runbook destination
 - a broader OpenShift check catalog covering cluster identity, networking, ingress controllers, cluster proxy posture, DNS operator settings, feature gates, scheduler posture, machine health checks, cluster autoscaling, projects, node pressure, pods, autoscalers, disruption budgets, events, SCCs, RBAC, service accounts, limit ranges, quotas, image streams, BuildConfigs, DeploymentConfigs, Knative services, VM snapshots, migration-toolkit resources, and build posture in addition to the earlier lifecycle and fleet checks
 - a fully expanded `Security and governance` category for the platform lane, surfacing OAuth/LDAP posture, SCCs, RBAC, service accounts, limit ranges, network policies, resource quotas, ACM governance, and ACS secured-cluster coverage from the existing backend toolkit
 - FinOps-style connection and request-scoped cluster override controls so operators can target a specific cluster, namespace, or estate slice
@@ -505,6 +508,7 @@ The latest lane adds a fast operator advisory path for observability and extensi
 - control-plane serving certificate and trust-bundle expiry review across key OpenShift namespaces
 - operator dependency / extension readiness scoring derived from cluster operators, subscriptions, CSVs, webhook posture, and aggregated APIs
 - a batched `/platform/advisory` endpoint that returns review packs without the slower multi-turn LLM loop
+- higher-level SRE review lanes that turn those same signals into upgrade preflight scoring, SLO / error-budget posture, operator blast-radius mapping, and alert-to-runbook handoff guidance
 
 ### `scripts/validate-docs-javascript.mjs`
 

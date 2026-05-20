@@ -41,6 +41,10 @@ For a full provider-by-provider reference, see [`LLM Providers`](llm-providers.m
 - `Summarize SCC, network policy, and quota posture for the selected projects.`
 - `Inspect PVC and PV status and identify storage bottlenecks.`
 - `Review builds and image streams for delivery-path failures.`
+- `Calculate an upgrade preflight score for the next OpenShift change window and explain any hold / no-go blockers.`
+- `Assess SLO and error-budget posture using alerts, events, workload health, and exposure signals.`
+- `Map operator upgrade blast radius across auth, ingress, storage, and workload surfaces.`
+- `Correlate current alerts and warning events to the most relevant OpenShift runbook and next owner handoff.`
 
 ## Guided troubleshooting workflows
 
@@ -62,6 +66,13 @@ Example guided workflow detail:
 - **Cluster operator degradation** checks cluster version, cluster operators, machine config pools, and related warning events
 - **Pending or crashlooping workloads** checks workload health, pods, quotas, storage, and node pressure
 - **Route or ingress exposure issues** checks services, routes, ingresses, and recent events
+
+For planned SRE review work, the Platform Console adds dedicated lanes for:
+
+- upgrade preflight scoring before a change window
+- SLO / error-budget posture review before accepting more change
+- operator upgrade blast-radius mapping for dependency-heavy estates
+- alert-to-runbook correlation when noisy signals need a clear owner and playbook destination
 
 This does not attempt to enumerate every OpenShift problem permutation, but it does provide a large guided catalog across the main platform, workload, storage, network, and security troubleshooting paths.
 

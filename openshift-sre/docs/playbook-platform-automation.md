@@ -4,6 +4,50 @@
 
 This playbook covers the OpenShift platform services used to understand lifecycle automation, delivery posture, machine management, virtualization, and day-2 operating readiness.
 
+It also serves as the primary runbook destination for the Platform Console lanes that now cover **upgrade preflight scoring**, **operator upgrade blast-radius mapping**, and parts of **alert-to-runbook correlation**.
+
+## Upgrade preflight scoring
+
+Use:
+
+- `list_cluster_version`
+- `list_cluster_operators`
+- `list_machine_config_pools`
+- `list_machine_sets`
+- `list_monitoring_alert_posture`
+- `list_pod_disruption_budgets`
+
+What to look for:
+
+- upgradeable posture that looks technically allowed but operationally unsafe
+- degraded operators, paused pools, or disruption constraints that would elongate or derail the window
+- monitoring gaps that make the change hard to observe safely
+
+Suggested prompts:
+
+- `Calculate an upgrade preflight score and explain whether the next OpenShift upgrade should be go, hold, or no-go.`
+
+## Operator upgrade blast-radius mapping
+
+Use:
+
+- `list_cluster_operators`
+- `list_operator_subscriptions`
+- `list_cluster_service_versions`
+- `list_operator_extension_readiness`
+- `list_api_service_health`
+- `list_admission_webhook_configurations`
+
+What to look for:
+
+- operators whose degradation would spread across auth, ingress, workload rollout, storage, or fleet governance
+- extension APIs or webhooks that turn a localized issue into a platform-wide upgrade problem
+- sequencing mistakes that increase dependency risk during a maintenance window
+
+Suggested prompts:
+
+- `Map operator upgrade blast radius and explain which platform domains are most exposed if current operator issues worsen.`
+
 ## Cluster infrastructure and platform pattern
 
 Use: `list_cluster_infrastructure`
@@ -116,6 +160,25 @@ Suggested prompts:
 
 - `Inspect cluster logging and OADP posture and summarize day-2 automation gaps.`
 
+## Alert-to-runbook correlation
+
+Use:
+
+- `list_monitoring_alert_posture`
+- `list_cluster_logging`
+- `list_events`
+- `list_workload_health`
+
+What to look for:
+
+- alerting gaps where the signal exists but the operational response is unclear
+- warning-event patterns that should land in a platform, storage, security, or migration playbook
+- logging blind spots that make runbook execution slower or less trustworthy
+
+Suggested prompts:
+
+- `Correlate current alerts and warning events to the most relevant platform runbook and identify any missing or stale guidance.`
+
 ## Virtualization and disaster recovery
 
 Use:
@@ -136,7 +199,9 @@ Suggested prompts:
 Operator actions:
 
 1. confirm the cluster infrastructure matches the platform pattern you think you are operating
-2. review MachineConfigPool and MachineSet posture before platform changes
-3. inspect GitOps, Tekton, builds, and image streams for delivery drift
-4. review OLM, logging, and OADP posture as part of day-2 automation readiness
-5. compare virtualization and DR posture before migration, failover, or upgrade work
+2. calculate an upgrade preflight score before major lifecycle changes instead of relying on isolated health checks
+3. map operator blast radius before platform changes so sequencing reduces dependency risk
+4. inspect GitOps, Tekton, builds, and image streams for delivery drift
+5. review OLM, logging, and OADP posture as part of day-2 automation readiness
+6. correlate alerts to the nearest runbook so the next owner gets a concrete handoff, not just a signal dump
+7. compare virtualization and DR posture before migration, failover, or upgrade work
