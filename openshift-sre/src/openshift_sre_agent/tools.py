@@ -91,8 +91,11 @@ class OpenShiftSreToolkit:
         self._current_context_name: str | None = settings.kube_context
         self._core: client.CoreV1Api | None = None
         self._apps: client.AppsV1Api | None = None
+        self._autoscaling: client.AutoscalingV2Api | None = None
         self._batch: client.BatchV1Api | None = None
         self._networking: client.NetworkingV1Api | None = None
+        self._policy: client.PolicyV1Api | None = None
+        self._rbac: client.RbacAuthorizationV1Api | None = None
         self._storage: client.StorageV1Api | None = None
         self._custom: client.CustomObjectsApi | None = None
         self.tools: dict[str, ToolSpec] = {
@@ -125,6 +128,18 @@ class OpenShiftSreToolkit:
                 "Inspect cluster operators and summarize available, progressing, and degraded posture.",
                 {},
                 self.list_cluster_operators,
+            ),
+            "list_cluster_network_config": ToolSpec(
+                "list_cluster_network_config",
+                "Inspect cluster network configuration to summarize network type, cluster/service CIDRs, external exposure ranges, and topology-related network settings.",
+                {},
+                self.list_cluster_network_config,
+            ),
+            "list_ingress_controllers": ToolSpec(
+                "list_ingress_controllers",
+                "Inspect OpenShift ingress controllers to summarize domain, publishing strategy, replica posture, and availability across the estate.",
+                {},
+                self.list_ingress_controllers,
             ),
             "list_nodes": ToolSpec(
                 "list_nodes",
@@ -179,6 +194,30 @@ class OpenShiftSreToolkit:
                 "List PVs and PVCs and summarize bind state, capacity, access mode, and storage class posture.",
                 {"project": "Optional namespace / project name to scope the query."},
                 self.list_persistent_storage,
+            ),
+            "list_horizontal_pod_autoscalers": ToolSpec(
+                "list_horizontal_pod_autoscalers",
+                "List horizontal pod autoscalers and summarize target workloads, min/max ranges, and scaling readiness posture.",
+                {"project": "Optional namespace / project name to scope the query."},
+                self.list_horizontal_pod_autoscalers,
+            ),
+            "list_pod_disruption_budgets": ToolSpec(
+                "list_pod_disruption_budgets",
+                "List pod disruption budgets and summarize allowed disruptions plus workloads that may block safe maintenance or upgrades.",
+                {"project": "Optional namespace / project name to scope the query."},
+                self.list_pod_disruption_budgets,
+            ),
+            "list_cronjobs": ToolSpec(
+                "list_cronjobs",
+                "List cron jobs and summarize schedule, suspend posture, and last/next execution coverage.",
+                {"project": "Optional namespace / project name to scope the query."},
+                self.list_cronjobs,
+            ),
+            "list_volume_snapshots": ToolSpec(
+                "list_volume_snapshots",
+                "List volume snapshots and volume snapshot classes to summarize protection coverage, readiness, and snapshot policy posture.",
+                {"project": "Optional namespace / project name to scope the query."},
+                self.list_volume_snapshots,
             ),
             "list_storage_classes": ToolSpec(
                 "list_storage_classes",
@@ -246,6 +285,24 @@ class OpenShiftSreToolkit:
                 {},
                 self.list_security_context_constraints,
             ),
+            "list_rbac_bindings": ToolSpec(
+                "list_rbac_bindings",
+                "List role bindings and cluster role bindings to surface privileged subjects, cluster-admin assignments, and namespace access posture.",
+                {"project": "Optional namespace / project name to scope the query."},
+                self.list_rbac_bindings,
+            ),
+            "list_service_accounts": ToolSpec(
+                "list_service_accounts",
+                "List service accounts and summarize token mounting posture, secret counts, and image-pull dependency signals.",
+                {"project": "Optional namespace / project name to scope the query."},
+                self.list_service_accounts,
+            ),
+            "list_limit_ranges": ToolSpec(
+                "list_limit_ranges",
+                "List limit ranges across the selected projects to show governance guardrails around default requests, limits, and max ratios.",
+                {"project": "Optional namespace / project name to scope the query."},
+                self.list_limit_ranges,
+            ),
             "list_network_policies": ToolSpec(
                 "list_network_policies",
                 "List network policies across the selected projects and summarize ingress and egress isolation coverage.",
@@ -270,11 +327,29 @@ class OpenShiftSreToolkit:
                 {"project": "Optional namespace / project name to scope the query."},
                 self.list_builds,
             ),
+            "list_build_configs": ToolSpec(
+                "list_build_configs",
+                "List build configs to summarize source strategy, trigger coverage, and output destinations across delivery namespaces.",
+                {"project": "Optional namespace / project name to scope the query."},
+                self.list_build_configs,
+            ),
+            "list_deployment_configs": ToolSpec(
+                "list_deployment_configs",
+                "List OpenShift deployment configs to summarize replica posture, strategy, and rollout trigger coverage.",
+                {"project": "Optional namespace / project name to scope the query."},
+                self.list_deployment_configs,
+            ),
             "list_gitops_argocds": ToolSpec(
                 "list_gitops_argocds",
                 "Inspect OpenShift GitOps / Argo CD instances to summarize install posture, HA settings, namespaces, and server exposure.",
                 {},
                 self.list_gitops_argocds,
+            ),
+            "list_knative_services": ToolSpec(
+                "list_knative_services",
+                "Inspect Knative services to summarize readiness, latest revisions, and serverless delivery posture when OpenShift Serverless is installed.",
+                {"project": "Optional namespace / project name to scope the query."},
+                self.list_knative_services,
             ),
             "list_gitops_applications": ToolSpec(
                 "list_gitops_applications",
@@ -311,6 +386,18 @@ class OpenShiftSreToolkit:
                 "Inspect OpenShift Virtualization / CNV resources to summarize KubeVirt control-plane health, HyperConverged posture, virtual machines, DataVolumes, and live migration activity.",
                 {"project": "Optional namespace / project name to scope VM, DataVolume, and migration queries."},
                 self.list_virtualization_resources,
+            ),
+            "list_virtual_machine_snapshots": ToolSpec(
+                "list_virtual_machine_snapshots",
+                "Inspect KubeVirt virtual machine snapshots to summarize snapshot readiness, source VMs, and restore posture.",
+                {"project": "Optional namespace / project name to scope VM snapshot queries."},
+                self.list_virtual_machine_snapshots,
+            ),
+            "list_migration_toolkit_resources": ToolSpec(
+                "list_migration_toolkit_resources",
+                "Inspect Migration Toolkit for Containers resources to summarize migration clusters, storage, plans, and recent migration execution posture.",
+                {"project": "Optional namespace / project name to scope migration toolkit queries."},
+                self.list_migration_toolkit_resources,
             ),
             "list_disaster_recovery_resources": ToolSpec(
                 "list_disaster_recovery_resources",
@@ -383,8 +470,11 @@ class OpenShiftSreToolkit:
 
         self._core = client.CoreV1Api()
         self._apps = client.AppsV1Api()
+        self._autoscaling = client.AutoscalingV2Api()
         self._batch = client.BatchV1Api()
         self._networking = client.NetworkingV1Api()
+        self._policy = client.PolicyV1Api()
+        self._rbac = client.RbacAuthorizationV1Api()
         self._storage = client.StorageV1Api()
         self._custom = client.CustomObjectsApi()
         self._configured = True
@@ -654,6 +744,64 @@ class OpenShiftSreToolkit:
             )
         return {"count": len(rows), "degraded_count": degraded_count, "progressing_count": progressing_count, "cluster_operators": rows}
 
+    def list_cluster_network_config(self) -> dict[str, Any]:
+        items = self._list_custom(group="config.openshift.io", version="v1", plural="networks")
+        item = next((entry for entry in items if (entry.get("metadata") or {}).get("name") == "cluster"), None)
+        if item is None:
+            return {"count": 0, "cluster_networks": []}
+        spec = item.get("spec") or {}
+        status = item.get("status") or {}
+        cluster_network = spec.get("clusterNetwork") or []
+        service_network = spec.get("serviceNetwork") or []
+        return {
+            "count": 1,
+            "cluster_networks": [
+                {
+                    "cluster_network_cidr_count": len(cluster_network),
+                    "service_network_cidr_count": len(service_network),
+                    "network_type": status.get("networkType") or spec.get("networkType"),
+                    "cluster_network_cidrs": cluster_network,
+                    "service_network_cidrs": service_network,
+                    "external_ip": spec.get("externalIP") or {},
+                    "load_balancer": spec.get("loadBalancer") or {},
+                    "ingress": spec.get("ingress") or {},
+                    "status": status,
+                }
+            ],
+        }
+
+    def list_ingress_controllers(self) -> dict[str, Any]:
+        rows = []
+        available_count = 0
+        unavailable_count = 0
+        for item in self._list_custom(group="operator.openshift.io", version="v1", plural="ingresscontrollers", namespace="openshift-ingress-operator"):
+            metadata = item.get("metadata") or {}
+            spec = item.get("spec") or {}
+            status = item.get("status") or {}
+            conditions = self._extract_condition_map(status.get("conditions"))
+            available = conditions.get("Available")
+            replicas = status.get("availableReplicas")
+            desired = spec.get("replicas")
+            if available == "True":
+                available_count += 1
+            if desired is not None and replicas is not None and replicas < desired:
+                unavailable_count += 1
+            rows.append(
+                {
+                    "namespace": metadata.get("namespace"),
+                    "ingress_controller_name": metadata.get("name"),
+                    "domain": spec.get("domain"),
+                    "endpoint_publishing_strategy": ((spec.get("endpointPublishingStrategy") or {}).get("type")),
+                    "route_selector": spec.get("routeSelector") or {},
+                    "namespace_selector": spec.get("namespaceSelector") or {},
+                    "desired_replicas": desired,
+                    "available_replicas": replicas,
+                    "available": available,
+                    "degraded": conditions.get("Degraded"),
+                }
+            )
+        return {"count": len(rows), "available_count": available_count, "unavailable_count": unavailable_count, "ingress_controllers": rows}
+
     def list_nodes(self) -> dict[str, Any]:
         self._ensure_clients()
         assert self._core is not None
@@ -886,6 +1034,131 @@ class OpenShiftSreToolkit:
                     }
                 )
         return {"pv_count": len(pvs), "pvc_count": len(pvcs), "pending_pvc_count": pending_pvc_count, "persistent_volumes": pvs, "persistent_volume_claims": pvcs}
+
+    def list_horizontal_pod_autoscalers(self, project: str | None = None) -> dict[str, Any]:
+        self._ensure_clients()
+        assert self._autoscaling is not None
+        rows = []
+        constrained_count = 0
+        for namespace in self._selected_projects(project):
+            for autoscaler in self._autoscaling.list_namespaced_horizontal_pod_autoscaler(namespace).items:
+                spec = getattr(autoscaler, "spec", None)
+                status = getattr(autoscaler, "status", None)
+                current = getattr(status, "current_replicas", None)
+                maximum = getattr(spec, "max_replicas", None)
+                if current is not None and maximum is not None and current >= maximum:
+                    constrained_count += 1
+                rows.append(
+                    {
+                        "project": namespace,
+                        "horizontal_pod_autoscaler_name": self._metadata_name(autoscaler),
+                        "target_kind": getattr(getattr(spec, "scale_target_ref", None), "kind", None),
+                        "target_name": getattr(getattr(spec, "scale_target_ref", None), "name", None),
+                        "min_replicas": getattr(spec, "min_replicas", None),
+                        "max_replicas": maximum,
+                        "current_replicas": current,
+                        "desired_replicas": getattr(status, "desired_replicas", None),
+                        "condition_count": len(getattr(status, "conditions", None) or []),
+                    }
+                )
+        return {"count": len(rows), "constrained_count": constrained_count, "horizontal_pod_autoscalers": rows}
+
+    def list_pod_disruption_budgets(self, project: str | None = None) -> dict[str, Any]:
+        self._ensure_clients()
+        assert self._policy is not None
+        rows = []
+        blocking_count = 0
+        for namespace in self._selected_projects(project):
+            for pdb in self._policy.list_namespaced_pod_disruption_budget(namespace).items:
+                status = getattr(pdb, "status", None)
+                disruptions = getattr(status, "disruptions_allowed", None)
+                if disruptions == 0:
+                    blocking_count += 1
+                rows.append(
+                    {
+                        "project": namespace,
+                        "pod_disruption_budget_name": self._metadata_name(pdb),
+                        "min_available": getattr(getattr(pdb, "spec", None), "min_available", None),
+                        "max_unavailable": getattr(getattr(pdb, "spec", None), "max_unavailable", None),
+                        "current_healthy": getattr(status, "current_healthy", None),
+                        "desired_healthy": getattr(status, "desired_healthy", None),
+                        "expected_pods": getattr(status, "expected_pods", None),
+                        "disruptions_allowed": disruptions,
+                    }
+                )
+        return {"count": len(rows), "blocking_count": blocking_count, "pod_disruption_budgets": rows}
+
+    def list_cronjobs(self, project: str | None = None) -> dict[str, Any]:
+        self._ensure_clients()
+        assert self._batch is not None
+        rows = []
+        suspended_count = 0
+        for namespace in self._selected_projects(project):
+            for cronjob in self._batch.list_namespaced_cron_job(namespace).items:
+                spec = getattr(cronjob, "spec", None)
+                status = getattr(cronjob, "status", None)
+                suspended = bool(getattr(spec, "suspend", False))
+                if suspended:
+                    suspended_count += 1
+                rows.append(
+                    {
+                        "project": namespace,
+                        "cronjob_name": self._metadata_name(cronjob),
+                        "schedule": getattr(spec, "schedule", None),
+                        "suspend": suspended,
+                        "concurrency_policy": getattr(spec, "concurrency_policy", None),
+                        "last_schedule_time": getattr(status, "last_schedule_time", None).isoformat() if getattr(status, "last_schedule_time", None) else None,
+                        "active_job_count": len(getattr(status, "active", None) or []),
+                    }
+                )
+        return {"count": len(rows), "suspended_count": suspended_count, "cronjobs": rows}
+
+    def list_volume_snapshots(self, project: str | None = None) -> dict[str, Any]:
+        snapshot_rows = []
+        ready_count = 0
+        namespaces = self._selected_projects(project)
+        for namespace in namespaces:
+            for item in self._list_custom_any_version(
+                group="snapshot.storage.k8s.io",
+                versions=("v1", "v1beta1"),
+                plural="volumesnapshots",
+                namespace=namespace,
+            ):
+                metadata = item.get("metadata") or {}
+                spec = item.get("spec") or {}
+                status = item.get("status") or {}
+                if status.get("readyToUse") is True:
+                    ready_count += 1
+                snapshot_rows.append(
+                    {
+                        "project": namespace,
+                        "volume_snapshot_name": metadata.get("name"),
+                        "source_pvc": ((spec.get("source") or {}).get("persistentVolumeClaimName")),
+                        "volume_snapshot_class_name": spec.get("volumeSnapshotClassName"),
+                        "ready_to_use": status.get("readyToUse"),
+                        "restore_size": status.get("restoreSize"),
+                    }
+                )
+        snapshot_class_rows = [
+            {
+                "volume_snapshot_class_name": (item.get("metadata") or {}).get("name"),
+                "driver": (item.get("driver")),
+                "deletion_policy": item.get("deletionPolicy"),
+                "is_default": ((item.get("metadata") or {}).get("annotations") or {}).get("snapshot.storage.kubernetes.io/is-default-class") == "true",
+            }
+            for item in self._list_custom_any_version(
+                group="snapshot.storage.k8s.io",
+                versions=("v1", "v1beta1"),
+                plural="volumesnapshotclasses",
+            )
+        ]
+        return {
+            "volume_snapshot_count": len(snapshot_rows),
+            "ready_volume_snapshot_count": ready_count,
+            "volume_snapshot_class_count": len(snapshot_class_rows),
+            "volume_snapshots": snapshot_rows,
+            "volume_snapshot_classes": snapshot_class_rows,
+        }
 
     def list_storage_classes(self) -> dict[str, Any]:
         self._ensure_clients()
@@ -1180,6 +1453,98 @@ class OpenShiftSreToolkit:
             )
         return {"count": len(rows), "privileged_count": privileged_count, "security_context_constraints": rows}
 
+    def list_rbac_bindings(self, project: str | None = None) -> dict[str, Any]:
+        self._ensure_clients()
+        assert self._rbac is not None
+        cluster_rows = []
+        cluster_admin_count = 0
+        for binding in self._rbac.list_cluster_role_binding().items:
+            role_ref = getattr(binding, "role_ref", None)
+            role_name = getattr(role_ref, "name", None)
+            if role_name == "cluster-admin":
+                cluster_admin_count += 1
+            cluster_rows.append(
+                {
+                    "cluster_role_binding_name": self._metadata_name(binding),
+                    "role_ref_kind": getattr(role_ref, "kind", None),
+                    "role_ref_name": role_name,
+                    "subject_count": len(getattr(binding, "subjects", None) or []),
+                }
+            )
+        namespace_rows = []
+        elevated_namespace_binding_count = 0
+        for namespace in self._selected_projects(project):
+            for binding in self._rbac.list_namespaced_role_binding(namespace).items:
+                role_ref = getattr(binding, "role_ref", None)
+                role_name = getattr(role_ref, "name", None)
+                if role_name in {"admin", "cluster-admin", "edit"}:
+                    elevated_namespace_binding_count += 1
+                namespace_rows.append(
+                    {
+                        "project": namespace,
+                        "role_binding_name": self._metadata_name(binding),
+                        "role_ref_kind": getattr(role_ref, "kind", None),
+                        "role_ref_name": role_name,
+                        "subject_count": len(getattr(binding, "subjects", None) or []),
+                    }
+                )
+        return {
+            "cluster_role_binding_count": len(cluster_rows),
+            "namespace_role_binding_count": len(namespace_rows),
+            "cluster_admin_binding_count": cluster_admin_count,
+            "elevated_namespace_binding_count": elevated_namespace_binding_count,
+            "cluster_role_bindings": cluster_rows,
+            "role_bindings": namespace_rows,
+        }
+
+    def list_service_accounts(self, project: str | None = None) -> dict[str, Any]:
+        self._ensure_clients()
+        assert self._core is not None
+        rows = []
+        token_mount_count = 0
+        for namespace in self._selected_projects(project):
+            for service_account in self._core.list_namespaced_service_account(namespace).items:
+                automount = getattr(service_account, "automount_service_account_token", None)
+                if automount is True:
+                    token_mount_count += 1
+                rows.append(
+                    {
+                        "project": namespace,
+                        "service_account_name": self._metadata_name(service_account),
+                        "automount_service_account_token": automount,
+                        "secret_count": len(getattr(service_account, "secrets", None) or []),
+                        "image_pull_secret_count": len(getattr(service_account, "image_pull_secrets", None) or []),
+                    }
+                )
+        return {"count": len(rows), "automount_token_enabled_count": token_mount_count, "service_accounts": rows}
+
+    def list_limit_ranges(self, project: str | None = None) -> dict[str, Any]:
+        self._ensure_clients()
+        assert self._core is not None
+        rows = []
+        for namespace in self._selected_projects(project):
+            for limit_range in self._core.list_namespaced_limit_range(namespace).items:
+                limits = []
+                for item in getattr(limit_range, "spec", None).limits or []:
+                    limits.append(
+                        {
+                            "type": getattr(item, "type", None),
+                            "default": getattr(item, "default", None) or {},
+                            "default_request": getattr(item, "default_request", None) or {},
+                            "max": getattr(item, "max", None) or {},
+                            "min": getattr(item, "min", None) or {},
+                        }
+                    )
+                rows.append(
+                    {
+                        "project": namespace,
+                        "limit_range_name": self._metadata_name(limit_range),
+                        "limit_item_count": len(limits),
+                        "limits": limits,
+                    }
+                )
+        return {"count": len(rows), "limit_ranges": rows}
+
     def list_network_policies(self, project: str | None = None) -> dict[str, Any]:
         self._ensure_clients()
         assert self._networking is not None
@@ -1258,6 +1623,85 @@ class OpenShiftSreToolkit:
                     }
                 )
         return {"count": len(rows), "failed_count": failed_count, "builds": rows}
+
+    def list_build_configs(self, project: str | None = None) -> dict[str, Any]:
+        rows = []
+        trigger_count = 0
+        for namespace in self._selected_projects(project):
+            for item in self._list_custom(group="build.openshift.io", version="v1", plural="buildconfigs", namespace=namespace):
+                spec = item.get("spec") or {}
+                triggers = spec.get("triggers") or []
+                trigger_count += len(triggers)
+                rows.append(
+                    {
+                        "project": namespace,
+                        "build_config_name": (item.get("metadata") or {}).get("name"),
+                        "source_type": ((spec.get("source") or {}).get("type")),
+                        "strategy_type": next((key for key in (spec.get("strategy") or {}) if key.endswith("Strategy")), None),
+                        "output_to_kind": ((spec.get("output") or {}).get("to") or {}).get("kind"),
+                        "output_to_name": ((spec.get("output") or {}).get("to") or {}).get("name"),
+                        "trigger_count": len(triggers),
+                    }
+                )
+        return {"count": len(rows), "trigger_count": trigger_count, "build_configs": rows}
+
+    def list_deployment_configs(self, project: str | None = None) -> dict[str, Any]:
+        rows = []
+        degraded_count = 0
+        for namespace in self._selected_projects(project):
+            for item in self._list_custom(group="apps.openshift.io", version="v1", plural="deploymentconfigs", namespace=namespace):
+                spec = item.get("spec") or {}
+                status = item.get("status") or {}
+                desired = spec.get("replicas") or 0
+                available = status.get("availableReplicas") or 0
+                if available < desired:
+                    degraded_count += 1
+                rows.append(
+                    {
+                        "project": namespace,
+                        "deployment_config_name": (item.get("metadata") or {}).get("name"),
+                        "strategy_type": ((spec.get("strategy") or {}).get("type")),
+                        "desired_replicas": desired,
+                        "available_replicas": available,
+                        "ready_replicas": status.get("readyReplicas") or 0,
+                        "latest_version": status.get("latestVersion"),
+                        "trigger_count": len(spec.get("triggers") or []),
+                    }
+                )
+        return {"count": len(rows), "degraded_count": degraded_count, "deployment_configs": rows}
+
+    def list_knative_services(self, project: str | None = None) -> dict[str, Any]:
+        rows = []
+        not_ready_count = 0
+        namespaces = self._selected_projects(project)
+        if not project:
+            namespaces = self._namespace_candidates(namespaces, self._all_projects())
+        for namespace in namespaces:
+            for item in self._list_custom_any_version(
+                group="serving.knative.dev",
+                versions=("v1", "v1beta1"),
+                plural="services",
+                namespace=namespace,
+            ):
+                metadata = item.get("metadata") or {}
+                spec = item.get("spec") or {}
+                status = item.get("status") or {}
+                conditions = self._extract_condition_map(status.get("conditions"))
+                ready = conditions.get("Ready")
+                if ready not in {None, "True"}:
+                    not_ready_count += 1
+                rows.append(
+                    {
+                        "project": namespace,
+                        "knative_service_name": metadata.get("name"),
+                        "url": status.get("url"),
+                        "latest_created_revision_name": status.get("latestCreatedRevisionName"),
+                        "latest_ready_revision_name": status.get("latestReadyRevisionName"),
+                        "container_count": len(((spec.get("template") or {}).get("spec") or {}).get("containers") or []),
+                        "ready": ready,
+                    }
+                )
+        return {"count": len(rows), "not_ready_count": not_ready_count, "knative_services": rows}
 
     def list_gitops_argocds(self) -> dict[str, Any]:
         rows = []
@@ -1691,6 +2135,122 @@ class OpenShiftSreToolkit:
             "virtual_machines": vm_rows,
             "data_volumes": datavolume_rows,
             "live_migrations": migration_rows,
+        }
+
+    def list_virtual_machine_snapshots(self, project: str | None = None) -> dict[str, Any]:
+        rows = []
+        ready_count = 0
+        namespaces = self._selected_projects(project)
+        if not project:
+            namespaces = self._namespace_candidates(namespaces, ["openshift-cnv"])
+        for namespace in namespaces:
+            for item in self._list_custom_any_version(
+                group="snapshot.kubevirt.io",
+                versions=("v1beta1", "v1alpha1"),
+                plural="virtualmachinesnapshots",
+                namespace=namespace,
+            ):
+                metadata = item.get("metadata") or {}
+                spec = item.get("spec") or {}
+                status = item.get("status") or {}
+                if status.get("readyToUse") is True:
+                    ready_count += 1
+                rows.append(
+                    {
+                        "project": namespace,
+                        "virtual_machine_snapshot_name": metadata.get("name"),
+                        "source_virtual_machine_name": ((spec.get("source") or {}).get("name")),
+                        "ready_to_use": status.get("readyToUse"),
+                        "creation_time": status.get("creationTime"),
+                        "error": status.get("error") or {},
+                    }
+                )
+        return {"count": len(rows), "ready_count": ready_count, "virtual_machine_snapshots": rows}
+
+    def list_migration_toolkit_resources(self, project: str | None = None) -> dict[str, Any]:
+        namespaces = self._namespace_candidates(
+            self._selected_projects(project),
+            ["openshift-migration"],
+        )
+        migcluster_rows = []
+        migstorage_rows = []
+        migplan_rows = []
+        migration_rows = []
+        active_migration_count = 0
+        for namespace in namespaces:
+            for item in self._list_custom_any_version(
+                group="migration.openshift.io",
+                versions=("v1alpha1",),
+                plural="migclusters",
+                namespace=namespace,
+            ):
+                migcluster_rows.append(
+                    {
+                        "project": namespace,
+                        "mig_cluster_name": (item.get("metadata") or {}).get("name"),
+                        "is_host_cluster": (item.get("spec") or {}).get("isHostCluster"),
+                        "ready": ((item.get("status") or {}).get("conditions") or []),
+                    }
+                )
+            for item in self._list_custom_any_version(
+                group="migration.openshift.io",
+                versions=("v1alpha1",),
+                plural="migstorages",
+                namespace=namespace,
+            ):
+                backup_storage_config = (item.get("spec") or {}).get("backupStorageConfig") or {}
+                migstorage_rows.append(
+                    {
+                        "project": namespace,
+                        "mig_storage_name": (item.get("metadata") or {}).get("name"),
+                        "backup_storage_provider": backup_storage_config.get("provider") or backup_storage_config.get("awsBucketName") or backup_storage_config.get("gcpBucket") or backup_storage_config.get("azureResourceGroup"),
+                    }
+                )
+            for item in self._list_custom_any_version(
+                group="migration.openshift.io",
+                versions=("v1alpha1",),
+                plural="migplans",
+                namespace=namespace,
+            ):
+                migplan_rows.append(
+                    {
+                        "project": namespace,
+                        "mig_plan_name": (item.get("metadata") or {}).get("name"),
+                        "source_cluster": ((item.get("spec") or {}).get("srcMigClusterRef") or {}).get("name"),
+                        "destination_cluster": ((item.get("spec") or {}).get("destMigClusterRef") or {}).get("name"),
+                        "migration_stage_count": len(((item.get("spec") or {}).get("stages") or [])),
+                        "include_pvs": ((item.get("spec") or {}).get("indirectImageMigration")),
+                    }
+                )
+            for item in self._list_custom_any_version(
+                group="migration.openshift.io",
+                versions=("v1alpha1",),
+                plural="migmigrations",
+                namespace=namespace,
+            ):
+                status = item.get("status") or {}
+                phase = status.get("phase") or status.get("conditions")
+                if isinstance(phase, str) and phase.lower() in {"running", "executing", "started"}:
+                    active_migration_count += 1
+                migration_rows.append(
+                    {
+                        "project": namespace,
+                        "mig_migration_name": (item.get("metadata") or {}).get("name"),
+                        "mig_plan_name": ((item.get("spec") or {}).get("migPlanRef") or {}).get("name"),
+                        "phase": phase,
+                        "stage": status.get("stage"),
+                    }
+                )
+        return {
+            "mig_cluster_count": len(migcluster_rows),
+            "mig_storage_count": len(migstorage_rows),
+            "mig_plan_count": len(migplan_rows),
+            "mig_migration_count": len(migration_rows),
+            "active_migration_count": active_migration_count,
+            "mig_clusters": migcluster_rows,
+            "mig_storages": migstorage_rows,
+            "mig_plans": migplan_rows,
+            "mig_migrations": migration_rows,
         }
 
     def list_disaster_recovery_resources(self, project: str | None = None) -> dict[str, Any]:

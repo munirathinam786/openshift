@@ -17,8 +17,8 @@
           "key": "platform",
           "eyebrow": "Lifecycle, DR, migration, and fleet readiness",
           "title": "Platform Console",
-          "description": "Run planned OpenShift platform reviews from the same operator shell as the main console while focusing on lifecycle readiness, DR posture, migration sequencing, ACM fleet coordination, OADP backup checks, and OpenShift Virtualization / CNV expansion across baremetal, ROSA, ARO, and IBM Z estates.",
-          "badges": ["Shared operator shell", "Platform runway", "Lifecycle + DR", "Virtualization / CNV", "Migration readiness", "CSV/PPT/PDF/Word"],
+          "description": "Run planned OpenShift platform reviews from the same operator shell as the main console while focusing on lifecycle readiness, cluster networking, ingress posture, workload disruption safety, RBAC governance, delivery automation, migration sequencing, ACM fleet coordination, OADP backup checks, and OpenShift Virtualization / CNV expansion across baremetal, ROSA, ARO, and IBM Z estates.",
+          "badges": ["Shared operator shell", "Platform runway", "Lifecycle + DR", "Expanded check catalog", "Virtualization / CNV", "Migration readiness", "CSV/PPT/PDF/Word"],
           "actions": [
             { "label": "Open docs home", "href": "/docs-home/" },
             { "label": "Agent console", "href": "console.html" },
@@ -34,37 +34,42 @@
             { "label": "Safety model", "value": "Read-only review lane", "detail": "The platform workspace uses the same live `/chat` evidence path as the main console while keeping investigations in operator-safe, read-only territory." },
             { "label": "Connected views", "value": "Platform + console + security + history", "detail": "Move from planned readiness reviews to incident triage, security posture, and historical comparison without leaving the shared shell." }
           ],
-          "workspaceSignals": ["Profile-driven prompt builder", "Feature-level platform selector", "Shared shell continuity", "LLM runtime controls", "Export packs", "Live /chat workflow"],
+          "workspaceSignals": ["Profile-driven prompt builder", "Saved templates + watchlists", "Run compare + readiness scoring", "Searchable feature selector", "Expanded platform categories", "Multi-cluster sweep lane", "Live /chat + streaming workflow"],
           "sectionNav": [
             { "label": "Launcher", "href": "#platform-launcher" },
+            { "label": "Templates", "href": "#platform-library" },
+            { "label": "Scoring", "href": "#platform-intelligence" },
             { "label": "Latest results", "href": "#platform-results" },
+            { "label": "Sweep", "href": "#platform-sweep" },
             { "label": "Export pack", "href": "#platform-exports" },
             { "label": "Evidence trace", "href": "#platform-trace" }
           ],
           "shortcuts": [
             { "label": "Cmd/Ctrl + Enter → run platform review", "href": "#platform-launcher" },
             { "label": "Lifecycle preset", "href": "#platform-launcher" },
-            { "label": "DR preset", "href": "#platform-launcher" },
+            { "label": "Save a reusable template", "href": "#platform-library" },
+            { "label": "Compare recent runs", "href": "#platform-intelligence" },
             { "label": "Export platform pack", "href": "#platform-exports" }
           ],
           "highlights": [
             { "title": "Guided platform lane", "description": "Lifecycle, migration, and resiliency reviews no longer have to hide inside generic prompts or troubleshooting flows." },
             { "title": "Shared shell continuity", "description": "The Platform Console now mirrors the same shell rhythm, navigation language, and action layout as the main console while keeping its own indigo platform accent." },
-            { "title": "Change-window friendly exports", "description": "Turn the latest review into a concise platform handoff without manually copying evidence into slides or docs." }
+            { "title": "Templates, watchlists, and compare", "description": "Save a review, rerun it as a watchlist, compare it against recent history, and keep platform readiness grounded in evidence instead of memory." },
+            { "title": "Broader platform evidence", "description": "The platform lane now covers ingress controllers, cluster networking, autoscaling, disruption budgets, RBAC, BuildConfigs, DeploymentConfigs, Knative, VM snapshots, and Migration Toolkit posture in addition to the earlier catalog." }
           ],
           "featureGroups": [
             {
               "kicker": "Platform workspace",
               "title": "Lifecycle, resiliency, and migration readiness in one control room",
-              "description": "Use this page when the question is bigger than a single incident: upgrades, migrations, failover prep, virtualization posture, or cross-platform dependency reviews, all inside the same operator shell language as the main console.",
+              "description": "Use this page when the question is bigger than a single incident: upgrades, migrations, failover prep, virtualization posture, repeatable watchlists, historical comparison, or cross-platform dependency reviews, all inside the same operator shell language as the main console.",
               "items": [
                 { "title": "Review profiles", "description": "Load purpose-built prompts for lifecycle readiness, DR exercises, migration waves, virtualization, or fleet posture before you fine-tune the exact checks.", "meta": "Launcher", "href": "#platform-launcher" },
-                { "title": "Feature-level selection", "description": "Mix cluster version, operator health, machine pools, ACM, OADP, CNV, DR, storage, GitOps, and logging checks into a single platform assessment.", "meta": "Coverage", "href": "#platform-launcher" },
-                { "title": "Operator-ready evidence", "description": "Keep a readable summary, tool trace, and export pack together so platform teams can move from review to execution faster.", "meta": "Handoff", "href": "#platform-results" }
+                { "title": "Feature-level selection", "description": "Mix cluster version, networking, ingress controllers, autoscaling, disruption budgets, RBAC, BuildConfigs, DeploymentConfigs, Knative, ACM, OADP, CNV, DR, MTC, storage, GitOps, and logging checks into a single platform assessment.", "meta": "Coverage", "href": "#platform-launcher" },
+                { "title": "Repeatable operating motion", "description": "Save templates, create watchlists, compare runs, and sweep the estate without leaving the platform workspace.", "meta": "Operations", "href": "#platform-library" }
               ]
             }
           ],
-          "notice": "This page uses the live FastAPI backend on http://127.0.0.1:8000/ and composes platform-focused prompts for the existing /chat workflow so lifecycle and resiliency reviews reuse the same evidence pipeline as the main console."
+          "notice": "This page uses the live FastAPI backend on http://127.0.0.1:8000/ and composes platform-focused prompts for the existing /chat workflow so lifecycle, delivery, governance, migration, and resiliency reviews reuse the same evidence pipeline as the main console."
         }
       </script>
     </div>
@@ -74,11 +79,11 @@
         <article class="md-content__inner md-typeset">
           <section class="agent-shell__fallback">
             <h1>Platform Console</h1>
-            <p>Dedicated React workspace for platform lifecycle readiness, DR and failover planning, OpenShift Virtualization / CNV posture, migration reviews, and fleet-aware day-2 engineering checks.</p>
+            <p>Dedicated React workspace for platform lifecycle readiness, DR and failover planning, OpenShift Virtualization / CNV posture, migration reviews, workload disruption safety, and fleet-aware day-2 engineering checks.</p>
             <ul>
               <li>Choose a profile like lifecycle readiness, DR posture, migration factory, virtualization, or fleet posture.</li>
-              <li>Select the exact OpenShift platform signals to inspect, including cluster version, machine pools, ACM, OADP, CNV, DR resources, storage, logging, GitOps, and platform inventory.</li>
-              <li>Run the review through the live <code>POST /chat</code> endpoint and export the resulting platform summary for operator handoff.</li>
+              <li>Select the exact OpenShift platform signals to inspect, including cluster version, machine pools, cluster networking, ingress controllers, autoscaling, disruption budgets, RBAC, BuildConfigs, DeploymentConfigs, ACM, OADP, CNV, DR resources, storage, logging, GitOps, Knative, MTC, and platform inventory.</li>
+              <li>Run the review through the live <code>POST /chat</code> or <code>POST /chat/stream</code> endpoint, then compare history, build watchlists, or export the resulting platform summary for operator handoff.</li>
             </ul>
             <p><a href="console.html">Back to Agent Console</a> &middot; <a href="security-console.html">Open Security Console</a></p>
           </section>

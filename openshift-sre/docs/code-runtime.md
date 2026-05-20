@@ -232,9 +232,14 @@ It now combines:
 
 - the same shared React operator-shell language as `docs/console.html`, with platform-specific metadata, actions, stats, and shell-highlight copy
 - profile-driven lifecycle-readiness, DR, migration, virtualization, and fleet posture launchers
-- a broader OpenShift check catalog covering cluster identity, projects, node pressure, pods, events, SCCs, network policies, quotas, image streams, and build posture in addition to the existing lifecycle and fleet checks
+- saved template and watchlist controls backed by `/investigations` and `/watchlists`
+- inline historical run comparison backed by `/history/compare` and recent-run loading from `/history/overview`
+- a readiness scorecard and recommendation lane derived from the most recent tool trace
+- a broader OpenShift check catalog covering cluster identity, networking, ingress controllers, projects, node pressure, pods, autoscalers, disruption budgets, events, SCCs, RBAC, service accounts, limit ranges, quotas, image streams, BuildConfigs, DeploymentConfigs, Knative services, VM snapshots, migration-toolkit resources, and build posture in addition to the earlier lifecycle and fleet checks
 - FinOps-style connection and request-scoped cluster override controls so operators can target a specific cluster, namespace, or estate slice
-- a dedicated platform review launcher that turns the selected OpenShift signals into a `/chat` request with runtime overrides
+- a dedicated platform review launcher that turns the selected OpenShift signals into a `/chat` or `/chat/stream` request with runtime overrides
+- a multi-cluster sweep lane backed by `/platform/sweep` for estate-wide checks without leaving the Platform Console
+- selector polish with search, selected-only filtering, richer feature descriptions, and category summary chips so the larger check catalog stays usable
 - an export lane for CSV, PowerPoint, PDF, and Word-compatible handoff packs with tool-trace context
 
 The page was also visually tightened so the landing shell and the “Platform operations runway” launcher use the same operator-workspace rhythm as the main console instead of looking like a separate design language.
@@ -413,6 +418,7 @@ It now covers:
 - the dedicated runway launcher styling for lifecycle, DR, migration, and CNV readiness reviews
 - platform-specific shell tinting so the landing shell stays visually aligned with `docs/console.html` while preserving its indigo platform accent
 - darker runway metric capsules and hero-note styling so the launcher reads like an extension of the shared shell instead of a separate page theme
+- template/watchlist cards, readiness scorecards, compare tables, and sweep-result surfaces
 - responsive and dark-mode polish for platform cards, summaries, trace surfaces, and feature-selection blocks
 
 ### `docs/assets/stylesheets/security-console.css`

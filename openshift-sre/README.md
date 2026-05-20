@@ -117,6 +117,15 @@ The `Platform Console` now also follows the same landing-shell visual language a
 
 Its `Selected platform checks` catalog now exposes the broader OpenShift inspection surface as well, including cluster identity, project inventory, node pressure, pod and event risk, SCC and network-policy posture, resource quotas, image streams, and build signals alongside the existing lifecycle, ACM, ACS, OADP, DR, and CNV checks.
 
+The page now also includes:
+
+- saved platform-review templates backed by the investigations API
+- watchlist creation and manual watchlist execution from the same workspace
+- run-to-run comparison and readiness scoring inside the platform lane
+- a multi-cluster sweep lane powered by the platform sweep API
+- optional streaming review execution for live evidence visibility
+- a searchable feature selector that now covers cluster networking, ingress controllers, HPAs, PDBs, CronJobs, volume snapshots, RBAC bindings, service accounts, limit ranges, BuildConfigs, DeploymentConfigs, Knative services, VM snapshots, and Migration Toolkit resources
+
 ## Rebuild workflow
 
 To rebuild the UI bundle, regenerate the site, and refresh the Podman stack:

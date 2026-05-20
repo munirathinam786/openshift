@@ -71,6 +71,8 @@ body[data-shell-page="platform"] .md-content__inner {
 .platform-console__grid,
 .platform-console__result-grid,
 .platform-console__question-grid,
+.platform-console__filter-bar,
+.platform-console__category-strip,
 .platform-console__toolbar,
 .platform-console__runtime-grid,
 .platform-console__exports {
@@ -87,8 +89,13 @@ body[data-shell-page="platform"] .md-content__inner {
 .platform-console__metrics,
 .platform-console__grid,
 .platform-console__question-grid,
+.platform-console__filter-bar,
 .platform-console__exports {
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+
+.platform-console__category-strip {
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
 }
 
 .platform-console__metric,
@@ -230,6 +237,16 @@ body[data-shell-page="platform"] .agent-console__panel:not(.platform-console__he
   justify-content: flex-start;
 }
 
+.platform-console__link-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+}
+
+.platform-console__link-bar a {
+  text-decoration: none;
+}
+
 .platform-console__feature-list {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
@@ -264,6 +281,21 @@ body[data-shell-page="platform"] .agent-console__panel:not(.platform-console__he
   letter-spacing: -0.02em;
 }
 
+.platform-console__category-chip {
+  display: grid;
+  gap: 0.4rem;
+  padding: 0.95rem 1rem;
+  border-radius: 18px;
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  background: linear-gradient(180deg, rgba(248, 250, 252, 0.76), rgba(255, 255, 255, 0.96));
+}
+
+body[data-shell-page="platform"] .platform-console__category-chip {
+  border-color: rgba(var(--agent-accent-rgb), 0.16);
+  background: linear-gradient(180deg, rgba(238, 242, 255, 0.72), rgba(255, 255, 255, 0.98));
+  box-shadow: 0 12px 28px rgba(79, 70, 229, 0.06);
+}
+
 .platform-console__feature {
   display: flex;
   gap: 0.7rem;
@@ -293,9 +325,86 @@ body[data-shell-page="platform"] .platform-console__feature-group {
   font-weight: 700;
 }
 
+.platform-console__feature-note {
+  display: block;
+  margin-top: 0.18rem;
+  color: #334155;
+  font-size: 0.92rem;
+  line-height: 1.45;
+}
+
 .platform-console__meta {
   color: #475569;
   font-size: 0.95rem;
+}
+
+.platform-console__selection-summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.platform-console__library-list,
+.platform-console__watchlist-results,
+.platform-console__recommendations,
+.platform-console__score-grid,
+.platform-console__compare-grid,
+.platform-console__mini-list {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.platform-console__library-card,
+.platform-console__score-card,
+.platform-console__mini-item {
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  border-radius: 18px;
+  background: rgba(248, 250, 252, 0.86);
+  padding: 0.9rem 1rem;
+}
+
+body[data-shell-page="platform"] .platform-console__library-card,
+body[data-shell-page="platform"] .platform-console__score-card,
+body[data-shell-page="platform"] .platform-console__mini-item {
+  border-color: rgba(var(--agent-accent-rgb), 0.16);
+  background: linear-gradient(180deg, rgba(238, 242, 255, 0.72), rgba(255, 255, 255, 0.98));
+}
+
+.platform-console__score-grid {
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+.platform-console__score-card--ok {
+  box-shadow: 0 16px 28px rgba(22, 101, 52, 0.08);
+}
+
+.platform-console__score-card--warn {
+  box-shadow: 0 16px 28px rgba(154, 52, 18, 0.08);
+}
+
+.platform-console__score-card--error {
+  box-shadow: 0 16px 28px rgba(153, 27, 27, 0.08);
+}
+
+.platform-console__score-value {
+  display: block;
+  font-size: 2rem;
+  line-height: 1.1;
+  margin-top: 0.25rem;
+}
+
+.platform-console__compare-grid {
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+}
+
+.platform-console__table-wrap {
+  overflow: auto;
+}
+
+.platform-console__mini-item strong {
+  display: block;
+  margin-bottom: 0.2rem;
 }
 
 .platform-console__summary pre,
@@ -355,6 +464,10 @@ body[data-theme="dark"] .platform-console__card,
 body[data-theme="dark"] .platform-console__tool-card,
 body[data-theme="dark"] .platform-console__summary,
 body[data-theme="dark"] .platform-console__trace,
+body[data-theme="dark"] .platform-console__library-card,
+body[data-theme="dark"] .platform-console__score-card,
+body[data-theme="dark"] .platform-console__mini-item,
+body[data-theme="dark"] .platform-console__category-chip,
 body[data-theme="dark"] .platform-console__feature-group,
 body[data-theme="dark"] .platform-console__feature,
 body[data-theme="dark"] .platform-console__empty,
@@ -365,13 +478,16 @@ body[data-theme="dark"] .agent-console__panel {
 }
 
 body[data-theme="dark"] .platform-console__meta,
+body[data-theme="dark"] .platform-console__feature-note,
 body[data-theme="dark"] .platform-console__step-table th,
 body[data-theme="dark"] .platform-console__empty {
   color: #cbd5e1;
 }
 
 @media (max-width: 900px) {
-  .platform-console__feature-list {
+  .platform-console__feature-list,
+  .platform-console__compare-grid,
+  .platform-console__score-grid {
     grid-template-columns: 1fr;
   }
 }
