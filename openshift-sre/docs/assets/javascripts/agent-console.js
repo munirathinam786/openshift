@@ -246,6 +246,66 @@
       evidenceSources: ['Cluster infrastructure pattern and node architectures', 'ManagedCluster fleet posture for IBM Z targets', 'Cluster operators, node readiness, workload health, and quota posture'],
       checks: ['Confirm the cluster exposes an IBM Z / s390x architecture signal before pursuing architecture-specific hypotheses.', 'Compare IBM Z targets against ROSA, ARO, IPI, or UPI peers only after architecture and quota posture are clear.', 'Identify whether the issue is architecture-specific, policy-related, or simply another cluster-level operator failure.'],
       prompt: 'Act as an IBM Z OpenShift platform specialist. Investigate IBM Z architecture posture by checking cluster infrastructure, node architectures, ACM managed-cluster state, cluster operators, quota posture, and workload stability. Return the likely root cause, evidence, blast radius, and safe next steps.'
+    },
+    {
+      id: 'gitops-argocd-drift',
+      category: 'GitOps & delivery',
+      label: 'OpenShift GitOps / Argo CD drift and sync posture',
+      summary: 'Use when Argo CD looks stale, applications drift from Git, or GitOps rollout posture differs across clusters or namespaces.',
+      symptoms: ['GitOps-managed applications stop syncing, health goes degraded, or one cluster falls behind the rest of the fleet.', 'Operators need to separate Argo CD control-plane issues from repo, destination, or workload drift.'],
+      evidenceSources: ['Argo CD instance configuration, HA, and managed namespace posture', 'Argo CD application sync status, health, target revision, and destination scope', 'Related workload health, route posture, and image/build signals for the impacted delivery path'],
+      checks: ['Confirm the Argo CD control plane is healthy before assuming the app drift starts in Git or in the destination cluster.', 'Compare sync and health posture across the affected applications, namespaces, and platform patterns.', 'Determine whether the break starts in GitOps control, native OpenShift builds, or the target workloads.'],
+      prompt: 'Act as an OpenShift GitOps specialist. Investigate Argo CD drift by checking Argo CD instances, managed namespaces, application sync and health state, build and image-stream posture, route exposure, and workload health. Return the likely root cause, evidence, blast radius, and safe next steps.'
+    },
+    {
+      id: 'tekton-pipeline-delivery',
+      category: 'GitOps & delivery',
+      label: 'OpenShift Pipelines / Tekton delivery failures',
+      summary: 'Use when Tekton runs fail, pipelines-as-code behavior changes, or delivery automation drifts after a repo, operator, or cluster change.',
+      symptoms: ['PipelineRuns fail or stall, TektonConfig drift appears, or pipelines-as-code stops triggering as expected.', 'Delivery issues differ between baremetal, ROSA, ARO, or IBM Z estate segments.'],
+      evidenceSources: ['TektonConfig profile, API-field posture, and pipelines-as-code settings', 'PipelineRun success / failure trends, reasons, and namespace distribution', 'Related build, image-stream, and workload rollout health'],
+      checks: ['Confirm the Pipelines operator and TektonConfig are healthy before focusing on individual PipelineRuns.', 'Identify whether failures are namespace-specific, repo-specific, or platform-pattern-specific.', 'Correlate delivery failures with image, build, or workload readiness regressions.'],
+      prompt: 'Act as an OpenShift Pipelines specialist. Investigate Tekton delivery failures by checking TektonConfig posture, PipelineRuns, build health, image streams, and workload rollout impact. Return the likely root cause, evidence, blast radius, and safe next steps.'
+    },
+    {
+      id: 'cluster-logging-forwarding',
+      category: 'Platform services',
+      label: 'Cluster Logging and log-forwarding posture',
+      summary: 'Use when cluster logging is degraded, forwarding targets look stale, or audit / infra / app log pipelines diverge between clusters.',
+      symptoms: ['Operators suspect missing logs, broken forwarding, or degraded logging operators after a day-2 change.', 'The issue needs logging CR health, forwarding topology, and storage correlation rather than generic cluster-only checks.'],
+      evidenceSources: ['ClusterLogging management state and log-store / collection configuration', 'ClusterLogForwarder inputs, pipelines, and output types', 'Storage and operator posture for the logging namespaces'],
+      checks: ['Confirm ClusterLogging is reconciled before treating downstream missing logs as an app-only issue.', 'Check whether forwarding outputs changed, disappeared, or diverged across cluster patterns.', 'Correlate logging issues with storage, operator, or namespace changes.'],
+      prompt: 'Act as an OpenShift logging specialist. Investigate Cluster Logging posture by checking ClusterLogging and ClusterLogForwarder resources, operator health, storage dependencies, and related warning events. Return the likely root cause, evidence, blast radius, and safe next steps.'
+    },
+    {
+      id: 'oadp-backup-recovery',
+      category: 'Platform services',
+      label: 'OADP backup / restore / schedule posture',
+      summary: 'Use when backup confidence drops, Velero storage locations drift, or restore readiness is unclear across clusters.',
+      symptoms: ['OADP or Velero posture changes after storage or credentials updates, or backup schedules appear missing or paused.', 'Operators need to understand whether the issue is OADP configuration, storage reachability, or namespace scope.'],
+      evidenceSources: ['DataProtectionApplication reconciliation state and backup-location configuration', 'Velero backup storage locations and access mode posture', 'Backup schedules, paused state, TTL, and storage dependencies'],
+      checks: ['Confirm the DataProtectionApplication is reconciled before assuming schedule-level issues.', 'Identify whether backup storage locations or schedules drifted from the intended pattern.', 'Correlate OADP posture with storage-class or platform-pattern differences.'],
+      prompt: 'Act as an OpenShift backup and recovery specialist. Investigate OADP posture by checking DataProtectionApplication resources, backup storage locations, schedules, and storage dependencies. Return the likely root cause, evidence, blast radius, and safe next steps.'
+    },
+    {
+      id: 'oauth-ldap-access',
+      category: 'Identity & access',
+      label: 'OAuth / LDAP identity-provider and access posture',
+      summary: 'Use when OpenShift login posture, LDAP identity-provider drift, or admin access expectations change after day-2 identity updates.',
+      symptoms: ['Operators suspect OAuth or LDAP provider drift, identity mappings no longer match expectation, or access posture differs across clusters.', 'The issue needs cluster OAuth evidence instead of guessing from workload symptoms alone.'],
+      evidenceSources: ['Cluster OAuth configuration and configured identity providers', 'LDAP URL, mapping method, login/challenge posture', 'Related namespace and SCC guardrails that may amplify the access issue'],
+      checks: ['Confirm whether the cluster OAuth configuration changed before assuming application-level authentication failure.', 'Identify whether LDAP providers, mapping methods, or templates differ from the intended estate standard.', 'Separate identity-provider drift from downstream policy or namespace-guardrail effects.'],
+      prompt: 'Act as an OpenShift identity specialist. Investigate OAuth and LDAP posture by checking OAuth configuration, configured identity providers, mapping methods, SCC guardrails, and related namespace posture. Return the likely root cause, evidence, blast radius, and safe next steps.'
+    },
+    {
+      id: 'baremetal-platform-posture',
+      category: 'Platform patterns',
+      label: 'Baremetal IPI / UPI platform posture',
+      summary: 'Use when baremetal clusters need an infrastructure-aware review that separates node, machine-config, and cluster-pattern drift from managed-service assumptions.',
+      symptoms: ['Baremetal clusters diverge from ROSA or ARO peers, or worker / machine-config posture changes after day-2 operations.', 'Operators need a baremetal-first investigation path for machine pools, nodes, and platform services.'],
+      evidenceSources: ['Cluster infrastructure platform pattern and topology', 'MachineSet and MachineConfigPool posture', 'Node readiness, workload stability, and day-2 platform services such as logging, GitOps, or pipelines'],
+      checks: ['Confirm the cluster is a baremetal / IPI / UPI pattern before applying managed-service assumptions.', 'Compare healthy and unhealthy baremetal scopes using machine config, node, and workload posture first.', 'Correlate baremetal platform drift with day-2 services like GitOps, Tekton, logging, and backup.'],
+      prompt: 'Act as an OpenShift baremetal platform specialist. Investigate baremetal posture by checking cluster infrastructure, machine config pools, machine sets, node readiness, workload health, and day-2 platform services such as GitOps, Tekton, logging, and backup. Return the likely root cause, evidence, blast radius, and safe next steps.'
     }
   ];
   const TROUBLESHOOTING_PRESET_KEY = 'openshift-sre-troubleshooting-presets-v1';
@@ -270,7 +330,14 @@
     acm_cluster_unavailable: 'Managed cluster unavailable or not joined',
     acs_sensor_gap: 'ACS coverage gap or central issue',
     managed_service_drift: 'Managed service platform drift',
-    architecture_mismatch: 'Architecture or platform pattern mismatch'
+    architecture_mismatch: 'Architecture or platform pattern mismatch',
+    gitops_drift: 'GitOps / Argo CD drift or sync failure',
+    tekton_run_failed: 'Tekton PipelineRun failed or stuck',
+    delivery_pipeline_failure: 'Build or delivery pipeline failure',
+    logging_gap: 'Cluster logging or forwarding gap',
+    backup_gap: 'Backup schedule or storage-location gap',
+    auth_provider_drift: 'OAuth / LDAP provider drift',
+    baremetal_capacity_drift: 'Baremetal machine or capacity drift'
   };
   const CATEGORY_WORKFLOW_DEFAULTS = {
     'Core triage': {
@@ -336,6 +403,33 @@
       rootCauses: [{ title: 'Subscription channel or source issue', detail: 'The Subscription references a bad channel or source.', confidence: 'high', keywords: ['subscription', 'channel', 'source'] }, { title: 'CSV phase failure', detail: 'The installed CSV is not progressing to Succeeded.', confidence: 'medium', keywords: ['csv', 'failed', 'pending'] }, { title: 'Platform dependency problem', detail: 'An operator lifecycle issue is caused by an underlying platform fault.', confidence: 'medium', keywords: ['operator', 'platform', 'degraded'] }],
       nextActions: ['Identify the first unhealthy subscription.', 'Check CSV phase and operator namespace events.', 'Confirm whether the operator issue is isolated or cascading.']
     },
+    'GitOps & delivery': {
+      services: ['GitOps', 'Tekton', 'Builds', 'Image streams', 'Workloads'],
+      symptomOptions: ['gitops_drift', 'tekton_run_failed', 'delivery_pipeline_failure'],
+      checklist: ['Check whether the GitOps or Tekton control plane is healthy before focusing on one application or run.', 'Compare healthy and unhealthy namespaces, apps, or pipelines side-by-side.', 'Correlate delivery failures with build, image-stream, route, and workload posture.'],
+      commandHints: ['oc get argocd -A', 'oc get applications.argoproj.io -A', 'oc get tektonconfig config -o yaml', 'oc get pipelineruns -A', 'oc get builds -A', 'oc get is -A'],
+      runbooks: [{ title: 'Operations guide', href: 'operations/' }, { title: 'Platform automation playbook', href: 'playbook-platform-automation.md' }],
+      rootCauses: [{ title: 'GitOps control-plane drift', detail: 'Argo CD itself is unhealthy or no longer aligned to the intended managed-namespace and sync model.', confidence: 'high', keywords: ['argocd', 'gitops', 'sync', 'health'] }, { title: 'Tekton execution failure', detail: 'PipelineRuns or Tekton configuration drift broke delivery automation.', confidence: 'high', keywords: ['tekton', 'pipelinerun', 'pipeline', 'delivery'] }, { title: 'Build or image supply-chain regression', detail: 'Native OpenShift builds or image streams diverged from the expected deployment inputs.', confidence: 'medium', keywords: ['build', 'image', 'imagestream', 'revision'] }],
+      nextActions: ['Confirm whether the failure begins in GitOps, Tekton, or native build/image delivery.', 'Compare the affected delivery path against a healthy peer namespace or cluster.', 'Escalate only after control-plane and app-level drift are separated.']
+    },
+    'Platform services': {
+      services: ['Cluster logging', 'OADP', 'Storage', 'Operator subscriptions'],
+      symptomOptions: ['logging_gap', 'backup_gap', 'warning_events'],
+      checklist: ['Check service-specific control resources before assuming the issue is only at workload level.', 'Confirm whether storage or operator health changed near the incident start.', 'Compare platform service posture between healthy and unhealthy cluster patterns.'],
+      commandHints: ['oc get clusterlogging -n openshift-logging', 'oc get clusterlogforwarders -n openshift-logging', 'oc get dataprotectionapplications -n openshift-adp', 'oc get backupstoragelocations -n openshift-adp', 'oc get schedules -n openshift-adp'],
+      runbooks: [{ title: 'Operations guide', href: 'operations/' }, { title: 'Storage governance playbook', href: 'playbook-storage-governance.md' }],
+      rootCauses: [{ title: 'Logging service drift', detail: 'Logging operator or forwarding posture changed, breaking visibility or export paths.', confidence: 'medium', keywords: ['logging', 'forwarder', 'clusterlogging', 'logs'] }, { title: 'Backup control drift', detail: 'OADP or Velero storage and schedule posture drifted away from the intended recovery model.', confidence: 'medium', keywords: ['oadp', 'velero', 'backup', 'schedule'] }, { title: 'Underlying storage dependency issue', detail: 'Platform service posture is degraded because its storage dependencies are misaligned or unavailable.', confidence: 'medium', keywords: ['storage', 'bucket', 'class', 'persistent'] }],
+      nextActions: ['Verify whether the platform service control resources reconcile cleanly.', 'Check whether storage or schedule posture changed recently.', 'Compare service posture across the affected cluster patterns.']
+    },
+    'Identity & access': {
+      services: ['OAuth / LDAP', 'SCCs', 'Network policies'],
+      symptomOptions: ['auth_provider_drift', 'policy_block'],
+      checklist: ['Inspect cluster OAuth configuration before assuming application-level authentication failure.', 'Confirm whether LDAP providers, mapping methods, or login posture changed.', 'Correlate identity posture with namespace guardrails and downstream admission effects.'],
+      commandHints: ['oc get oauth cluster -o yaml', 'oc get scc', 'oc get networkpolicy -A'],
+      runbooks: [{ title: 'Operations guide', href: 'operations/' }, { title: 'Advanced security governance', href: 'playbook-advanced-security-governance.md' }],
+      rootCauses: [{ title: 'Identity-provider drift', detail: 'OAuth / LDAP configuration changed from the intended baseline.', confidence: 'high', keywords: ['oauth', 'ldap', 'identity', 'mapping'] }, { title: 'Access and policy interaction', detail: 'The login path works, but downstream SCC or namespace guardrails block expected actions.', confidence: 'medium', keywords: ['access', 'scc', 'policy', 'forbidden'] }, { title: 'Estate inconsistency across clusters', detail: 'Identity-provider posture diverges between baremetal, ROSA, ARO, or IBM Z clusters.', confidence: 'medium', keywords: ['cluster', 'rosa', 'aro', 'ibm', 'baremetal'] }],
+      nextActions: ['Compare OAuth provider posture with a healthy peer cluster.', 'Confirm whether LDAP settings changed with the latest day-2 rollout.', 'Separate identity-provider drift from downstream policy-side effects.']
+    },
     'Fleet governance': {
       services: ['ACM', 'Cluster infrastructure', 'ROSA', 'ARO', 'IBM Z'],
       symptomOptions: ['acm_cluster_unavailable', 'acm_policy_drift', 'managed_service_drift'],
@@ -397,6 +491,26 @@
       services: ['ACM', 'Cluster infrastructure', 'ROSA', 'ARO', 'IBM Z'],
       symptomOptions: ['acm_cluster_unavailable', 'acm_policy_drift', 'managed_service_drift']
     },
+    'gitops-argocd-drift': {
+      services: ['GitOps', 'Builds', 'Image streams', 'Workloads'],
+      symptomOptions: ['gitops_drift', 'delivery_pipeline_failure']
+    },
+    'tekton-pipeline-delivery': {
+      services: ['Tekton', 'Builds', 'Image streams', 'Workloads'],
+      symptomOptions: ['tekton_run_failed', 'delivery_pipeline_failure']
+    },
+    'cluster-logging-forwarding': {
+      services: ['Cluster logging', 'Storage', 'Operator subscriptions'],
+      symptomOptions: ['logging_gap', 'warning_events']
+    },
+    'oadp-backup-recovery': {
+      services: ['OADP', 'Storage'],
+      symptomOptions: ['backup_gap', 'pvc_pending']
+    },
+    'oauth-ldap-access': {
+      services: ['OAuth / LDAP', 'SCCs', 'Network policies'],
+      symptomOptions: ['auth_provider_drift', 'policy_block']
+    },
     'acs-security-coverage': {
       services: ['ACS', 'Network policies', 'Workloads'],
       symptomOptions: ['acs_sensor_gap', 'policy_block']
@@ -412,6 +526,10 @@
     'ibmz-architecture-posture': {
       services: ['IBM Z', 'Cluster infrastructure', 'Nodes', 'ACM'],
       symptomOptions: ['architecture_mismatch', 'node_not_ready']
+    },
+    'baremetal-platform-posture': {
+      services: ['Baremetal', 'Cluster infrastructure', 'Machine API', 'Nodes', 'GitOps', 'Tekton', 'Cluster logging', 'OADP'],
+      symptomOptions: ['baremetal_capacity_drift', 'node_not_ready', 'managed_service_drift']
     }
   };
   const ENRICHED_TROUBLESHOOTING_SCENARIOS = TROUBLESHOOTING_SCENARIOS.map((scenario) => {

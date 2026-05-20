@@ -32,6 +32,13 @@
     list_machine_sets: 'MachineSet posture',
     list_nodes: 'Node inventory',
     list_node_pressure: 'Node pressure and readiness',
+    list_gitops_argocds: 'OpenShift GitOps / Argo CD control-plane posture',
+    list_gitops_applications: 'Argo CD application sync posture',
+    list_tekton_configs: 'OpenShift Pipelines / Tekton configuration posture',
+    list_tekton_pipeline_runs: 'Tekton PipelineRun delivery posture',
+    list_cluster_logging: 'Cluster Logging posture',
+    list_oadp_resources: 'OADP / Velero backup posture',
+    list_oauth_configuration: 'OAuth / LDAP identity-provider posture',
     run_read_only_oc_cli: 'Read-only oc validation'
   };
 
@@ -179,14 +186,53 @@
         'list_cluster_operators'
       ]
     },
+    'gitops-delivery': {
+      label: 'GitOps and delivery security posture',
+      narrative: 'Review Argo CD, Tekton, build and workload delivery posture so software-supply and promotion drift becomes visible before it becomes an incident.',
+      features: [
+        'list_cluster_infrastructure',
+        'list_gitops_argocds',
+        'list_gitops_applications',
+        'list_tekton_configs',
+        'list_tekton_pipeline_runs',
+        'list_workload_health',
+        'list_operator_subscriptions'
+      ]
+    },
+    'day2-services': {
+      label: 'Day-2 services hardening and resilience',
+      narrative: 'Review cluster logging, backup posture, operator lifecycle, storage dependencies, and recovery-readiness signals across the OpenShift estate.',
+      features: [
+        'list_cluster_infrastructure',
+        'list_cluster_logging',
+        'list_oadp_resources',
+        'list_persistent_storage',
+        'list_storage_classes',
+        'list_cluster_operators',
+        'list_operator_subscriptions'
+      ]
+    },
+    'identity-access': {
+      label: 'OAuth / LDAP and guardrail posture',
+      narrative: 'Review cluster identity providers, SCC posture, namespace guardrails, and network boundaries so access drift is separated from workload-side breakage.',
+      features: [
+        'list_cluster_infrastructure',
+        'list_oauth_configuration',
+        'list_security_context_constraints',
+        'list_network_policies',
+        'list_resource_quotas',
+        'list_cluster_operators'
+      ]
+    },
     'platform-patterns': {
-      label: 'ROSA / ARO / IBM Z platform-pattern coverage',
-      narrative: 'Compare infrastructure pattern, fleet membership, operator health, and node posture across ROSA, ARO, and IBM Z-aligned estates so pattern-specific gaps stand out quickly.',
+      label: 'Baremetal / ROSA / ARO / IBM Z platform-pattern coverage',
+      narrative: 'Compare infrastructure pattern, fleet membership, operator health, identity posture, and node posture across baremetal, ROSA, ARO, and IBM Z-aligned estates so pattern-specific gaps stand out quickly.',
       features: [
         'list_cluster_infrastructure',
         'list_nodes',
         'list_cluster_operators',
         'list_acm_managed_clusters',
+        'list_oauth_configuration',
         'list_resource_quotas'
       ]
     }
@@ -200,6 +246,9 @@
     'iam-encryption': 'iam-encryption',
     acm: 'acm',
     acs: 'acs',
+    gitops: 'gitops-delivery',
+    day2: 'day2-services',
+    identity: 'identity-access',
     platform: 'platform-patterns'
   };
 
@@ -1076,7 +1125,10 @@
           h('button', { className: 'agent-console__example', type: 'button', onClick: () => applyPreset('iam-encryption') }, 'SCC + guardrails'),
           h('button', { className: 'agent-console__example', type: 'button', onClick: () => applyPreset('acm') }, 'ACM fleet'),
           h('button', { className: 'agent-console__example', type: 'button', onClick: () => applyPreset('acs') }, 'ACS coverage'),
-          h('button', { className: 'agent-console__example', type: 'button', onClick: () => applyPreset('platform') }, 'ROSA / ARO / IBM Z')
+          h('button', { className: 'agent-console__example', type: 'button', onClick: () => applyPreset('gitops') }, 'GitOps / Tekton'),
+          h('button', { className: 'agent-console__example', type: 'button', onClick: () => applyPreset('day2') }, 'Logging / OADP'),
+          h('button', { className: 'agent-console__example', type: 'button', onClick: () => applyPreset('identity') }, 'OAuth / LDAP'),
+          h('button', { className: 'agent-console__example', type: 'button', onClick: () => applyPreset('platform') }, 'Baremetal / ROSA / ARO / IBM Z')
         ),
         h('div', { className: `agent-console__status${status.kind ? ` agent-console__status--${status.kind}` : ''}` }, status.message)
       ),

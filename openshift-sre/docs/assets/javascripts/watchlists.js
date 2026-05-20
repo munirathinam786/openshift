@@ -298,6 +298,24 @@
         investigationRegions.value = 'local-cluster,aro-prod,rosa-stage';
         investigationTags.value = 'acs,security,coverage';
         investigationPrompt.value = 'Review ACS central services, secured-cluster coverage, network policies, and workload posture. Highlight missing protection, uneven rollout, and any pattern-specific gap across ROSA, ARO, or core OpenShift clusters.';
+      } else if (button.dataset.investigationExample === 'gitops') {
+        investigationName.value = 'GitOps and delivery hygiene review';
+        investigationCategory.value = 'gitops-delivery';
+        investigationRegions.value = 'local-cluster,aro-prod,rosa-stage';
+        investigationTags.value = 'gitops,argocd,tekton,delivery';
+        investigationPrompt.value = 'Review Argo CD instances, Argo CD applications, Tekton configuration, PipelineRuns, builds, image streams, and workload health. Highlight delivery drift, stuck sync posture, failing pipelines, and cross-cluster differences.';
+      } else if (button.dataset.investigationExample === 'day2') {
+        investigationName.value = 'Day-2 service hygiene review';
+        investigationCategory.value = 'day2-services';
+        investigationRegions.value = 'local-cluster,aro-prod,rosa-stage,ibmz-prod';
+        investigationTags.value = 'logging,oadp,oauth,operations';
+        investigationPrompt.value = 'Review cluster logging, log-forwarding, OADP backup posture, OAuth / LDAP configuration, operator subscriptions, and storage dependencies. Highlight missing backups, identity drift, forwarding gaps, and pattern-specific operational risk.';
+      } else if (button.dataset.investigationExample === 'baremetal') {
+        investigationName.value = 'Baremetal platform hygiene review';
+        investigationCategory.value = 'platform-pattern';
+        investigationRegions.value = 'local-cluster,baremetal-prod';
+        investigationTags.value = 'baremetal,ipi,upi,platform';
+        investigationPrompt.value = 'Inspect cluster infrastructure, machine config pools, machine sets, node readiness, workload health, GitOps, Tekton, logging, OADP, and ACM posture for baremetal estates. Highlight capacity drift, day-2 service gaps, and differences from managed-service peers.';
       } else {
         investigationName.value = 'IBM Z platform hygiene review';
         investigationCategory.value = 'platform-pattern';

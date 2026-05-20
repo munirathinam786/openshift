@@ -13,8 +13,8 @@
           "key": "troubleshooting",
           "eyebrow": "Incident triage workspace",
           "title": "Troubleshooting Console",
-          "description": "Investigate OpenShift failures through guided workflows, evidence paths, and operator-safe next steps in a cleaner, more professional triage view.",
-          "badges": ["React shell", "14 guided scenarios", "Read-only safe", "ACM + ACS + platform patterns"],
+          "description": "Investigate OpenShift failures through guided workflows, evidence paths, and operator-safe next steps across core platform, delivery stacks, day-2 services, and platform patterns.",
+          "badges": ["React shell", "19 guided scenarios", "Read-only safe", "GitOps + Tekton + day-2 services", "ACM + ACS + platform patterns"],
           "actions": [
             { "label": "Open agent console", "href": "console.html" },
             { "label": "Open history", "href": "history.html" }
@@ -24,7 +24,7 @@
             { "label": "Tool drilldown", "href": "tool-drilldown.html" }
           ],
           "stats": [
-            { "label": "Troubleshooting coverage", "value": "Cluster → fleet → platform pattern", "detail": "Scenarios span operators, ACM, ACS, nodes, workloads, networking, storage, quotas, governance, ROSA, ARO, and IBM Z." },
+            { "label": "Troubleshooting coverage", "value": "Cluster → day-2 → fleet → platform pattern", "detail": "Scenarios span operators, GitOps, Tekton, logging, OADP, OAuth, ACM, ACS, nodes, workloads, networking, storage, quotas, governance, baremetal, ROSA, ARO, and IBM Z." },
             { "label": "Working mode", "value": "Evidence-first", "detail": "The generated prompt captures severity, time window, scope, and validated checks." },
             { "label": "Best for", "value": "Rapid failure isolation", "detail": "Use it when alarms are noisy and the fault domain is still fuzzy." }
           ],
@@ -112,11 +112,11 @@
                     <span class="agent-console__history-badge agent-console__history-badge--ok">Read-only safe</span>
                   </div>
                   <h4>Technical troubleshooting</h4>
-                  <p>Choose a scenario, inspect the evidence plan, load the prompt, and run the agent. This page is optimized for operational diagnosis across platform operators, ACM fleet governance, ACS coverage, ROSA and ARO platform patterns, IBM Z estates, networking, workloads, storage, OLM, quota pressure, and namespace guardrails.</p>
+                  <p>Choose a scenario, inspect the evidence plan, load the prompt, and run the agent. This page is optimized for operational diagnosis across platform operators, GitOps, Tekton, cluster logging, OADP, OAuth / LDAP, ACM fleet governance, ACS coverage, baremetal, ROSA and ARO platform patterns, IBM Z estates, networking, workloads, storage, OLM, quota pressure, and namespace guardrails.</p>
                   <section class="agent-console__troubleshooting-callout">
                     <div>
                       <h5>OpenShift troubleshooting scenarios</h5>
-                      <p class="agent-console__meta">Use the dropdown for scenarios such as ACM fleet drift, ACS coverage gaps, ROSA or ARO posture issues, IBM Z capacity checks, operator degradation, route failures, rollout issues, quota pressure, OLM problems, and storage binding failures.</p>
+                      <p class="agent-console__meta">Use the dropdown for scenarios such as Argo CD drift, Tekton failures, cluster logging gaps, OADP posture, OAuth / LDAP drift, ACM fleet drift, ACS coverage gaps, baremetal posture, ROSA or ARO posture issues, IBM Z capacity checks, operator degradation, route failures, rollout issues, quota pressure, OLM problems, and storage binding failures.</p>
                     </div>
                     <label class="agent-console__label" for="agent-troubleshooting-scenario">
                       Troubleshooting workflow
@@ -143,6 +143,17 @@
                         <optgroup label="Operators">
                           <option value="olm-csv-subscription-failures">OLM subscription / CSV failures</option>
                         </optgroup>
+                        <optgroup label="GitOps &amp; delivery">
+                          <option value="gitops-argocd-drift">OpenShift GitOps / Argo CD drift and sync posture</option>
+                          <option value="tekton-pipeline-delivery">OpenShift Pipelines / Tekton delivery failures</option>
+                        </optgroup>
+                        <optgroup label="Platform services">
+                          <option value="cluster-logging-forwarding">Cluster Logging and log-forwarding posture</option>
+                          <option value="oadp-backup-recovery">OADP backup / restore / schedule posture</option>
+                        </optgroup>
+                        <optgroup label="Identity &amp; access">
+                          <option value="oauth-ldap-access">OAuth / LDAP identity-provider and access posture</option>
+                        </optgroup>
                         <optgroup label="Fleet governance">
                           <option value="acm-fleet-governance">ACM hub / managed cluster / policy drift</option>
                         </optgroup>
@@ -150,6 +161,7 @@
                           <option value="acs-security-coverage">ACS central / secured cluster coverage gaps</option>
                         </optgroup>
                         <optgroup label="Platform patterns">
+                          <option value="baremetal-platform-posture">Baremetal IPI / UPI platform posture</option>
                           <option value="rosa-platform-posture">ROSA platform posture and managed-service dependencies</option>
                           <option value="aro-platform-posture">ARO platform posture and Azure landing-zone dependencies</option>
                           <option value="ibmz-architecture-posture">IBM Z architecture and capacity posture</option>
@@ -211,11 +223,19 @@
                               <option value="Routes">Routes / ingress</option>
                               <option value="Storage">Storage</option>
                               <option value="SCCs">SCCs / policies</option>
+                              <option value="OAuth / LDAP">OAuth / LDAP</option>
                               <option value="OLM">OLM / subscriptions</option>
                               <option value="Machine API">Machine API</option>
+                              <option value="GitOps">GitOps / Argo CD</option>
+                              <option value="Tekton">Tekton / Pipelines</option>
+                              <option value="Builds">Builds</option>
+                              <option value="Image streams">Image streams</option>
+                              <option value="Cluster logging">Cluster logging</option>
+                              <option value="OADP">OADP / Velero</option>
                               <option value="Cluster infrastructure">Cluster infrastructure / platform pattern</option>
                               <option value="ACM">ACM / fleet governance</option>
                               <option value="ACS">ACS / secured clusters</option>
+                              <option value="Baremetal">Baremetal / IPI / UPI</option>
                               <option value="ROSA">ROSA platform pattern</option>
                               <option value="ARO">ARO platform pattern</option>
                               <option value="IBM Z">IBM Z platform pattern</option>
@@ -333,17 +353,21 @@
                   </section>
                   <ul>
                     <li>scenario-first OpenShift investigation flows</li>
-                    <li>platform, ACM, ACS, workload, networking, storage, and governance troubleshooting</li>
-                    <li>ROSA, ARO, and IBM Z platform-pattern workflows</li>
+                    <li>platform, GitOps, Tekton, logging, backup, identity, ACM, ACS, workload, networking, storage, and governance troubleshooting</li>
+                    <li>baremetal, ROSA, ARO, and IBM Z platform-pattern workflows</li>
                     <li>evidence preview before sending the prompt</li>
                     <li>safe, read-only operator guidance</li>
                   </ul>
                   <div class="agent-console__actions">
                     <button class="agent-console__example agent-console__example--selected" type="button" data-agent-load-troubleshooting aria-pressed="true">Load selected workflow</button>
                     <button class="agent-console__example" type="button" data-agent-module="technical-triage" data-agent-prompt="Act as an OpenShift technical troubleshooting specialist. Investigate the operator issue by gathering evidence from cluster operators, warning events, node state, workload health, route posture, and storage dependencies. Return: 1) likely root cause, 2) evidence collected, 3) blast radius, 4) immediate next steps, and 5) deeper follow-up checks if the first hypothesis is wrong.">Load troubleshooting specialist</button>
-                    <button class="agent-console__example" type="button" data-agent-prompt="Investigate a production issue by checking cluster operators, ACM fleet state, route and service posture, rollout health, node readiness, ACS coverage, and storage dependencies. Summarize the most likely failure path and the next safe operator actions.">Incident triage</button>
-                    <button class="agent-console__example" type="button" data-agent-prompt="Investigate ACM hub health, managed-cluster availability, policy compliance, and platform-pattern drift across ROSA, ARO, and IBM Z targets. Summarize the most likely fleet failure path and the next safe operator actions.">ACM fleet drift</button>
+                    <button class="agent-console__example" type="button" data-agent-prompt="Investigate a production issue by checking cluster operators, ACM fleet state, route and service posture, rollout health, node readiness, GitOps, Tekton, logging, OADP, OAuth / LDAP, ACS coverage, and storage dependencies. Summarize the most likely failure path and the next safe operator actions.">Incident triage</button>
+                    <button class="agent-console__example" type="button" data-agent-prompt="Investigate OpenShift GitOps drift by checking Argo CD instances, applications, build and image-stream posture, and workload health. Summarize the most likely failure path and the next safe operator actions.">GitOps drift</button>
+                    <button class="agent-console__example" type="button" data-agent-prompt="Investigate OpenShift Pipelines posture by checking TektonConfig settings, PipelineRuns, build health, image streams, and rollout impact. Summarize the most likely failure path and the next safe operator actions.">Tekton delivery</button>
+                    <button class="agent-console__example" type="button" data-agent-prompt="Investigate cluster logging, OADP backup posture, and OAuth or LDAP drift across the active OpenShift cluster. Summarize the most likely day-2 service failure path and the next safe operator actions.">Day-2 services</button>
+                    <button class="agent-console__example" type="button" data-agent-prompt="Investigate ACM hub health, managed-cluster availability, policy compliance, and platform-pattern drift across baremetal, ROSA, ARO, and IBM Z targets. Summarize the most likely fleet failure path and the next safe operator actions.">ACM fleet drift</button>
                     <button class="agent-console__example" type="button" data-agent-prompt="Investigate ACS central services, secured-cluster availability, network-policy posture, and workload protection gaps. Summarize the most likely security coverage issue and the next safe operator actions.">ACS coverage</button>
+                    <button class="agent-console__example" type="button" data-agent-prompt="Investigate baremetal OpenShift posture by checking cluster infrastructure, machine config pools, machine sets, nodes, workloads, GitOps, Tekton, logging, and OADP posture. Summarize the likely root cause and next safe operator actions.">Baremetal posture</button>
                   </div>
                 </article>
               </section>

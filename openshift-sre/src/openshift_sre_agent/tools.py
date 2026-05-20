@@ -270,6 +270,48 @@ class OpenShiftSreToolkit:
                 {"project": "Optional namespace / project name to scope the query."},
                 self.list_builds,
             ),
+            "list_gitops_argocds": ToolSpec(
+                "list_gitops_argocds",
+                "Inspect OpenShift GitOps / Argo CD instances to summarize install posture, HA settings, namespaces, and server exposure.",
+                {},
+                self.list_gitops_argocds,
+            ),
+            "list_gitops_applications": ToolSpec(
+                "list_gitops_applications",
+                "Inspect Argo CD applications to summarize sync, health, project, and destination posture across managed namespaces.",
+                {},
+                self.list_gitops_applications,
+            ),
+            "list_tekton_configs": ToolSpec(
+                "list_tekton_configs",
+                "Inspect OpenShift Pipelines / Tekton configuration resources to summarize profile, API stability, and pipelines-as-code posture.",
+                {},
+                self.list_tekton_configs,
+            ),
+            "list_tekton_pipeline_runs": ToolSpec(
+                "list_tekton_pipeline_runs",
+                "Inspect Tekton pipeline runs to summarize recent CI/CD execution health, namespace distribution, and failure posture.",
+                {"project": "Optional namespace / project name to scope the query."},
+                self.list_tekton_pipeline_runs,
+            ),
+            "list_cluster_logging": ToolSpec(
+                "list_cluster_logging",
+                "Inspect OpenShift Logging resources to summarize ClusterLogging and ClusterLogForwarder posture, retention, and forwarding configuration.",
+                {},
+                self.list_cluster_logging,
+            ),
+            "list_oadp_resources": ToolSpec(
+                "list_oadp_resources",
+                "Inspect OADP and Velero resources to summarize backup applications, storage locations, and schedule posture.",
+                {},
+                self.list_oadp_resources,
+            ),
+            "list_oauth_configuration": ToolSpec(
+                "list_oauth_configuration",
+                "Inspect OpenShift OAuth configuration to summarize identity providers, LDAP posture, and cluster-admin access expectations.",
+                {},
+                self.list_oauth_configuration,
+            ),
             "run_read_only_oc_cli": ToolSpec(
                 "run_read_only_oc_cli",
                 "Run a carefully validated read-only oc CLI command for edge-case diagnostics.",
@@ -1204,6 +1246,324 @@ class OpenShiftSreToolkit:
                     }
                 )
         return {"count": len(rows), "failed_count": failed_count, "builds": rows}
+
+    def list_gitops_argocds(self) -> dict[str, Any]:
+        rows = []
+        available_count = 0
+        namespaces = self._namespace_candidates(
+            ["openshift-gitops", "openshift-gitops-operator"],
+            self._all_projects(),
+        )
+        for item in self._list_custom_from_namespaces(
+            group="argoproj.io",
+            versions=("v1beta1", "v1alpha1"),
+            plural="argocds",
+            namespaces=namespaces,
+        ):
+            metadata = item.get("metadata") or {}
+            spec = item.get("spec") or {}
+            status = item.get("status") or {}
+            conditions = self._extract_condition_map(status.get("conditions"))
+            available = conditions.get("Available") or conditions.get("Reconciled")
+            if available == "True":
+                available_count += 1
+            managed_namespaces = spec.get("sourceNamespaces") or spec.get("applicationSet", {}).get("sourceNamespaces") or []
+            rows.append(
+                {
+                    "namespace": metadata.get("namespace"),
+                    "argocd_name": metadata.get("name"),
+                    "server_route_enabled": ((spec.get("server") or {}).get("route") or {}).get("enabled"),
+                    "server_autoscale_enabled": ((spec.get("server") or {}).get("autoscale") or {}).get("enabled"),
+                    "ha_enabled": spec.get("ha", {}).get("enabled") if isinstance(spec.get("ha"), dict) else spec.get("ha"),
+                    "controller_processors": ((spec.get("controller") or {}).get("processors") or {}).get("operation") if isinstance((spec.get("controller") or {}).get("processors"), dict) else None,
+                    "application_instance_label_key": spec.get("applicationInstanceLabelKey"),
+                    "managed_namespace_count": len(managed_namespaces),
+                    "managed_namespaces": managed_namespaces,
+                    "available": available,
+                    "phase": status.get("phase"),
+                }
+            )
+        return {"count": len(rows), "available_count": available_count, "gitops_argocds": rows}
+
+    def list_gitops_applications(self) -> dict[str, Any]:
+        rows = []
+        unhealthy_count = 0
+        for item in self._list_custom_from_namespaces(
+            group="argoproj.io",
+            versions=("v1alpha1",),
+            plural="applications",
+            namespaces=self._namespace_candidates(["openshift-gitops"], self._all_projects()),
+        ):
+            metadata = item.get("metadata") or {}
+            spec = item.get("spec") or {}
+            status = item.get("status") or {}
+            sync_status = ((status.get("sync") or {}).get("status"))
+            health_status = ((status.get("health") or {}).get("status"))
+            if sync_status not in {None, "Synced"} or health_status not in {None, "Healthy"}:
+                unhealthy_count += 1
+            destination = spec.get("destination") or {}
+            rows.append(
+                {
+                    "namespace": metadata.get("namespace"),
+                    "application_name": metadata.get("name"),
+                    "project": spec.get("project"),
+                    "destination_namespace": destination.get("namespace"),
+                    "destination_server": destination.get("server"),
+                    "repo_url": (spec.get("source") or {}).get("repoURL"),
+                    "path": (spec.get("source") or {}).get("path"),
+                    "target_revision": (spec.get("source") or {}).get("targetRevision"),
+                    "sync_status": sync_status,
+                    "health_status": health_status,
+                }
+            )
+        return {"count": len(rows), "unhealthy_count": unhealthy_count, "gitops_applications": rows}
+
+    def list_tekton_configs(self) -> dict[str, Any]:
+        config_rows = []
+        pipeline_as_code_rows = []
+        namespaces = self._namespace_candidates(["openshift-pipelines", "openshift-operators"], self._all_projects())
+        for item in self._list_custom_any_version(
+            group="operator.tekton.dev",
+            versions=("v1alpha1", "v1beta1", "v1"),
+            plural="tektonconfigs",
+        ):
+            metadata = item.get("metadata") or {}
+            spec = item.get("spec") or {}
+            status = item.get("status") or {}
+            conditions = self._extract_condition_map(status.get("conditions"))
+            config_rows.append(
+                {
+                    "tekton_config_name": metadata.get("name"),
+                    "profile": spec.get("profile"),
+                    "target_namespace": spec.get("targetNamespace"),
+                    "pipeline_enable_api_fields": ((spec.get("pipeline") or {}).get("enable-api-fields")) or ((spec.get("pipeline") or {}).get("enableApiFields")),
+                    "pipeline_as_code_enabled": ((spec.get("pipeline") or {}).get("enable-pipelines-as-code")) or ((spec.get("pipeline") or {}).get("enablePipelinesAsCode")),
+                    "pruner_enabled": ((spec.get("pruner") or {}).get("disabled")) is False if spec.get("pruner") is not None else None,
+                    "ready": conditions.get("Ready") or conditions.get("Succeeded"),
+                    "version": status.get("version"),
+                }
+            )
+        for item in self._list_custom_from_namespaces(
+            group="operator.tekton.dev",
+            versions=("v1alpha1",),
+            plural="tektonpipelines",
+            namespaces=namespaces,
+        ):
+            metadata = item.get("metadata") or {}
+            status = item.get("status") or {}
+            conditions = self._extract_condition_map(status.get("conditions"))
+            pipeline_as_code_rows.append(
+                {
+                    "namespace": metadata.get("namespace"),
+                    "tekton_pipeline_name": metadata.get("name"),
+                    "ready": conditions.get("Ready") or conditions.get("Succeeded"),
+                    "version": status.get("version"),
+                }
+            )
+        return {
+            "config_count": len(config_rows),
+            "pipeline_install_count": len(pipeline_as_code_rows),
+            "tekton_configs": config_rows,
+            "tekton_pipelines": pipeline_as_code_rows,
+        }
+
+    def list_tekton_pipeline_runs(self, project: str | None = None) -> dict[str, Any]:
+        rows = []
+        failed_count = 0
+        namespaces = self._selected_projects(project)
+        if not project:
+            namespaces = self._namespace_candidates(namespaces, ["openshift-pipelines"])
+        for namespace in namespaces:
+            for item in self._list_custom_any_version(
+                group="tekton.dev",
+                versions=("v1", "v1beta1"),
+                plural="pipelineruns",
+                namespace=namespace,
+            ):
+                metadata = item.get("metadata") or {}
+                spec = item.get("spec") or {}
+                status = item.get("status") or {}
+                conditions = status.get("conditions") or []
+                succeeded_condition = next((condition for condition in conditions if condition.get("type") == "Succeeded"), {})
+                succeeded = succeeded_condition.get("status")
+                if succeeded == "False":
+                    failed_count += 1
+                rows.append(
+                    {
+                        "project": namespace,
+                        "pipeline_run_name": metadata.get("name"),
+                        "pipeline_name": ((spec.get("pipelineRef") or {}).get("name")) or ((status.get("pipelineSpec") or {}).get("metadata") or {}).get("name"),
+                        "service_account": spec.get("taskRunTemplate", {}).get("serviceAccountName") or spec.get("serviceAccountName"),
+                        "status": succeeded,
+                        "reason": succeeded_condition.get("reason"),
+                        "start_time": status.get("startTime"),
+                        "completion_time": status.get("completionTime"),
+                    }
+                )
+        return {"count": len(rows), "failed_count": failed_count, "tekton_pipeline_runs": rows}
+
+    def list_cluster_logging(self) -> dict[str, Any]:
+        cluster_logging_rows = []
+        log_forwarder_rows = []
+        unavailable_count = 0
+        namespaces = self._namespace_candidates(["openshift-logging"], self._all_projects())
+        for item in self._list_custom_from_namespaces(
+            group="logging.openshift.io",
+            versions=("v1",),
+            plural="clusterloggings",
+            namespaces=namespaces,
+        ):
+            metadata = item.get("metadata") or {}
+            spec = item.get("spec") or {}
+            status = item.get("status") or {}
+            conditions = self._extract_condition_map(status.get("conditions"))
+            ready = conditions.get("Ready") or conditions.get("Available")
+            if ready not in {None, "True"}:
+                unavailable_count += 1
+            cluster_logging_rows.append(
+                {
+                    "namespace": metadata.get("namespace"),
+                    "cluster_logging_name": metadata.get("name"),
+                    "management_state": spec.get("managementState"),
+                    "log_store_type": ((spec.get("logStore") or {}).get("type")),
+                    "visualization_type": ((spec.get("visualization") or {}).get("type")),
+                    "collection_type": ((spec.get("collection") or {}).get("type")),
+                    "ready": ready,
+                }
+            )
+        for item in self._list_custom_from_namespaces(
+            group="logging.openshift.io",
+            versions=("v1",),
+            plural="clusterlogforwarders",
+            namespaces=namespaces,
+        ):
+            metadata = item.get("metadata") or {}
+            spec = item.get("spec") or {}
+            status = item.get("status") or {}
+            outputs = spec.get("outputs") or []
+            log_forwarder_rows.append(
+                {
+                    "namespace": metadata.get("namespace"),
+                    "cluster_log_forwarder_name": metadata.get("name"),
+                    "input_count": len(spec.get("inputs") or []),
+                    "pipeline_count": len(spec.get("pipelines") or []),
+                    "output_types": sorted({output.get("type") for output in outputs if output.get("type")}),
+                    "ready": self._extract_condition_map(status.get("conditions")).get("Ready"),
+                }
+            )
+        return {
+            "cluster_logging_count": len(cluster_logging_rows),
+            "cluster_log_forwarder_count": len(log_forwarder_rows),
+            "unavailable_count": unavailable_count,
+            "cluster_loggings": cluster_logging_rows,
+            "cluster_log_forwarders": log_forwarder_rows,
+        }
+
+    def list_oadp_resources(self) -> dict[str, Any]:
+        application_rows = []
+        backup_location_rows = []
+        schedule_rows = []
+        namespaces = self._namespace_candidates(["openshift-adp", "oadp-operator"], self._all_projects())
+        for item in self._list_custom_from_namespaces(
+            group="oadp.openshift.io",
+            versions=("v1alpha1",),
+            plural="dataprotectionapplications",
+            namespaces=namespaces,
+        ):
+            metadata = item.get("metadata") or {}
+            spec = item.get("spec") or {}
+            status = item.get("status") or {}
+            conditions = self._extract_condition_map(status.get("conditions"))
+            application_rows.append(
+                {
+                    "namespace": metadata.get("namespace"),
+                    "data_protection_application_name": metadata.get("name"),
+                    "backup_image": ((spec.get("backupLocations") or [{}])[0] or {}).get("velero") if isinstance(spec.get("backupLocations"), list) else None,
+                    "snapshot_location_count": len(spec.get("snapshotLocations") or []),
+                    "backup_location_count": len(spec.get("backupLocations") or []),
+                    "reconciled": conditions.get("Reconciled") or conditions.get("Ready"),
+                }
+            )
+        for namespace in namespaces:
+            for item in self._list_custom_any_version(
+                group="velero.io",
+                versions=("v1",),
+                plural="backupstoragelocations",
+                namespace=namespace,
+            ):
+                metadata = item.get("metadata") or {}
+                spec = item.get("spec") or {}
+                backup_location_rows.append(
+                    {
+                        "namespace": metadata.get("namespace"),
+                        "backup_storage_location_name": metadata.get("name"),
+                        "provider": spec.get("provider"),
+                        "bucket": (spec.get("objectStorage") or {}).get("bucket"),
+                        "default": spec.get("default"),
+                        "access_mode": spec.get("accessMode"),
+                    }
+                )
+            for item in self._list_custom_any_version(
+                group="velero.io",
+                versions=("v1",),
+                plural="schedules",
+                namespace=namespace,
+            ):
+                metadata = item.get("metadata") or {}
+                spec = item.get("spec") or {}
+                schedule_rows.append(
+                    {
+                        "namespace": metadata.get("namespace"),
+                        "schedule_name": metadata.get("name"),
+                        "schedule": spec.get("schedule"),
+                        "paused": spec.get("paused"),
+                        "ttl": ((spec.get("template") or {}).get("ttl")),
+                    }
+                )
+        return {
+            "application_count": len(application_rows),
+            "backup_storage_location_count": len(backup_location_rows),
+            "schedule_count": len(schedule_rows),
+            "data_protection_applications": application_rows,
+            "backup_storage_locations": backup_location_rows,
+            "backup_schedules": schedule_rows,
+        }
+
+    def list_oauth_configuration(self) -> dict[str, Any]:
+        items = self._list_custom(group="config.openshift.io", version="v1", plural="oauths")
+        item = next((entry for entry in items if (entry.get("metadata") or {}).get("name") == "cluster"), None)
+        if item is None:
+            return {"count": 0, "oauth_configurations": []}
+        spec = item.get("spec") or {}
+        identity_providers = spec.get("identityProviders") or []
+        ldap_count = 0
+        rows = []
+        for provider in identity_providers:
+            provider_type = provider.get("type")
+            if provider_type == "LDAP":
+                ldap_count += 1
+            rows.append(
+                {
+                    "name": provider.get("name"),
+                    "type": provider_type,
+                    "mapping_method": provider.get("mappingMethod"),
+                    "ldap_url": ((provider.get("ldap") or {}).get("url")) if provider_type == "LDAP" else None,
+                    "challenge": provider.get("challenge"),
+                    "login": provider.get("login"),
+                }
+            )
+        return {
+            "count": 1,
+            "ldap_provider_count": ldap_count,
+            "oauth_configurations": [
+                {
+                    "identity_provider_count": len(rows),
+                    "templates_configured": list((spec.get("templates") or {}).keys()) if isinstance(spec.get("templates"), dict) else [],
+                    "token_config": spec.get("tokenConfig") or {},
+                    "identity_providers": rows,
+                }
+            ],
+        }
 
     def run_read_only_oc_cli(self, command: str) -> dict[str, Any]:
         if not command or not command.strip():
