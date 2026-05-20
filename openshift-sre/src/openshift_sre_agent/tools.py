@@ -306,6 +306,18 @@ class OpenShiftSreToolkit:
                 {},
                 self.list_oadp_resources,
             ),
+            "list_virtualization_resources": ToolSpec(
+                "list_virtualization_resources",
+                "Inspect OpenShift Virtualization / CNV resources to summarize KubeVirt control-plane health, HyperConverged posture, virtual machines, DataVolumes, and live migration activity.",
+                {"project": "Optional namespace / project name to scope VM, DataVolume, and migration queries."},
+                self.list_virtualization_resources,
+            ),
+            "list_disaster_recovery_resources": ToolSpec(
+                "list_disaster_recovery_resources",
+                "Inspect ACM and ODF disaster-recovery resources to summarize DR policies, DR placement controls, and volume replication posture.",
+                {"project": "Optional namespace / project name to scope DR placement and replication queries."},
+                self.list_disaster_recovery_resources,
+            ),
             "list_oauth_configuration": ToolSpec(
                 "list_oauth_configuration",
                 "Inspect OpenShift OAuth configuration to summarize identity providers, LDAP posture, and cluster-admin access expectations.",
@@ -1527,6 +1539,265 @@ class OpenShiftSreToolkit:
             "data_protection_applications": application_rows,
             "backup_storage_locations": backup_location_rows,
             "backup_schedules": schedule_rows,
+        }
+
+    def list_virtualization_resources(self, project: str | None = None) -> dict[str, Any]:
+        control_plane_namespaces = self._namespace_candidates(["openshift-cnv", "openshift-cnv-operator"], self._all_projects())
+        workload_namespaces = self._selected_projects(project)
+        if not project:
+            workload_namespaces = self._namespace_candidates(
+                workload_namespaces,
+                ["openshift-cnv", "openshift-virtualization-os-images"],
+            )
+
+        kubevirt_rows = []
+        kubevirt_available_count = 0
+        for item in self._list_custom_from_namespaces(
+            group="kubevirt.io",
+            versions=("v1", "v1alpha3"),
+            plural="kubevirts",
+            namespaces=control_plane_namespaces,
+        ):
+            metadata = item.get("metadata") or {}
+            status = item.get("status") or {}
+            conditions = self._extract_condition_map(status.get("conditions"))
+            available = conditions.get("Available") or conditions.get("Progressing")
+            if conditions.get("Available") == "True":
+                kubevirt_available_count += 1
+            kubevirt_rows.append(
+                {
+                    "namespace": metadata.get("namespace"),
+                    "kubevirt_name": metadata.get("name"),
+                    "phase": status.get("phase"),
+                    "observed_version": status.get("observedKubeVirtVersion") or status.get("observedDeploymentConfigVersion"),
+                    "target_version": status.get("targetKubeVirtVersion") or status.get("targetDeploymentConfigVersion"),
+                    "available": available,
+                    "conditions": conditions,
+                }
+            )
+
+        hyperconverged_rows = []
+        hyperconverged_available_count = 0
+        for item in self._list_custom_from_namespaces(
+            group="hco.kubevirt.io",
+            versions=("v1beta1", "v1alpha1"),
+            plural="hyperconvergeds",
+            namespaces=control_plane_namespaces,
+        ):
+            metadata = item.get("metadata") or {}
+            status = item.get("status") or {}
+            conditions = self._extract_condition_map(status.get("conditions"))
+            available = conditions.get("Available") or conditions.get("ReconcileCompleted")
+            if conditions.get("Available") == "True" or conditions.get("ReconcileCompleted") == "True":
+                hyperconverged_available_count += 1
+            hyperconverged_rows.append(
+                {
+                    "namespace": metadata.get("namespace"),
+                    "hyperconverged_name": metadata.get("name"),
+                    "version": status.get("versions", {}).get("operator") if isinstance(status.get("versions"), dict) else None,
+                    "available": available,
+                    "conditions": conditions,
+                    "live_migration_config": ((item.get("spec") or {}).get("liveMigrationConfig")) or {},
+                }
+            )
+
+        vm_rows = []
+        running_vm_count = 0
+        for namespace in workload_namespaces:
+            for item in self._list_custom_any_version(
+                group="kubevirt.io",
+                versions=("v1", "v1alpha3"),
+                plural="virtualmachines",
+                namespace=namespace,
+            ):
+                metadata = item.get("metadata") or {}
+                spec = item.get("spec") or {}
+                status = item.get("status") or {}
+                printable_status = status.get("printableStatus") or status.get("status")
+                if printable_status == "Running":
+                    running_vm_count += 1
+                vm_rows.append(
+                    {
+                        "project": namespace,
+                        "virtual_machine_name": metadata.get("name"),
+                        "run_strategy": spec.get("runStrategy"),
+                        "running": spec.get("running"),
+                        "printable_status": printable_status,
+                        "ready": status.get("ready"),
+                    }
+                )
+
+        datavolume_rows = []
+        failed_datavolume_count = 0
+        for namespace in workload_namespaces:
+            for item in self._list_custom_any_version(
+                group="cdi.kubevirt.io",
+                versions=("v1beta1", "v1alpha1"),
+                plural="datavolumes",
+                namespace=namespace,
+            ):
+                metadata = item.get("metadata") or {}
+                status = item.get("status") or {}
+                phase = status.get("phase")
+                if phase in {"Failed", "Unknown"}:
+                    failed_datavolume_count += 1
+                datavolume_rows.append(
+                    {
+                        "project": namespace,
+                        "data_volume_name": metadata.get("name"),
+                        "phase": phase,
+                        "progress": status.get("progress"),
+                        "storage": ((item.get("spec") or {}).get("storage") or {}).get("resources", {}).get("requests", {}).get("storage"),
+                    }
+                )
+
+        migration_rows = []
+        failed_migration_count = 0
+        for namespace in workload_namespaces:
+            for item in self._list_custom_any_version(
+                group="kubevirt.io",
+                versions=("v1", "v1alpha3"),
+                plural="virtualmachineinstancemigrations",
+                namespace=namespace,
+            ):
+                metadata = item.get("metadata") or {}
+                status = item.get("status") or {}
+                phase = status.get("phase")
+                if phase in {"Failed", "Unknown"}:
+                    failed_migration_count += 1
+                migration_rows.append(
+                    {
+                        "project": namespace,
+                        "migration_name": metadata.get("name"),
+                        "phase": phase,
+                        "vm_instance_name": ((item.get("spec") or {}).get("vmiName")),
+                        "creation_timestamp": metadata.get("creationTimestamp"),
+                    }
+                )
+
+        return {
+            "kubevirt_count": len(kubevirt_rows),
+            "kubevirt_available_count": kubevirt_available_count,
+            "hyperconverged_count": len(hyperconverged_rows),
+            "hyperconverged_available_count": hyperconverged_available_count,
+            "virtual_machine_count": len(vm_rows),
+            "running_virtual_machine_count": running_vm_count,
+            "data_volume_count": len(datavolume_rows),
+            "failed_data_volume_count": failed_datavolume_count,
+            "migration_count": len(migration_rows),
+            "failed_migration_count": failed_migration_count,
+            "kubevirts": kubevirt_rows,
+            "hyperconvergeds": hyperconverged_rows,
+            "virtual_machines": vm_rows,
+            "data_volumes": datavolume_rows,
+            "live_migrations": migration_rows,
+        }
+
+    def list_disaster_recovery_resources(self, project: str | None = None) -> dict[str, Any]:
+        base_namespaces = self._namespace_candidates(
+            self._selected_projects(project),
+            ["openshift-dr-system", "open-cluster-management-backup", "openshift-adp"],
+        )
+        cluster_namespaces = self._namespace_candidates(base_namespaces, self._all_projects())
+
+        dr_policy_rows = []
+        for item in self._list_custom_from_namespaces(
+            group="ramendr.openshift.io",
+            versions=("v1alpha1", "v1alpha2"),
+            plural="drpolicies",
+            namespaces=cluster_namespaces,
+        ):
+            metadata = item.get("metadata") or {}
+            spec = item.get("spec") or {}
+            dr_policy_rows.append(
+                {
+                    "namespace": metadata.get("namespace"),
+                    "dr_policy_name": metadata.get("name"),
+                    "scheduling_interval": spec.get("schedulingInterval"),
+                    "dr_cluster_count": len(spec.get("drClusters") or []),
+                    "dr_clusters": spec.get("drClusters") or [],
+                }
+            )
+
+        drpc_rows = []
+        failover_count = 0
+        for item in self._list_custom_from_namespaces(
+            group="ramendr.openshift.io",
+            versions=("v1alpha1", "v1alpha2"),
+            plural="drplacementcontrols",
+            namespaces=cluster_namespaces,
+        ):
+            metadata = item.get("metadata") or {}
+            spec = item.get("spec") or {}
+            status = item.get("status") or {}
+            action = spec.get("action") or status.get("action")
+            if action in {"Failover", "Relocate"}:
+                failover_count += 1
+            drpc_rows.append(
+                {
+                    "namespace": metadata.get("namespace"),
+                    "dr_placement_control_name": metadata.get("name"),
+                    "preferred_cluster": spec.get("preferredCluster"),
+                    "dr_policy_ref": spec.get("drPolicyRef", {}).get("name") if isinstance(spec.get("drPolicyRef"), dict) else spec.get("drPolicyRef"),
+                    "action": action,
+                    "phase": status.get("phase"),
+                    "conditions": self._extract_condition_map(status.get("conditions")),
+                }
+            )
+
+        volume_replication_class_rows = []
+        for item in self._list_custom_any_version(
+            group="replication.storage.openshift.io",
+            versions=("v1alpha1", "v1beta1"),
+            plural="volumereplicationclasses",
+        ):
+            metadata = item.get("metadata") or {}
+            spec = item.get("spec") or {}
+            volume_replication_class_rows.append(
+                {
+                    "volume_replication_class_name": metadata.get("name"),
+                    "provisioner": spec.get("provisioner"),
+                    "parameters": spec.get("parameters") or {},
+                }
+            )
+
+        volume_replication_rows = []
+        degraded_replication_count = 0
+        for namespace in cluster_namespaces:
+            for item in self._list_custom_any_version(
+                group="replication.storage.openshift.io",
+                versions=("v1alpha1", "v1beta1"),
+                plural="volumereplications",
+                namespace=namespace,
+            ):
+                metadata = item.get("metadata") or {}
+                spec = item.get("spec") or {}
+                status = item.get("status") or {}
+                state = status.get("state") or status.get("lastSyncTime")
+                if isinstance(state, str) and state.lower() in {"failed", "error"}:
+                    degraded_replication_count += 1
+                volume_replication_rows.append(
+                    {
+                        "namespace": metadata.get("namespace"),
+                        "volume_replication_name": metadata.get("name"),
+                        "data_source": spec.get("dataSource", {}).get("name") if isinstance(spec.get("dataSource"), dict) else None,
+                        "replication_state": spec.get("replicationState"),
+                        "status_state": status.get("state"),
+                        "last_sync_time": status.get("lastSyncTime"),
+                    }
+                )
+
+        return {
+            "dr_policy_count": len(dr_policy_rows),
+            "dr_placement_control_count": len(drpc_rows),
+            "active_failover_action_count": failover_count,
+            "volume_replication_class_count": len(volume_replication_class_rows),
+            "volume_replication_count": len(volume_replication_rows),
+            "degraded_replication_count": degraded_replication_count,
+            "dr_policies": dr_policy_rows,
+            "dr_placement_controls": drpc_rows,
+            "volume_replication_classes": volume_replication_class_rows,
+            "volume_replications": volume_replication_rows,
         }
 
     def list_oauth_configuration(self) -> dict[str, Any]:

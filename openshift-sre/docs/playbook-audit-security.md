@@ -4,10 +4,10 @@
 
 This playbook covers the services that help an operator answer:
 
-- **Are we collecting enough audit evidence?**
-- **Are compliance recorders/rules healthy?**
-- **Are detection services enabled where we expect them?**
-- **Is edge protection present?**
+- **Are core OpenShift guardrails configured the way we expect?**
+- **Is namespace isolation and route exposure aligned with policy?**
+- **Are identity-provider, fleet-security, and logging controls healthy?**
+- **Do we have enough evidence for a security or compliance review?**
 
 For deeper vulnerability, data-security, and org-governance review, continue into the [`Advanced Security & Governance`](playbook-advanced-security-governance.md) playbook.
 
@@ -40,106 +40,131 @@ Example runtime shape used by the UI:
 
 Use this when you want the browser workflow to mirror the same runtime flexibility already available in the FinOps workspace.
 
-## CloudTrail
+## Security context constraints
 
-Use: `list_cloudtrail_trails`
-
-What to look for:
-
-- no active trail
-- no multi-region trail
-- log file validation disabled
-- logging stopped unexpectedly
-
-Suggested prompts:
-
-- `Inspect CloudTrail trails and summarize any gaps in audit logging posture.`
-- `Check whether CloudTrail is logging across regions and whether validation is enabled.`
-
-Operator actions:
-
-1. confirm at least one expected trail exists
-2. check `is_logging`
-3. verify `is_multi_region_trail`
-4. confirm central S3 destination is expected
-
-## OpenShift Config
-
-Use: `list_config_rules`
+Use: `list_security_context_constraints`
 
 What to look for:
 
-- recorder not running
-- rules in unexpected states
-- no recorder in an account/region that should be monitored
+- privileged or host-access SCCs still bound more broadly than expected
+- legacy SCC usage that should have been replaced by tighter workload settings
+- service accounts relying on broad SCCs without a current business reason
 
 Suggested prompts:
 
-- `Review OpenShift Config recorders and rules for compliance drift.`
-- `Tell me whether Config is recording properly in this region.`
+- `Inspect SCC posture and summarize the riskiest privilege assignments.`
+- `Review security context constraints and highlight namespaces or service accounts that look over-permissive.`
 
 Operator actions:
 
-1. inspect recorder `recording` status
-2. review rule inventory and scope coverage
-3. note whether the recorder is tracking all supported resource types
+1. identify the SCCs with the broadest privilege surface
+2. map high-risk SCC usage back to namespaces and service accounts
+3. flag workloads that need a migration path toward tighter pod security settings
 
-## GuardDuty
+## Network policies
 
-Use: `list_guardduty_detectors`
+Use: `list_network_policies`
 
 What to look for:
 
-- no detector present
-- detector disabled
-- suspicious feature count mismatch across regions/accounts
+- namespaces with no policy coverage where isolation is expected
+- default-deny posture missing in shared or regulated projects
+- policy count present but obviously not aligned with application tiers
 
 Suggested prompts:
 
-- `Inspect GuardDuty detector posture and summarize missing coverage.`
+- `Review OpenShift network policy coverage and summarize namespace isolation gaps.`
+- `Tell me which projects appear under-protected from east-west traffic.`
 
 Operator actions:
 
-1. confirm detector exists
-2. verify detector `status`
-3. compare posture across environments if multi-account
+1. compare protected and unprotected namespaces
+2. look for shared namespaces without clear ingress and egress controls
+3. capture which application tiers still depend on broad intra-cluster reachability
 
-## Security Hub
+## OAuth and identity-provider posture
 
-Use: `list_securityhub_standards`
+Use: `list_oauth_configuration`
 
 What to look for:
 
-- hub not enabled
-- standards missing or disabled
-- unexpected standards status
+- unexpected identity providers still enabled
+- LDAP, HTPasswd, or GitHub mappings drifting from the intended auth design
+- branding, login, or claim-mapping details inconsistent across clusters
 
 Suggested prompts:
 
-- `Review Security Hub and enabled standards for security posture drift.`
+- `Inspect OAuth configuration and summarize identity-provider drift.`
+- `Review LDAP and OAuth posture across this cluster and call out risky auth patterns.`
 
 Operator actions:
 
-1. confirm hub exists
-2. inspect enabled standards count
-3. flag disabled or unhealthy subscriptions
+1. confirm the expected identity providers are present and healthy
+2. compare cluster auth posture with the intended platform-standard design
+3. flag legacy or emergency providers that should be retired
 
-## WAF
+## ACS coverage
 
-Use: `list_waf_web_acls`
+Use:
+
+- `list_acs_central_services`
+- `list_acs_secured_clusters`
 
 What to look for:
 
-- missing regional or CloudFront web ACLs
-- ACLs present but not aligned to expected protection layers
+- central services missing or degraded
+- secured clusters absent from environments that should be enrolled
+- fleet coverage that does not match the known managed-cluster estate
 
 Suggested prompts:
 
-- `Inspect WAF coverage for regional and CloudFront scopes.`
-- `Tell me whether our ALB/NLB edge protection posture looks incomplete.`
+- `Inspect ACS central and secured-cluster coverage and summarize the biggest protection gaps.`
 
 Operator actions:
 
-1. review regional ACL count
-2. review CloudFront ACL count
-3. compare expected protected surfaces against actual ACL inventory
+1. confirm ACS central components exist and appear healthy
+2. compare secured-cluster enrollment with the fleet you expect ACM to manage
+3. identify clusters or environments where enforcement or visibility is still missing
+
+## Cluster logging evidence
+
+Use: `list_cluster_logging`
+
+What to look for:
+
+- log store or collector components not ready
+- forwarding posture missing where audit evidence is expected off-cluster
+- retention or pipeline gaps that could block incident reconstruction
+
+Suggested prompts:
+
+- `Inspect Cluster Logging posture and summarize evidence-collection gaps.`
+
+Operator actions:
+
+1. confirm logging operators and collectors are present
+2. review forwarding targets and obvious readiness issues
+3. note whether the cluster appears able to support an audit or incident review without extra manual collection
+
+## Route exposure and namespace guardrails
+
+Use:
+
+- `list_routes`
+- `list_resource_quotas`
+
+What to look for:
+
+- public routes without clear ownership or TLS posture
+- namespaces with weak quota controls in shared environments
+- route inventory that does not align with the intended ingress pattern
+
+Suggested prompts:
+
+- `Review route exposure and quota posture for security and governance drift.`
+
+Operator actions:
+
+1. identify the most exposed routes and confirm they belong where expected
+2. compare quota posture across shared namespaces
+3. capture any guardrail gaps that could increase blast radius during an incident

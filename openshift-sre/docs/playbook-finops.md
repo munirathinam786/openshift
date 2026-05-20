@@ -1,105 +1,118 @@
 # FinOps & Optimization Playbook
 
-This playbook covers spend visibility, chargeback drilldowns, forecast review, commitment coverage, and cost optimization recommendations.
+This playbook covers capacity posture, namespace pressure, storage efficiency, and platform optimization signals that operators can review directly from the OpenShift estate.
 
-## Cost and usage summary
+## Cluster infrastructure summary
 
-Use: `list_cost_and_usage_summary`
-
-What to look for:
-
-- sharp spend changes across the selected window
-- daily spikes that do not align with expected releases or experiments
-- monthly totals that outpace the current operating plan
-
-Suggested prompts:
-
-- `Summarize cluster resource utilization over the last 30 days and call out any obvious spikes.`
-
-## Cost by service
-
-Use: `list_cost_by_service`
+Use: `list_cluster_infrastructure`
 
 What to look for:
 
-- top services dominating spend unexpectedly
-- recent growth in services that should be flat or seasonal
-- storage, analytics, or data-transfer services growing faster than expected
+- platform-pattern mismatches across clusters
+- worker footprint or topology that no longer matches intended sizing
+- infrastructure signals that suggest a cluster is overbuilt, underbuilt, or drifting from design
 
 Suggested prompts:
 
-- `Break down cost by service for the last 30 days and highlight the top cost drivers.`
+- `Summarize cluster infrastructure posture and call out obvious scaling or platform-pattern concerns.`
 
-## Cost by tag
+## Node and workload pressure
 
-Use: `list_cost_by_tag`
+Use:
+
+- `list_nodes`
+- `list_workload_health`
 
 What to look for:
 
-- missing ownership or environment allocation
-- large `<unallocated>` or blank tag spend
-- teams or workloads with sudden spend drift
+- nodes that are ready but clearly under strain
+- repeated workload rollouts failing because of capacity or scheduling pressure
+- unhealthy workloads clustering in the same pool, zone, or platform slice
 
 Suggested prompts:
 
-- `Break down cost by tag for Environment and call out unallocated spend.`
-- `Summarize spend by Owner tag and identify the biggest cost concentrations.`
+- `Review node and workload posture and summarize where cluster capacity looks tight or inefficient.`
 
-## Cost forecast
+## Namespace quota governance
 
-Use: `get_cost_forecast`
+Use: `list_resource_quotas`
 
 What to look for:
 
-- next-month forecast exceeding current run-rate expectations
-- prediction intervals wide enough to suggest unstable usage patterns
-- forecast drift that should trigger a planning review
+- shared namespaces without quota guardrails
+- quota shapes that do not match the workload class they are supposed to protect
+- clusters where project-level governance is too loose to support safe multi-tenancy
 
 Suggested prompts:
 
-- `Forecast the next month of spend and explain whether the range looks risky.`
+- `Inspect resource quota posture and summarize the biggest namespace-governance gaps.`
 
-## Savings Plans coverage
+## Persistent storage posture
 
-Use: `list_savings_plans_coverage`
+Use:
+
+- `list_persistent_storage`
+- `list_storage_classes`
 
 What to look for:
 
-- low average coverage despite stable compute usage
-- rising on-demand share in what should be committed workloads
-- coverage gaps that align with newly deployed fleets or regions
+- PVCs and PVs that look stranded, oversized, or misaligned with the intended storage tier
+- storage classes that do not match the platform standard
+- projects carrying storage posture that will complicate failover, migration, or optimization work
 
 Suggested prompts:
 
-- `Review Savings Plans coverage and explain where on-demand spend still dominates.`
+- `Review persistent storage and storage classes and summarize optimization or governance risks.`
 
-## Rightsizing recommendations
+## Machine API and upgrade readiness
 
-Use: `list_rightsizing_recommendations`
+Use:
+
+- `list_machine_config_pools`
+- `list_machine_sets`
 
 What to look for:
 
-- large estimated monthly savings concentrated in a small number of instances
-- repeated same-family downsizing opportunities
-- cost optimization opportunities that need coordination with platform owners
+- machine-set or machine-config posture suggesting uneven capacity management
+- pools stuck updating or degraded before a change window
+- scaling patterns that make cluster capacity expensive to operate or hard to reason about
 
 Suggested prompts:
 
-- `Review EC2 rightsizing recommendations and summarize the top savings opportunities.`
+- `Inspect Machine API posture and summarize capacity-management or upgrade-readiness risks.`
+
+## Delivery-stack efficiency
+
+Use:
+
+- `list_gitops_applications`
+- `list_tekton_pipeline_runs`
+- `list_builds`
+- `list_image_streams`
+
+What to look for:
+
+- delivery workflows repeatedly re-running or failing in ways that waste cluster capacity
+- build and pipeline backlogs creating unnecessary platform churn
+- image-stream or rollout patterns that suggest poor workload hygiene
+
+Suggested prompts:
+
+- `Inspect GitOps, Tekton, builds, and image streams and summarize the most likely platform-efficiency issues.`
 
 ## Recommended FinOps drilldown workflow
 
-1. start with `list_cost_and_usage_summary` to establish the current run rate
-2. use `list_cost_by_service` to identify the top cost concentrations
-3. use `list_cost_by_tag` to attribute spend to teams or environments
-4. use `get_cost_forecast` to understand forward risk
-5. use `list_savings_plans_coverage` to inspect commitment posture
-6. use `list_rightsizing_recommendations` to turn findings into optimization actions
+1. start with `list_cluster_infrastructure` to confirm the baseline platform shape
+2. use `list_nodes` and `list_workload_health` to identify real pressure or over-provisioning signals
+3. use `list_resource_quotas` to inspect namespace-level governance and contention controls
+4. use `list_persistent_storage` and `list_storage_classes` to understand storage efficiency
+5. use `list_machine_config_pools` and `list_machine_sets` to inspect scaling and upgrade readiness
+6. use GitOps, Tekton, build, and image-stream posture to turn platform friction into optimization actions
 
 ## Recommendation patterns the agent should surface
 
-- reduce or remove unallocated tag spend by enforcing cost-allocation tags
-- review top-service growth before the next billing cycle closes
-- improve Savings Plans coverage for stable compute-heavy workloads
-- validate rightsizing recommendations with application owners before execution
-- pair forecast growth with deployment calendars, data retention changes, or scaling events
+- reduce noisy re-delivery loops and failed pipelines that waste cluster capacity
+- tighten quota posture in shared namespaces before pressure becomes an outage
+- normalize storage classes and remove stranded storage where possible
+- align machine pools and worker topology with actual platform demand
+- use platform-pattern context when comparing ROSA, ARO, baremetal, and IBM Z optimization actions

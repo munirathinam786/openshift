@@ -2,158 +2,141 @@
 
 ![Platform and automation service map](assets/diagrams/platform-automation.svg)
 
-This playbook covers services used to understand operational automation, image delivery, event-driven workflows, and day-2 infrastructure posture.
+This playbook covers the OpenShift platform services used to understand lifecycle automation, delivery posture, machine management, virtualization, and day-2 operating readiness.
 
-## Auto Scaling groups
+## Cluster infrastructure and platform pattern
 
-Use: `list_autoscaling_groups`
-
-What to look for:
-
-- desired capacity drifting too close to min or max bounds
-- suspiciously uneven AZ spread
-- launch-template posture missing where modern configuration is expected
-
-Suggested prompts:
-
-- `Inspect Auto Scaling groups and summarize capacity or configuration drift.`
-
-## EBS volumes
-
-Use: `list_ebs_volumes`
+Use: `list_cluster_infrastructure`
 
 What to look for:
 
-- unattached but still provisioned volumes
-- unencrypted volumes in sensitive environments
-- volume classes or IOPS profiles that look inconsistent with workload intent
+- platform type resolving differently than expected for ROSA, ARO, baremetal, or IBM Z clusters
+- infrastructure signals that explain why lifecycle or delivery workflows behave differently across clusters
+- cluster identity or topology drift before broader automation analysis
 
 Suggested prompts:
 
-- `Inspect EBS volumes and summarize storage posture or cost-risk drift.`
+- `Inspect cluster infrastructure posture and summarize platform-pattern drift.`
 
-## SSM managed instances
+## Machine config pools
 
-Use: `list_ssm_managed_instances`
+Use: `list_machine_config_pools`
 
 What to look for:
 
-- instances missing from Systems Manager
-- `PingStatus` not healthy
-- inconsistent agent versions
+- pools stuck updating, degraded, or paused unexpectedly
+- machine config rollout drift affecting upgrade readiness
+- worker configuration differences that explain inconsistent workload behavior
 
 Suggested prompts:
 
-- `Inspect SSM managed instances and summarize agent health drift.`
+- `Inspect machine config pools and summarize lifecycle or rollout drift.`
 
-## Parameter Store
+## Machine sets
 
-Use: `list_ssm_parameters`
+Use: `list_machine_sets`
 
 What to look for:
 
-- unexpected parameter sprawl
-- wrong parameter types/tiers
-- stale metadata suggesting unmanaged config
+- replica targets that no longer match capacity intent
+- machine-set posture inconsistent with the infrastructure pattern
+- unhealthy or stale machine-set definitions in clusters that should scale predictably
 
 Suggested prompts:
 
-- `Review Parameter Store metadata and identify suspicious configuration sprawl.`
+- `Inspect machine sets and summarize scaling or topology drift.`
 
-## Secrets Manager
-
-Use: `list_secrets_manager_secrets`
-
-What to look for:
-
-- rotation disabled for high-value secrets
-- stale rotation dates
-- inconsistent owning services
-
-Suggested prompts:
-
-- `Inspect Secrets Manager metadata and summarize rotation posture.`
-
-## EventBridge
+## GitOps controllers and applications
 
 Use:
 
-- `list_eventbridge_buses`
-- `list_eventbridge_rules`
+- `list_gitops_argocds`
+- `list_gitops_applications`
 
 What to look for:
 
-- unexpected custom buses
-- disabled rules
-- stale or risky schedule expressions
+- Argo CD instances missing from clusters where GitOps is expected
+- applications drifting, out of sync, or failing health checks repeatedly
+- fleet delivery posture that diverges across clusters or platform patterns
 
 Suggested prompts:
 
-- `Review EventBridge buses and rules for automation drift.`
+- `Review OpenShift GitOps posture and summarize the most important delivery drift.`
 
-## ECR
-
-Use: `list_ecr_repositories`
-
-What to look for:
-
-- mutable tags where immutability is expected
-- scan-on-push disabled
-- inconsistent encryption settings
-
-Suggested prompts:
-
-- `Inspect ECR repositories and summarize image governance gaps.`
-
-## CloudFormation stacks
-
-Use: `list_cloudformation_stacks`
-
-What to look for:
-
-- stacks stuck in failure states
-- old stacks with suspicious drift status
-- missing termination protection where it should exist
-
-Suggested prompts:
-
-- `Inspect CloudFormation stacks and summarize provisioning or drift concerns.`
-
-## KMS keys
-
-Use: `list_kms_keys`
-
-What to look for:
-
-- customer-managed keys without rotation enabled
-- alias sprawl or unclear key ownership
-- keys in unexpected states
-
-Suggested prompts:
-
-- `Inspect KMS key inventory and summarize encryption-key posture concerns.`
-
-## ALB / NLB and target groups
+## Tekton and build automation
 
 Use:
 
-- `list_load_balancers`
-- `list_target_groups`
+- `list_tekton_configs`
+- `list_tekton_pipeline_runs`
+- `list_builds`
+- `list_image_streams`
 
 What to look for:
 
-- load balancers with suspicious state
-- target groups with mismatched health check configuration
-- internet-facing surfaces without clear purpose
+- Tekton configuration drift or missing controller posture
+- pipeline runs failing in the same namespaces or phases
+- build and image-stream patterns that block release velocity
 
 Suggested prompts:
 
-- `Review ALB, NLB, and target groups for traffic delivery risk.`
+- `Inspect Tekton, builds, and image streams and summarize delivery-automation drift.`
+
+## Operator lifecycle posture
+
+Use:
+
+- `list_operator_subscriptions`
+- `list_cluster_service_versions`
+
+What to look for:
+
+- subscriptions that are not progressing or are pinned unexpectedly
+- CSVs stuck in pending, replacing, or failed states
+- operator drift that can break day-2 automation or upgrades
+
+Suggested prompts:
+
+- `Review OLM subscriptions and CSVs for platform-automation drift.`
+
+## Cluster logging and day-2 automation
+
+Use:
+
+- `list_cluster_logging`
+- `list_oadp_resources`
+
+What to look for:
+
+- logging components or forwarding posture not ready
+- backup schedules or backup storage missing where platform standards expect them
+- day-2 services drifting enough to weaken operational recovery
+
+Suggested prompts:
+
+- `Inspect cluster logging and OADP posture and summarize day-2 automation gaps.`
+
+## Virtualization and disaster recovery
+
+Use:
+
+- `list_virtualization_resources`
+- `list_disaster_recovery_resources`
+
+What to look for:
+
+- virtualization resources not aligned with workload-mobility expectations
+- DR resources missing from clusters expected to support failover or migration
+- migration posture that looks blocked by platform-service drift
+
+Suggested prompts:
+
+- `Inspect virtualization and disaster-recovery resources and summarize platform readiness concerns.`
 
 Operator actions:
 
-1. map external surfaces
-2. inspect listener and target-group design
-3. compare health-check paths/protocols with application expectations
-4. compare desired capacity and storage posture with workload expectations
-5. inspect infrastructure stack health and key-management hygiene
+1. confirm the cluster infrastructure matches the platform pattern you think you are operating
+2. review MachineConfigPool and MachineSet posture before platform changes
+3. inspect GitOps, Tekton, builds, and image streams for delivery drift
+4. review OLM, logging, and OADP posture as part of day-2 automation readiness
+5. compare virtualization and DR posture before migration, failover, or upgrade work

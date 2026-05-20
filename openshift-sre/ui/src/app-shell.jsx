@@ -4,6 +4,7 @@ import { createRoot } from 'react-dom/client';
 const NAV_ITEMS = [
   { key: 'console', label: 'Agent Console', href: 'console.html', short: 'AC' },
   { key: 'security', label: 'Security Console', href: 'security-console.html', short: 'SC' },
+  { key: 'platform', label: 'Platform Console', href: 'platform-console.html', short: 'PF' },
   { key: 'posture-radar', label: 'Posture Radar', href: 'posture-radar.html', short: 'PR' },
   { key: 'watchlists', label: 'Watchlists', href: 'watchlists.html', short: 'WL' },
   { key: 'drift-diff', label: 'Drift Diff', href: 'drift-diff.html', short: 'DD' },
@@ -17,6 +18,7 @@ const NAV_ITEMS = [
 const PAGE_THEMES = {
   console: { short: 'AC', tone: 'Live operator workspace', eyebrow: 'Direct run surface' },
   security: { short: 'SC', tone: 'Audit and security review lane', eyebrow: 'Dedicated cloud security workspace' },
+  platform: { short: 'PF', tone: 'Lifecycle and resiliency workspace', eyebrow: 'Platform operations control lane' },
   'posture-radar': { short: 'PR', tone: 'Cross-account posture command lane', eyebrow: 'Multi-region sweep visualizer' },
   watchlists: { short: 'WL', tone: 'Saved investigation workspace', eyebrow: 'Operator watch automation' },
   'drift-diff': { short: 'DD', tone: 'Run-to-run drift analysis', eyebrow: 'Baseline comparison cockpit' },

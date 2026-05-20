@@ -9,6 +9,7 @@ nav:
   - Home: index.md
   - LLM Utilization: llm-utilization.html
   - Security Console: security-console.html
+  - Platform Console: platform-console.html
   - Troubleshooting Console: troubleshooting.html
   - Agent Console: console.html
   - FinOps Console: finops-console.html

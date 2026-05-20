@@ -1135,6 +1135,13 @@ def finops_console_page():
     return _redirect_site_page("/guide/finops-console.html")
 
 
+@app.api_route("/platform-console.html", methods=["GET", "HEAD"], include_in_schema=False, response_model=None)
+@app.api_route("/platform-console/", methods=["GET", "HEAD"], include_in_schema=False, response_model=None)
+@app.api_route("/docs/platform-console.html", methods=["GET", "HEAD"], include_in_schema=False, response_model=None)
+def platform_console_page():
+    return _redirect_site_page("/guide/platform-console.html")
+
+
 @app.api_route("/posture-radar.html", methods=["GET", "HEAD"], include_in_schema=False, response_model=None)
 @app.api_route("/docs/posture-radar.html", methods=["GET", "HEAD"], include_in_schema=False, response_model=None)
 def posture_radar_page():

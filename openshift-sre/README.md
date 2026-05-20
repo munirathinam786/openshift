@@ -100,6 +100,7 @@ The MkDocs site under `docs/` is kept as a first-class operator surface.
 The OpenShift SRE retains the same major feature lanes:
 
 - `Agent Console`
+- `Platform Console`
 - `Troubleshooting`
 - `Security Console`
 - `FinOps Console`

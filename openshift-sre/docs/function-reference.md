@@ -153,99 +153,69 @@ Important SQLAlchemy models:
 | Module | Symbol | Purpose |
 | --- | --- | --- |
 | `tools.py` | `ToolSpec` | Declares the tool name, description, arguments, and handler |
-| `tools.py` | `AwsSessionFactory.create()` | Builds a kubernetes session using the configured region/profile/credentials |
+| `tools.py` | `OpenShiftSreToolkit.__init__(...)` | Creates the shared Kubernetes, OpenShift custom-object, and policy-aware tool registry used by every workflow |
 | `tools.py` | `OpenShiftSreToolkit.tool_manifest()` | Returns the tool schema sent to the model |
 | `tools.py` | `OpenShiftSreToolkit.invoke(...)` | Resolves and executes one tool call |
-| `tools.py` | `OpenShiftSreToolkit._client(...)` | Creates a kubernetes client with shared retry and TLS settings |
-| `tools.py` | `_cost_time_period(...)`, `_normalize_granularity(...)`, `_money_value(...)`, `_money_dict(...)` | Shared helpers for FinOps tools |
+| `tools.py` | `OpenShiftSreToolkit._api_client(...)` / `OpenShiftSreToolkit._custom_api(...)` | Builds Kubernetes and custom-resource clients with shared auth, retry, and TLS handling |
+| `tools.py` | `OpenShiftSreToolkit._list_custom_any_version(...)` / `OpenShiftSreToolkit._list_custom_from_namespaces(...)` | Walks OpenShift CRDs safely across version fallbacks and namespace candidates |
+| `tools.py` | `OpenShiftSreToolkit._selected_projects(...)` / `OpenShiftSreToolkit._namespace_candidates(...)` | Normalizes project scoping so prompts can target one namespace or the whole estate |
+| `tools.py` | `OpenShiftSreToolkit._extract_condition_map(...)` | Converts Kubernetes condition lists into compact status dictionaries used by the UI and summaries |
 | `model_client.py` | `_chat_ollama(...)`, `_chat_openai_compatible(...)`, `_chat_azure_openai(...)`, `_chat_anthropic(...)`, `_chat_gemini(...)` | Provider-specific request/response adapters with normalized token tracking |
 
 ## Toolkit functions by domain
 
-### Compute and platform inventory
+### Core platform inventory and health
 
-- `list_ec2_instances`
-- `list_autoscaling_groups`
-- `list_ebs_volumes`
-- `list_rds_instances`
-- `list_cloudformation_stacks`
-- `list_ecs_clusters`
-- `list_eks_clusters`
-- `list_lambda_functions`
-- `list_emr_clusters`
-- `list_ecr_repositories`
+- `list_cluster_infrastructure`
+- `list_cluster_version`
+- `list_cluster_operators`
+- `list_nodes`
+- `list_node_pressure`
+- `list_events`
 
-### Networking and edge
+### Workloads, routing, and storage
 
-- `list_vpc_inventory`
-- `list_subnets`
-- `list_transit_gateways`
-- `list_load_balancers`
-- `list_target_groups`
-- `list_api_gateways`
-- `list_cloudfront_distributions`
-- `list_route53_zones`
-- `list_waf_web_acls`
-- `list_network_firewalls`
-- `list_firewall_manager_policies`
+- `list_workload_health`
+- `list_services`
+- `list_routes`
+- `list_ingresses`
+- `list_persistent_storage`
+- `list_storage_classes`
 
-### Observability and operations
+### Machine API and operator lifecycle
 
-- `get_cloudwatch_metric`
-- `query_logs_insights`
-- `list_alarms`
-- `list_ssm_managed_instances`
-- `list_ssm_parameters`
-- `list_secrets_manager_secrets`
-- `list_eventbridge_buses`
-- `list_eventbridge_rules`
-- `list_step_functions`
+- `list_machine_config_pools`
+- `list_machine_sets`
+- `list_operator_subscriptions`
+- `list_cluster_service_versions`
+- `list_image_streams`
+- `list_builds`
 
-### FinOps and cost analysis
+### GitOps, delivery, logging, and backup
 
-- `list_cost_and_usage_summary`
-- `list_cost_by_service`
-- `list_cost_by_tag`
-- `get_cost_forecast`
-- `list_savings_plans_coverage`
-- `list_rightsizing_recommendations`
+- `list_gitops_argocds`
+- `list_gitops_applications`
+- `list_tekton_configs`
+- `list_tekton_pipeline_runs`
+- `list_cluster_logging`
+- `list_oadp_resources`
 
-### Data and analytics
+### Identity, security, and policy posture
 
-- `list_s3_buckets`
-- `list_glue_catalog`
-- `list_athena_workgroups`
-- `list_redshift_clusters`
-- `list_redshift_serverless`
-- `list_dynamodb_tables`
-- `list_kinesis_streams`
-- `list_opensearch_domains`
-- `list_elasticache_clusters`
-- `list_sqs_queues`
-- `list_sns_topics`
+- `list_oauth_configuration`
+- `list_security_context_constraints`
+- `list_network_policies`
+- `list_resource_quotas`
+- `list_acs_central_services`
+- `list_acs_secured_clusters`
 
-### Security, governance, and backup
+### Fleet governance and platform operations
 
-- `list_cloudtrail_trails`
-- `list_cloudtrail_event_selectors`
-- `list_config_rules`
-- `list_config_compliance_summary`
-- `list_guardduty_detectors`
-- `list_guardduty_findings`
-- `list_detective_graphs`
-- `list_inspector_findings`
-- `list_macie_posture`
-- `list_access_analyzers`
-- `list_kms_keys`
-- `list_securityhub_findings`
-- `list_securityhub_standards`
-- `list_backup_vaults`
-- `list_backup_recovery_points`
-- `list_backup_plan_vault_mappings`
-- `list_organization_accounts`
-- `list_organization_structure`
-- `list_organization_account_mappings`
-- `list_controltower_controls`
+- `list_acm_multicluster_hubs`
+- `list_acm_managed_clusters`
+- `list_acm_policies`
+- `list_virtualization_resources`
+- `list_disaster_recovery_resources`
 
 ### Guarded CLI fallback
 

@@ -63,6 +63,8 @@ The live toolkit is now aligned to the repository's OpenShift estate rather than
 - cluster infrastructure and platform-pattern detection for estates such as `ROSA`, `ARO`, and `IBM Z`
 - ACM fleet objects such as `MultiClusterHub`, `ManagedCluster`, and governance `Policy`
 - ACS objects such as `CentralService` and `SecuredCluster`
+- OpenShift Virtualization / CNV objects such as `KubeVirt`, `HyperConverged`, `VirtualMachine`, `DataVolume`, and live migration resources
+- ACM / ODF disaster-recovery objects such as `DRPolicy`, `DRPlacementControl`, and `VolumeReplication`
 - guarded read-only `oc` support for edge-case diagnostics that are not worth hardcoding as dedicated tools
 
 That means the SRE runtime can now reason about a single cluster, a managed multi-cluster fleet, or a platform-pattern comparison lane without pretending everything is just one generic OpenShift cluster.
@@ -85,6 +87,7 @@ The key moving parts are:
 - workload and application posture: projects, pods, workload rollout health, services, routes, ingresses, events
 - storage and supply chain: persistent storage, storage classes, image streams, builds
 - platform lifecycle: machine config pools, machine sets, operator subscriptions, ClusterServiceVersions
+- platform resiliency and migration: OADP backup posture, OpenShift Virtualization / CNV resources, and ACM / ODF disaster-recovery resources
 - operator-safe diagnostics: guarded read-only `oc` CLI execution
 
 For a source-level inventory of the individual tool functions, see [`Function Reference`](function-reference.md).
@@ -109,6 +112,8 @@ class OpenShiftSreToolkit:
             "list_acm_policies": ToolSpec(...),
             "list_acs_central_services": ToolSpec(...),
             "list_acs_secured_clusters": ToolSpec(...),
+            "list_virtualization_resources": ToolSpec(...),
+            "list_disaster_recovery_resources": ToolSpec(...),
             "run_read_only_oc_cli": ToolSpec(...),
         }
 

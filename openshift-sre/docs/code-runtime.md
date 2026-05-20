@@ -155,7 +155,7 @@ It includes:
 
 - runtime override inputs for Ollama and cluster settings
 - prompt templates for common investigations
-- runtime-depth shortcuts for ECS service health and EKS nodegroup/add-on readiness checks
+- runtime-depth shortcuts for OpenShift operator health, route exposure, fleet posture, and platform-pattern readiness checks
 - deeper investigation shortcuts for operator health, route exposure, and OpenShift-native workload readiness
 - final answer rendering
 - reasoning trace rendering
@@ -223,6 +223,19 @@ It combines:
 - workflow summaries derived from FinOps tool calls
 - approval-queue-driven safe execution planning
 - a report/export lane that enables PowerPoint and PDF export after a report is generated
+
+#### `docs/platform-console.html`
+
+This page is the dedicated platform-operations workspace.
+
+It now combines:
+
+- profile-driven lifecycle-readiness, DR, migration, virtualization, and fleet posture launchers
+- FinOps-style connection and request-scoped cluster override controls so operators can target a specific cluster, namespace, or estate slice
+- a dedicated platform review launcher that turns the selected OpenShift signals into a `/chat` request with runtime overrides
+- an export lane for CSV, PowerPoint, PDF, and Word-compatible handoff packs with tool-trace context
+
+The platform page deliberately complements Troubleshooting and Security: it is optimized for planned operational readiness work, not just incident response or audit narratives.
 
 #### `docs/security-console.html`
 
@@ -494,8 +507,10 @@ If you want to extend the runtime layer, these are the highest-leverage places:
 - add new docs shell behaviors in `ui/src/app-shell.jsx`
 - add new dashboard visuals in `docs/assets/javascripts/history-dashboard.js`
 - add FinOps workflow or report-export behavior in `docs/assets/javascripts/finops-console.js`
+- add platform lifecycle, DR, or migration workflows in `docs/assets/javascripts/platform-console.js`
 - expand shared visual language in `docs/assets/stylesheets/agent-console.css`
 - refine FinOps-specific visuals in `docs/assets/stylesheets/finops-console.css`
+- refine platform-specific visuals in `docs/assets/stylesheets/platform-console.css`
 - add productivity helpers and workflow affordances in `docs/assets/javascripts/agent-console.js`
 - add or modify container orchestration behavior in `compose.yaml` and `scripts/podman-dev-refresh.sh`
 - add regression coverage in `tests/`

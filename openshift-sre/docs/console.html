@@ -13,24 +13,26 @@
           "key": "console",
           "eyebrow": "AI-assisted operations",
           "title": "OpenShift SRE Console",
-          "description": "Run OpenShift SRE prompts, troubleshooting flows, and review structured output in an operator workspace. The LLM runtime controls, cluster scope overrides, and guided diagnostics all live here.",
-          "badges": ["React shell", "Live /chat endpoint", "Operator-safe guidance", "GitOps + Tekton + day-2 services", "ACM + ACS + platform patterns"],
+          "description": "Run OpenShift SRE prompts, troubleshooting flows, and review structured output in an operator workspace. The LLM runtime controls, cluster scope overrides, guided diagnostics, and dedicated platform operations lane all live in this connected console set.",
+          "badges": ["React shell", "Live /chat endpoint", "Operator-safe guidance", "GitOps + Tekton + day-2 services", "ACM + ACS + platform patterns", "Lifecycle + DR + CNV"],
           "actions": [
             { "label": "Open docs home", "href": "/docs-home/" },
             { "label": "Open FinOps console", "href": "finops-console.html" },
+            { "label": "Open Platform console", "href": "platform-console.html" },
             { "label": "Open troubleshooting", "href": "troubleshooting.html" },
             { "label": "Open history", "href": "history.html" }
           ],
           "secondaryActions": [
+            { "label": "Security console", "href": "security-console.html" },
             { "label": "LLM utilization", "href": "llm-utilization.html" },
             { "label": "Tool drilldown", "href": "tool-drilldown.html" }
           ],
           "stats": [
-            { "label": "Primary workflow", "value": "Agent-driven investigations", "detail": "Switch between cluster posture reviews, GitOps and Tekton checks, logging and backup posture, fleet governance, ACS checks, and guided troubleshooting." },
+            { "label": "Primary workflow", "value": "Agent-driven investigations", "detail": "Switch between cluster posture reviews, GitOps and Tekton checks, logging and backup posture, fleet governance, ACS checks, platform lifecycle and DR reviews, and guided troubleshooting." },
             { "label": "Safety model", "value": "Read-only by default", "detail": "OpenShift mutations remain policy-gated." },
-            { "label": "Connected views", "value": "5 operator pages", "detail": "Console, troubleshooting, history, utilization, and drilldown stay linked." }
+            { "label": "Connected views", "value": "8 operator pages", "detail": "Console, platform, security, troubleshooting, history, utilization, drilldown, and FinOps stay linked." }
           ],
-          "workspaceSignals": ["Prompt drafts persisted locally", "Answer export and copy workflow", "Response report exports", "Scenario-led troubleshooting handoff", "FinOps queue integration"],
+          "workspaceSignals": ["Prompt drafts persisted locally", "Answer export and copy workflow", "Response report exports", "Scenario-led troubleshooting handoff", "FinOps queue integration", "Platform operations lane"],
           "sectionNav": [
             { "label": "Run surface", "href": "#console-run" },
             { "label": "Response hub", "href": "#console-response" },
@@ -90,6 +92,7 @@
               <li>Responses include both the final answer and the returned reasoning trace.</li>
             </ul>
             <p><a href="/docs-home/">Open the Terraform IaC docs home</a> to launch the broader documentation set from the same application.</p>
+            <p><a href="platform-console.html">Open the dedicated Platform Console</a> for lifecycle readiness, DR posture, migration reviews, and OpenShift Virtualization / CNV checks.</p>
             <p><a href="history.html">Open the dedicated historical dashboard</a> for charts, run health summaries, and recent persisted runs.</p>
             <p><strong>Tip:</strong> when running in Podman on macOS, <code>http://host.containers.internal:11434</code> is usually the right Ollama URL if Ollama is running on your Mac.</p>
           </section>
@@ -257,6 +260,24 @@
                       <button class="agent-console__example" type="button" data-agent-prompt="Review cluster logging, OADP backup posture, and OAuth or LDAP identity-provider drift across the active cluster. Summarize the highest-risk day-2 service gaps and safest next actions.">Day-2 services</button>
                       <button class="agent-console__example" type="button" data-agent-prompt="Review ACM hub health, managed-cluster availability, platform patterns such as baremetal, ROSA, ARO, and IBM Z, and governance-policy drift. Summarize the highest-risk fleet issues and the safest next actions.">Fleet governance</button>
                       <button class="agent-console__example" type="button" data-agent-prompt="Review ACS central health, secured-cluster coverage, network-policy posture, and workload protection gaps. Summarize the highest-risk security coverage issues and the safest next actions.">ACS coverage</button>
+                    </div>
+                  </article>
+
+                  <article class="agent-console__module-card agent-console__module-card--finops">
+                    <div class="agent-console__module-badge-row">
+                      <span class="agent-console__history-badge">Platform</span>
+                      <span class="agent-console__history-badge">Lifecycle + DR</span>
+                      <span class="agent-console__history-badge agent-console__history-badge--ok">Dedicated page</span>
+                    </div>
+                    <h4>Platform operations console</h4>
+                    <p>Lifecycle readiness, disaster recovery posture, migration planning, OpenShift Virtualization / CNV reviews, and fleet-aware platform assessments now live in their own React-powered workspace.</p>
+                    <ul>
+                      <li>profile-driven lifecycle, DR, migration, virtualization, and fleet reviews</li>
+                      <li>feature-level selection across ACM, OADP, CNV, DR, storage, machine pools, and day-2 controls</li>
+                      <li>handoff-ready CSV, PowerPoint, PDF, and Word exports</li>
+                    </ul>
+                    <div class="agent-console__actions">
+                      <a class="agent-console__button" href="platform-console.html">Open Platform Console</a>
                     </div>
                   </article>
                 </div>

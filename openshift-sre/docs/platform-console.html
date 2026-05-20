@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Platform Console – OpenShift SRE Local Agent</title>
+    <link rel="stylesheet" href="assets/stylesheets/agent-console.css">
+    <link rel="stylesheet" href="assets/stylesheets/finops-console.css">
+    <link rel="stylesheet" href="assets/stylesheets/platform-console.css">
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  </head>
+  <body dir="ltr">
+    <div data-app-shell>
+      <script type="application/json" data-app-shell-props>
+        {
+          "key": "platform",
+          "eyebrow": "Lifecycle, DR, migration, and fleet readiness",
+          "title": "Platform Console",
+          "description": "Dedicated OpenShift platform-operations workspace for lifecycle readiness, day-2 platform engineering, OpenShift Virtualization / CNV posture, ACM fleet coordination, OADP backup checks, DR failover signals, migration readiness, and handoff-ready summaries for baremetal, ROSA, ARO, and IBM Z estates.",
+          "badges": ["Platform runway", "Lifecycle + DR", "Virtualization / CNV", "Migration readiness", "CSV/PPT/PDF/Word", "React shell"],
+          "actions": [
+            { "label": "Agent console", "href": "console.html" },
+            { "label": "Open troubleshooting", "href": "troubleshooting.html" }
+          ],
+          "secondaryActions": [
+            { "label": "Security console", "href": "security-console.html" },
+            { "label": "Open history", "href": "history.html" }
+          ],
+          "stats": [
+            { "label": "Platform coverage", "value": "Lifecycle + DR + CNV + migration", "detail": "Review cluster version posture, machine pools, operator health, ACM fleet dependencies, OADP backup posture, DR policy signals, and virtualization readiness from one operator lane." },
+            { "label": "Operating profiles", "value": "6 platform review packs", "detail": "Choose lifecycle, DR, migration, virtualization, fleet posture, or automation-focused reviews and tailor the exact OpenShift signals to inspect." },
+            { "label": "Handoff delivery", "value": "Executive + operator packs", "detail": "Export the latest platform review for change boards, DR exercises, migration planning, or platform-engineering standups." }
+          ],
+          "workspaceSignals": ["Profile-driven prompt builder", "Feature-level platform selector", "LLM runtime controls", "Export packs", "Live /chat workflow"],
+          "sectionNav": [
+            { "label": "Launcher", "href": "#platform-launcher" },
+            { "label": "Latest results", "href": "#platform-results" },
+            { "label": "Export pack", "href": "#platform-exports" },
+            { "label": "Evidence trace", "href": "#platform-trace" }
+          ],
+          "shortcuts": [
+            { "label": "Cmd/Ctrl + Enter → run platform review", "href": "#platform-launcher" },
+            { "label": "Lifecycle preset", "href": "#platform-launcher" },
+            { "label": "DR preset", "href": "#platform-launcher" },
+            { "label": "Export platform pack", "href": "#platform-exports" }
+          ],
+          "highlights": [
+            { "title": "Separate platform lane", "description": "Lifecycle, migration, and resiliency reviews no longer have to hide inside generic prompts or troubleshooting flows." },
+            { "title": "Repo-aligned platform coverage", "description": "The console matches the repo's actual OpenShift scope by covering ACM, OADP, CNV, DR, machine pools, fleet posture, and platform-pattern readiness." },
+            { "title": "Change-window friendly exports", "description": "Turn the latest review into a concise platform handoff without manually copying evidence into slides or docs." }
+          ],
+          "featureGroups": [
+            {
+              "kicker": "Platform workspace",
+              "title": "Lifecycle, resiliency, and migration readiness in one control room",
+              "description": "Use this page when the question is bigger than a single incident: upgrades, migrations, failover prep, virtualization posture, or cross-platform dependency reviews.",
+              "items": [
+                { "title": "Review profiles", "description": "Load purpose-built prompts for lifecycle readiness, DR exercises, migration waves, virtualization, or fleet posture before you fine-tune the exact checks.", "meta": "Launcher", "href": "#platform-launcher" },
+                { "title": "Feature-level selection", "description": "Mix cluster version, operator health, machine pools, ACM, OADP, CNV, DR, storage, GitOps, and logging checks into a single platform assessment.", "meta": "Coverage", "href": "#platform-launcher" },
+                { "title": "Operator-ready evidence", "description": "Keep a readable summary, tool trace, and export pack together so platform teams can move from review to execution faster.", "meta": "Handoff", "href": "#platform-results" }
+              ]
+            }
+          ],
+          "notice": "This page uses the live FastAPI backend on http://127.0.0.1:8000/ and composes platform-focused prompts for the existing /chat workflow so lifecycle and resiliency reviews reuse the same evidence pipeline as the main console."
+        }
+      </script>
+    </div>
+
+    <main class="md-main">
+      <div class="md-content" data-md-component="content">
+        <article class="md-content__inner md-typeset">
+          <section class="agent-shell__fallback">
+            <h1>Platform Console</h1>
+            <p>Dedicated React workspace for platform lifecycle readiness, DR and failover planning, OpenShift Virtualization / CNV posture, migration reviews, and fleet-aware day-2 engineering checks.</p>
+            <ul>
+              <li>Choose a profile like lifecycle readiness, DR posture, migration factory, virtualization, or fleet posture.</li>
+              <li>Select the exact OpenShift platform signals to inspect, including cluster version, machine pools, ACM, OADP, CNV, DR resources, storage, logging, GitOps, and platform inventory.</li>
+              <li>Run the review through the live <code>POST /chat</code> endpoint and export the resulting platform summary for operator handoff.</li>
+            </ul>
+            <p><a href="console.html">Back to Agent Console</a> &middot; <a href="security-console.html">Open Security Console</a></p>
+          </section>
+          <div id="platform-root"></div>
+          <div id="platform-workspace" hidden></div>
+        </article>
+      </div>
+    </main>
+
+    <footer class="agent-console__footer">
+      <span>Author: Sathishkumar Munirathinam / </span>
+      <a href="mailto:Sathishkumar.munirathinam@kyndryl.com">Sathishkumar.munirathinam@kyndryl.com</a>
+    </footer>
+
+    <script src="assets/javascripts/app-shell.js"></script>
+    <script src="assets/javascripts/llm-provider-runtime.js"></script>
+    <script src="https://unpkg.com/pptxgenjs@3.12.0/dist/pptxgen.bundle.js"></script>
+    <script src="https://unpkg.com/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+    <script src="assets/javascripts/platform-console.js"></script>
+  </body>
+</html>

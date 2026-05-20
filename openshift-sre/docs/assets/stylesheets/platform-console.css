@@ -1,0 +1,205 @@
+.platform-console {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.platform-console__hero {
+  display: grid;
+  gap: 1rem;
+  padding: 1.25rem;
+  border-radius: 24px;
+  background:
+    radial-gradient(circle at top right, rgba(88, 166, 255, 0.2), transparent 32%),
+    linear-gradient(135deg, rgba(15, 23, 42, 0.96), rgba(30, 41, 59, 0.94));
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  color: #e2e8f0;
+  box-shadow: 0 28px 60px rgba(15, 23, 42, 0.2);
+}
+
+.platform-console__hero h2,
+.platform-console__hero h3,
+.platform-console__hero p,
+.platform-console__hero li,
+.platform-console__hero strong {
+  color: inherit;
+}
+
+.platform-console__hero-grid,
+.platform-console__metrics,
+.platform-console__grid,
+.platform-console__result-grid,
+.platform-console__question-grid,
+.platform-console__toolbar,
+.platform-console__runtime-grid,
+.platform-console__exports {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.platform-console__hero-grid,
+.platform-console__runtime-grid,
+.platform-console__result-grid {
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.platform-console__metrics,
+.platform-console__grid,
+.platform-console__question-grid,
+.platform-console__exports {
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+
+.platform-console__metric,
+.platform-console__card,
+.platform-console__tool-card,
+.platform-console__summary,
+.platform-console__trace,
+.platform-console__hero-note {
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.74);
+  box-shadow: 0 18px 48px rgba(15, 23, 42, 0.08);
+  backdrop-filter: blur(14px);
+}
+
+.platform-console__hero-note {
+  padding: 1rem 1.1rem;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.platform-console__metric,
+.platform-console__card,
+.platform-console__tool-card,
+.platform-console__summary,
+.platform-console__trace {
+  padding: 1rem 1.1rem;
+}
+
+.platform-console__metric strong,
+.platform-console__tool-card strong {
+  display: block;
+  font-size: 1.35rem;
+  margin-top: 0.25rem;
+}
+
+.platform-console__eyebrow,
+.platform-console__pill,
+.platform-console__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.78rem;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: #1d4ed8;
+  background: rgba(191, 219, 254, 0.55);
+  border-radius: 999px;
+  padding: 0.28rem 0.72rem;
+}
+
+.platform-console__badge--ok {
+  color: #166534;
+  background: rgba(187, 247, 208, 0.55);
+}
+
+.platform-console__badge--warn {
+  color: #9a3412;
+  background: rgba(254, 215, 170, 0.6);
+}
+
+.platform-console__toolbar {
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  align-items: end;
+}
+
+.platform-console__toolbar .agent-console__actions {
+  justify-content: flex-start;
+}
+
+.platform-console__feature-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 0.75rem;
+  margin-top: 0.6rem;
+}
+
+.platform-console__feature {
+  display: flex;
+  gap: 0.7rem;
+  align-items: flex-start;
+  padding: 0.85rem 0.95rem;
+  border-radius: 18px;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  background: rgba(248, 250, 252, 0.9);
+}
+
+.platform-console__feature input {
+  margin-top: 0.3rem;
+}
+
+.platform-console__feature-label {
+  font-weight: 700;
+}
+
+.platform-console__meta {
+  color: #475569;
+  font-size: 0.95rem;
+}
+
+.platform-console__summary pre,
+.platform-console__trace pre {
+  max-height: 320px;
+  overflow: auto;
+  border-radius: 16px;
+  background: #0f172a;
+  color: #e2e8f0;
+  padding: 0.95rem;
+}
+
+.platform-console__tool-card ul,
+.platform-console__hero ul,
+.platform-console__summary ul {
+  margin: 0.45rem 0 0;
+  padding-left: 1.1rem;
+}
+
+.platform-console__tool-card li,
+.platform-console__hero li,
+.platform-console__summary li {
+  margin-bottom: 0.3rem;
+}
+
+.platform-console__step-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+.platform-console__step-table th,
+.platform-console__step-table td {
+  padding: 0.65rem 0.7rem;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.18);
+  vertical-align: top;
+  text-align: left;
+}
+
+.platform-console__step-table th {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #475569;
+}
+
+.platform-console__empty {
+  padding: 1rem 1.1rem;
+  border-radius: 18px;
+  border: 1px dashed rgba(148, 163, 184, 0.32);
+  background: rgba(248, 250, 252, 0.78);
+  color: #475569;
+}
+
+@media (max-width: 900px) {
+  .platform-console__feature-list {
+    grid-template-columns: 1fr;
+  }
+}

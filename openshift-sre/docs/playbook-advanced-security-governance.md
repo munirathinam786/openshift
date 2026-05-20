@@ -4,196 +4,146 @@
 
 This playbook covers the deeper posture services that help answer:
 
-- **Can we investigate suspicious behavior effectively?**
-- **Do we have vulnerability and data-security visibility?**
-- **Can we spot risky external access paths?**
-- **Do backup depth and org structure match policy expectations?**
+- **Is multi-cluster governance healthy across ACM, ACS, and platform patterns?**
+- **Do backup, disaster-recovery, and virtualization layers match expectations?**
+- **Are lifecycle, operator, and identity controls drifting across the fleet?**
+- **Can we explain security and governance posture cluster-by-cluster?**
 
-## Detective
+## ACM hub posture
 
-Use: `list_detective_graphs`
+Use: `list_acm_multicluster_hubs`
 
 What to look for:
 
-- no graph in an environment where investigation tooling is expected
-- inconsistent graph coverage across regions/accounts
+- hub resources missing from the management cluster
+- components not available or obviously degraded
+- more than one hub pattern where the fleet design expects a single control point
 
 Suggested prompts:
 
-- `Summarize Detective graph coverage and whether investigative visibility looks incomplete.`
+- `Summarize ACM hub posture and whether fleet governance looks healthy.`
 
-## GuardDuty findings
+## Managed-cluster coverage
+
+Use: `list_acm_managed_clusters`
+
+What to look for:
+
+- clusters missing from ACM enrollment
+- unavailable or detached clusters in important environments
+- platform-pattern skew across ROSA, ARO, baremetal, and IBM Z footprints
+
+Suggested prompts:
+
+- `Review ACM managed-cluster coverage and summarize the highest-risk fleet gaps.`
+
+## ACM governance policies
+
+Use: `list_acm_policies`
+
+What to look for:
+
+- policies stuck in non-compliant or unknown states
+- governance coverage missing in shared or regulated clusters
+- policy posture drifting differently across platform patterns
+
+Suggested prompts:
+
+- `Summarize ACM governance policy compliance and highlight the most important drift.`
+
+## ACS service and secured-cluster posture
 
 Use:
 
-- `list_guardduty_detectors`
-- `list_guardduty_findings`
+- `list_acs_central_services`
+- `list_acs_secured_clusters`
 
 What to look for:
 
-- recurring higher-severity findings on similar resource classes
-- findings without an obvious owner or containment path
-- detector coverage present but no meaningful findings visibility workflow
+- ACS central components not ready
+- secured-cluster rollout incomplete across the known fleet
+- a mismatch between ACM-managed clusters and ACS-secured clusters
 
 Suggested prompts:
 
-- `Summarize GuardDuty findings by severity and likely resource blast radius.`
+- `Review ACS platform coverage and summarize where cluster protection still looks incomplete.`
 
-## Inspector
-
-Use: `list_inspector_findings`
-
-What to look for:
-
-- severe findings clustering in one resource type
-- many active findings without obvious ownership
-- high-severity sample findings on public-facing workloads
-
-Suggested prompts:
-
-- `Review sampled Inspector findings and summarize the most urgent exposure themes.`
-
-## Macie
-
-Use: `list_macie_posture`
-
-What to look for:
-
-- Macie not enabled where S3 data sensitivity review is expected
-- no active job footprint in data-heavy environments
-- stale classification-job posture
-
-Suggested prompts:
-
-- `Inspect Macie session posture and summarize data-security coverage gaps.`
-
-## IAM Access Analyzer
-
-Use: `list_access_analyzers`
-
-What to look for:
-
-- no analyzers where external-sharing review is expected
-- analyzers not active
-- analyzer types inconsistent with governance design
-
-Suggested prompts:
-
-- `Review IAM Access Analyzer coverage and summarize external-access visibility gaps.`
-
-## KMS key posture
-
-Use: `list_kms_keys`
-
-What to look for:
-
-- customer-managed keys without rotation
-- keys with unclear aliases or ownership
-- keys not in an enabled state when they should be active
-
-Suggested prompts:
-
-- `Review KMS key posture and summarize key-management risks.`
-
-## Security Hub findings
+## Disaster recovery and backup readiness
 
 Use:
 
-- `list_securityhub_standards`
-- `list_securityhub_findings`
+- `list_oadp_resources`
+- `list_disaster_recovery_resources`
 
 What to look for:
 
-- recurring critical/high findings across the same product or resource type
-- stale workflow states
-- findings volume that does not match the enabled standards footprint
+- backup schedules or backup-storage locations missing where recovery is expected
+- DR resources present but not obviously bound to the right applications or clusters
+- stale recovery posture in failover or migration-sensitive environments
 
 Suggested prompts:
 
-- `Review Security Hub findings and summarize the most urgent cross-service posture issues.`
+- `Inspect OADP and disaster-recovery resources and summarize recovery readiness gaps.`
 
-## OpenShift Config compliance summary
+## Virtualization and workload mobility
+
+Use: `list_virtualization_resources`
+
+What to look for:
+
+- VM, VMI, or migration posture not matching workload expectations
+- virtualization resources concentrated in clusters without the expected supporting platform services
+- mobility or migration workflows that appear blocked by infrastructure drift
+
+Suggested prompts:
+
+- `Review OpenShift Virtualization posture and summarize the biggest workload-mobility risks.`
+
+## Identity and cluster-access governance
+
+Use: `list_oauth_configuration`
+
+What to look for:
+
+- inconsistent provider posture across clusters
+- cluster access paths that drift from the intended enterprise auth pattern
+- emergency or legacy identity providers still active in sensitive estates
+
+Suggested prompts:
+
+- `Compare OAuth and identity-provider posture across clusters and summarize governance drift.`
+
+## Platform lifecycle and operator governance
 
 Use:
 
-- `list_config_rules`
-- `list_config_compliance_summary`
+- `list_cluster_infrastructure`
+- `list_machine_config_pools`
+- `list_machine_sets`
+- `list_operator_subscriptions`
+- `list_cluster_service_versions`
 
 What to look for:
 
-- non-compliant rule concentrations
-- rules with unknown or insufficiently updated status
-- rule state and compliance status drifting apart
+- upgrade readiness issues hidden behind degraded operators or machine config drift
+- machine-set posture inconsistent with the infrastructure pattern
+- OLM subscriptions or CSVs stuck before or after platform updates
 
 Suggested prompts:
 
-- `Summarize OpenShift Config compliance by rule and highlight the most important non-compliant controls.`
-
-## CloudTrail event selectors
-
-Use:
-
-- `list_cloudtrail_trails`
-- `list_cloudtrail_event_selectors`
-
-What to look for:
-
-- trails with no data-event coverage where it is expected
-- management events enabled but write visibility incomplete
-- inconsistent selector posture across trails
-
-Suggested prompts:
-
-- `Inspect CloudTrail event selectors and summarize data-event coverage gaps.`
-
-## Backup recovery-point depth
-
-Use:
-
-- `list_backup_recovery_points`
-- `list_backup_plan_vault_mappings`
-
-What to look for:
-
-- vaults with zero or suspiciously low recovery-point counts
-- stale latest recovery-point timestamps
-- vault lock posture missing where expected
-
-Suggested prompts:
-
-- `Inspect backup recovery-point posture and identify weak coverage areas.`
-- `Review backup plan-to-vault mappings and summarize schedule or vault-target inconsistencies.`
-
-## Organizations structure and SCP inventory
-
-Use:
-
-- `list_organization_structure`
-- `list_organization_account_mappings`
-
-What to look for:
-
-- missing top-level OUs in known environments
-- surprisingly high or low SCP inventory
-- roots and policy types not matching governance design
-
-Suggested prompts:
-
-- `Summarize Organizations structure, top-level OUs, and SCP inventory for governance drift.`
-- `Inspect account-to-OU mappings and summarize suspicious placement or ownership drift.`
+- `Summarize platform lifecycle readiness across machine config, Machine API, and OLM posture.`
 
 ## Combined workflow
 
 Suggested prompt:
 
-- `Summarize Detective, Inspector, Macie, Access Analyzer, backup recovery-point posture, and Organizations structure into one governance review.`
-- `Summarize GuardDuty findings, Security Hub findings, Config compliance counts, CloudTrail selectors, backup mappings, and account-to-OU placement into one governance drilldown.`
+- `Summarize ACM hubs, managed clusters, ACM policies, ACS coverage, OADP resources, disaster-recovery resources, virtualization posture, and OAuth drift into one governance review.`
+- `Compare platform lifecycle readiness, virtualization posture, and recovery readiness across ROSA, ARO, baremetal, and IBM Z clusters.`
 
 Operator actions:
 
-1. confirm the security detective/assessment services are enabled where expected
-2. review sampled Inspector severity distribution
-3. verify Macie and Access Analyzer presence in sensitive environments
-4. compare backup depth with stated recovery expectations
-5. compare OU and SCP structure with intended landing-zone design
-6. compare findings volume and compliance posture with the expected security operating model
+1. confirm ACM and ACS coverage matches the clusters you actually operate
+2. compare governance drift across platform patterns instead of treating the fleet as homogeneous
+3. verify backup and DR resources exist where recovery promises have been made
+4. inspect virtualization posture anywhere VM migration or CNV adoption matters
+5. compare OAuth, Machine API, and OLM posture before planning upgrades or failovers
