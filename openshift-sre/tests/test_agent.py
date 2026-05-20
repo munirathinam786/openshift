@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from types import SimpleNamespace
+
 from openshift_sre_agent.agent import AgentEnvelope, OpenShiftSreAgent
 from openshift_sre_agent.config import Settings
 from openshift_sre_agent.tools import OpenShiftSreToolkit
@@ -232,15 +234,38 @@ def test_classify_error_message_distinguishes_auth_from_not_enabled() -> None:
 
 def test_required_tools_for_platform_review_prompt() -> None:
     required_tools = OpenShiftSreAgent._required_tools_for_prompt(
-        "Review cluster version, degraded operators, route exposure, warning events, and build failures."
+        "Review cluster version, degraded operators, aggregated API services, pending CSRs, route exposure, warning events, and build failures."
     )
 
     assert "list_cluster_version" in required_tools
     assert "list_cluster_operators" in required_tools
+    assert "list_api_service_health" in required_tools
+    assert "list_certificatesigning_requests" in required_tools
     assert "list_routes" in required_tools
     assert "list_ingresses" in required_tools
     assert "list_events" in required_tools
     assert "list_builds" in required_tools
+
+
+def test_required_tools_for_admission_governance_prompt() -> None:
+    required_tools = OpenShiftSreAgent._required_tools_for_prompt(
+        "Review admission webhooks, SCC posture, network policies, and quota guardrails before the next change window."
+    )
+
+    assert "list_admission_webhook_configurations" in required_tools
+    assert "list_security_context_constraints" in required_tools
+    assert "list_network_policies" in required_tools
+    assert "list_resource_quotas" in required_tools
+
+
+def test_required_tools_for_observability_and_extension_prompt() -> None:
+    required_tools = OpenShiftSreAgent._required_tools_for_prompt(
+        "Review monitoring and alert posture, control-plane certificate expiry and trust review, and operator extension readiness before the next upgrade."
+    )
+
+    assert "list_monitoring_alert_posture" in required_tools
+    assert "list_control_plane_certificates" in required_tools
+    assert "list_operator_extension_readiness" in required_tools
 
 
 def test_required_tools_for_capacity_prompt() -> None:
@@ -301,6 +326,57 @@ def test_summarize_tool_result_for_platform_outputs() -> None:
     assert "4 route row(s)" in route_summary
     assert "1 lacking TLS configuration" in route_summary
     assert "3 resource quota row(s) and 1 cluster resource quota row(s)" in quota_summary
+
+
+def test_summarize_tool_result_for_api_and_certificate_outputs() -> None:
+    api_summary = OpenShiftSreAgent._summarize_tool_result(
+        "list_api_service_health",
+        "API Service Health",
+        {"count": 6, "unavailable_count": 2, "api_services": []},
+    )
+    csr_summary = OpenShiftSreAgent._summarize_tool_result(
+        "list_certificatesigning_requests",
+        "Certificate Signing Requests",
+        {"count": 4, "pending_count": 2, "denied_count": 1, "certificate_signing_requests": []},
+    )
+    webhook_summary = OpenShiftSreAgent._summarize_tool_result(
+        "list_admission_webhook_configurations",
+        "Admission Webhook Configurations",
+        {"count": 3, "webhook_count": 9, "fail_open_webhook_count": 2, "missing_ca_bundle_webhook_count": 1, "admission_webhook_configurations": []},
+    )
+
+    assert "6 APIService row(s), with 2 unavailable aggregated API(s)" in api_summary
+    assert "4 CSR row(s), with 2 pending and 1 denied" in csr_summary
+    assert "3 webhook configuration row(s) covering 9 webhook(s), with 2 fail-open and 1 missing CA bundle(s)" in webhook_summary
+
+
+def test_summarize_tool_result_for_monitoring_and_extension_outputs() -> None:
+    monitoring_summary = OpenShiftSreAgent._summarize_tool_result(
+        "list_monitoring_alert_posture",
+        "Monitoring Alert Posture",
+        {
+            "alertmanager_count": 2,
+            "prometheus_count": 2,
+            "prometheus_rule_count": 5,
+            "unavailable_alertmanager_count": 1,
+            "unavailable_prometheus_count": 0,
+        },
+    )
+    certificate_summary = OpenShiftSreAgent._summarize_tool_result(
+        "list_control_plane_certificates",
+        "Control Plane Certificates",
+        {"count": 6, "expired_count": 1, "expiring_within_30d_count": 2, "trust_bundle_count": 3},
+    )
+    readiness_summary = OpenShiftSreAgent._summarize_tool_result(
+        "list_operator_extension_readiness",
+        "Operator Extension Readiness",
+        {"readiness_score": 78, "degraded_operator_count": 1, "unavailable_api_service_count": 2, "hotspot_count": 3},
+    )
+
+    assert "2 Alertmanager, 2 Prometheus, and 5 PrometheusRule row(s)" in monitoring_summary
+    assert "1 Alertmanager and 0 Prometheus instance(s) unavailable" in monitoring_summary
+    assert "reviewed 6 certificate-bearing control-plane resource(s), with 1 expired, 2 expiring within 30 days, and 3 trust bundle(s)" in certificate_summary
+    assert "readiness score 78/100, with 1 degraded operator(s), 2 unavailable aggregated API(s), and 3 hotspot(s)" in readiness_summary
 
 
 def test_summarize_tool_result_for_pressure_and_build_outputs() -> None:
@@ -593,6 +669,260 @@ def test_list_cluster_autoscaling_returns_scaler_summary() -> None:
     assert result["machine_autoscaler_enabled_count"] == 1
     assert result["cluster_autoscalers"][0]["scale_down_enabled"] is True
     assert result["machine_autoscalers"][0]["max_replicas"] == 9
+
+
+def test_list_api_service_health_returns_aggregated_api_summary() -> None:
+    toolkit = OpenShiftSreToolkit(make_settings())
+    toolkit._ensure_clients = lambda: None
+    toolkit._apiregistration = SimpleNamespace(
+        list_api_service=lambda: SimpleNamespace(
+            items=[
+                SimpleNamespace(
+                    metadata=SimpleNamespace(name="v1.route.openshift.io"),
+                    spec=SimpleNamespace(
+                        group="route.openshift.io",
+                        version="v1",
+                        group_priority_minimum=1800,
+                        version_priority=15,
+                        service=SimpleNamespace(namespace="openshift-apiserver", name="apiserver"),
+                        insecure_skip_tls_verify=False,
+                        ca_bundle="ca-data",
+                    ),
+                    status=SimpleNamespace(
+                        conditions=[SimpleNamespace(type="Available", status="True", reason="Passed", message="ok")]
+                    ),
+                ),
+                SimpleNamespace(
+                    metadata=SimpleNamespace(name="v1.packages.operators.coreos.com"),
+                    spec=SimpleNamespace(
+                        group="packages.operators.coreos.com",
+                        version="v1",
+                        group_priority_minimum=2000,
+                        version_priority=15,
+                        service=SimpleNamespace(namespace="openshift-marketplace", name="packageserver"),
+                        insecure_skip_tls_verify=True,
+                        ca_bundle=None,
+                    ),
+                    status=SimpleNamespace(
+                        conditions=[SimpleNamespace(type="Available", status="False", reason="MissingEndpoints", message="no endpoints")]
+                    ),
+                ),
+            ]
+        )
+    )
+
+    result = toolkit.list_api_service_health()
+
+    assert result["count"] == 2
+    assert result["unavailable_count"] == 1
+    assert result["insecure_skip_tls_count"] == 1
+    assert result["api_services"][1]["service_name"] == "packageserver"
+
+
+def test_list_certificatesigning_requests_returns_pending_summary() -> None:
+    toolkit = OpenShiftSreToolkit(make_settings())
+    toolkit._ensure_clients = lambda: None
+    toolkit._certificates = SimpleNamespace(
+        list_certificate_signing_request=lambda: SimpleNamespace(
+            items=[
+                SimpleNamespace(
+                    metadata=SimpleNamespace(name="csr-approved"),
+                    spec=SimpleNamespace(signer_name="kubernetes.io/kubelet-serving", username="system:node:worker-0", groups=["system:nodes"], expiration_seconds=3600),
+                    status=SimpleNamespace(conditions=[SimpleNamespace(type="Approved")], certificate="issued"),
+                ),
+                SimpleNamespace(
+                    metadata=SimpleNamespace(name="csr-pending"),
+                    spec=SimpleNamespace(signer_name="kubernetes.io/kube-apiserver-client-kubelet", username="system:node:worker-1", groups=["system:nodes"], expiration_seconds=3600),
+                    status=SimpleNamespace(conditions=[], certificate=None),
+                ),
+                SimpleNamespace(
+                    metadata=SimpleNamespace(name="csr-denied"),
+                    spec=SimpleNamespace(signer_name="example.com/custom", username="alice", groups=["system:authenticated"], expiration_seconds=1800),
+                    status=SimpleNamespace(conditions=[SimpleNamespace(type="Denied")], certificate=None),
+                ),
+            ]
+        )
+    )
+
+    result = toolkit.list_certificatesigning_requests()
+
+    assert result["count"] == 3
+    assert result["approved_count"] == 1
+    assert result["pending_count"] == 1
+    assert result["denied_count"] == 1
+    assert result["issued_count"] == 1
+
+
+def test_list_admission_webhook_configurations_returns_policy_summary() -> None:
+    toolkit = OpenShiftSreToolkit(make_settings())
+    toolkit._ensure_clients = lambda: None
+    toolkit._admissionregistration = SimpleNamespace(
+        list_mutating_webhook_configuration=lambda: SimpleNamespace(
+            items=[
+                SimpleNamespace(
+                    metadata=SimpleNamespace(name="mutating-a"),
+                    webhooks=[
+                        SimpleNamespace(
+                            name="injector.a",
+                            failure_policy="Ignore",
+                            client_config=SimpleNamespace(service=SimpleNamespace(namespace="ns-a", name="svc-a"), ca_bundle=None),
+                        )
+                    ],
+                )
+            ]
+        ),
+        list_validating_webhook_configuration=lambda: SimpleNamespace(
+            items=[
+                SimpleNamespace(
+                    metadata=SimpleNamespace(name="validating-a"),
+                    webhooks=[
+                        SimpleNamespace(
+                            name="validator.a",
+                            failure_policy="Fail",
+                            client_config=SimpleNamespace(service=SimpleNamespace(namespace="ns-b", name="svc-b"), ca_bundle="ca-data"),
+                        ),
+                        SimpleNamespace(
+                            name="validator.b",
+                            failure_policy="Fail",
+                            client_config=SimpleNamespace(service=None, ca_bundle=None),
+                        ),
+                    ],
+                )
+            ]
+        ),
+    )
+
+    result = toolkit.list_admission_webhook_configurations()
+
+    assert result["count"] == 2
+    assert result["webhook_count"] == 3
+    assert result["fail_open_webhook_count"] == 1
+    assert result["missing_ca_bundle_webhook_count"] == 1
+    assert result["service_backed_webhook_count"] == 2
+
+
+def test_list_monitoring_alert_posture_returns_stack_summary() -> None:
+    toolkit = OpenShiftSreToolkit(make_settings())
+    toolkit._all_projects = lambda: ["openshift-monitoring", "openshift-user-workload-monitoring"]
+
+    def fake_list_custom_from_namespaces(**kwargs):
+        plural = kwargs["plural"]
+        if plural == "alertmanagers":
+            return [
+                {
+                    "metadata": {"namespace": "openshift-monitoring", "name": "main"},
+                    "spec": {"replicas": 2, "paused": False},
+                    "status": {"availableReplicas": 1},
+                }
+            ]
+        if plural == "prometheuses":
+            return [
+                {
+                    "metadata": {"namespace": "openshift-monitoring", "name": "k8s"},
+                    "spec": {"replicas": 2},
+                    "status": {"availableReplicas": 2},
+                }
+            ]
+        if plural == "prometheusrules":
+            return [
+                {
+                    "metadata": {"namespace": "openshift-monitoring", "name": "cluster-rules"},
+                    "spec": {
+                        "groups": [
+                            {
+                                "name": "cluster",
+                                "rules": [
+                                    {"alert": "ClusterDown", "labels": {"severity": "critical"}},
+                                    {"alert": "HighCPU", "labels": {"severity": "warning"}},
+                                    {"record": "job:http_requests:sum"},
+                                ],
+                            }
+                        ]
+                    },
+                }
+            ]
+        return []
+
+    toolkit._list_custom_from_namespaces = fake_list_custom_from_namespaces
+
+    result = toolkit.list_monitoring_alert_posture()
+
+    assert result["alertmanager_count"] == 1
+    assert result["unavailable_alertmanager_count"] == 1
+    assert result["prometheus_count"] == 1
+    assert result["unavailable_prometheus_count"] == 0
+    assert result["prometheus_rule_count"] == 1
+    assert result["critical_alert_rule_count"] == 1
+    assert result["warning_alert_rule_count"] == 1
+
+
+def test_list_control_plane_certificates_returns_expiry_summary() -> None:
+    toolkit = OpenShiftSreToolkit(make_settings())
+    toolkit._ensure_clients = lambda: None
+    toolkit._selected_projects = lambda project=None: toolkit._control_plane_namespaces()
+    toolkit._core = SimpleNamespace(
+        list_namespaced_secret=lambda namespace: SimpleNamespace(
+            items=[
+                SimpleNamespace(
+                    metadata=SimpleNamespace(name=f"{namespace}-serving-cert"),
+                    data={
+                        "tls.crt": "unused-base64",
+                    },
+                )
+            ]
+        ),
+        list_namespaced_config_map=lambda namespace: SimpleNamespace(
+            items=[
+                SimpleNamespace(
+                    metadata=SimpleNamespace(name=f"{namespace}-trusted-ca"),
+                    data={
+                        "ca-bundle.crt": "-----BEGIN CERTIFICATE-----\nTEST\n-----END CERTIFICATE-----",
+                    },
+                )
+            ]
+        ),
+    )
+    toolkit._extract_pem_certificates = lambda raw_text: ["pem-cert"] if raw_text else []
+    toolkit._decode_pem_certificate = lambda pem_text: {
+        "subject_common_name": "api.cluster.example",
+        "issuer_common_name": "cluster-root-ca",
+        "serial_number": "01",
+        "not_before": "May 01 00:00:00 2026 GMT",
+        "not_after": "Jun 01 00:00:00 2026 GMT",
+        "expires_at": "2026-06-01T00:00:00+00:00",
+        "days_until_expiry": 10 if pem_text == "pem-cert" else 365,
+        "expired": False,
+    }
+
+    import openshift_sre_agent.tools as tools_module
+
+    original_b64decode = tools_module.base64.b64decode
+    tools_module.base64.b64decode = lambda value: b"-----BEGIN CERTIFICATE-----\nTEST\n-----END CERTIFICATE-----"
+    try:
+        result = toolkit.list_control_plane_certificates()
+    finally:
+        tools_module.base64.b64decode = original_b64decode
+
+    assert result["count"] == len(toolkit._control_plane_namespaces()) * 2
+    assert result["expired_count"] == 0
+    assert result["expiring_within_30d_count"] == len(toolkit._control_plane_namespaces()) * 2
+    assert result["trust_bundle_count"] == len(toolkit._control_plane_namespaces())
+
+
+def test_list_operator_extension_readiness_returns_scored_summary() -> None:
+    toolkit = OpenShiftSreToolkit(make_settings())
+    toolkit.list_cluster_operators = lambda: {"degraded_count": 1}
+    toolkit.list_operator_subscriptions = lambda: {"unhealthy_count": 2}
+    toolkit.list_cluster_service_versions = lambda: {"failed_count": 1}
+    toolkit.list_api_service_health = lambda: {"unavailable_count": 1}
+    toolkit.list_admission_webhook_configurations = lambda: {"fail_open_webhook_count": 2, "missing_ca_bundle_webhook_count": 1}
+
+    result = toolkit.list_operator_extension_readiness()
+
+    assert result["count"] == 1
+    assert result["readiness_score"] == 60
+    assert result["hotspot_count"] == 6
+    assert any("degraded cluster operator" in hotspot for hotspot in result["hotspots"])
 
 
 def test_settings_with_overrides_prefers_request_values() -> None:

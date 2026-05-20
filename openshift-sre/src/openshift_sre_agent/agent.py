@@ -70,9 +70,15 @@ class OpenShiftSreAgent:
         (re.compile(r"machine\s+sets?|machine-api", re.IGNORECASE), ("list_machine_sets",)),
         (re.compile(r"operator\s+subscriptions?|olm\s+subscriptions?", re.IGNORECASE), ("list_operator_subscriptions",)),
         (re.compile(r"csvs?|cluster\s+service\s+versions?", re.IGNORECASE), ("list_cluster_service_versions",)),
+        (re.compile(r"monitoring|alert\s+posture|prometheus|alertmanager|alert\s+rules?", re.IGNORECASE), ("list_monitoring_alert_posture",)),
+        (re.compile(r"control[-\s]*plane\s+certificates?|certificate\s+expiry|trust\s+review|trust\s+bundle|serving\s+certificates?", re.IGNORECASE), ("list_control_plane_certificates",)),
+        (re.compile(r"aggregated\s+api|api\s+services?|apiservice", re.IGNORECASE), ("list_api_service_health",)),
+        (re.compile(r"csr|certificate\s+signing\s+requests?|pending\s+certificate|node\s+join\s+certificate", re.IGNORECASE), ("list_certificatesigning_requests",)),
+        (re.compile(r"operator\s+dependency|extension\s+readiness|operator\s+extension|extension\s+apis?", re.IGNORECASE), ("list_operator_extension_readiness",)),
         (re.compile(r"scc|security\s+context\s+constraints?|privileged\s+containers?", re.IGNORECASE), ("list_security_context_constraints",)),
+        (re.compile(r"admission\s+webhooks?|validating\s+webhooks?|mutating\s+webhooks?|webhook\s+failure\s+policy", re.IGNORECASE), ("list_admission_webhook_configurations",)),
         (re.compile(r"network\s+polic(y|ies)|ingress\s+isolation|egress\s+isolation", re.IGNORECASE), ("list_network_policies",)),
-        (re.compile(r"resource\s+quotas?|cluster\s+resource\s+quotas?|quota\s+pressure", re.IGNORECASE), ("list_resource_quotas",)),
+        (re.compile(r"resource\s+quotas?|cluster\s+resource\s+quotas?|quota(\s+(pressure|guardrails?))?", re.IGNORECASE), ("list_resource_quotas",)),
         (re.compile(r"image\s+streams?|imagestreams?", re.IGNORECASE), ("list_image_streams",)),
         (re.compile(r"builds?|buildconfigs?|pipeline\s+failures?", re.IGNORECASE), ("list_builds",)),
     )
@@ -553,8 +559,33 @@ class OpenShiftSreAgent:
             return f"{label}: returned {count} subscription row(s), with {cls._safe_int(result.get('unhealthy_count'))} needing follow-up."
         if tool_name == "list_cluster_service_versions":
             return f"{label}: returned {count} CSV row(s), with {cls._safe_int(result.get('failed_count'))} not in a healthy phase."
+        if tool_name == "list_monitoring_alert_posture":
+            return (
+                f"{label}: returned {cls._safe_int(result.get('alertmanager_count'))} Alertmanager, {cls._safe_int(result.get('prometheus_count'))} Prometheus, and "
+                f"{cls._safe_int(result.get('prometheus_rule_count'))} PrometheusRule row(s), with {cls._safe_int(result.get('unavailable_alertmanager_count'))} Alertmanager and "
+                f"{cls._safe_int(result.get('unavailable_prometheus_count'))} Prometheus instance(s) unavailable."
+            )
+        if tool_name == "list_control_plane_certificates":
+            return (
+                f"{label}: reviewed {count} certificate-bearing control-plane resource(s), with {cls._safe_int(result.get('expired_count'))} expired, "
+                f"{cls._safe_int(result.get('expiring_within_30d_count'))} expiring within 30 days, and {cls._safe_int(result.get('trust_bundle_count'))} trust bundle(s)."
+            )
+        if tool_name == "list_api_service_health":
+            return f"{label}: returned {count} APIService row(s), with {cls._safe_int(result.get('unavailable_count'))} unavailable aggregated API(s)."
+        if tool_name == "list_certificatesigning_requests":
+            return f"{label}: returned {count} CSR row(s), with {cls._safe_int(result.get('pending_count'))} pending and {cls._safe_int(result.get('denied_count'))} denied."
+        if tool_name == "list_operator_extension_readiness":
+            return (
+                f"{label}: readiness score {cls._safe_int(result.get('readiness_score'))}/100, with {cls._safe_int(result.get('degraded_operator_count'))} degraded operator(s), "
+                f"{cls._safe_int(result.get('unavailable_api_service_count'))} unavailable aggregated API(s), and {cls._safe_int(result.get('hotspot_count'))} hotspot(s)."
+            )
         if tool_name == "list_security_context_constraints":
             return f"{label}: returned {count} SCC row(s), with {cls._safe_int(result.get('privileged_count'))} allowing privileged containers."
+        if tool_name == "list_admission_webhook_configurations":
+            return (
+                f"{label}: returned {count} webhook configuration row(s) covering {cls._safe_int(result.get('webhook_count'))} webhook(s), "
+                f"with {cls._safe_int(result.get('fail_open_webhook_count'))} fail-open and {cls._safe_int(result.get('missing_ca_bundle_webhook_count'))} missing CA bundle(s)."
+            )
         if tool_name == "list_resource_quotas":
             return f"{label}: returned {cls._safe_int(result.get('quota_count'))} resource quota row(s) and {cls._safe_int(result.get('cluster_quota_count'))} cluster resource quota row(s)."
         if tool_name == "list_builds":
@@ -583,6 +614,7 @@ class OpenShiftSreAgent:
             "Pvc": "PVC",
             "Pv": "PV",
             "Api": "API",
+            "Csr": "CSR",
             "Olm": "OLM",
             "Mcp": "MCP",
         }

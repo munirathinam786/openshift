@@ -1,12 +1,17 @@
 from __future__ import annotations
 
+import base64
 import hashlib
 import json
 import logging
+import re
 import shlex
+import ssl
 import subprocess
+import tempfile
 import time as _time
 from dataclasses import dataclass
+from datetime import datetime, timezone
 from typing import Any, Callable
 
 from kubernetes import client, config
@@ -92,7 +97,10 @@ class OpenShiftSreToolkit:
         self._core: client.CoreV1Api | None = None
         self._apps: client.AppsV1Api | None = None
         self._autoscaling: client.AutoscalingV2Api | None = None
+        self._apiregistration: client.ApiregistrationV1Api | None = None
+        self._admissionregistration: client.AdmissionregistrationV1Api | None = None
         self._batch: client.BatchV1Api | None = None
+        self._certificates: client.CertificatesV1Api | None = None
         self._networking: client.NetworkingV1Api | None = None
         self._policy: client.PolicyV1Api | None = None
         self._rbac: client.RbacAuthorizationV1Api | None = None
@@ -285,6 +293,30 @@ class OpenShiftSreToolkit:
                 {},
                 self.list_cluster_service_versions,
             ),
+            "list_monitoring_alert_posture": ToolSpec(
+                "list_monitoring_alert_posture",
+                "Inspect monitoring stack resources to summarize Prometheus, Alertmanager, and alert-rule posture across cluster and user-workload monitoring namespaces.",
+                {},
+                self.list_monitoring_alert_posture,
+            ),
+            "list_control_plane_certificates": ToolSpec(
+                "list_control_plane_certificates",
+                "Inspect control-plane certificate and trust-bundle resources to summarize expiration risk, trust wiring, and expiring CA or serving-certificate posture.",
+                {},
+                self.list_control_plane_certificates,
+            ),
+            "list_api_service_health": ToolSpec(
+                "list_api_service_health",
+                "Inspect aggregated APIService registrations to summarize availability, backing services, TLS skip-verify posture, and extension health risks.",
+                {},
+                self.list_api_service_health,
+            ),
+            "list_certificatesigning_requests": ToolSpec(
+                "list_certificatesigning_requests",
+                "Inspect certificate signing requests to summarize pending node joins, denied requests, signer usage, and certificate issuance posture.",
+                {},
+                self.list_certificatesigning_requests,
+            ),
             "list_acm_multicluster_hubs": ToolSpec(
                 "list_acm_multicluster_hubs",
                 "Inspect ACM MultiClusterHub resources to summarize hub availability, lifecycle phase, and placement namespace coverage.",
@@ -320,6 +352,18 @@ class OpenShiftSreToolkit:
                 "List security context constraints and summarize privilege and host access posture.",
                 {},
                 self.list_security_context_constraints,
+            ),
+            "list_admission_webhook_configurations": ToolSpec(
+                "list_admission_webhook_configurations",
+                "Inspect mutating and validating webhook configurations to summarize failure policy, service backing, CA bundle posture, and admission-governance risk.",
+                {},
+                self.list_admission_webhook_configurations,
+            ),
+            "list_operator_extension_readiness": ToolSpec(
+                "list_operator_extension_readiness",
+                "Combine operator, extension API, CSV, and webhook signals into a readiness score for platform extensions and operator-dependent control-plane services.",
+                {},
+                self.list_operator_extension_readiness,
             ),
             "list_rbac_bindings": ToolSpec(
                 "list_rbac_bindings",
@@ -507,7 +551,10 @@ class OpenShiftSreToolkit:
         self._core = client.CoreV1Api()
         self._apps = client.AppsV1Api()
         self._autoscaling = client.AutoscalingV2Api()
+        self._apiregistration = client.ApiregistrationV1Api()
+        self._admissionregistration = client.AdmissionregistrationV1Api()
         self._batch = client.BatchV1Api()
+        self._certificates = client.CertificatesV1Api()
         self._networking = client.NetworkingV1Api()
         self._policy = client.PolicyV1Api()
         self._rbac = client.RbacAuthorizationV1Api()
@@ -572,6 +619,71 @@ class OpenShiftSreToolkit:
     @staticmethod
     def _resource_value(usage: dict[str, Any] | None, key: str) -> str | None:
         return usage.get(key) if usage else None
+
+    @staticmethod
+    def _extract_pem_certificates(raw_text: str | None) -> list[str]:
+        if not raw_text:
+            return []
+        return re.findall(r"-----BEGIN CERTIFICATE-----.*?-----END CERTIFICATE-----", raw_text, flags=re.DOTALL)
+
+    @staticmethod
+    def _x509_name_common_name(items: Any) -> str | None:
+        for entry in items or []:
+            for key, value in entry:
+                if key == "commonName":
+                    return value
+        return None
+
+    @classmethod
+    def _decode_pem_certificate(cls, pem_text: str) -> dict[str, Any] | None:
+        try:
+            with tempfile.NamedTemporaryFile("w", suffix=".pem", delete=True) as handle:
+                handle.write(pem_text)
+                handle.flush()
+                decoded = ssl._ssl._test_decode_cert(handle.name)  # type: ignore[attr-defined]
+        except Exception:  # noqa: BLE001
+            return None
+
+        not_after = decoded.get("notAfter")
+        expires_at: str | None = None
+        days_until_expiry: int | None = None
+        expired = False
+        if isinstance(not_after, str):
+            try:
+                expiry_ts = ssl.cert_time_to_seconds(not_after)
+                expiry_dt = datetime.fromtimestamp(expiry_ts, tz=timezone.utc)
+                expires_at = expiry_dt.isoformat()
+                days_until_expiry = int((expiry_dt - datetime.now(timezone.utc)).total_seconds() // 86400)
+                expired = expiry_dt <= datetime.now(timezone.utc)
+            except Exception:  # noqa: BLE001
+                expires_at = None
+                days_until_expiry = None
+                expired = False
+
+        return {
+            "subject_common_name": cls._x509_name_common_name(decoded.get("subject")),
+            "issuer_common_name": cls._x509_name_common_name(decoded.get("issuer")),
+            "serial_number": decoded.get("serialNumber"),
+            "not_before": decoded.get("notBefore"),
+            "not_after": not_after,
+            "expires_at": expires_at,
+            "days_until_expiry": days_until_expiry,
+            "expired": expired,
+        }
+
+    @staticmethod
+    def _control_plane_namespaces() -> list[str]:
+        return [
+            "openshift-config",
+            "openshift-config-managed",
+            "openshift-ingress",
+            "openshift-kube-apiserver",
+            "openshift-kube-controller-manager",
+            "openshift-apiserver",
+            "openshift-authentication",
+            "openshift-monitoring",
+            "openshift-service-ca",
+        ]
 
     def _list_custom(self, *, group: str, version: str, plural: str, namespace: str | None = None) -> list[dict[str, Any]]:
         self._ensure_clients()
@@ -1479,6 +1591,301 @@ class OpenShiftSreToolkit:
                 )
         return {"count": len(rows), "failed_count": failed_count, "cluster_service_versions": rows}
 
+    def list_monitoring_alert_posture(self) -> dict[str, Any]:
+        namespaces = self._namespace_candidates(["openshift-monitoring", "openshift-user-workload-monitoring"], self._all_projects())
+        alertmanager_rows = []
+        prometheus_rows = []
+        rule_rows = []
+        unavailable_alertmanager_count = 0
+        unavailable_prometheus_count = 0
+        alert_rule_count = 0
+        critical_alert_rule_count = 0
+        warning_alert_rule_count = 0
+
+        for item in self._list_custom_from_namespaces(
+            group="monitoring.coreos.com",
+            versions=("v1",),
+            plural="alertmanagers",
+            namespaces=namespaces,
+        ):
+            metadata = item.get("metadata") or {}
+            spec = item.get("spec") or {}
+            status = item.get("status") or {}
+            available = status.get("availableReplicas") or 0
+            desired = spec.get("replicas") or 0
+            if desired and available < desired:
+                unavailable_alertmanager_count += 1
+            alertmanager_rows.append(
+                {
+                    "namespace": metadata.get("namespace"),
+                    "alertmanager_name": metadata.get("name"),
+                    "desired_replicas": desired,
+                    "available_replicas": available,
+                    "paused": spec.get("paused"),
+                    "external_url": spec.get("externalUrl"),
+                }
+            )
+
+        for item in self._list_custom_from_namespaces(
+            group="monitoring.coreos.com",
+            versions=("v1",),
+            plural="prometheuses",
+            namespaces=namespaces,
+        ):
+            metadata = item.get("metadata") or {}
+            spec = item.get("spec") or {}
+            status = item.get("status") or {}
+            available = status.get("availableReplicas") or 0
+            desired = spec.get("replicas") or 0
+            if desired and available < desired:
+                unavailable_prometheus_count += 1
+            prometheus_rows.append(
+                {
+                    "namespace": metadata.get("namespace"),
+                    "prometheus_name": metadata.get("name"),
+                    "desired_replicas": desired,
+                    "available_replicas": available,
+                    "paused": spec.get("paused"),
+                    "rule_namespace_selector": spec.get("ruleNamespaceSelector") or {},
+                }
+            )
+
+        for item in self._list_custom_from_namespaces(
+            group="monitoring.coreos.com",
+            versions=("v1",),
+            plural="prometheusrules",
+            namespaces=namespaces,
+        ):
+            metadata = item.get("metadata") or {}
+            spec = item.get("spec") or {}
+            groups = spec.get("groups") or []
+            rule_count = 0
+            critical_count = 0
+            warning_count = 0
+            for group in groups:
+                for rule in group.get("rules") or []:
+                    if not rule.get("alert"):
+                        continue
+                    rule_count += 1
+                    severity = str(((rule.get("labels") or {}).get("severity")) or "").lower()
+                    if severity == "critical":
+                        critical_count += 1
+                    elif severity == "warning":
+                        warning_count += 1
+            alert_rule_count += rule_count
+            critical_alert_rule_count += critical_count
+            warning_alert_rule_count += warning_count
+            rule_rows.append(
+                {
+                    "namespace": metadata.get("namespace"),
+                    "prometheus_rule_name": metadata.get("name"),
+                    "group_count": len(groups),
+                    "alert_rule_count": rule_count,
+                    "critical_alert_rule_count": critical_count,
+                    "warning_alert_rule_count": warning_count,
+                }
+            )
+
+        return {
+            "alertmanager_count": len(alertmanager_rows),
+            "unavailable_alertmanager_count": unavailable_alertmanager_count,
+            "prometheus_count": len(prometheus_rows),
+            "unavailable_prometheus_count": unavailable_prometheus_count,
+            "prometheus_rule_count": len(rule_rows),
+            "alert_rule_count": alert_rule_count,
+            "critical_alert_rule_count": critical_alert_rule_count,
+            "warning_alert_rule_count": warning_alert_rule_count,
+            "alertmanagers": alertmanager_rows,
+            "prometheuses": prometheus_rows,
+            "prometheus_rules": rule_rows,
+        }
+
+    def list_control_plane_certificates(self) -> dict[str, Any]:
+        self._ensure_clients()
+        assert self._core is not None
+        rows = []
+        expired_count = 0
+        expiring_within_30d_count = 0
+        trust_bundle_count = 0
+        namespaces = self._namespace_candidates(self._control_plane_namespaces(), self._selected_projects())
+        candidate_keys = {"tls.crt", "ca.crt", "service-ca.crt", "ca-bundle.crt", "trusted-ca-bundle"}
+
+        def _record(namespace: str, kind: str, resource_name: str, key: str, raw_value: str) -> None:
+            nonlocal expired_count, expiring_within_30d_count, trust_bundle_count
+            certs = self._extract_pem_certificates(raw_value)
+            if not certs:
+                return
+            decoded = self._decode_pem_certificate(certs[0])
+            if decoded is None:
+                return
+            trust_bundle = (
+                "ca" in key.lower()
+                or "bundle" in key.lower()
+                or "trusted-ca" in resource_name.lower()
+                or resource_name.lower().endswith("-ca")
+            )
+            if trust_bundle:
+                trust_bundle_count += 1
+            days_until_expiry = decoded.get("days_until_expiry")
+            expired = bool(decoded.get("expired"))
+            if expired:
+                expired_count += 1
+            elif isinstance(days_until_expiry, int) and days_until_expiry <= 30:
+                expiring_within_30d_count += 1
+            rows.append(
+                {
+                    "namespace": namespace,
+                    "resource_kind": kind,
+                    "resource_name": resource_name,
+                    "data_key": key,
+                    "certificate_count": len(certs),
+                    "trust_bundle": trust_bundle,
+                    **decoded,
+                }
+            )
+
+        for namespace in namespaces:
+            try:
+                for secret in self._core.list_namespaced_secret(namespace).items:
+                    for key, value in (getattr(secret, "data", None) or {}).items():
+                        if key in candidate_keys or key.endswith(".crt") or key.endswith(".pem"):
+                            try:
+                                decoded_text = base64.b64decode(value).decode("utf-8", errors="ignore")
+                            except Exception:  # noqa: BLE001
+                                continue
+                            _record(namespace, "Secret", self._metadata_name(secret) or "unknown", key, decoded_text)
+            except ApiException as error:
+                if error.status not in {403, 404}:
+                    raise
+
+            try:
+                for config_map in self._core.list_namespaced_config_map(namespace).items:
+                    for key, value in (getattr(config_map, "data", None) or {}).items():
+                        if key in candidate_keys or key.endswith(".crt") or key.endswith(".pem") or "bundle" in key.lower():
+                            _record(namespace, "ConfigMap", self._metadata_name(config_map) or "unknown", key, value)
+            except ApiException as error:
+                if error.status not in {403, 404}:
+                    raise
+
+        rows.sort(key=lambda item: (item.get("days_until_expiry") is None, item.get("days_until_expiry") if item.get("days_until_expiry") is not None else 10**9, item.get("namespace") or "", item.get("resource_name") or ""))
+        return {
+            "count": len(rows),
+            "expired_count": expired_count,
+            "expiring_within_30d_count": expiring_within_30d_count,
+            "trust_bundle_count": trust_bundle_count,
+            "control_plane_certificates": rows,
+        }
+
+    def list_api_service_health(self) -> dict[str, Any]:
+        self._ensure_clients()
+        assert self._apiregistration is not None
+        rows = []
+        unavailable_count = 0
+        local_count = 0
+        insecure_skip_tls_count = 0
+        try:
+            items = self._apiregistration.list_api_service().items
+        except ApiException as error:
+            if error.status in {403, 404}:
+                return {"count": 0, "unavailable_count": 0, "local_count": 0, "insecure_skip_tls_count": 0, "api_services": []}
+            raise
+        for api_service in items:
+            metadata = getattr(api_service, "metadata", None)
+            spec = getattr(api_service, "spec", None)
+            status = getattr(api_service, "status", None)
+            service_ref = getattr(spec, "service", None)
+            available = self._condition_status(getattr(status, "conditions", None), "Available")
+            if available != "True":
+                unavailable_count += 1
+            if service_ref is None:
+                local_count += 1
+            if getattr(spec, "insecure_skip_tls_verify", False):
+                insecure_skip_tls_count += 1
+            rows.append(
+                {
+                    "api_service_name": getattr(metadata, "name", None),
+                    "group": getattr(spec, "group", None),
+                    "version": getattr(spec, "version", None),
+                    "group_priority_minimum": getattr(spec, "group_priority_minimum", None),
+                    "version_priority": getattr(spec, "version_priority", None),
+                    "service_namespace": getattr(service_ref, "namespace", None) if service_ref else None,
+                    "service_name": getattr(service_ref, "name", None) if service_ref else None,
+                    "local": service_ref is None,
+                    "insecure_skip_tls_verify": bool(getattr(spec, "insecure_skip_tls_verify", False)),
+                    "ca_bundle_configured": bool(getattr(spec, "ca_bundle", None)),
+                    "available": available,
+                    "reason": next((getattr(condition, "reason", None) for condition in getattr(status, "conditions", None) or [] if getattr(condition, "type", None) == "Available"), None),
+                    "message": next((getattr(condition, "message", None) for condition in getattr(status, "conditions", None) or [] if getattr(condition, "type", None) == "Available"), None),
+                }
+            )
+        return {
+            "count": len(rows),
+            "unavailable_count": unavailable_count,
+            "local_count": local_count,
+            "insecure_skip_tls_count": insecure_skip_tls_count,
+            "api_services": rows,
+        }
+
+    def list_certificatesigning_requests(self) -> dict[str, Any]:
+        self._ensure_clients()
+        assert self._certificates is not None
+        rows = []
+        approved_count = 0
+        denied_count = 0
+        pending_count = 0
+        issued_count = 0
+        try:
+            items = self._certificates.list_certificate_signing_request().items
+        except ApiException as error:
+            if error.status in {403, 404}:
+                return {
+                    "count": 0,
+                    "approved_count": 0,
+                    "denied_count": 0,
+                    "pending_count": 0,
+                    "issued_count": 0,
+                    "certificate_signing_requests": [],
+                }
+            raise
+        for request in items:
+            metadata = getattr(request, "metadata", None)
+            spec = getattr(request, "spec", None)
+            status = getattr(request, "status", None)
+            condition_types = {getattr(condition, "type", None) for condition in getattr(status, "conditions", None) or []}
+            approved = "Approved" in condition_types
+            denied = "Denied" in condition_types
+            issued = bool(getattr(status, "certificate", None))
+            if approved:
+                approved_count += 1
+            if denied:
+                denied_count += 1
+            if issued:
+                issued_count += 1
+            if not approved and not denied:
+                pending_count += 1
+            rows.append(
+                {
+                    "csr_name": getattr(metadata, "name", None),
+                    "signer_name": getattr(spec, "signer_name", None),
+                    "username": getattr(spec, "username", None),
+                    "group_count": len(getattr(spec, "groups", None) or []),
+                    "expiration_seconds": getattr(spec, "expiration_seconds", None),
+                    "approved": approved,
+                    "denied": denied,
+                    "pending": not approved and not denied,
+                    "certificate_issued": issued,
+                    "created_at": self._creation_timestamp(request),
+                }
+            )
+        return {
+            "count": len(rows),
+            "approved_count": approved_count,
+            "denied_count": denied_count,
+            "pending_count": pending_count,
+            "issued_count": issued_count,
+            "certificate_signing_requests": rows,
+        }
+
     def list_acm_multicluster_hubs(self) -> dict[str, Any]:
         namespaces = self._namespace_candidates(
             ["open-cluster-management", "open-cluster-management-hub"],
@@ -1670,6 +2077,135 @@ class OpenShiftSreToolkit:
                 }
             )
         return {"count": len(rows), "privileged_count": privileged_count, "security_context_constraints": rows}
+
+    def list_admission_webhook_configurations(self) -> dict[str, Any]:
+        self._ensure_clients()
+        assert self._admissionregistration is not None
+        rows = []
+        fail_open_webhook_count = 0
+        missing_ca_bundle_webhook_count = 0
+        service_backed_webhook_count = 0
+
+        def _collect(configuration_kind: str, items: list[Any]) -> None:
+            nonlocal fail_open_webhook_count, missing_ca_bundle_webhook_count, service_backed_webhook_count
+            for configuration in items:
+                metadata = getattr(configuration, "metadata", None)
+                webhooks = list(getattr(configuration, "webhooks", None) or [])
+                config_fail_open = 0
+                config_missing_ca = 0
+                config_service_backed = 0
+                for webhook in webhooks:
+                    client_config = getattr(webhook, "client_config", None)
+                    service_ref = getattr(client_config, "service", None) if client_config else None
+                    failure_policy = getattr(webhook, "failure_policy", None) or "Fail"
+                    ca_bundle = getattr(client_config, "ca_bundle", None) if client_config else None
+                    if failure_policy == "Ignore":
+                        fail_open_webhook_count += 1
+                        config_fail_open += 1
+                    if service_ref is not None:
+                        service_backed_webhook_count += 1
+                        config_service_backed += 1
+                    if service_ref is not None and not ca_bundle:
+                        missing_ca_bundle_webhook_count += 1
+                        config_missing_ca += 1
+                rows.append(
+                    {
+                        "configuration_kind": configuration_kind,
+                        "configuration_name": getattr(metadata, "name", None),
+                        "webhook_count": len(webhooks),
+                        "fail_open_webhook_count": config_fail_open,
+                        "missing_ca_bundle_webhook_count": config_missing_ca,
+                        "service_backed_webhook_count": config_service_backed,
+                        "webhook_names": [getattr(webhook, "name", None) for webhook in webhooks],
+                    }
+                )
+
+        try:
+            _collect("MutatingWebhookConfiguration", self._admissionregistration.list_mutating_webhook_configuration().items)
+            _collect("ValidatingWebhookConfiguration", self._admissionregistration.list_validating_webhook_configuration().items)
+        except ApiException as error:
+            if error.status in {403, 404}:
+                return {
+                    "count": 0,
+                    "webhook_count": 0,
+                    "fail_open_webhook_count": 0,
+                    "missing_ca_bundle_webhook_count": 0,
+                    "service_backed_webhook_count": 0,
+                    "admission_webhook_configurations": [],
+                }
+            raise
+
+        return {
+            "count": len(rows),
+            "webhook_count": sum(row["webhook_count"] for row in rows),
+            "fail_open_webhook_count": fail_open_webhook_count,
+            "missing_ca_bundle_webhook_count": missing_ca_bundle_webhook_count,
+            "service_backed_webhook_count": service_backed_webhook_count,
+            "admission_webhook_configurations": rows,
+        }
+
+    def list_operator_extension_readiness(self) -> dict[str, Any]:
+        operators = self.list_cluster_operators()
+        subscriptions = self.list_operator_subscriptions()
+        csvs = self.list_cluster_service_versions()
+        api_services = self.list_api_service_health()
+        webhooks = self.list_admission_webhook_configurations()
+
+        degraded_operator_count = operators.get("degraded_count") or 0
+        unhealthy_subscription_count = subscriptions.get("unhealthy_count") or 0
+        failed_csv_count = csvs.get("failed_count") or 0
+        unavailable_api_service_count = api_services.get("unavailable_count") or 0
+        fail_open_webhook_count = webhooks.get("fail_open_webhook_count") or 0
+        missing_ca_bundle_webhook_count = webhooks.get("missing_ca_bundle_webhook_count") or 0
+
+        penalties = (
+            (int(degraded_operator_count) * 9)
+            + (int(unhealthy_subscription_count) * 5)
+            + (int(failed_csv_count) * 4)
+            + (int(unavailable_api_service_count) * 10)
+            + (int(fail_open_webhook_count) * 2)
+            + (int(missing_ca_bundle_webhook_count) * 3)
+        )
+        readiness_score = max(0, min(100, 100 - penalties))
+
+        hotspots: list[str] = []
+        if degraded_operator_count:
+            hotspots.append(f"{degraded_operator_count} degraded cluster operator(s)")
+        if unavailable_api_service_count:
+            hotspots.append(f"{unavailable_api_service_count} unavailable aggregated APIService registration(s)")
+        if unhealthy_subscription_count:
+            hotspots.append(f"{unhealthy_subscription_count} unhealthy operator subscription(s)")
+        if failed_csv_count:
+            hotspots.append(f"{failed_csv_count} ClusterServiceVersion(s) outside a healthy phase")
+        if missing_ca_bundle_webhook_count:
+            hotspots.append(f"{missing_ca_bundle_webhook_count} webhook(s) missing a CA bundle")
+        if fail_open_webhook_count:
+            hotspots.append(f"{fail_open_webhook_count} fail-open admission webhook(s)")
+
+        return {
+            "count": 1,
+            "readiness_score": readiness_score,
+            "degraded_operator_count": degraded_operator_count,
+            "unhealthy_subscription_count": unhealthy_subscription_count,
+            "failed_csv_count": failed_csv_count,
+            "unavailable_api_service_count": unavailable_api_service_count,
+            "fail_open_webhook_count": fail_open_webhook_count,
+            "missing_ca_bundle_webhook_count": missing_ca_bundle_webhook_count,
+            "hotspot_count": len(hotspots),
+            "hotspots": hotspots,
+            "operator_extension_readiness": [
+                {
+                    "readiness_score": readiness_score,
+                    "degraded_operator_count": degraded_operator_count,
+                    "unhealthy_subscription_count": unhealthy_subscription_count,
+                    "failed_csv_count": failed_csv_count,
+                    "unavailable_api_service_count": unavailable_api_service_count,
+                    "fail_open_webhook_count": fail_open_webhook_count,
+                    "missing_ca_bundle_webhook_count": missing_ca_bundle_webhook_count,
+                    "hotspots": hotspots,
+                }
+            ],
+        }
 
     def list_rbac_bindings(self, project: str | None = None) -> dict[str, Any]:
         self._ensure_clients()

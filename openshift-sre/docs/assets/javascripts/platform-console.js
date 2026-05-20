@@ -28,6 +28,11 @@
 		list_cluster_autoscaling: 'ClusterAutoscaler and MachineAutoscaler capacity posture',
 		list_operator_subscriptions: 'Operator subscription health',
 		list_cluster_service_versions: 'CSV install and operator lifecycle',
+		list_monitoring_alert_posture: 'Monitoring stack, Alertmanager, and PrometheusRule posture',
+		list_control_plane_certificates: 'Control-plane certificate expiry and trust-bundle review',
+		list_operator_extension_readiness: 'Operator dependency and extension readiness scoring',
+		list_api_service_health: 'Aggregated APIService availability and extension health',
+		list_certificatesigning_requests: 'CSR approval backlog and certificate issuance posture',
 		list_workload_health: 'Workload rollout and readiness posture',
 		list_services: 'Service exposure posture',
 		list_routes: 'Route posture and ingress pathways',
@@ -40,6 +45,7 @@
 		list_volume_snapshots: 'VolumeSnapshot readiness and class coverage',
 		list_storage_classes: 'StorageClass defaults and options',
 		list_security_context_constraints: 'SecurityContextConstraint privilege posture',
+		list_admission_webhook_configurations: 'Admission webhook failure policy and CA-bundle posture',
 		list_rbac_bindings: 'RBAC bindings and elevated-access posture',
 		list_service_accounts: 'ServiceAccount token and pull-secret posture',
 		list_limit_ranges: 'LimitRange defaults and governance guardrails',
@@ -81,7 +87,13 @@
 		list_volume_snapshots: 'Summarizes protection coverage and readiness of storage snapshots and snapshot classes.',
 		list_machine_health_checks: 'Shows machine remediation safety rails and whether node-health automation is actually armed for the fleet.',
 		list_cluster_autoscaling: 'Adds cluster-wide and machine-set scaling guardrails so lifecycle reviews can spot brittle capacity envelopes early.',
+		list_monitoring_alert_posture: 'Summarizes Prometheus, Alertmanager, and PrometheusRule coverage so monitoring blind spots and alerting readiness show up before a change window.',
+		list_control_plane_certificates: 'Reviews serving certificates and trust bundles across key control-plane namespaces to flag expiry and trust-chain risk before it bites the API path.',
+		list_operator_extension_readiness: 'Derives a fast readiness score from cluster operators, subscriptions, CSVs, APIService health, and webhook posture so extension drift is visible in one place.',
+		list_api_service_health: 'Surfaces unavailable aggregated APIs and fragile extension registrations that can quietly break operators, consoles, and upgrade workflows.',
+		list_certificatesigning_requests: 'Highlights pending or denied CSRs so node joins, kubelet rotation, and certificate approval bottlenecks stop being surprise outage lore.',
 		list_oauth_configuration: 'Summarizes cluster identity providers, LDAP posture, and authentication entry points used for platform access.',
+		list_admission_webhook_configurations: 'Shows mutating and validating webhook risk, including fail-open behavior and missing CA bundles that can destabilize admission paths.',
 		list_rbac_bindings: 'Surfaces cluster-admin, admin, and other elevated bindings that influence governance posture.',
 		list_service_accounts: 'Shows token-mount behavior and pull-secret usage across service identities.',
 		list_limit_ranges: 'Captures namespace defaults and max/min envelopes for resource-governance reviews.',
@@ -107,9 +119,9 @@
 	};
 
 	const featureGroups = [
-		{ title: 'Core platform and lifecycle', features: ['get_cluster_identity', 'list_cluster_infrastructure', 'list_projects', 'list_cluster_version', 'list_cluster_operators', 'list_cluster_network_config', 'list_ingress_controllers', 'list_cluster_proxy_config', 'list_cluster_dns_config', 'list_feature_gate_config', 'list_scheduler_config', 'list_nodes', 'list_node_pressure', 'list_machine_config_pools', 'list_machine_sets', 'list_machine_health_checks', 'list_cluster_autoscaling', 'list_operator_subscriptions', 'list_cluster_service_versions'] },
+		{ title: 'Core platform and lifecycle', features: ['get_cluster_identity', 'list_cluster_infrastructure', 'list_projects', 'list_cluster_version', 'list_cluster_operators', 'list_cluster_network_config', 'list_ingress_controllers', 'list_cluster_proxy_config', 'list_cluster_dns_config', 'list_feature_gate_config', 'list_scheduler_config', 'list_nodes', 'list_node_pressure', 'list_machine_config_pools', 'list_machine_sets', 'list_machine_health_checks', 'list_cluster_autoscaling', 'list_operator_subscriptions', 'list_cluster_service_versions', 'list_monitoring_alert_posture', 'list_control_plane_certificates', 'list_operator_extension_readiness', 'list_api_service_health', 'list_certificatesigning_requests'] },
 		{ title: 'Workloads, traffic, and storage', features: ['list_pods', 'list_workload_health', 'list_horizontal_pod_autoscalers', 'list_pod_disruption_budgets', 'list_cronjobs', 'list_services', 'list_routes', 'list_ingresses', 'list_events', 'list_persistent_storage', 'list_volume_snapshots', 'list_storage_classes'] },
-		{ title: 'Security and governance', features: ['list_security_context_constraints', 'list_oauth_configuration', 'list_rbac_bindings', 'list_service_accounts', 'list_limit_ranges', 'list_network_policies', 'list_resource_quotas', 'list_acm_multicluster_hubs', 'list_acm_managed_clusters', 'list_acm_policies', 'list_acs_central_services', 'list_acs_secured_clusters'] },
+		{ title: 'Security and governance', features: ['list_security_context_constraints', 'list_admission_webhook_configurations', 'list_oauth_configuration', 'list_rbac_bindings', 'list_service_accounts', 'list_limit_ranges', 'list_network_policies', 'list_resource_quotas', 'list_acm_multicluster_hubs', 'list_acm_managed_clusters', 'list_acm_policies', 'list_acs_central_services', 'list_acs_secured_clusters'] },
 		{ title: 'Delivery, automation, and data services', features: ['list_image_streams', 'list_builds', 'list_build_configs', 'list_deployment_configs', 'list_gitops_argocds', 'list_gitops_applications', 'list_knative_services', 'list_tekton_configs', 'list_tekton_pipeline_runs', 'list_cluster_logging', 'list_oadp_resources'] },
 		{ title: 'Virtualization, DR, and migration', features: ['list_virtualization_resources', 'list_virtual_machine_snapshots', 'list_migration_toolkit_resources', 'list_disaster_recovery_resources'] }
 	];
@@ -123,7 +135,14 @@
 			summary: 'Assess whether the platform is ready for an upgrade or change window across version, operators, nodes, and machine pools.',
 			promptLead: 'Act as an OpenShift platform lifecycle lead preparing a change window. Build a lifecycle-readiness review using the selected evidence and focus on upgrade blockers, operator risk, machine-pool rollout safety, and dependencies across baremetal, ROSA, ARO, and IBM Z patterns when relevant.',
 			questions: ['What would block the next controlled upgrade or maintenance window?', 'Which operator or machine-pool signals look most likely to elongate the change window?', 'What should the platform team validate before approving the next step?'],
-			features: ['get_cluster_identity', 'list_cluster_infrastructure', 'list_projects', 'list_cluster_version', 'list_cluster_operators', 'list_cluster_network_config', 'list_ingress_controllers', 'list_cluster_proxy_config', 'list_cluster_dns_config', 'list_feature_gate_config', 'list_scheduler_config', 'list_nodes', 'list_node_pressure', 'list_machine_config_pools', 'list_machine_sets', 'list_machine_health_checks', 'list_cluster_autoscaling', 'list_operator_subscriptions', 'list_cluster_service_versions']
+			features: ['get_cluster_identity', 'list_cluster_infrastructure', 'list_projects', 'list_cluster_version', 'list_cluster_operators', 'list_cluster_network_config', 'list_ingress_controllers', 'list_cluster_proxy_config', 'list_cluster_dns_config', 'list_feature_gate_config', 'list_scheduler_config', 'list_nodes', 'list_node_pressure', 'list_machine_config_pools', 'list_machine_sets', 'list_machine_health_checks', 'list_cluster_autoscaling', 'list_operator_subscriptions', 'list_cluster_service_versions', 'list_monitoring_alert_posture', 'list_control_plane_certificates', 'list_operator_extension_readiness', 'list_api_service_health', 'list_certificatesigning_requests']
+		},
+		observability: {
+			title: 'Observability and extension advisory lane',
+			summary: 'Run a fast pre-change advisory across monitoring, alert posture, certificate trust, and extension readiness without waiting on the full LLM loop.',
+			promptLead: 'Act as an OpenShift observability and control-plane readiness lead. Use the selected evidence to assess monitoring stack health, alert coverage, control-plane certificate expiry, trust-bundle posture, operator dependencies, and extension API readiness before a maintenance window.',
+			questions: ['Which monitoring or extension signals are the best early-warning indicators for the next maintenance window?', 'Do certificate expiry or trust-bundle issues threaten control-plane or operator continuity?', 'What should platform engineering stabilize first before approving the next change?'],
+			features: ['get_cluster_identity', 'list_cluster_operators', 'list_operator_subscriptions', 'list_cluster_service_versions', 'list_monitoring_alert_posture', 'list_control_plane_certificates', 'list_operator_extension_readiness', 'list_api_service_health', 'list_certificatesigning_requests', 'list_admission_webhook_configurations']
 		},
 		dr: {
 			title: 'Disaster recovery and failover posture',
@@ -151,7 +170,7 @@
 			summary: 'Compare fleet-level dependencies, governance, and security rollout signals across managed OpenShift estate patterns.',
 			promptLead: 'Act as a fleet platform operations lead reviewing the health of a multi-platform OpenShift estate. Use the selected evidence to compare ACM governance, managed-cluster readiness, platform inventory, backup posture, and security rollout patterns across baremetal, ROSA, ARO, and IBM Z footprints where relevant.',
 			questions: ['Which fleet-level gaps threaten consistency across platforms?', 'Where should governance, backup, or security rollout be tightened first?', 'What handoff should go to platform owners versus security or app teams?'],
-			features: ['get_cluster_identity', 'list_cluster_infrastructure', 'list_projects', 'list_oauth_configuration', 'list_rbac_bindings', 'list_service_accounts', 'list_limit_ranges', 'list_network_policies', 'list_resource_quotas', 'list_acm_multicluster_hubs', 'list_acm_managed_clusters', 'list_acm_policies', 'list_oadp_resources', 'list_acs_central_services', 'list_acs_secured_clusters']
+			features: ['get_cluster_identity', 'list_cluster_infrastructure', 'list_projects', 'list_api_service_health', 'list_certificatesigning_requests', 'list_admission_webhook_configurations', 'list_oauth_configuration', 'list_rbac_bindings', 'list_service_accounts', 'list_limit_ranges', 'list_network_policies', 'list_resource_quotas', 'list_acm_multicluster_hubs', 'list_acm_managed_clusters', 'list_acm_policies', 'list_oadp_resources', 'list_acs_central_services', 'list_acs_secured_clusters']
 		},
 		automation: {
 			title: 'Platform automation and day-2 controls',
@@ -162,7 +181,7 @@
 		}
 	};
 
-	const presetOrder = ['lifecycle', 'dr', 'migration', 'virtualization', 'fleet', 'automation'];
+	const presetOrder = ['lifecycle', 'observability', 'dr', 'migration', 'virtualization', 'fleet', 'automation'];
 	const defaultProfileKey = 'lifecycle';
 	const defaultStatus = 'Select a platform profile, adjust the checks, and run the review.';
 	const parseCsv = (value) => String(value || '').split(',').map((item) => item.trim()).filter(Boolean);
@@ -668,6 +687,43 @@
 			}
 		};
 
+		const runFastAdvisory = async () => {
+			if (!selectedFeatures.length) {
+				setStatus('Select at least one platform check before running the advisory pack.');
+				setStatusTone('error');
+				return;
+			}
+			setBusy(true);
+			setLastRun({ prompt, answer: '', steps: [], runId: null });
+			setStatus('Running the fast non-LLM platform advisory pack …');
+			setStatusTone('');
+			try {
+				const payload = await fetchJson('/platform/advisory', {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({
+						lane_key: profileKey,
+						lane_label: profile.title,
+						focus_label: 'Fast non-LLM advisory pack',
+						selected_features: selectedFeatures,
+						operator_notes: [concern, recentChange, successCriteria, customPrompt].filter(Boolean).join(' · '),
+						runtime: buildRuntime(),
+						tags: ['platform-console', profileKey, 'fast-advisory']
+					})
+				});
+				setLastRun({ prompt, answer: payload.answer || '', steps: Array.isArray(payload.steps) ? payload.steps : [], runId: payload.run_id || null });
+				setStatus(payload.run_id ? `Fast advisory completed and stored as run #${payload.run_id}.` : 'Fast advisory completed.');
+				setStatusTone('ok');
+				await loadOverview();
+			} catch (error) {
+				setLastRun({ prompt, answer: '', steps: [], runId: null });
+				setStatus(error instanceof Error ? error.message : 'Unexpected error while running the fast advisory pack.');
+				setStatusTone('error');
+			} finally {
+				setBusy(false);
+			}
+		};
+
 		const runSweep = async () => {
 			if (!selectedSweepTools.length) {
 				setSweepStatus({ message: 'Pick at least one selected platform check before running the sweep.', tone: 'error' });
@@ -777,7 +833,7 @@
 					h('label', { className: 'agent-console__label' }, ['Namespace / project focus', h('input', { className: 'agent-console__input', value: project, onChange: (event) => setProject(event.target.value), placeholder: 'openshift-dr-system or app namespace' })]),
 					h('label', { className: 'agent-console__label' }, ['Cluster or estate scope', h('input', { className: 'agent-console__input', value: clusterScope, onChange: (event) => setClusterScope(event.target.value), placeholder: 'prod-west fleet / aro landing zone / baremetal DR pair' })]),
 					h('label', { className: 'agent-console__label' }, [h('span', null, 'Streaming execution'), h('input', { type: 'checkbox', checked: streamMode, onChange: (event) => setStreamMode(event.target.checked) })]),
-					h('div', { className: 'agent-console__actions' }, [h('button', { className: 'agent-console__example', type: 'button', onClick: resetProfileFeatures }, 'Reset checks'), h('button', { className: 'agent-console__button', type: 'button', disabled: busy, onClick: runPlatformReview }, busy ? 'Running…' : (streamMode ? 'Stream platform review' : 'Run platform review'))])
+					h('div', { className: 'agent-console__actions' }, [h('button', { className: 'agent-console__example', type: 'button', onClick: resetProfileFeatures }, 'Reset checks'), h('button', { className: 'agent-console__example', type: 'button', disabled: busy, onClick: runFastAdvisory }, busy ? 'Running…' : 'Run fast advisory'), h('button', { className: 'agent-console__button', type: 'button', disabled: busy, onClick: runPlatformReview }, busy ? 'Running…' : (streamMode ? 'Stream platform review' : 'Run platform review'))])
 				]),
 				h('div', { className: 'platform-console__grid' }, [
 					h('label', { className: 'agent-console__label' }, ['Primary concern', h('input', { className: 'agent-console__input', value: concern, onChange: (event) => setConcern(event.target.value), placeholder: 'upgrade blockers / failover readiness / migration wave risk' })]),

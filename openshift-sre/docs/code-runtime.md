@@ -233,7 +233,7 @@ This page is the dedicated platform-operations workspace.
 It now combines:
 
 - the same shared React operator-shell language as `docs/console.html`, with platform-specific metadata, actions, stats, and shell-highlight copy
-- profile-driven lifecycle-readiness, DR, migration, virtualization, and fleet posture launchers
+- profile-driven lifecycle-readiness, observability/advisory, DR, migration, virtualization, and fleet posture launchers
 - saved template and watchlist controls backed by `/investigations` and `/watchlists`
 - inline historical run comparison backed by `/history/compare` and recent-run loading from `/history/overview`
 - a readiness scorecard and recommendation lane derived from the most recent tool trace
@@ -241,6 +241,7 @@ It now combines:
 - a fully expanded `Security and governance` category for the platform lane, surfacing OAuth/LDAP posture, SCCs, RBAC, service accounts, limit ranges, network policies, resource quotas, ACM governance, and ACS secured-cluster coverage from the existing backend toolkit
 - FinOps-style connection and request-scoped cluster override controls so operators can target a specific cluster, namespace, or estate slice
 - a dedicated platform review launcher that turns the selected OpenShift signals into a `/chat` or `/chat/stream` request with runtime overrides
+- a fast advisory launcher that turns the same selected signals into a batched `/platform/advisory` request for non-LLM handoff packs
 - a multi-cluster sweep lane backed by `/platform/sweep` for estate-wide checks without leaving the Platform Console
 - selector polish with search, selected-only filtering, richer feature descriptions, and category summary chips so the larger check catalog stays usable
 - an export lane for CSV, PowerPoint, PDF, and Word-compatible handoff packs with tool-trace context
@@ -491,6 +492,19 @@ The backend runtime itself also gained more enterprise-style operational safegua
 - richer readiness output through `GET /readyz`
 - a detailed subsystem snapshot through `GET /healthz/full`
 - stronger SQLAlchemy engine defaults such as connection timeouts, pool pre-ping, pool lifo usage, and pool telemetry in the database observability payload
+
+The OpenShift toolkit and Platform Console were also extended again to cover several control-plane blind spots that matter in enterprise estates:
+
+- aggregated `APIService` health so extension-backed APIs that break console or operator flows show up early
+- `CertificateSigningRequest` posture so pending or denied node / kubelet certificate flows are visible without dropping to raw CLI inspection
+- admission webhook configuration posture so fail-open policies and missing CA bundles are reviewable before a change window
+
+The latest lane adds a fast operator advisory path for observability and extension readiness as well:
+
+- monitoring and alert posture summaries for Prometheus, Alertmanager, and `PrometheusRule` coverage
+- control-plane serving certificate and trust-bundle expiry review across key OpenShift namespaces
+- operator dependency / extension readiness scoring derived from cluster operators, subscriptions, CSVs, webhook posture, and aggregated APIs
+- a batched `/platform/advisory` endpoint that returns review packs without the slower multi-turn LLM loop
 
 ### `scripts/validate-docs-javascript.mjs`
 

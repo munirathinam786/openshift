@@ -199,9 +199,23 @@ class ChatResponse(BaseModel):
     tags: list[str] | None = None
 
 
+class PlatformAdvisoryResponse(ChatResponse):
+    advisory: dict[str, Any] | None = None
+
+
 class SecurityAuditRequest(BaseModel):
     profile_key: str = Field(default="sox", max_length=64)
     profile_label: str = Field(min_length=1, max_length=255)
+    focus_label: str = Field(min_length=1, max_length=255)
+    selected_features: list[str] = Field(min_length=1, max_length=20)
+    operator_notes: str = Field(default="", max_length=4000)
+    runtime: RuntimeConfig | None = None
+    tags: list[str] | None = Field(default=None, max_length=10)
+
+
+class PlatformAdvisoryRequest(BaseModel):
+    lane_key: str = Field(default="platform-advisory", max_length=64)
+    lane_label: str = Field(min_length=1, max_length=255)
     focus_label: str = Field(min_length=1, max_length=255)
     selected_features: list[str] = Field(min_length=1, max_length=20)
     operator_notes: str = Field(default="", max_length=4000)
@@ -425,6 +439,173 @@ def _build_security_audit_prompt(
     return " ".join(prompt_parts)
 
 
+def _extract_platform_counts(result: dict[str, Any]) -> tuple[int, int]:
+    flagged_patterns = (
+        "degraded_count",
+        "failed_count",
+        "warning_count",
+        "pending_count",
+        "denied_count",
+        "unavailable_count",
+        "unhealthy_count",
+        "expired_count",
+        "expiring_within_30d_count",
+        "missing_ca_bundle_webhook_count",
+        "fail_open_webhook_count",
+        "hotspot_count",
+        "risky_pod_count",
+        "not_ready_count",
+        "unavailable_alertmanager_count",
+        "unavailable_prometheus_count",
+        "unavailable_api_service_count",
+    )
+    healthy_patterns = (
+        "available_count",
+        "ready_count",
+        "issued_count",
+        "service_backed_webhook_count",
+        "trust_bundle_count",
+    )
+    flagged = sum(_safe_int(result.get(key)) for key in flagged_patterns)
+    healthy = sum(_safe_int(result.get(key)) for key in healthy_patterns)
+    return flagged, healthy
+
+
+def _count_platform_advisory_signals(steps: list[dict[str, Any]]) -> dict[str, int]:
+    summary = {
+        "reviewed_checks": 0,
+        "tool_errors": 0,
+        "flagged_signals": 0,
+        "healthy_signals": 0,
+        "expired_certificates": 0,
+        "expiring_certificates": 0,
+        "monitoring_outages": 0,
+        "critical_alert_rules": 0,
+        "extension_hotspots": 0,
+    }
+
+    for step in steps:
+        result = step.get("tool_result") or {}
+        error_message = result.get("error") or step.get("tool_error")
+        if error_message:
+            summary["tool_errors"] += 1
+            continue
+
+        summary["reviewed_checks"] += 1
+        flagged, healthy = _extract_platform_counts(result)
+        summary["flagged_signals"] += flagged
+        summary["healthy_signals"] += healthy
+        summary["expired_certificates"] += _safe_int(result.get("expired_count"))
+        summary["expiring_certificates"] += _safe_int(result.get("expiring_within_30d_count"))
+        summary["monitoring_outages"] += _safe_int(result.get("unavailable_alertmanager_count"))
+        summary["monitoring_outages"] += _safe_int(result.get("unavailable_prometheus_count"))
+        summary["critical_alert_rules"] += _safe_int(result.get("critical_alert_rule_count"))
+        summary["extension_hotspots"] += _safe_int(result.get("hotspot_count"))
+
+    return summary
+
+
+def _build_platform_advisory_prompt(
+    *,
+    lane_label: str,
+    focus_label: str,
+    region: str,
+    selected_features: list[str],
+    operator_notes: str,
+) -> str:
+    feature_labels = [AGENT_HELPERS._humanize_tool_name(tool_name) for tool_name in selected_features]
+    prompt_parts = [
+        f'Build a non-LLM OpenShift platform advisory pack for "{lane_label}".',
+        f"Primary region or cluster scope: {region}.",
+        f"Review focus: {focus_label}.",
+        f"Selected OpenShift platform features: {', '.join(feature_labels)}.",
+        "Return a fast operator advisory with readiness score, hotspots, evidence summaries, and recommended next actions.",
+    ]
+    if operator_notes.strip():
+        prompt_parts.append(f"Operator notes: {operator_notes.strip()}")
+    return " ".join(prompt_parts)
+
+
+def _build_platform_advisory_payload(
+    *,
+    lane_label: str,
+    focus_label: str,
+    region: str,
+    operator_notes: str,
+    steps: list[dict[str, Any]],
+) -> dict[str, Any]:
+    counters = _count_platform_advisory_signals(steps)
+    attention_tools: list[str] = []
+    healthy_tools: list[str] = []
+    for step in steps:
+        tool_name = ((step.get("tool_call") or {}).get("name")) or ""
+        if not tool_name:
+            continue
+        label = AGENT_HELPERS._humanize_tool_name(tool_name)
+        result = step.get("tool_result") or {}
+        flagged, healthy = _extract_platform_counts(result)
+        if step.get("tool_error") or result.get("error") or flagged > 0:
+            attention_tools.append(label)
+        elif healthy > 0:
+            healthy_tools.append(label)
+
+    readiness_score = max(
+        0,
+        min(
+            100,
+            100
+            - (counters["tool_errors"] * 15)
+            - (min(counters["flagged_signals"], 12) * 4)
+            - (counters["expired_certificates"] * 8)
+            - (counters["expiring_certificates"] * 2)
+            + min(counters["healthy_signals"], 10),
+        ),
+    )
+
+    recommendations: list[str] = []
+    if counters["monitoring_outages"] > 0 or counters["critical_alert_rules"] > 0:
+        recommendations.append("Review the openshift-monitoring Prometheus and Alertmanager control planes first, then validate whether critical alert rules map to active paging expectations.")
+    if counters["expired_certificates"] > 0 or counters["expiring_certificates"] > 0:
+        recommendations.append("Rotate or validate the expiring control-plane serving and trust-bundle certificates before the next maintenance or upgrade window.")
+    if counters["extension_hotspots"] > 0:
+        recommendations.append("Stabilize operator dependencies, extension APIs, and admission wiring together so add-on readiness is not judged on CSV phase alone.")
+    if counters["tool_errors"] > 0:
+        recommendations.append("Rerun the failed checks with the correct kube context, token, and operator API availability so the advisory pack is complete before handoff.")
+    if not recommendations:
+        recommendations.append("The advisory pack did not surface urgent blockers; save this lane as a repeatable pre-change review and compare it with the previous run before the next window.")
+
+    answer_parts = [
+        f"{lane_label} platform advisory completed for {region}.",
+        f"Reviewed {counters['reviewed_checks']} check(s) with {counters['tool_errors']} tool error(s) and a derived readiness score of {readiness_score}/100.",
+        f"Review focus: {focus_label}.",
+    ]
+    if counters["monitoring_outages"] > 0:
+        answer_parts.append(f"Monitoring stack availability gaps detected: {counters['monitoring_outages']} unavailable Prometheus or Alertmanager instance(s).")
+    if counters["critical_alert_rules"] > 0:
+        answer_parts.append(f"Critical alert rule coverage reviewed: {counters['critical_alert_rules']} critical alert rule definition(s).")
+    if counters["expired_certificates"] > 0 or counters["expiring_certificates"] > 0:
+        answer_parts.append(
+            f"Certificate review detected {counters['expired_certificates']} expired and {counters['expiring_certificates']} soon-to-expire control-plane certificate resource(s)."
+        )
+    if counters["extension_hotspots"] > 0:
+        answer_parts.append(f"Operator extension readiness hotspots detected: {counters['extension_hotspots']}.")
+    if operator_notes.strip():
+        answer_parts.append(f"Operator context noted: {operator_notes.strip()}")
+
+    return {
+        "answer": AGENT_HELPERS._augment_final_answer(" ".join(answer_parts), steps, missing_tools=[]),
+        "scorecard": {
+            **counters,
+            "readiness_score": readiness_score,
+            "attention_tool_count": len(attention_tools),
+            "healthy_tool_count": len(healthy_tools),
+        },
+        "attention_tools": attention_tools,
+        "healthy_tools": healthy_tools,
+        "recommendations": recommendations[:4],
+    }
+
+
 def _count_security_audit_signals(steps: list[dict[str, Any]]) -> dict[str, int]:
     summary = {
         "reviewed_controls": 0,
@@ -588,6 +769,104 @@ def _run_batched_security_audit(request: SecurityAuditRequest) -> tuple[ChatResp
             confidence=confidence,
             token_usage={"prompt_tokens": 0, "completion_tokens": 0, "total_tokens": 0},
             tags=audit_tags,
+        ),
+        settings,
+        duration_ms,
+    )
+
+
+def _run_batched_platform_advisory(request: PlatformAdvisoryRequest) -> tuple[PlatformAdvisoryResponse, Settings, int]:
+    settings = _runtime_settings(request.runtime)
+    toolkit = OpenShiftSreToolkit(settings)
+    selected_features: list[str] = []
+    invalid_features: list[str] = []
+    for tool_name in request.selected_features:
+        normalized = str(tool_name or "").strip()
+        if not normalized:
+            continue
+        if normalized in toolkit.tools:
+            if normalized not in selected_features:
+                selected_features.append(normalized)
+        else:
+            invalid_features.append(normalized)
+
+    if invalid_features:
+        raise HTTPException(status_code=400, detail=f"Unsupported platform advisory tools requested: {', '.join(invalid_features)}")
+    if not selected_features:
+        raise HTTPException(status_code=400, detail="At least one supported platform advisory feature is required.")
+
+    prompt = _build_platform_advisory_prompt(
+        lane_label=request.lane_label,
+        focus_label=request.focus_label,
+        region=settings.cluster_scope,
+        selected_features=selected_features,
+        operator_notes=request.operator_notes,
+    )
+
+    started_at = perf_counter()
+    steps: list[dict[str, Any]] = []
+    for index, tool_name in enumerate(selected_features, start=1):
+        step_record: dict[str, Any] = {
+            "step": index,
+            "thought": f"Run {AGENT_HELPERS._humanize_tool_name(tool_name)} for the fast platform advisory pack.",
+            "tool_call": {"name": tool_name, "arguments": {}},
+            "final_answer": "",
+            "batched_platform_advisory": True,
+        }
+        try:
+            step_record["tool_result"] = toolkit.invoke(tool_name, {})
+        except Exception as error:  # noqa: BLE001
+            step_record["tool_error"] = str(error)
+            step_record["tool_result"] = {"error": str(error)}
+        steps.append(step_record)
+
+    advisory = _build_platform_advisory_payload(
+        lane_label=request.lane_label,
+        focus_label=request.focus_label,
+        region=settings.cluster_scope,
+        operator_notes=request.operator_notes,
+        steps=steps,
+    )
+    duration_ms = int((perf_counter() - started_at) * 1000)
+    advisory_tags = list(dict.fromkeys([*(request.tags or []), "platform-advisory", request.lane_key]))
+    confidence = AGENT_HELPERS._compute_confidence(steps)
+    run_id = HISTORY_STORE.record_chat(
+        prompt=prompt,
+        answer=advisory["answer"],
+        steps=steps,
+        model_name=settings.effective_model_name,
+        cluster_scope=settings.cluster_scope,
+        duration_ms=duration_ms,
+        token_usage={"prompt_tokens": 0, "completion_tokens": 0, "total_tokens": 0},
+        tags=advisory_tags,
+    )
+    if run_id is not None:
+        _schedule_ws_broadcast(
+            {
+                "type": "run_completed",
+                "run_id": run_id,
+                "status": "completed",
+                "duration_ms": duration_ms,
+                "model_name": settings.effective_model_name,
+                "provider_name": settings.llm_provider,
+                "prompt_excerpt": prompt[:120],
+                "confidence": confidence,
+            }
+        )
+
+    return (
+        PlatformAdvisoryResponse(
+            answer=advisory["answer"],
+            steps=steps,
+            run_id=run_id,
+            confidence=confidence,
+            token_usage={"prompt_tokens": 0, "completion_tokens": 0, "total_tokens": 0},
+            tags=advisory_tags,
+            advisory={
+                "lane_label": request.lane_label,
+                "focus_label": request.focus_label,
+                **advisory,
+            },
         ),
         settings,
         duration_ms,
@@ -1460,6 +1739,17 @@ def security_audit(request: SecurityAuditRequest) -> ChatResponse:
         raise HTTPException(status_code=503, detail="Server is shutting down.")
 
     response, _, _ = _run_batched_security_audit(request)
+    return response
+
+
+@app.post("/platform/advisory", response_model=PlatformAdvisoryResponse)
+def platform_advisory(request: PlatformAdvisoryRequest) -> PlatformAdvisoryResponse:
+    """Run a batched non-LLM platform advisory pack for fast operator review lanes."""
+
+    if _shutting_down:
+        raise HTTPException(status_code=503, detail="Server is shutting down.")
+
+    response, _, _ = _run_batched_platform_advisory(request)
     return response
 
 

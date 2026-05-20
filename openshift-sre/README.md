@@ -124,11 +124,25 @@ The page now also includes:
 - saved platform-review templates backed by the investigations API
 - watchlist creation and manual watchlist execution from the same workspace
 - run-to-run comparison and readiness scoring inside the platform lane
+- a fast non-LLM advisory pack lane backed by `/platform/advisory` for pre-change review packs
 - a multi-cluster sweep lane powered by the platform sweep API
 - optional streaming review execution for live evidence visibility
 - a searchable feature selector that now covers cluster networking, ingress controllers, cluster proxy, DNS operator settings, feature gates, scheduler posture, machine health checks, cluster autoscaling, HPAs, PDBs, CronJobs, volume snapshots, RBAC bindings, service accounts, limit ranges, BuildConfigs, DeploymentConfigs, Knative services, VM snapshots, and Migration Toolkit resources
 
 The `Security and governance` lane in the Platform Console now exposes the full platform-facing governance surface already available in the backend, including OAuth/LDAP posture, SCCs, RBAC bindings, service accounts, limit ranges, network policies, resource quotas, ACM fleet governance, and ACS rollout coverage.
+
+This enterprise pass also expands the console and toolkit with a few high-value control-plane checks that are easy to miss until they hurt:
+
+- aggregated `APIService` availability and extension registration drift
+- `CertificateSigningRequest` approval / denial backlog for node and certificate operations
+- mutating and validating admission webhook posture, including fail-open behavior and missing CA bundle wiring
+
+This follow-on pass adds another high-value enterprise lane focused on control-plane observability and extension safety:
+
+- monitoring and alert posture across Prometheus, Alertmanager, and `PrometheusRule` coverage
+- control-plane certificate expiry and trust-bundle review across key OpenShift namespaces
+- operator dependency / extension readiness scoring that combines cluster operators, subscriptions, CSVs, webhook posture, and aggregated APIs
+- a batched `/platform/advisory` endpoint for fast, non-LLM operator review packs
 
 ## Rebuild workflow
 

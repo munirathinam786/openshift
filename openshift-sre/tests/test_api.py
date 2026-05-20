@@ -389,6 +389,82 @@ def test_security_audit_endpoint_batches_selected_controls(client, api_mocks):
     api_mocks["toolkit"].invoke.assert_any_call("list_securityhub_findings", {})
 
 
+def test_platform_advisory_endpoint_batches_selected_controls(client, api_mocks):
+    api_mocks["toolkit"].tools = {
+        "list_monitoring_alert_posture": object(),
+        "list_control_plane_certificates": object(),
+        "list_operator_extension_readiness": object(),
+        "list_api_service_health": object(),
+    }
+
+    def fake_invoke(tool_name, _arguments):
+        responses = {
+            "list_monitoring_alert_posture": {
+                "alertmanager_count": 1,
+                "unavailable_alertmanager_count": 1,
+                "prometheus_count": 1,
+                "unavailable_prometheus_count": 0,
+                "prometheus_rule_count": 3,
+                "critical_alert_rule_count": 2,
+            },
+            "list_control_plane_certificates": {
+                "count": 4,
+                "expired_count": 1,
+                "expiring_within_30d_count": 2,
+                "trust_bundle_count": 2,
+            },
+            "list_operator_extension_readiness": {
+                "count": 1,
+                "readiness_score": 74,
+                "degraded_operator_count": 1,
+                "unavailable_api_service_count": 1,
+                "hotspot_count": 2,
+            },
+            "list_api_service_health": {"count": 5, "unavailable_count": 1},
+        }
+        return responses[tool_name]
+
+    api_mocks["toolkit"].invoke.side_effect = fake_invoke
+
+    resp = client.post(
+        "/platform/advisory",
+        json={
+            "lane_key": "observability",
+            "lane_label": "Observability and extension readiness",
+            "focus_label": "Fast non-LLM advisory pack",
+            "selected_features": [
+                "list_monitoring_alert_posture",
+                "list_control_plane_certificates",
+                "list_operator_extension_readiness",
+                "list_api_service_health",
+            ],
+            "operator_notes": "Use this pack before the next maintenance window.",
+            "runtime": {"cluster_scope": "prod-east"},
+            "tags": ["platform-console", "observability"],
+        },
+    )
+
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["run_id"] == 42
+    assert data["confidence"] is not None
+    assert "Observability and extension readiness platform advisory completed" in data["answer"]
+    assert data["advisory"]["scorecard"]["readiness_score"] == 58
+    assert "Monitoring Alert Posture" in data["advisory"]["attention_tools"]
+    assert len(data["advisory"]["recommendations"]) >= 3
+    assert len(data["steps"]) == 4
+    assert all(step["batched_platform_advisory"] is True for step in data["steps"])
+    assert data["steps"][1]["tool_call"]["name"] == "list_control_plane_certificates"
+
+    recorded = api_mocks["history_store"].record_chat.call_args.kwargs
+    assert recorded["cluster_scope"] == "prod-east"
+    assert recorded["model_name"] == "gpt-oss:20b"
+    assert recorded["token_usage"] == {"prompt_tokens": 0, "completion_tokens": 0, "total_tokens": 0}
+    assert "Selected OpenShift platform features" in recorded["prompt"]
+    api_mocks["toolkit"].invoke.assert_any_call("list_monitoring_alert_posture", {})
+    api_mocks["toolkit"].invoke.assert_any_call("list_operator_extension_readiness", {})
+
+
 def test_chat_with_external_llm_runtime_records_effective_model(client, api_mocks):
     resp = client.post(
         "/chat",
