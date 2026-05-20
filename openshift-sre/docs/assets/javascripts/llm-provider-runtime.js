@@ -75,7 +75,7 @@
     }
   };
 
-  window.AwsSreLlmRuntime = {
+  const runtimeApi = {
     fallbackCatalog: FALLBACK_PROVIDER_CATALOG,
     normalizeProviderId,
     getProvider,
@@ -83,4 +83,7 @@
     buildLlmRuntime,
     fetchProviderCatalog,
   };
+
+  window.OpenShiftSreLlmRuntime = runtimeApi;
+  window.AwsSreLlmRuntime = runtimeApi;
 })();

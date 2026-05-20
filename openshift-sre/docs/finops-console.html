@@ -14,10 +14,10 @@
       <script type="application/json" data-app-shell-props>
         {
           "key": "finops",
-          "eyebrow": "Cloud financial operations",
+          "eyebrow": "OpenShift platform economics",
           "title": "FinOps Console",
-          "description": "Dedicated workspace for cluster cost optimization, chargeback & showback, reserved/spot instance purchasing, executive reporting, rightsizing, anomaly detection, and approval-queue-driven safe execution planning.",
-          "badges": ["React", "45+ operations", "Chargeback", "RI/Spot purchasing", "Executive reports", "Approval queue"],
+          "description": "Dedicated workspace for OpenShift platform efficiency, chargeback & showback, rightsizing, storage hygiene, route rationalization, executive reporting, and approval-queue-driven safe execution planning.",
+          "badges": ["React", "30+ operations", "Chargeback", "Platform efficiency", "Executive reports", "Approval queue"],
           "actions": [
             { "label": "Agent console", "href": "console.html" },
             { "label": "Open history", "href": "history.html" }
@@ -27,7 +27,7 @@
             { "label": "Tool drilldown", "href": "tool-drilldown.html" }
           ],
           "stats": [
-            { "label": "FinOps tools", "value": "45+ operations", "detail": "Cost analysis, chargeback by tags/account/project, RI & Spot purchasing, storage & network optimization, executive summaries, team scorecards, and more." },
+            { "label": "FinOps tools", "value": "30+ operations", "detail": "Platform efficiency, chargeback by namespace or platform pattern, storage and network optimization, governance reviews, executive summaries, and team scorecards." },
             { "label": "Execution model", "value": "Proposal-only", "detail": "All recommendations are queued for human review before any cluster mutation." },
             { "label": "Approval queue", "value": "Persistent stages", "detail": "Items progress through planned → approved → precheck → ready → executed → rolled back." }
           ],
@@ -46,15 +46,15 @@
           ],
           "highlights": [
             { "title": "Operation selector", "description": "45+ operations across 8 groups: Workflows, Cost Analysis, Chargeback & Showback, Commitment & Purchasing, Optimization, Governance, and Reporting & Executive." },
-            { "title": "Chargeback & showback", "description": "Charge back costs by tags, account, project, team, or Kubernetes namespace. Allocate shared services and track budget variance." },
-            { "title": "Purchasing intelligence", "description": "Reserved Instance & Savings Plans purchase planning, Spot strategy, Graviton migration, and commitment expiry analysis." },
-            { "title": "Executive reporting", "description": "Generate executive summaries, board presentations, weekly digests, savings reports, unit economics, team scorecards, and what-if forecasts." },
+            { "title": "Chargeback & showback", "description": "Allocate platform cost by namespace, team, project, or platform pattern. Make shared OpenShift services visible and defensible." },
+            { "title": "Platform efficiency", "description": "Focus on worker capacity, namespace density, storage hygiene, route rationalization, operator footprint, and non-production scheduling." },
+            { "title": "Executive reporting", "description": "Generate executive summaries, board narratives, weekly digests, waste-reduction reports, unit economics, and team scorecards." },
             { "title": "Safe execution queue", "description": "Queue recommendations with stage tracking, auto-approve toggles, and rollback guidance." }
           ],
           "featureGroups": [
             {
               "kicker": "FinOps workspace",
-              "title": "Optimization, chargeback, commitments, and reporting in one surface",
+              "title": "Optimization, chargeback, governance, and reporting in one surface",
               "description": "The FinOps page is purpose-built for both platform operators and finance-facing review workflows.",
               "items": [
                 { "title": "Operation catalog", "description": "Navigate broad workflows, single-question analyses, and executive report generators from a structured catalog.", "meta": "Launcher", "href": "#finops-launcher" },
@@ -83,9 +83,9 @@
         <article class="md-content__inner md-typeset">
           <section class="agent-shell__fallback">
             <h1>FinOps Console</h1>
-            <p>Dedicated workspace for cluster cost optimization, chargeback & showback, reserved/spot instance purchasing, executive reporting, and approval-queue-driven safe execution planning.</p>
+            <p>Dedicated workspace for OpenShift platform efficiency, chargeback &amp; showback, storage and route hygiene, executive reporting, and approval-queue-driven safe execution planning.</p>
             <ul>
-              <li>Select from 45+ FinOps operations across 8 groups (Workflows, Cost Analysis, Chargeback, Commitment & Purchasing, Optimization, Governance, Reporting & Executive).</li>
+              <li>Select from OpenShift-native FinOps operations across workflows, resource analysis, chargeback, capacity, storage, network, governance, and reporting lanes.</li>
               <li>The page calls the live <code>POST /chat</code> endpoint on the same origin.</li>
               <li>Workflow results are structured into opportunities, savings tables, action cards, and an approval queue.</li>
             </ul>

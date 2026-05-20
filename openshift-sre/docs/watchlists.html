@@ -13,7 +13,7 @@
           "key": "watchlists",
           "eyebrow": "Repeatable investigations",
           "title": "Watchlists & Saved Investigations",
-          "description": "Save reusable investigation prompts, attach regional or cross-account targets, and run them as manual watchlists with the same operator-safe theme.",
+          "description": "Save reusable OpenShift investigation prompts, attach cluster scopes or execution contexts, and run them as manual watchlists with the same operator-safe theme.",
           "badges": ["Saved prompt packs", "Manual watchlist runs", "3D operator surface"],
           "actions": [
             { "label": "Open Agent Console", "href": "console.html" },
@@ -25,9 +25,9 @@
             { "label": "FinOps Console", "href": "finops-console.html" }
           ],
           "stats": [
-            { "label": "Saved prompts", "value": "Reusable investigation packs", "detail": "Investigations preserve the prompt, category, tags, and default regions so teams stop rewriting the same reviews." },
+            { "label": "Saved prompts", "value": "Reusable investigation packs", "detail": "Investigations preserve the prompt, category, tags, and default cluster scopes so teams stop rewriting the same reviews." },
             { "label": "Execution mode", "value": "Manual-first watchlists", "detail": "Runs stay operator-triggered so scope, trust context, and blast radius are validated before each launch." },
-            { "label": "Operational fit", "value": "Weekly hygiene sweeps", "detail": "Ideal for recurring posture checks, recurring chargeback reviews, and multi-region governance routines." }
+            { "label": "Operational fit", "value": "Weekly hygiene sweeps", "detail": "Ideal for recurring platform checks, recurring chargeback reviews, and multi-cluster governance routines." }
           ],
           "sectionNav": [
             { "label": "Saved investigations", "href": "#watchlists-investigations" },
@@ -37,9 +37,9 @@
             { "label": "Reusable prompts", "href": "#watchlists-investigations" },
             { "label": "Manual run queue", "href": "#watchlists-runs" }
           ],
-          "workspaceSignals": ["Backed by persistence", "Runs store normal chat history", "Role + region fan-out supported"],
+          "workspaceSignals": ["Backed by persistence", "Runs store normal chat history", "Execution context + cluster-scope fan-out supported"],
           "highlights": [
-            { "title": "Prompt packs with memory", "description": "Store recurring investigation prompts once, then reuse them across regional audits, platform checks, and governance walkthroughs." },
+            { "title": "Prompt packs with memory", "description": "Store recurring investigation prompts once, then reuse them across cluster audits, platform checks, and governance walkthroughs." },
             { "title": "Manual operator launch", "description": "Watchlists stay intentionally human-triggered so context, credentials, and the intended blast radius are reviewed before execution." },
             { "title": "History-friendly results", "description": "Manual watchlist runs land in the normal run history, making them easy to compare later in history and drift views." }
           ],
@@ -49,13 +49,13 @@
               "title": "Build reusable prompts without losing operator control",
               "description": "This page sits between ad-hoc prompting and full automation: reusable enough for consistency, manual enough for safe review.",
               "items": [
-                { "title": "Saved investigation templates", "description": "Capture the actual investigation prompt, category, tags, and preferred regions in one place for future runs.", "meta": "Prompt reuse", "href": "#watchlists-investigations" },
-                { "title": "Role and region fan-out", "description": "Attach target regions and optional cross-account roles so every run starts with the right visibility footprint.", "meta": "Scope control", "href": "#watchlists-runs" },
+                { "title": "Saved investigation templates", "description": "Capture the actual investigation prompt, category, tags, and preferred cluster scopes in one place for future runs.", "meta": "Prompt reuse", "href": "#watchlists-investigations" },
+                { "title": "Execution context fan-out", "description": "Attach target cluster scopes and optional execution contexts so every run starts with the right visibility footprint.", "meta": "Scope control", "href": "#watchlists-runs" },
                 { "title": "Operator notes lane", "description": "Keep human context near the run itself so recurring checks include intent, timing, and expected follow-up steps.", "meta": "Run hygiene", "href": "#watchlists-runs" }
               ]
             }
           ],
-          "notice": "These watchlists are intentionally manual-first so operators can validate scope, regions, and trust context before each run."
+          "notice": "These watchlists are intentionally manual-first so operators can validate scope, cluster targets, and trust context before each run."
         }
       </script>
     </div>
@@ -66,15 +66,15 @@
             <section class="agent-console__panel" id="watchlists-investigations">
               <h2>Saved investigations</h2>
               <label class="agent-console__label" for="investigation-name">Name</label>
-              <input id="investigation-name" class="agent-console__input" data-investigation-name type="text" placeholder="Regional network hygiene review">
+              <input id="investigation-name" class="agent-console__input" data-investigation-name type="text" placeholder="Cluster edge hygiene review">
               <label class="agent-console__label" for="investigation-category">Category</label>
               <input id="investigation-category" class="agent-console__input" data-investigation-category type="text" value="platform">
-              <label class="agent-console__label" for="investigation-regions">Default regions</label>
-              <input id="investigation-regions" class="agent-console__input" data-investigation-regions type="text" placeholder="local-cluster,us-west-2">
+              <label class="agent-console__label" for="investigation-regions">Default cluster scopes</label>
+              <input id="investigation-regions" class="agent-console__input" data-investigation-regions type="text" placeholder="local-cluster,aro-prod,rosa-stage">
               <label class="agent-console__label" for="investigation-tags">Default tags</label>
               <input id="investigation-tags" class="agent-console__input" data-investigation-tags type="text" placeholder="network,weekly-review">
               <label class="agent-console__label" for="investigation-prompt">Prompt</label>
-              <textarea id="investigation-prompt" class="agent-console__textarea" data-investigation-prompt placeholder="Review security groups, route tables, NAT gateways, and VPC endpoints. Highlight internet exposure, blackhole routes, and missing private connectivity posture."></textarea>
+              <textarea id="investigation-prompt" class="agent-console__textarea" data-investigation-prompt placeholder="Review routes, services, network policies, and operator health. Highlight public exposure, stale routes, missing isolation, and namespace drift."></textarea>
               <div class="agent-console__actions">
                 <button class="agent-console__button" type="button" data-investigation-save>Save investigation</button>
                 <button class="agent-console__example" type="button" data-investigation-example="network">Load network example</button>
@@ -151,13 +151,13 @@
                 <p class="agent-console__meta" data-watchlist-llm-provider-note>Manual watchlist runs can use the local Ollama model or an external provider like OpenAI, Azure OpenAI, Anthropic, Gemini, or OpenRouter.</p>
               </details>
               <label class="agent-console__label" for="watchlist-name">Watchlist name</label>
-              <input id="watchlist-name" class="agent-console__input" data-watchlist-name type="text" placeholder="Weekly regional network audit">
+              <input id="watchlist-name" class="agent-console__input" data-watchlist-name type="text" placeholder="Weekly cluster hygiene review">
               <label class="agent-console__label" for="watchlist-investigation">Saved investigation</label>
               <select id="watchlist-investigation" class="agent-console__input" data-watchlist-investigation></select>
-              <label class="agent-console__label" for="watchlist-regions">Regions</label>
-              <input id="watchlist-regions" class="agent-console__input" data-watchlist-regions type="text" placeholder="local-cluster,us-west-2">
-              <label class="agent-console__label" for="watchlist-roles">Role ARNs (optional, one per line)</label>
-              <textarea id="watchlist-roles" class="agent-console__textarea" data-watchlist-roles placeholder="cluster:role/readonly-sre-audit"></textarea>
+              <label class="agent-console__label" for="watchlist-regions">Cluster scopes</label>
+              <input id="watchlist-regions" class="agent-console__input" data-watchlist-regions type="text" placeholder="local-cluster,aro-prod,rosa-stage">
+              <label class="agent-console__label" for="watchlist-roles">Execution contexts (optional, one per line)</label>
+              <textarea id="watchlist-roles" class="agent-console__textarea" data-watchlist-roles placeholder="kubeadmin@aro-prod&#10;sre-readonly@rosa-stage"></textarea>
               <label class="agent-console__label" for="watchlist-notes">Operator notes</label>
               <textarea id="watchlist-notes" class="agent-console__textarea" data-watchlist-notes placeholder="Run every Monday after patching."></textarea>
               <div class="agent-console__actions">

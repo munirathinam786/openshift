@@ -2,7 +2,7 @@
   const root = document.querySelector('[data-watchlists]');
   if (!root) return;
 
-  const llmRuntime = window.AwsSreLlmRuntime || {};
+  const llmRuntime = window.OpenShiftSreLlmRuntime || window.AwsSreLlmRuntime || {};
 
   const investigationName = root.querySelector('[data-investigation-name]');
   const investigationCategory = root.querySelector('[data-investigation-category]');
@@ -162,7 +162,7 @@
       <article class="agent-console__history-card">
         <div class="agent-console__history-badge-row">
           <span class="agent-console__history-badge">${investigation.category}</span>
-          <span class="agent-console__history-badge">${(investigation.default_regions || []).join(', ') || 'default region'}</span>
+          <span class="agent-console__history-badge">${(investigation.default_regions || []).join(', ') || 'default scope'}</span>
         </div>
         <h3>${investigation.name}</h3>
         <p>${investigation.description || 'No description provided yet.'}</p>
@@ -185,8 +185,8 @@
         </div>
         <h3>${watchlist.name}</h3>
         <p>${investigation.name || 'No saved investigation linked.'}</p>
-        <p class="agent-console__meta">Regions: ${(watchlist.regions || []).join(', ') || 'inherit from investigation / runtime'}</p>
-        <p class="agent-console__meta">Roles: ${(watchlist.role_arns || []).length || 0} configured</p>
+        <p class="agent-console__meta">Cluster scopes: ${(watchlist.regions || []).join(', ') || 'inherit from investigation / runtime'}</p>
+        <p class="agent-console__meta">Execution contexts: ${(watchlist.role_arns || []).length || 0} configured</p>
         <p class="agent-console__meta">Last run: ${watchlist.last_run_at || 'never'}</p>
         <div class="agent-console__actions">
           <button class="agent-console__button agent-console__button--secondary" type="button" data-watchlist-run-id="${watchlist.id}">Run now</button>
@@ -198,7 +198,7 @@
   function runResultMarkup(result) {
     return `
       <details class="agent-console__history-card agent-console__history-card--detail">
-        <summary>${result.region} · ${result.role_arn || 'current trust context'} · run ${result.run_id || 'n/a'}</summary>
+        <summary>${result.region} · ${result.role_arn || 'current execution context'} · run ${result.run_id || 'n/a'}</summary>
         <p class="agent-console__meta">Confidence: ${result.confidence ?? '—'}</p>
         <pre>${result.answer || 'No answer returned.'}</pre>
       </details>
@@ -281,17 +281,17 @@
   root.querySelectorAll('[data-investigation-example]').forEach((button) => {
     button.addEventListener('click', () => {
       if (button.dataset.investigationExample === 'network') {
-        investigationName.value = 'Regional network hygiene review';
+        investigationName.value = 'Cluster edge hygiene review';
         investigationCategory.value = 'platform';
-        investigationRegions.value = 'local-cluster,us-west-2';
+        investigationRegions.value = 'local-cluster,aro-prod';
         investigationTags.value = 'network,governance';
-        investigationPrompt.value = 'Review security groups, route tables, NAT gateways, and VPC endpoints. Highlight internet exposure, blackhole routes, missing private connectivity, and cross-region drift.';
+        investigationPrompt.value = 'Review routes, services, ingresses, and network policies. Highlight public exposure, stale routes, missing isolation, and cross-cluster drift.';
       } else {
         investigationName.value = 'Storage governance review';
         investigationCategory.value = 'storage';
-        investigationRegions.value = 'local-cluster,eu-west-1';
+        investigationRegions.value = 'local-cluster,ibmz-prod';
         investigationTags.value = 'storage,governance';
-        investigationPrompt.value = 'Inspect S3 governance posture, RDS failover posture, and RDS event subscriptions. Highlight public buckets, missing encryption, weak failover posture, and absent notification coverage.';
+        investigationPrompt.value = 'Inspect persistent volumes, persistent volume claims, storage classes, image streams, and builds. Highlight stale storage, weak reclaim posture, and artifact sprawl.';
       }
     });
   });

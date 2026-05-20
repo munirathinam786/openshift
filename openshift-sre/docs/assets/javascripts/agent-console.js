@@ -26,7 +26,7 @@
   const historyRuns = root.querySelector('[data-agent-history-runs]');
   const steps = root.querySelector('[data-agent-steps]');
   const promptButtons = root.querySelectorAll('button[data-agent-prompt], button[data-agent-example]');
-  const llmRuntime = window.AwsSreLlmRuntime || {};
+  const llmRuntime = window.OpenShiftSreLlmRuntime || window.AwsSreLlmRuntime || {};
   const llmProviderInput = root.querySelector('[data-agent-llm-provider]');
   const ollamaBaseUrlInput = root.querySelector('[data-agent-ollama-base-url]');
   const modelNameInput = root.querySelector('[data-agent-model-name]');
@@ -1822,7 +1822,7 @@
     .replace(/^get_/, '')
     .replace(/^run_/, '')
     .split('_')
-    .map((part) => ({ aws: 'AWS', ec2: 'EC2', efs: 'EFS', kms: 'KMS', vpc: 'VPC', tgw: 'TGW', ssm: 'SSM' }[part] || `${part.charAt(0).toUpperCase()}${part.slice(1)}`))
+    .map((part) => ({ oc: 'oc', pvc: 'PVC', pv: 'PV', scc: 'SCC', olm: 'OLM', csv: 'CSV', mcp: 'MCP', api: 'API' }[part] || `${part.charAt(0).toUpperCase()}${part.slice(1)}`))
     .join(' ');
 
   const classifyError = (message = '') => {
@@ -2180,10 +2180,10 @@
 
   const serviceCategory = (service = '') => {
     const normalized = String(service).toLowerCase();
-    if (/(ec2|eks|ecs|lambda|rds|redshift|elasticache|opensearch|emr)/.test(normalized)) {
+    if (/(node|machine|worker|capacity|cpu|memory|autoscal)/.test(normalized)) {
       return 'compute';
     }
-    if (/(s3|ebs|efs|glacier|backup|storage)/.test(normalized)) {
+    if (/(storage|volume|pvc|pv|image|registry|build|artifact)/.test(normalized)) {
       return 'storage';
     }
     return null;
@@ -2336,14 +2336,14 @@
         if (coverage < 85 || uncoveredAverage > 0) {
           upsertOpportunity(opportunities, {
             key: 'commitment-savings-plans-gap',
-            title: `Close Savings Plans coverage gap (${formatNumber(coverage)}%)`,
+            title: `Reduce uncovered baseline spend (${formatNumber(coverage)}%)`,
             category: 'commitment',
             estimatedMonthlySavings: uncoveredAverage,
             unit: rows[0]?.on_demand_cost?.unit || 'USD',
             basis: 'Observed uncovered on-demand spend',
             confidence: 'medium',
             risk: 'medium',
-            action: 'Review steady-state compute baseline and purchase or rebalance Savings Plans for the consistently uncovered portion of spend.',
+            action: 'Review steady-state platform usage and reduce uncovered waste or rebalance baseline capacity for the consistently uncovered portion of spend.',
             evidence: `Average coverage is ${formatNumber(coverage)}% with about ${formatCurrency(uncoveredAverage, rows[0]?.on_demand_cost?.unit || 'USD')} of uncovered on-demand cost per sampled period.`,
             executionPlan: 'Future safe execution plan: validate steady-state compute usage, simulate commitment scenarios, obtain finance approval, and then place the commitment purchase through controlled automation.'
           });
@@ -2435,7 +2435,7 @@
       { label: 'Estimated monthly savings', value: formatCurrency(workflow.totalEstimatedMonthlySavings, 'USD') },
       { label: 'Observed spend', value: workflow.overview.totalObservedSpend === null ? '—' : formatCurrency(workflow.overview.totalObservedSpend, 'USD') },
       { label: 'Forecast', value: workflow.overview.forecastTotal === null ? '—' : formatCurrency(workflow.overview.forecastTotal, workflow.overview.forecastUnit) },
-      { label: 'Savings Plans coverage', value: workflow.overview.savingsPlansCoverage === null ? '—' : `${formatNumber(workflow.overview.savingsPlansCoverage)}%` },
+      { label: 'Efficiency coverage', value: workflow.overview.savingsPlansCoverage === null ? '—' : `${formatNumber(workflow.overview.savingsPlansCoverage)}%` },
       { label: 'Direct rightsizing savings', value: formatCurrency(workflow.overview.rightsizingSavings, 'USD') }
     ].map((item) => `
       <article class="agent-console__history-card">

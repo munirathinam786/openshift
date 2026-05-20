@@ -19,10 +19,27 @@
   let lastSweepPayload = null;
 
   const presetTools = {
-    network: ['get_caller_identity', 'list_security_groups', 'list_route_tables', 'list_nat_gateways', 'list_vpc_endpoints'],
-    storage: ['get_caller_identity', 'list_s3_bucket_posture', 'list_rds_failover_posture', 'list_rds_event_subscriptions'],
-    identity: ['get_caller_identity', 'list_enabled_regions', 'list_iam_roles', 'list_lambda_operational_posture']
+    network: ['get_cluster_identity', 'list_routes', 'list_services', 'list_network_policies'],
+    storage: ['get_cluster_identity', 'list_persistent_storage', 'list_storage_classes', 'list_workload_health'],
+    identity: ['get_cluster_identity', 'list_cluster_operators', 'list_operator_subscriptions', 'list_resource_quotas']
   };
+
+  function countRows(payload) {
+    if (!payload) return '—';
+    if (Number.isFinite(Number(payload.count))) return Number(payload.count);
+    if (Array.isArray(payload.items)) return payload.items.length;
+    for (const value of Object.values(payload)) {
+      if (Array.isArray(value)) return value.length;
+    }
+    return '—';
+  }
+
+  function getClusterIdentity(target) {
+    const identity = target.tool_results?.get_cluster_identity || target.caller_identity || {};
+    const name = identity.cluster_name || identity.infrastructure_name || identity.name || identity.account || 'unknown cluster';
+    const detail = identity.current_context || identity.namespace || identity.arn || identity.api_url || 'identity unavailable';
+    return { name, detail };
+  }
 
   function selectedTools() {
     return Array.from(toolsSelect.selectedOptions).map((option) => option.value);
@@ -105,21 +122,16 @@
 
   function summarizeTarget(target) {
     const toolResults = target.tool_results || {};
-    const securityGroups = toolResults.list_security_groups || {};
-    const routeTables = toolResults.list_route_tables || {};
-    const s3 = toolResults.list_s3_bucket_posture || {};
-    const budgets = toolResults.list_budgets || {};
-    const costByAccount = toolResults.list_cost_by_account || {};
     return {
       region: target.region || 'unknown-region',
-      roleArn: target.role_arn || 'current trust context',
-      account: target.caller_identity?.account || 'unknown account',
-      arn: target.caller_identity?.arn || 'Caller identity unavailable',
-      riskyGroups: securityGroups.risky_group_count ?? '—',
-      blackholeRoutes: routeTables.blackhole_route_count ?? '—',
-      bucketRisk: s3.public_or_unencrypted_count ?? '—',
-      budgets: budgets.count ?? '—',
-      spend: moneyBlock(costByAccount.total_unblended_cost)
+      roleArn: target.role_arn || 'current execution context',
+      account: getClusterIdentity(target).name,
+      arn: getClusterIdentity(target).detail,
+      riskyGroups: countRows(toolResults.list_cluster_operators),
+      blackholeRoutes: countRows(toolResults.list_nodes),
+      bucketRisk: countRows(toolResults.list_persistent_storage),
+      budgets: countRows(toolResults.list_resource_quotas),
+      spend: countRows(toolResults.list_workload_health)
     };
   }
 
@@ -183,12 +195,12 @@
     titleSlide.background = { color: 'F8FAFC' };
     titleSlide.addText(context.reportLabel, { x: 0.5, y: 0.5, w: 6.5, h: 0.5, fontSize: 24, bold: true, color: '0F172A' });
     titleSlide.addText(`Generated ${context.generatedAt.toLocaleString()}`, { x: 0.5, y: 1.1, w: 4.5, h: 0.3, fontSize: 14, color: '2563EB' });
-    titleSlide.addText(`Targets: ${context.count}\nRegions: ${context.regions.join(', ') || '—'}\nRoles: ${context.roleArns.join(', ') || 'Current trust context'}\nTools: ${context.toolNames.join(', ') || '—'}`, { x: 0.5, y: 1.7, w: 5.8, h: 2.2, fontSize: 12, color: '334155', breakLine: true });
-    titleSlide.addText((context.summaries.slice(0, 4).map((item) => `• ${item.account} @ ${item.region} — SG risk ${item.riskyGroups}, blackholes ${item.blackholeRoutes}, bucket risk ${item.bucketRisk}, spend ${item.spend}`).join('\n')) || '• No sweep targets were returned.', { x: 6.7, y: 1.4, w: 5.2, h: 3.0, fontSize: 12, color: '0F172A', margin: 0.12, fill: { color: 'DBEAFE' }, line: { color: '93C5FD' } });
+    titleSlide.addText(`Targets: ${context.count}\nCluster scopes: ${context.regions.join(', ') || '—'}\nExecution contexts: ${context.roleArns.join(', ') || 'Current execution context'}\nTools: ${context.toolNames.join(', ') || '—'}`, { x: 0.5, y: 1.7, w: 5.8, h: 2.2, fontSize: 12, color: '334155', breakLine: true });
+    titleSlide.addText((context.summaries.slice(0, 4).map((item) => `• ${item.account} @ ${item.region} — operator rows ${item.riskyGroups}, node rows ${item.blackholeRoutes}, storage rows ${item.bucketRisk}, workload rows ${item.spend}`).join('\n')) || '• No sweep targets were returned.', { x: 6.7, y: 1.4, w: 5.2, h: 3.0, fontSize: 12, color: '0F172A', margin: 0.12, fill: { color: 'DBEAFE' }, line: { color: '93C5FD' } });
 
     const detailSlide = pptx.addSlide();
     detailSlide.addText('Target summary', { x: 0.5, y: 0.4, w: 6.0, h: 0.4, fontSize: 20, bold: true, color: '0F172A' });
-    detailSlide.addText((context.summaries.length ? context.summaries : [{ account: 'No targets', region: '—', riskyGroups: '—', blackholeRoutes: '—', bucketRisk: '—', budgets: '—', spend: '—' }]).map((item) => `• ${item.account} (${item.region})\n  Role: ${item.roleArn}\n  Risky SGs: ${item.riskyGroups} · Blackhole routes: ${item.blackholeRoutes} · Bucket risk: ${item.bucketRisk} · Budgets: ${item.budgets} · Spend: ${item.spend}`).join('\n'), { x: 0.5, y: 1.0, w: 11.4, h: 5.6, fontSize: 11, color: '0F172A', margin: 0.12, fill: { color: 'FFFFFF' }, line: { color: 'CBD5E1' } });
+    detailSlide.addText((context.summaries.length ? context.summaries : [{ account: 'No targets', region: '—', riskyGroups: '—', blackholeRoutes: '—', bucketRisk: '—', budgets: '—', spend: '—' }]).map((item) => `• ${item.account} (${item.region})\n  Context: ${item.roleArn}\n  Operator rows: ${item.riskyGroups} · Node rows: ${item.blackholeRoutes} · Storage rows: ${item.bucketRisk} · Quota rows: ${item.budgets} · Workload rows: ${item.spend}`).join('\n'), { x: 0.5, y: 1.0, w: 11.4, h: 5.6, fontSize: 11, color: '0F172A', margin: 0.12, fill: { color: 'FFFFFF' }, line: { color: 'CBD5E1' } });
 
     await pptx.writeFile({ fileName: `openshift-sre-posture-radar-${createTimestampSlug()}.pptx` });
   }
@@ -226,11 +238,11 @@
     cursorY += 24;
     addBlock('Sweep scope', [
       `Targets: ${context.count}`,
-      `Regions: ${context.regions.join(', ') || '—'}`,
-      `Roles: ${context.roleArns.join(', ') || 'Current trust context'}`,
+      `Cluster scopes: ${context.regions.join(', ') || '—'}`,
+      `Execution contexts: ${context.roleArns.join(', ') || 'Current execution context'}`,
       `Tools: ${context.toolNames.join(', ') || '—'}`
     ]);
-    addBlock('Target summary', context.summaries.length ? context.summaries.map((item) => `${item.account} (${item.region}) — Role: ${item.roleArn}; Risky SGs: ${item.riskyGroups}; Blackhole routes: ${item.blackholeRoutes}; Bucket risk: ${item.bucketRisk}; Budgets: ${item.budgets}; Spend: ${item.spend}`) : ['No sweep targets were returned.']);
+    addBlock('Target summary', context.summaries.length ? context.summaries.map((item) => `${item.account} (${item.region}) — Context: ${item.roleArn}; Operator rows: ${item.riskyGroups}; Node rows: ${item.blackholeRoutes}; Storage rows: ${item.bucketRisk}; Quota rows: ${item.budgets}; Workload rows: ${item.spend}`) : ['No sweep targets were returned.']);
     doc.save(`openshift-sre-posture-radar-${createTimestampSlug()}.pdf`);
   }
 
@@ -255,12 +267,12 @@
     <p class="meta">${escapeHtml(context.generatedAt.toLocaleString())}</p>
     <div>
       <span class="chip">Targets: ${escapeHtml(context.count)}</span>
-      <span class="chip">Regions: ${escapeHtml(context.regions.join(', ') || '—')}</span>
+      <span class="chip">Cluster scopes: ${escapeHtml(context.regions.join(', ') || '—')}</span>
       <span class="chip">Tools: ${escapeHtml(context.toolNames.join(', ') || '—')}</span>
     </div>
     <div class="section">
       <h2>Target summary</h2>
-      <ul>${(context.summaries.length ? context.summaries : [{ account: 'No targets', region: '—', roleArn: '—', riskyGroups: '—', blackholeRoutes: '—', bucketRisk: '—', budgets: '—', spend: '—' }]).map((item) => `<li>${escapeHtml(`${item.account} (${item.region}) — Role: ${item.roleArn}; Risky SGs: ${item.riskyGroups}; Blackhole routes: ${item.blackholeRoutes}; Bucket risk: ${item.bucketRisk}; Budgets: ${item.budgets}; Spend: ${item.spend}`)}</li>`).join('')}</ul>
+      <ul>${(context.summaries.length ? context.summaries : [{ account: 'No targets', region: '—', roleArn: '—', riskyGroups: '—', blackholeRoutes: '—', bucketRisk: '—', budgets: '—', spend: '—' }]).map((item) => `<li>${escapeHtml(`${item.account} (${item.region}) — Context: ${item.roleArn}; Operator rows: ${item.riskyGroups}; Node rows: ${item.blackholeRoutes}; Storage rows: ${item.bucketRisk}; Quota rows: ${item.budgets}; Workload rows: ${item.spend}`)}</li>`).join('')}</ul>
     </div>
   </body>
 </html>`;
@@ -307,25 +319,21 @@
   function renderTarget(target) {
     const identity = target.caller_identity || {};
     const toolResults = target.tool_results || {};
-    const securityGroups = toolResults.list_security_groups || {};
-    const routeTables = toolResults.list_route_tables || {};
-    const s3 = toolResults.list_s3_bucket_posture || {};
-    const budgets = toolResults.list_budgets || {};
-    const costByAccount = toolResults.list_cost_by_account || {};
+    const identity = getClusterIdentity(target);
     return `
       <article class="agent-console__history-card agent-console__history-card--timeline">
         <div class="agent-console__history-badge-row">
           <span class="agent-console__history-badge">${target.region}</span>
-          <span class="agent-console__history-badge">${target.role_arn || 'current trust context'}</span>
+          <span class="agent-console__history-badge">${target.role_arn || 'current execution context'}</span>
         </div>
-        <h3>${identity.account || 'unknown account'}</h3>
-        <p class="agent-console__meta">${identity.arn || 'Caller identity unavailable'}</p>
+        <h3>${identity.name}</h3>
+        <p class="agent-console__meta">${identity.detail}</p>
         <ul>
-          <li>Security groups with internet ingress: <strong>${securityGroups.risky_group_count ?? '—'}</strong></li>
-          <li>Blackhole routes: <strong>${routeTables.blackhole_route_count ?? '—'}</strong></li>
-          <li>Public or unencrypted buckets: <strong>${s3.public_or_unencrypted_count ?? '—'}</strong></li>
-          <li>Budgets returned: <strong>${budgets.count ?? '—'}</strong></li>
-          <li>Account-level spend: <strong>${moneyBlock(costByAccount.total_unblended_cost)}</strong></li>
+          <li>Cluster operators reviewed: <strong>${countRows(toolResults.list_cluster_operators)}</strong></li>
+          <li>Node rows reviewed: <strong>${countRows(toolResults.list_nodes)}</strong></li>
+          <li>Route / service rows reviewed: <strong>${countRows(toolResults.list_routes)}</strong></li>
+          <li>Persistent storage rows: <strong>${countRows(toolResults.list_persistent_storage)}</strong></li>
+          <li>Quota policy rows: <strong>${countRows(toolResults.list_resource_quotas)}</strong></li>
         </ul>
       </article>
     `;
@@ -334,7 +342,7 @@
   function renderRaw(target) {
     return `
       <details class="agent-console__history-card agent-console__history-card--detail">
-        <summary>${target.region} · ${target.caller_identity?.account || 'unknown account'} · raw evidence</summary>
+        <summary>${target.region} · ${getClusterIdentity(target).name} · raw evidence</summary>
         <pre>${JSON.stringify(target.tool_results || {}, null, 2)}</pre>
       </details>
     `;
@@ -348,7 +356,7 @@
       setStatus('Pick at least one tool before running the posture radar.', 'warning');
       return;
     }
-    setStatus('Running posture radar across the selected targets…', 'pending');
+    setStatus('Running posture radar across the selected cluster targets…', 'pending');
     runButton.disabled = true;
     try {
       const runtime = buildRuntime();
@@ -397,7 +405,7 @@
       Array.from(toolsSelect.options).forEach((option) => {
         option.selected = preset.includes(option.value);
       });
-      setStatus(`Loaded the ${button.dataset.radarPreset} tool pack.`, 'info');
+      setStatus(`Loaded the ${button.dataset.radarPreset} OpenShift tool pack.`, 'info');
     });
   });
 
