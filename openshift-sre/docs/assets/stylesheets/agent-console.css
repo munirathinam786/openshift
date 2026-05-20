@@ -85,6 +85,12 @@ body[data-shell-page="security"] {
   --agent-accent-soft: rgba(14, 116, 144, 0.14);
 }
 
+body[data-shell-page="platform"] {
+  --agent-accent-rgb: 79, 70, 229;
+  --agent-accent-strong: #4f46e5;
+  --agent-accent-soft: rgba(79, 70, 229, 0.14);
+}
+
 body[data-shell-page="finops"] {
   --agent-accent-rgb: 14, 116, 144;
   --agent-accent-strong: #0e7490;

@@ -17,22 +17,24 @@
           "key": "platform",
           "eyebrow": "Lifecycle, DR, migration, and fleet readiness",
           "title": "Platform Console",
-          "description": "Dedicated OpenShift platform-operations workspace for lifecycle readiness, day-2 platform engineering, OpenShift Virtualization / CNV posture, ACM fleet coordination, OADP backup checks, DR failover signals, migration readiness, and handoff-ready summaries for baremetal, ROSA, ARO, and IBM Z estates.",
-          "badges": ["Platform runway", "Lifecycle + DR", "Virtualization / CNV", "Migration readiness", "CSV/PPT/PDF/Word", "React shell"],
+          "description": "Run planned OpenShift platform reviews from the same operator shell as the main console while focusing on lifecycle readiness, DR posture, migration sequencing, ACM fleet coordination, OADP backup checks, and OpenShift Virtualization / CNV expansion across baremetal, ROSA, ARO, and IBM Z estates.",
+          "badges": ["Shared operator shell", "Platform runway", "Lifecycle + DR", "Virtualization / CNV", "Migration readiness", "CSV/PPT/PDF/Word"],
           "actions": [
+            { "label": "Open docs home", "href": "/docs-home/" },
             { "label": "Agent console", "href": "console.html" },
             { "label": "Open troubleshooting", "href": "troubleshooting.html" }
           ],
           "secondaryActions": [
             { "label": "Security console", "href": "security-console.html" },
-            { "label": "Open history", "href": "history.html" }
+            { "label": "Open history", "href": "history.html" },
+            { "label": "FinOps console", "href": "finops-console.html" }
           ],
           "stats": [
-            { "label": "Platform coverage", "value": "Lifecycle + DR + CNV + migration", "detail": "Review cluster version posture, machine pools, operator health, ACM fleet dependencies, OADP backup posture, DR policy signals, and virtualization readiness from one operator lane." },
-            { "label": "Operating profiles", "value": "6 platform review packs", "detail": "Choose lifecycle, DR, migration, virtualization, fleet posture, or automation-focused reviews and tailor the exact OpenShift signals to inspect." },
-            { "label": "Handoff delivery", "value": "Executive + operator packs", "detail": "Export the latest platform review for change boards, DR exercises, migration planning, or platform-engineering standups." }
+            { "label": "Primary workflow", "value": "Planned platform readiness reviews", "detail": "Review cluster version posture, machine pools, operator health, ACM fleet dependencies, OADP backup posture, DR policy signals, and virtualization readiness from one operator lane." },
+            { "label": "Safety model", "value": "Read-only review lane", "detail": "The platform workspace uses the same live `/chat` evidence path as the main console while keeping investigations in operator-safe, read-only territory." },
+            { "label": "Connected views", "value": "Platform + console + security + history", "detail": "Move from planned readiness reviews to incident triage, security posture, and historical comparison without leaving the shared shell." }
           ],
-          "workspaceSignals": ["Profile-driven prompt builder", "Feature-level platform selector", "LLM runtime controls", "Export packs", "Live /chat workflow"],
+          "workspaceSignals": ["Profile-driven prompt builder", "Feature-level platform selector", "Shared shell continuity", "LLM runtime controls", "Export packs", "Live /chat workflow"],
           "sectionNav": [
             { "label": "Launcher", "href": "#platform-launcher" },
             { "label": "Latest results", "href": "#platform-results" },
@@ -46,15 +48,15 @@
             { "label": "Export platform pack", "href": "#platform-exports" }
           ],
           "highlights": [
-            { "title": "Separate platform lane", "description": "Lifecycle, migration, and resiliency reviews no longer have to hide inside generic prompts or troubleshooting flows." },
-            { "title": "Repo-aligned platform coverage", "description": "The console matches the repo's actual OpenShift scope by covering ACM, OADP, CNV, DR, machine pools, fleet posture, and platform-pattern readiness." },
+            { "title": "Guided platform lane", "description": "Lifecycle, migration, and resiliency reviews no longer have to hide inside generic prompts or troubleshooting flows." },
+            { "title": "Shared shell continuity", "description": "The Platform Console now mirrors the same shell rhythm, navigation language, and action layout as the main console while keeping its own indigo platform accent." },
             { "title": "Change-window friendly exports", "description": "Turn the latest review into a concise platform handoff without manually copying evidence into slides or docs." }
           ],
           "featureGroups": [
             {
               "kicker": "Platform workspace",
               "title": "Lifecycle, resiliency, and migration readiness in one control room",
-              "description": "Use this page when the question is bigger than a single incident: upgrades, migrations, failover prep, virtualization posture, or cross-platform dependency reviews.",
+              "description": "Use this page when the question is bigger than a single incident: upgrades, migrations, failover prep, virtualization posture, or cross-platform dependency reviews, all inside the same operator shell language as the main console.",
               "items": [
                 { "title": "Review profiles", "description": "Load purpose-built prompts for lifecycle readiness, DR exercises, migration waves, virtualization, or fleet posture before you fine-tune the exact checks.", "meta": "Launcher", "href": "#platform-launcher" },
                 { "title": "Feature-level selection", "description": "Mix cluster version, operator health, machine pools, ACM, OADP, CNV, DR, storage, GitOps, and logging checks into a single platform assessment.", "meta": "Coverage", "href": "#platform-launcher" },

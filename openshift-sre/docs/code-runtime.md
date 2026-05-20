@@ -230,10 +230,13 @@ This page is the dedicated platform-operations workspace.
 
 It now combines:
 
+- the same shared React operator-shell language as `docs/console.html`, with platform-specific metadata, actions, stats, and shell-highlight copy
 - profile-driven lifecycle-readiness, DR, migration, virtualization, and fleet posture launchers
 - FinOps-style connection and request-scoped cluster override controls so operators can target a specific cluster, namespace, or estate slice
 - a dedicated platform review launcher that turns the selected OpenShift signals into a `/chat` request with runtime overrides
 - an export lane for CSV, PowerPoint, PDF, and Word-compatible handoff packs with tool-trace context
+
+The page was also visually tightened so the landing shell and the “Platform operations runway” launcher use the same operator-workspace rhythm as the main console instead of looking like a separate design language.
 
 The platform page deliberately complements Troubleshooting and Security: it is optimized for planned operational readiness work, not just incident response or audit narratives.
 
@@ -398,6 +401,18 @@ It now covers:
 - FinOps-specific responsive and dark-mode polish
 
 It now also provides the shared settings-panel styling used by both FinOps and Security, including the model-picker row that pairs the model dropdown with the refresh action.
+
+### `docs/assets/stylesheets/platform-console.css`
+
+This stylesheet adds platform-specific presentation on top of the shared operator design system.
+
+It now covers:
+
+- platform-page background treatment and content-surface gradients
+- the dedicated runway launcher styling for lifecycle, DR, migration, and CNV readiness reviews
+- platform-specific shell tinting so the landing shell stays visually aligned with `docs/console.html` while preserving its indigo platform accent
+- darker runway metric capsules and hero-note styling so the launcher reads like an extension of the shared shell instead of a separate page theme
+- responsive and dark-mode polish for platform cards, summaries, trace surfaces, and feature-selection blocks
 
 ### `docs/assets/stylesheets/security-console.css`
 
