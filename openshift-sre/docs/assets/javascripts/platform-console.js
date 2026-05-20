@@ -782,10 +782,29 @@
 						h('span', { className: 'platform-console__pill' }, `${group.features.filter((featureId) => selectedFeatures.includes(featureId)).length}/${group.features.length}`)
 					]))),
 					h('div', { className: 'agent-console__actions' }, [h('button', { className: 'agent-console__example', type: 'button', onClick: selectAllFeatures }, 'Select all OpenShift checks'), h('button', { className: 'agent-console__example', type: 'button', onClick: clearAllFeatures }, 'Clear checks'), h('button', { className: 'agent-console__example', type: 'button', onClick: resetProfileFeatures }, 'Restore profile defaults')]),
-					h('div', { className: 'platform-console__feature-group-list' }, visibleFeatureGroups.length ? visibleFeatureGroups.map((group) => h('section', { className: 'platform-console__feature-group', key: group.title }, [
-						h('div', { className: 'platform-console__feature-group-header' }, [h('div', null, [h('h4', null, group.title), h('p', { className: 'platform-console__meta' }, groupDescriptions[group.title] || '')]), h('span', { className: 'platform-console__pill' }, `${group.features.filter((featureId) => selectedFeatures.includes(featureId)).length}/${group.features.length}`)]),
-						h('div', { className: 'platform-console__feature-list' }, group.visibleFeatures.map((featureId) => h('label', { className: 'platform-console__feature', key: featureId }, [h('input', { type: 'checkbox', checked: selectedFeatures.includes(featureId), onChange: () => toggleFeature(featureId) }), h('span', null, [h('span', { className: 'platform-console__feature-label' }, featureLabels[featureId] || slugToTitle(featureId)), featureDescriptions[featureId] ? h('span', { className: 'platform-console__feature-note' }, featureDescriptions[featureId]) : null, h('span', { className: 'platform-console__meta' }, `Tool: ${featureId}`)])])))
-					]))) : h('div', { className: 'platform-console__empty' }, 'No platform checks match the current selector filters. Clear the search or show all checks to continue.')
+					h(
+						'div',
+						{ className: 'platform-console__feature-group-list' },
+						visibleFeatureGroups.length
+							? visibleFeatureGroups.map((group) => h('section', { className: 'platform-console__feature-group', key: group.title }, [
+								h('div', { className: 'platform-console__feature-group-header' }, [
+									h('div', null, [
+										h('h4', null, group.title),
+										h('p', { className: 'platform-console__meta' }, groupDescriptions[group.title] || '')
+									]),
+									h('span', { className: 'platform-console__pill' }, `${group.features.filter((featureId) => selectedFeatures.includes(featureId)).length}/${group.features.length}`)
+								]),
+								h('div', { className: 'platform-console__feature-list' }, group.visibleFeatures.map((featureId) => h('label', { className: 'platform-console__feature', key: featureId }, [
+									h('input', { type: 'checkbox', checked: selectedFeatures.includes(featureId), onChange: () => toggleFeature(featureId) }),
+									h('span', null, [
+										h('span', { className: 'platform-console__feature-label' }, featureLabels[featureId] || slugToTitle(featureId)),
+										featureDescriptions[featureId] ? h('span', { className: 'platform-console__feature-note' }, featureDescriptions[featureId]) : null,
+										h('span', { className: 'platform-console__meta' }, `Tool: ${featureId}`)
+									])
+								]))),
+							]))
+							: h('div', { className: 'platform-console__empty' }, 'No platform checks match the current selector filters. Clear the search or show all checks to continue.')
+					)
 				]),
 				h('section', { className: 'platform-console__card' }, [
 					h('div', { className: 'agent-console__queue-header' }, [h('div', null, [h('h3', null, 'Prompt builder'), h('p', { className: 'platform-console__meta' }, 'Adjust the context below if you want the agent to emphasize a specific change window, dependency set, or handoff audience.')]), h('span', { className: 'platform-console__pill' }, streamMode ? 'Live /chat/stream prompt' : 'Live /chat prompt')]),
