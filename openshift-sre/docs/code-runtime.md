@@ -232,6 +232,7 @@ It now combines:
 
 - the same shared React operator-shell language as `docs/console.html`, with platform-specific metadata, actions, stats, and shell-highlight copy
 - profile-driven lifecycle-readiness, DR, migration, virtualization, and fleet posture launchers
+- a broader OpenShift check catalog covering cluster identity, projects, node pressure, pods, events, SCCs, network policies, quotas, image streams, and build posture in addition to the existing lifecycle and fleet checks
 - FinOps-style connection and request-scoped cluster override controls so operators can target a specific cluster, namespace, or estate slice
 - a dedicated platform review launcher that turns the selected OpenShift signals into a `/chat` request with runtime overrides
 - an export lane for CSV, PowerPoint, PDF, and Word-compatible handoff packs with tool-trace context

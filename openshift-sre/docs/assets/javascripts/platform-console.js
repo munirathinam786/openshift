@@ -8,10 +8,14 @@
   const llmRuntime = window.OpenShiftSreLlmRuntime || {};
 
   const featureLabels = {
+    get_cluster_identity: 'Cluster identity, API endpoint, and active context',
     list_cluster_infrastructure: 'Platform inventory / infrastructure topology',
+    list_projects: 'Project / namespace inventory and phase posture',
     list_cluster_version: 'Cluster version and upgrade posture',
     list_cluster_operators: 'Cluster operator health',
     list_nodes: 'Node readiness and worker footprint',
+    list_node_pressure: 'Node pressure, readiness, and kubelet conditions',
+    list_pods: 'Pod phase, restart, and pending risk',
     list_machine_config_pools: 'MachineConfigPool rollout posture',
     list_machine_sets: 'MachineSet capacity posture',
     list_operator_subscriptions: 'Operator subscription health',
@@ -20,8 +24,14 @@
     list_services: 'Service exposure posture',
     list_routes: 'Route posture and ingress pathways',
     list_ingresses: 'Ingress controller posture',
+    list_events: 'Recent warning and normal event patterns',
     list_persistent_storage: 'Persistent storage and claims posture',
     list_storage_classes: 'StorageClass defaults and options',
+    list_security_context_constraints: 'SecurityContextConstraint privilege posture',
+    list_network_policies: 'NetworkPolicy isolation and coverage posture',
+    list_resource_quotas: 'ResourceQuota and ClusterResourceQuota guardrails',
+    list_image_streams: 'ImageStream tags and lookup policy posture',
+    list_builds: 'Build and BuildConfig delivery posture',
     list_gitops_argocds: 'OpenShift GitOps / Argo CD control planes',
     list_gitops_applications: 'Argo CD application drift and health',
     list_tekton_configs: 'TektonConfig delivery posture',
@@ -38,6 +48,79 @@
     list_disaster_recovery_resources: 'DR policy, placement, and replication posture'
   };
 
+  const platformFeatureGroups = [
+    {
+      title: 'Core platform and lifecycle',
+      features: [
+        'get_cluster_identity',
+        'list_cluster_infrastructure',
+        'list_projects',
+        'list_cluster_version',
+        'list_cluster_operators',
+        'list_nodes',
+        'list_node_pressure',
+        'list_machine_config_pools',
+        'list_machine_sets',
+        'list_operator_subscriptions',
+        'list_cluster_service_versions',
+        'list_oauth_configuration'
+      ]
+    },
+    {
+      title: 'Workloads, traffic, and storage',
+      features: [
+        'list_pods',
+        'list_workload_health',
+        'list_services',
+        'list_routes',
+        'list_ingresses',
+        'list_events',
+        'list_persistent_storage',
+        'list_storage_classes',
+        'list_resource_quotas'
+      ]
+    },
+    {
+      title: 'Security and governance',
+      features: [
+        'list_security_context_constraints',
+        'list_network_policies',
+        'list_acm_multicluster_hubs',
+        'list_acm_managed_clusters',
+        'list_acm_policies',
+        'list_acs_central_services',
+        'list_acs_secured_clusters'
+      ]
+    },
+    {
+      title: 'Delivery, automation, and data services',
+      features: [
+        'list_image_streams',
+        'list_builds',
+        'list_gitops_argocds',
+        'list_gitops_applications',
+        'list_tekton_configs',
+        'list_tekton_pipeline_runs',
+        'list_cluster_logging',
+        'list_oadp_resources'
+      ]
+    },
+    {
+      title: 'Virtualization, DR, and migration',
+      features: [
+        'list_virtualization_resources',
+        'list_disaster_recovery_resources'
+      ]
+    }
+  ];
+
+  const orderedFeatureIds = [
+    ...platformFeatureGroups.flatMap((group) => group.features),
+    ...Object.keys(featureLabels).filter((featureId) => !platformFeatureGroups.some((group) => group.features.includes(featureId)))
+  ];
+
+  const allSelectableFeatures = orderedFeatureIds.filter((featureId) => featureLabels[featureId]);
+
   const platformProfiles = {
     lifecycle: {
       title: 'Lifecycle readiness review',
@@ -49,10 +132,13 @@
         'What should the platform team validate before approving the next step?'
       ],
       features: [
+        'get_cluster_identity',
         'list_cluster_infrastructure',
+        'list_projects',
         'list_cluster_version',
         'list_cluster_operators',
         'list_nodes',
+        'list_node_pressure',
         'list_machine_config_pools',
         'list_machine_sets',
         'list_operator_subscriptions',
@@ -69,13 +155,15 @@
         'What should platform and app teams verify before a DR event is declared ready?'
       ],
       features: [
+        'get_cluster_identity',
         'list_disaster_recovery_resources',
         'list_oadp_resources',
         'list_acm_managed_clusters',
         'list_acm_policies',
         'list_cluster_logging',
         'list_persistent_storage',
-        'list_storage_classes'
+        'list_storage_classes',
+        'list_events'
       ]
     },
     migration: {
@@ -88,11 +176,15 @@
         'How should the migration sequence be staged to reduce blast radius?'
       ],
       features: [
+        'get_cluster_identity',
+        'list_projects',
         'list_virtualization_resources',
+        'list_pods',
         'list_workload_health',
         'list_services',
         'list_routes',
         'list_ingresses',
+        'list_events',
         'list_persistent_storage',
         'list_storage_classes',
         'list_acm_managed_clusters'
@@ -108,8 +200,11 @@
         'What are the safest next checks for the virtualization team?'
       ],
       features: [
+        'get_cluster_identity',
         'list_virtualization_resources',
         'list_nodes',
+        'list_node_pressure',
+        'list_pods',
         'list_machine_sets',
         'list_persistent_storage',
         'list_storage_classes',
@@ -126,13 +221,17 @@
         'What handoff should go to platform owners versus security or app teams?'
       ],
       features: [
+        'get_cluster_identity',
         'list_cluster_infrastructure',
+        'list_projects',
         'list_acm_multicluster_hubs',
         'list_acm_managed_clusters',
         'list_acm_policies',
         'list_oadp_resources',
         'list_acs_central_services',
-        'list_acs_secured_clusters'
+        'list_acs_secured_clusters',
+        'list_oauth_configuration',
+        'list_resource_quotas'
       ]
     },
     automation: {
@@ -145,14 +244,19 @@
         'What should be stabilized before more automation is rolled out?'
       ],
       features: [
+        'get_cluster_identity',
+        'list_projects',
         'list_gitops_argocds',
         'list_gitops_applications',
+        'list_image_streams',
+        'list_builds',
         'list_tekton_configs',
         'list_tekton_pipeline_runs',
         'list_cluster_logging',
         'list_oadp_resources',
         'list_operator_subscriptions',
-        'list_cluster_service_versions'
+        'list_cluster_service_versions',
+        'list_events'
       ]
     }
   };
@@ -453,6 +557,18 @@
       setStatusTone('ok');
     };
 
+    const selectAllFeatures = () => {
+      setSelectedFeatures(allSelectableFeatures);
+      setStatus('Selected the full OpenShift platform check catalog for this review.');
+      setStatusTone('ok');
+    };
+
+    const clearAllFeatures = () => {
+      setSelectedFeatures([]);
+      setStatus('Cleared the selected platform checks. Choose the exact OpenShift signals you want to inspect.');
+      setStatusTone('ok');
+    };
+
     const runPlatformReview = async () => {
       if (selectedFeatures.length === 0) {
         setStatus('Select at least one platform check before running the review.');
@@ -626,20 +742,31 @@
           h('div', { className: 'agent-console__queue-header' }, [
             h('div', null, [
               h('h3', null, 'Selected platform checks'),
-              h('p', { className: 'platform-console__meta' }, 'Choose the exact OpenShift signals to include in this review. The generated prompt names these areas explicitly so the evidence path stays grounded.')
+              h('p', { className: 'platform-console__meta' }, 'Choose the exact OpenShift signals to include in this review. The generated prompt names these areas explicitly so the evidence path stays grounded across lifecycle, workloads, security, delivery, fleet, and resiliency surfaces.')
             ]),
             h('span', { className: 'platform-console__pill' }, `${selectedFeatures.length} selected`)
           ]),
-          h('div', { className: 'platform-console__feature-list' }, Object.entries(featureLabels).map(([featureId, label]) => h('label', { className: 'platform-console__feature', key: featureId }, [
-            h('input', {
-              type: 'checkbox',
-              checked: selectedFeatures.includes(featureId),
-              onChange: () => toggleFeature(featureId)
-            }),
-            h('span', null, [
-              h('span', { className: 'platform-console__feature-label' }, label),
-              h('span', { className: 'platform-console__meta' }, `Tool: ${featureId}`)
-            ])
+          h('div', { className: 'agent-console__actions', key: 'feature-actions' }, [
+            h('button', { className: 'agent-console__example', type: 'button', onClick: selectAllFeatures }, 'Select all OpenShift checks'),
+            h('button', { className: 'agent-console__example', type: 'button', onClick: clearAllFeatures }, 'Clear checks'),
+            h('button', { className: 'agent-console__example', type: 'button', onClick: resetProfileFeatures }, 'Restore profile defaults')
+          ]),
+          h('div', { className: 'platform-console__feature-group-list' }, platformFeatureGroups.map((group) => h('section', { className: 'platform-console__feature-group', key: group.title }, [
+            h('div', { className: 'platform-console__feature-group-header' }, [
+              h('h4', null, group.title),
+              h('span', { className: 'platform-console__pill' }, `${group.features.filter((featureId) => selectedFeatures.includes(featureId)).length}/${group.features.length}`)
+            ]),
+            h('div', { className: 'platform-console__feature-list' }, group.features.map((featureId) => h('label', { className: 'platform-console__feature', key: featureId }, [
+              h('input', {
+                type: 'checkbox',
+                checked: selectedFeatures.includes(featureId),
+                onChange: () => toggleFeature(featureId)
+              }),
+              h('span', null, [
+                h('span', { className: 'platform-console__feature-label' }, featureLabels[featureId] || slugToTitle(featureId)),
+                h('span', { className: 'platform-console__meta' }, `Tool: ${featureId}`)
+              ])
+            ])))
           ])))
         ]),
         h('section', { className: 'platform-console__card', key: 'prompt-card' }, [

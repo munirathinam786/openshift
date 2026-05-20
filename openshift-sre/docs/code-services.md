@@ -60,11 +60,13 @@ This is the largest file in the project because it contains the actual OpenShift
 
 The live toolkit is now aligned to the repository's OpenShift estate rather than the older AWS-era inventory. In addition to core OpenShift cluster, workload, network, storage, Machine API, OLM, SCC, and quota inspection, the toolkit also surfaces:
 
+- cluster identity, active context, project inventory, node-pressure conditions, and recent event posture for first-pass operational triage
 - cluster infrastructure and platform-pattern detection for estates such as `ROSA`, `ARO`, and `IBM Z`
 - ACM fleet objects such as `MultiClusterHub`, `ManagedCluster`, and governance `Policy`
 - ACS objects such as `CentralService` and `SecuredCluster`
 - OpenShift Virtualization / CNV objects such as `KubeVirt`, `HyperConverged`, `VirtualMachine`, `DataVolume`, and live migration resources
 - ACM / ODF disaster-recovery objects such as `DRPolicy`, `DRPlacementControl`, and `VolumeReplication`
+- OpenShift supply-chain and day-2 delivery objects such as `ImageStream`, `Build`, `Argo CD`, `Tekton`, `ClusterLogging`, and `OADP`
 - guarded read-only `oc` support for edge-case diagnostics that are not worth hardcoding as dedicated tools
 
 That means the SRE runtime can now reason about a single cluster, a managed multi-cluster fleet, or a platform-pattern comparison lane without pretending everything is just one generic OpenShift cluster.
@@ -82,6 +84,7 @@ The key moving parts are:
 ### Service groupings in the live toolkit
 
 - cluster identity and platform pattern: cluster identity, cluster infrastructure, cluster version, cluster operators
+- project and node triage: projects, nodes, node pressure, pods, and recent warning events
 - fleet governance: ACM MultiClusterHub, ManagedCluster, and Policy resources
 - security and compliance: ACS CentralService, ACS SecuredCluster, SCCs, network policies, resource quotas
 - workload and application posture: projects, pods, workload rollout health, services, routes, ingresses, events
@@ -89,6 +92,8 @@ The key moving parts are:
 - platform lifecycle: machine config pools, machine sets, operator subscriptions, ClusterServiceVersions
 - platform resiliency and migration: OADP backup posture, OpenShift Virtualization / CNV resources, and ACM / ODF disaster-recovery resources
 - operator-safe diagnostics: guarded read-only `oc` CLI execution
+
+The `Platform Console` now exposes much more of that live toolkit directly through its grouped `Selected platform checks` catalog, so the browser workspace can compose reviews from the same OpenShift inspection surface documented here instead of relying on a smaller hand-picked subset.
 
 For a source-level inventory of the individual tool functions, see [`Function Reference`](function-reference.md).
 

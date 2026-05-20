@@ -237,6 +237,33 @@ body[data-shell-page="platform"] .agent-console__panel:not(.platform-console__he
   margin-top: 0.6rem;
 }
 
+.platform-console__feature-group-list {
+  display: grid;
+  gap: 1rem;
+  margin-top: 0.85rem;
+}
+
+.platform-console__feature-group {
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  border-radius: 20px;
+  padding: 1rem 1.05rem;
+  background: linear-gradient(180deg, rgba(248, 250, 252, 0.76), rgba(255, 255, 255, 0.96));
+}
+
+.platform-console__feature-group-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.85rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.platform-console__feature-group-header h4 {
+  margin: 0;
+  font-size: 1rem;
+  letter-spacing: -0.02em;
+}
+
 .platform-console__feature {
   display: flex;
   gap: 0.7rem;
@@ -250,6 +277,12 @@ body[data-shell-page="platform"] .agent-console__panel:not(.platform-console__he
 body[data-shell-page="platform"] .platform-console__feature {
   border-color: rgba(var(--agent-accent-rgb), 0.16);
   background: linear-gradient(180deg, rgba(238, 242, 255, 0.8), rgba(255, 255, 255, 0.96));
+}
+
+body[data-shell-page="platform"] .platform-console__feature-group {
+  border-color: rgba(var(--agent-accent-rgb), 0.16);
+  background: linear-gradient(180deg, rgba(238, 242, 255, 0.62), rgba(255, 255, 255, 0.98));
+  box-shadow: 0 14px 30px rgba(79, 70, 229, 0.06);
 }
 
 .platform-console__feature input {
@@ -322,6 +355,7 @@ body[data-theme="dark"] .platform-console__card,
 body[data-theme="dark"] .platform-console__tool-card,
 body[data-theme="dark"] .platform-console__summary,
 body[data-theme="dark"] .platform-console__trace,
+body[data-theme="dark"] .platform-console__feature-group,
 body[data-theme="dark"] .platform-console__feature,
 body[data-theme="dark"] .platform-console__empty,
 body[data-theme="dark"] .agent-console__panel {

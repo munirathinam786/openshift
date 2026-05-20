@@ -115,6 +115,8 @@ Those pages continue to use the live FastAPI endpoints and the shared React oper
 
 The `Platform Console` now also follows the same landing-shell visual language as the main `Agent Console`, with a platform-specific indigo accent and a runway-style launcher section that stays aligned with the shared operator shell patterns.
 
+Its `Selected platform checks` catalog now exposes the broader OpenShift inspection surface as well, including cluster identity, project inventory, node pressure, pod and event risk, SCC and network-policy posture, resource quotas, image streams, and build signals alongside the existing lifecycle, ACM, ACS, OADP, DR, and CNV checks.
+
 ## Rebuild workflow
 
 To rebuild the UI bundle, regenerate the site, and refresh the Podman stack:
