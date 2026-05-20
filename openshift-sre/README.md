@@ -128,6 +128,8 @@ The page now also includes:
 - optional streaming review execution for live evidence visibility
 - a searchable feature selector that now covers cluster networking, ingress controllers, HPAs, PDBs, CronJobs, volume snapshots, RBAC bindings, service accounts, limit ranges, BuildConfigs, DeploymentConfigs, Knative services, VM snapshots, and Migration Toolkit resources
 
+The `Security and governance` lane in the Platform Console now exposes the full platform-facing governance surface already available in the backend, including OAuth/LDAP posture, SCCs, RBAC bindings, service accounts, limit ranges, network policies, resource quotas, ACM fleet governance, and ACS rollout coverage.
+
 ## Rebuild workflow
 
 To rebuild the UI bundle, regenerate the site, and refresh the Podman stack:

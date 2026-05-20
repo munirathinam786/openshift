@@ -69,9 +69,16 @@
 		list_pod_disruption_budgets: 'Highlights workloads that may block draining, upgrades, or planned maintenance.',
 		list_cronjobs: 'Flags suspended or stale scheduled jobs that often get forgotten until a release weekend.',
 		list_volume_snapshots: 'Summarizes protection coverage and readiness of storage snapshots and snapshot classes.',
+		list_oauth_configuration: 'Summarizes cluster identity providers, LDAP posture, and authentication entry points used for platform access.',
 		list_rbac_bindings: 'Surfaces cluster-admin, admin, and other elevated bindings that influence governance posture.',
 		list_service_accounts: 'Shows token-mount behavior and pull-secret usage across service identities.',
 		list_limit_ranges: 'Captures namespace defaults and max/min envelopes for resource-governance reviews.',
+		list_resource_quotas: 'Shows namespace and cluster quota guardrails that shape multi-tenant governance and resource fairness.',
+		list_acm_multicluster_hubs: 'Adds ACM hub control-plane posture for fleet-wide governance orchestration and policy distribution.',
+		list_acm_managed_clusters: 'Surfaces fleet join, availability, and clusterset posture across managed OpenShift estates.',
+		list_acm_policies: 'Tracks ACM governance policy compliance, remediation mode, and disabled-policy drift.',
+		list_acs_central_services: 'Shows ACS control-plane readiness for security governance and policy management.',
+		list_acs_secured_clusters: 'Highlights secured-cluster rollout coverage and protection reach across the fleet.',
 		list_build_configs: 'Summarizes source strategy and trigger coverage for build pipelines, not just individual runs.',
 		list_deployment_configs: 'Tracks OpenShift-native rollout posture and trigger coverage for DeploymentConfigs.',
 		list_knative_services: 'Adds serverless readiness signals when OpenShift Serverless is installed.',
@@ -82,15 +89,15 @@
 	const groupDescriptions = {
 		'Core platform and lifecycle': 'Version, operators, networking, ingress, and machine-fleet readiness for change windows.',
 		'Workloads, traffic, and storage': 'Application rollout, disruption safety, autoscaling, exposure paths, and storage protection posture.',
-		'Security and governance': 'Privilege, identity, guardrails, and fleet-governance controls that shape operational risk.',
+		'Security and governance': 'Identity, privilege, segmentation, quota guardrails, and fleet governance controls that shape operational risk.',
 		'Delivery, automation, and data services': 'Build, rollout, GitOps, Tekton, logging, and serverless delivery surfaces.',
 		'Virtualization, DR, and migration': 'CNV, VM protection, MTC, failover policy, and recovery/mobility execution posture.'
 	};
 
 	const featureGroups = [
-		{ title: 'Core platform and lifecycle', features: ['get_cluster_identity', 'list_cluster_infrastructure', 'list_projects', 'list_cluster_version', 'list_cluster_operators', 'list_cluster_network_config', 'list_ingress_controllers', 'list_nodes', 'list_node_pressure', 'list_machine_config_pools', 'list_machine_sets', 'list_operator_subscriptions', 'list_cluster_service_versions', 'list_oauth_configuration'] },
-		{ title: 'Workloads, traffic, and storage', features: ['list_pods', 'list_workload_health', 'list_horizontal_pod_autoscalers', 'list_pod_disruption_budgets', 'list_cronjobs', 'list_services', 'list_routes', 'list_ingresses', 'list_events', 'list_persistent_storage', 'list_volume_snapshots', 'list_storage_classes', 'list_resource_quotas'] },
-		{ title: 'Security and governance', features: ['list_security_context_constraints', 'list_rbac_bindings', 'list_service_accounts', 'list_limit_ranges', 'list_network_policies', 'list_acm_multicluster_hubs', 'list_acm_managed_clusters', 'list_acm_policies', 'list_acs_central_services', 'list_acs_secured_clusters'] },
+		{ title: 'Core platform and lifecycle', features: ['get_cluster_identity', 'list_cluster_infrastructure', 'list_projects', 'list_cluster_version', 'list_cluster_operators', 'list_cluster_network_config', 'list_ingress_controllers', 'list_nodes', 'list_node_pressure', 'list_machine_config_pools', 'list_machine_sets', 'list_operator_subscriptions', 'list_cluster_service_versions'] },
+		{ title: 'Workloads, traffic, and storage', features: ['list_pods', 'list_workload_health', 'list_horizontal_pod_autoscalers', 'list_pod_disruption_budgets', 'list_cronjobs', 'list_services', 'list_routes', 'list_ingresses', 'list_events', 'list_persistent_storage', 'list_volume_snapshots', 'list_storage_classes'] },
+		{ title: 'Security and governance', features: ['list_security_context_constraints', 'list_oauth_configuration', 'list_rbac_bindings', 'list_service_accounts', 'list_limit_ranges', 'list_network_policies', 'list_resource_quotas', 'list_acm_multicluster_hubs', 'list_acm_managed_clusters', 'list_acm_policies', 'list_acs_central_services', 'list_acs_secured_clusters'] },
 		{ title: 'Delivery, automation, and data services', features: ['list_image_streams', 'list_builds', 'list_build_configs', 'list_deployment_configs', 'list_gitops_argocds', 'list_gitops_applications', 'list_knative_services', 'list_tekton_configs', 'list_tekton_pipeline_runs', 'list_cluster_logging', 'list_oadp_resources'] },
 		{ title: 'Virtualization, DR, and migration', features: ['list_virtualization_resources', 'list_virtual_machine_snapshots', 'list_migration_toolkit_resources', 'list_disaster_recovery_resources'] }
 	];
@@ -132,7 +139,7 @@
 			summary: 'Compare fleet-level dependencies, governance, and security rollout signals across managed OpenShift estate patterns.',
 			promptLead: 'Act as a fleet platform operations lead reviewing the health of a multi-platform OpenShift estate. Use the selected evidence to compare ACM governance, managed-cluster readiness, platform inventory, backup posture, and security rollout patterns across baremetal, ROSA, ARO, and IBM Z footprints where relevant.',
 			questions: ['Which fleet-level gaps threaten consistency across platforms?', 'Where should governance, backup, or security rollout be tightened first?', 'What handoff should go to platform owners versus security or app teams?'],
-			features: ['get_cluster_identity', 'list_cluster_infrastructure', 'list_projects', 'list_acm_multicluster_hubs', 'list_acm_managed_clusters', 'list_acm_policies', 'list_oadp_resources', 'list_acs_central_services', 'list_acs_secured_clusters', 'list_oauth_configuration', 'list_resource_quotas']
+			features: ['get_cluster_identity', 'list_cluster_infrastructure', 'list_projects', 'list_oauth_configuration', 'list_rbac_bindings', 'list_service_accounts', 'list_limit_ranges', 'list_network_policies', 'list_resource_quotas', 'list_acm_multicluster_hubs', 'list_acm_managed_clusters', 'list_acm_policies', 'list_oadp_resources', 'list_acs_central_services', 'list_acs_secured_clusters']
 		},
 		automation: {
 			title: 'Platform automation and day-2 controls',

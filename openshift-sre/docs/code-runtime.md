@@ -238,6 +238,7 @@ It now combines:
 - inline historical run comparison backed by `/history/compare` and recent-run loading from `/history/overview`
 - a readiness scorecard and recommendation lane derived from the most recent tool trace
 - a broader OpenShift check catalog covering cluster identity, networking, ingress controllers, projects, node pressure, pods, autoscalers, disruption budgets, events, SCCs, RBAC, service accounts, limit ranges, quotas, image streams, BuildConfigs, DeploymentConfigs, Knative services, VM snapshots, migration-toolkit resources, and build posture in addition to the earlier lifecycle and fleet checks
+- a fully expanded `Security and governance` category for the platform lane, surfacing OAuth/LDAP posture, SCCs, RBAC, service accounts, limit ranges, network policies, resource quotas, ACM governance, and ACS secured-cluster coverage from the existing backend toolkit
 - FinOps-style connection and request-scoped cluster override controls so operators can target a specific cluster, namespace, or estate slice
 - a dedicated platform review launcher that turns the selected OpenShift signals into a `/chat` or `/chat/stream` request with runtime overrides
 - a multi-cluster sweep lane backed by `/platform/sweep` for estate-wide checks without leaving the Platform Console
