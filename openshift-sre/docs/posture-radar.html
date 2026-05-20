@@ -13,8 +13,8 @@
           "key": "posture-radar",
           "eyebrow": "Cross-cluster platform visibility",
           "title": "Posture Radar",
-          "description": "Run the same OpenShift inspection pack across multiple cluster scopes and execution contexts to surface posture drift, identity context, and shared hotspots.",
-          "badges": ["3D shell", "Multi-cluster sweep", "Trust-context aware"],
+          "description": "Run the same OpenShift inspection pack across multiple cluster scopes and execution contexts to surface posture drift, ACM and ACS coverage, platform-pattern identity, and shared hotspots.",
+          "badges": ["3D shell", "Multi-cluster sweep", "Trust-context aware", "ACM + ACS + platform patterns"],
           "actions": [
             { "label": "Open Agent Console", "href": "console.html" },
             { "label": "Open Watchlists", "href": "watchlists.html" },
@@ -26,7 +26,7 @@
           ],
           "stats": [
             { "label": "Sweep mode", "value": "Cluster scope + context fan-out", "detail": "Each target run captures its own cluster identity before executing tool packs." },
-            { "label": "Best used for", "value": "Governance & platform checks", "detail": "Ideal for multi-cluster drift, storage posture, and shared platform checks." },
+            { "label": "Best used for", "value": "Governance & platform checks", "detail": "Ideal for multi-cluster drift, ACM governance, ACS coverage, storage posture, and shared platform-pattern checks." },
             { "label": "Output shape", "value": "Target cards + raw evidence", "detail": "Summaries keep the operator view fast while full JSON stays available." }
           ],
           "sectionNav": [
@@ -41,7 +41,7 @@
           "highlights": [
             { "title": "Cross-target evidence", "description": "Each target response preserves both summary cards and raw evidence so operators can compare posture without losing detail." },
             { "title": "Identity-aware sweep", "description": "Cluster identity is captured per target, helping operators verify exactly which context answered." },
-            { "title": "Pack-driven posture review", "description": "Run focused packs for networking, storage, or identity rather than manually stitching the same tools together every time." }
+            { "title": "Pack-driven posture review", "description": "Run focused packs for networking, storage, ACM governance, ACS coverage, or platform patterns rather than manually stitching the same tools together every time." }
           ],
           "featureGroups": [
             {
@@ -65,7 +65,7 @@
           <div class="agent-console" data-posture-radar>
             <section class="agent-console__panel" id="radar-run">
               <h2>Build a posture sweep</h2>
-              <p class="agent-console__meta">Pick the investigation pack, cluster scopes, and optional execution contexts. Every target returns its cluster identity so operators can confirm exactly which target answered.</p>
+              <p class="agent-console__meta">Pick the investigation pack, cluster scopes, and optional execution contexts. Every target returns cluster identity plus infrastructure evidence so operators can confirm exactly which target answered and which platform pattern it represents.</p>
               <details class="agent-console__settings" open>
                 <summary>Runtime credentials</summary>
                 <p class="agent-console__meta">Posture Radar runs OpenShift tools directly through <code>/platform/sweep</code>. Supply cluster runtime overrides here when the container defaults are not the credentials or trust context you want.</p>
@@ -96,6 +96,7 @@
               <label class="agent-console__label" for="radar-tools">Tool pack</label>
               <select id="radar-tools" class="agent-console__input" data-radar-tools multiple size="8">
                 <option value="get_cluster_identity" selected>Cluster identity</option>
+                <option value="list_cluster_infrastructure" selected>Cluster infrastructure / platform pattern</option>
                 <option value="list_cluster_operators" selected>Cluster operators</option>
                 <option value="list_nodes" selected>Nodes</option>
                 <option value="list_workload_health">Workload health</option>
@@ -103,6 +104,11 @@
                 <option value="list_services">Services</option>
                 <option value="list_persistent_storage">Persistent storage</option>
                 <option value="list_storage_classes">Storage classes</option>
+                <option value="list_acm_multicluster_hubs">ACM MultiClusterHubs</option>
+                <option value="list_acm_managed_clusters">ACM managed clusters</option>
+                <option value="list_acm_policies">ACM governance policies</option>
+                <option value="list_acs_central_services">ACS central services</option>
+                <option value="list_acs_secured_clusters">ACS secured clusters</option>
                 <option value="list_operator_subscriptions">Operator subscriptions</option>
                 <option value="list_network_policies">Network policies</option>
                 <option value="list_resource_quotas">Resource quotas</option>
@@ -118,6 +124,9 @@
                 <button class="agent-console__example" type="button" data-radar-preset="network">Network posture pack</button>
                 <button class="agent-console__example" type="button" data-radar-preset="storage">Storage governance pack</button>
                 <button class="agent-console__example" type="button" data-radar-preset="identity">Identity hygiene pack</button>
+                <button class="agent-console__example" type="button" data-radar-preset="acm">ACM fleet pack</button>
+                <button class="agent-console__example" type="button" data-radar-preset="acs">ACS coverage pack</button>
+                <button class="agent-console__example" type="button" data-radar-preset="platform">ROSA / ARO / IBM Z pack</button>
               </div>
               <div class="agent-console__status" data-radar-status></div>
             </section>

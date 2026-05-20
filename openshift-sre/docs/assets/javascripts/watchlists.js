@@ -286,12 +286,24 @@
         investigationRegions.value = 'local-cluster,aro-prod';
         investigationTags.value = 'network,governance';
         investigationPrompt.value = 'Review routes, services, ingresses, and network policies. Highlight public exposure, stale routes, missing isolation, and cross-cluster drift.';
+      } else if (button.dataset.investigationExample === 'acm') {
+        investigationName.value = 'ACM fleet governance review';
+        investigationCategory.value = 'fleet-governance';
+        investigationRegions.value = 'local-cluster,aro-prod,rosa-stage,ibmz-prod';
+        investigationTags.value = 'acm,governance,multi-cluster';
+        investigationPrompt.value = 'Review MultiClusterHub health, managed-cluster availability, ACM governance policies, and platform patterns such as ROSA, ARO, and IBM Z. Highlight fleet drift, noncompliant policy state, and unreachable clusters.';
+      } else if (button.dataset.investigationExample === 'acs') {
+        investigationName.value = 'ACS coverage review';
+        investigationCategory.value = 'security';
+        investigationRegions.value = 'local-cluster,aro-prod,rosa-stage';
+        investigationTags.value = 'acs,security,coverage';
+        investigationPrompt.value = 'Review ACS central services, secured-cluster coverage, network policies, and workload posture. Highlight missing protection, uneven rollout, and any pattern-specific gap across ROSA, ARO, or core OpenShift clusters.';
       } else {
-        investigationName.value = 'Storage governance review';
-        investigationCategory.value = 'storage';
+        investigationName.value = 'IBM Z platform hygiene review';
+        investigationCategory.value = 'platform-pattern';
         investigationRegions.value = 'local-cluster,ibmz-prod';
-        investigationTags.value = 'storage,governance';
-        investigationPrompt.value = 'Inspect persistent volumes, persistent volume claims, storage classes, image streams, and builds. Highlight stale storage, weak reclaim posture, and artifact sprawl.';
+        investigationTags.value = 'ibm-z,platform,capacity';
+        investigationPrompt.value = 'Inspect cluster infrastructure, node architectures, quotas, workload health, and ACM fleet posture for IBM Z / s390x estates. Highlight capacity drift, architecture-specific rollout risk, and differences from ROSA or ARO peers.';
       }
     });
   });

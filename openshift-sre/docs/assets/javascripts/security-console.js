@@ -9,8 +9,14 @@
   const llmRuntime = window.AwsSreLlmRuntime || {};
 
   const featureLabels = {
+    list_cluster_infrastructure: 'Cluster infrastructure and platform pattern',
     list_cluster_version: 'Cluster version posture',
     list_cluster_operators: 'Cluster operator health',
+    list_acm_multicluster_hubs: 'ACM MultiClusterHub health',
+    list_acm_managed_clusters: 'ACM managed cluster fleet',
+    list_acm_policies: 'ACM governance policies',
+    list_acs_central_services: 'ACS central services',
+    list_acs_secured_clusters: 'ACS secured-cluster coverage',
     list_security_context_constraints: 'SecurityContextConstraints posture',
     list_network_policies: 'NetworkPolicy coverage',
     list_resource_quotas: 'ResourceQuota posture',
@@ -34,6 +40,7 @@
       label: 'SOX evidence and control readiness',
       narrative: 'Focus on OpenShift controls that support change traceability, operator governance, namespace guardrails, and platform evidence collection for regulated environments.',
       features: [
+        'list_cluster_infrastructure',
         'list_cluster_version',
         'list_cluster_operators',
         'list_security_context_constraints',
@@ -47,6 +54,7 @@
       label: 'CIS-style cluster hardening review',
       narrative: 'Focus on baseline platform hardening, network segmentation, namespace guardrails, operator health, and control-plane posture.',
       features: [
+        'list_cluster_infrastructure',
         'list_cluster_version',
         'list_cluster_operators',
         'list_security_context_constraints',
@@ -59,6 +67,7 @@
       label: 'PCI-oriented platform posture review',
       narrative: 'Emphasize workload exposure, namespace isolation, operator health, and storage posture for regulated application paths.',
       features: [
+        'list_cluster_infrastructure',
         'list_routes',
         'list_ingresses',
         'list_services',
@@ -72,6 +81,7 @@
       label: 'HIPAA safeguard and evidence readiness',
       narrative: 'Focus on workload isolation, storage posture, operator stability, and evidence needed to support security safeguard reviews.',
       features: [
+        'list_cluster_infrastructure',
         'list_cluster_operators',
         'list_security_context_constraints',
         'list_network_policies',
@@ -85,6 +95,7 @@
       label: 'SOC 2 security and change controls',
       narrative: 'Review platform operator health, change-sensitive cluster posture, and namespace guardrails that support SOC 2 narratives.',
       features: [
+        'list_cluster_infrastructure',
         'list_cluster_version',
         'list_cluster_operators',
         'list_operator_subscriptions',
@@ -97,6 +108,7 @@
       label: 'ISO 27001 platform control mapping',
       narrative: 'Focus on governance, workload exposure, security boundaries, and operator lifecycle posture across the selected cluster domains.',
       features: [
+        'list_cluster_infrastructure',
         'list_cluster_operators',
         'list_routes',
         'list_ingresses',
@@ -109,6 +121,7 @@
       label: 'NIST CSF operational review',
       narrative: 'Frame the review around identify, protect, detect, respond, and recover themes using OpenShift security posture and operator health signals.',
       features: [
+        'list_cluster_infrastructure',
         'list_cluster_operators',
         'list_node_pressure',
         'list_workload_health',
@@ -121,6 +134,7 @@
       label: 'Namespace guardrails and workload privilege hygiene',
       narrative: 'Prioritize SCC posture, service exposure, workload security boundaries, and namespace-level governance signals.',
       features: [
+        'list_cluster_infrastructure',
         'list_security_context_constraints',
         'list_network_policies',
         'list_resource_quotas',
@@ -132,6 +146,7 @@
       label: 'Operator resilience and cluster governance',
       narrative: 'Review operator lifecycle stability, node pool posture, machine configuration state, and storage readiness across the platform.',
       features: [
+        'list_cluster_infrastructure',
         'list_cluster_operators',
         'list_operator_subscriptions',
         'list_cluster_service_versions',
@@ -139,6 +154,40 @@
         'list_machine_sets',
         'list_persistent_storage',
         'list_storage_classes'
+      ]
+    },
+    acm: {
+      label: 'ACM fleet governance and policy posture',
+      narrative: 'Review MultiClusterHub health, managed-cluster availability, cluster-set distribution, and governance-policy drift across the repo-wide OpenShift estate.',
+      features: [
+        'list_cluster_infrastructure',
+        'list_acm_multicluster_hubs',
+        'list_acm_managed_clusters',
+        'list_acm_policies',
+        'list_cluster_operators'
+      ]
+    },
+    acs: {
+      label: 'ACS central and secured-cluster coverage',
+      narrative: 'Review ACS central health, secured-cluster rollout, network segmentation, and workload posture so protection gaps are obvious before they become audit surprises.',
+      features: [
+        'list_cluster_infrastructure',
+        'list_acs_central_services',
+        'list_acs_secured_clusters',
+        'list_network_policies',
+        'list_workload_health',
+        'list_cluster_operators'
+      ]
+    },
+    'platform-patterns': {
+      label: 'ROSA / ARO / IBM Z platform-pattern coverage',
+      narrative: 'Compare infrastructure pattern, fleet membership, operator health, and node posture across ROSA, ARO, and IBM Z-aligned estates so pattern-specific gaps stand out quickly.',
+      features: [
+        'list_cluster_infrastructure',
+        'list_nodes',
+        'list_cluster_operators',
+        'list_acm_managed_clusters',
+        'list_resource_quotas'
       ]
     }
   };
@@ -148,7 +197,10 @@
     hipaa: 'hipaa',
     findings: 'nist',
     governance: 'resilience-governance',
-    'iam-encryption': 'iam-encryption'
+    'iam-encryption': 'iam-encryption',
+    acm: 'acm',
+    acs: 'acs',
+    platform: 'platform-patterns'
   };
 
   function escapeHtml(value) {
@@ -624,7 +676,7 @@
           h('input', { type: 'checkbox', checked: settings.openshiftVerifySsl, onChange: set('openshiftVerifySsl') }),
           h('span', null, 'Verify cluster API certificates')
         ),
-        h('p', { className: 'agent-console__meta' }, provider.description || 'Choose the local Ollama model or an external provider like OpenAI, Azure OpenAI, Anthropic, Gemini, or OpenRouter.')
+          h('p', { className: 'agent-console__meta' }, provider.description || 'Choose the local Ollama model or an external provider like OpenAI, Azure OpenAI, Anthropic, Gemini, or OpenRouter.')
       )
     );
   }
@@ -1021,7 +1073,10 @@
           h('button', { className: 'agent-console__example', type: 'button', onClick: () => applyPreset('hipaa') }, 'HIPAA preset'),
           h('button', { className: 'agent-console__example', type: 'button', onClick: () => applyPreset('findings') }, 'Findings triage'),
           h('button', { className: 'agent-console__example', type: 'button', onClick: () => applyPreset('governance') }, 'Governance depth'),
-          h('button', { className: 'agent-console__example', type: 'button', onClick: () => applyPreset('iam-encryption') }, 'SCC + guardrails')
+          h('button', { className: 'agent-console__example', type: 'button', onClick: () => applyPreset('iam-encryption') }, 'SCC + guardrails'),
+          h('button', { className: 'agent-console__example', type: 'button', onClick: () => applyPreset('acm') }, 'ACM fleet'),
+          h('button', { className: 'agent-console__example', type: 'button', onClick: () => applyPreset('acs') }, 'ACS coverage'),
+          h('button', { className: 'agent-console__example', type: 'button', onClick: () => applyPreset('platform') }, 'ROSA / ARO / IBM Z')
         ),
         h('div', { className: `agent-console__status${status.kind ? ` agent-console__status--${status.kind}` : ''}` }, status.message)
       ),

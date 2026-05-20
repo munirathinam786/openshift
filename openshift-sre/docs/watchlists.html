@@ -13,7 +13,7 @@
           "key": "watchlists",
           "eyebrow": "Repeatable investigations",
           "title": "Watchlists & Saved Investigations",
-          "description": "Save reusable OpenShift investigation prompts, attach cluster scopes or execution contexts, and run them as manual watchlists with the same operator-safe theme.",
+          "description": "Save reusable OpenShift investigation prompts, attach cluster scopes or execution contexts, and run them as manual watchlists with support for ACM, ACS, ROSA, ARO, IBM Z, and the broader operator-safe estate.",
           "badges": ["Saved prompt packs", "Manual watchlist runs", "3D operator surface"],
           "actions": [
             { "label": "Open Agent Console", "href": "console.html" },
@@ -27,7 +27,7 @@
           "stats": [
             { "label": "Saved prompts", "value": "Reusable investigation packs", "detail": "Investigations preserve the prompt, category, tags, and default cluster scopes so teams stop rewriting the same reviews." },
             { "label": "Execution mode", "value": "Manual-first watchlists", "detail": "Runs stay operator-triggered so scope, trust context, and blast radius are validated before each launch." },
-            { "label": "Operational fit", "value": "Weekly hygiene sweeps", "detail": "Ideal for recurring platform checks, recurring chargeback reviews, and multi-cluster governance routines." }
+            { "label": "Operational fit", "value": "Weekly hygiene sweeps", "detail": "Ideal for recurring platform checks, ACM governance routines, ACS coverage reviews, and ROSA / ARO / IBM Z estate hygiene." }
           ],
           "sectionNav": [
             { "label": "Saved investigations", "href": "#watchlists-investigations" },
@@ -74,11 +74,13 @@
               <label class="agent-console__label" for="investigation-tags">Default tags</label>
               <input id="investigation-tags" class="agent-console__input" data-investigation-tags type="text" placeholder="network,weekly-review">
               <label class="agent-console__label" for="investigation-prompt">Prompt</label>
-              <textarea id="investigation-prompt" class="agent-console__textarea" data-investigation-prompt placeholder="Review routes, services, network policies, and operator health. Highlight public exposure, stale routes, missing isolation, and namespace drift."></textarea>
+              <textarea id="investigation-prompt" class="agent-console__textarea" data-investigation-prompt placeholder="Review routes, services, network policies, ACM fleet health, ACS coverage, and operator posture. Highlight public exposure, stale routes, policy drift, and platform-pattern gaps."></textarea>
               <div class="agent-console__actions">
                 <button class="agent-console__button" type="button" data-investigation-save>Save investigation</button>
                 <button class="agent-console__example" type="button" data-investigation-example="network">Load network example</button>
-                <button class="agent-console__example" type="button" data-investigation-example="storage">Load storage example</button>
+                <button class="agent-console__example" type="button" data-investigation-example="acm">Load ACM example</button>
+                <button class="agent-console__example" type="button" data-investigation-example="acs">Load ACS example</button>
+                <button class="agent-console__example" type="button" data-investigation-example="storage">Load IBM Z example</button>
               </div>
               <div class="agent-console__status" data-investigation-status></div>
               <div class="agent-console__cards" data-investigation-list>

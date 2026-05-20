@@ -21,7 +21,10 @@
   const presetTools = {
     network: ['get_cluster_identity', 'list_routes', 'list_services', 'list_network_policies'],
     storage: ['get_cluster_identity', 'list_persistent_storage', 'list_storage_classes', 'list_workload_health'],
-    identity: ['get_cluster_identity', 'list_cluster_operators', 'list_operator_subscriptions', 'list_resource_quotas']
+    identity: ['get_cluster_identity', 'list_cluster_infrastructure', 'list_cluster_operators', 'list_operator_subscriptions', 'list_resource_quotas'],
+    acm: ['get_cluster_identity', 'list_cluster_infrastructure', 'list_acm_multicluster_hubs', 'list_acm_managed_clusters', 'list_acm_policies'],
+    acs: ['get_cluster_identity', 'list_cluster_infrastructure', 'list_acs_central_services', 'list_acs_secured_clusters', 'list_network_policies'],
+    platform: ['get_cluster_identity', 'list_cluster_infrastructure', 'list_nodes', 'list_cluster_operators', 'list_acm_managed_clusters']
   };
 
   function countRows(payload) {
@@ -127,11 +130,11 @@
       roleArn: target.role_arn || 'current execution context',
       account: getClusterIdentity(target).name,
       arn: getClusterIdentity(target).detail,
-      riskyGroups: countRows(toolResults.list_cluster_operators),
-      blackholeRoutes: countRows(toolResults.list_nodes),
-      bucketRisk: countRows(toolResults.list_persistent_storage),
-      budgets: countRows(toolResults.list_resource_quotas),
-      spend: countRows(toolResults.list_workload_health)
+      infrastructureRows: countRows(toolResults.list_cluster_infrastructure),
+      fleetRows: countRows(toolResults.list_acm_managed_clusters),
+      policyRows: countRows(toolResults.list_acm_policies),
+      acsRows: countRows(toolResults.list_acs_secured_clusters),
+      workloadRows: countRows(toolResults.list_workload_health)
     };
   }
 
@@ -172,8 +175,8 @@
       ['summary', 'role_arns', context.roleArns.join(', ')],
       ['summary', 'tool_names', context.toolNames.join(', ')],
       [],
-      ['targets', 'region', 'role_arn', 'account', 'arn', 'risky_groups', 'blackhole_routes', 'bucket_risk', 'budgets', 'spend'],
-      ...context.summaries.map((item) => ['targets', item.region, item.roleArn, item.account, item.arn, item.riskyGroups, item.blackholeRoutes, item.bucketRisk, item.budgets, item.spend]),
+      ['targets', 'region', 'role_arn', 'account', 'arn', 'infrastructure_rows', 'fleet_rows', 'policy_rows', 'acs_rows', 'workload_rows'],
+      ...context.summaries.map((item) => ['targets', item.region, item.roleArn, item.account, item.arn, item.infrastructureRows, item.fleetRows, item.policyRows, item.acsRows, item.workloadRows]),
       [],
       ['raw_tool_results', 'region', 'role_arn', 'tool_name', 'payload'],
       ...context.results.flatMap((target) => Object.entries(target.tool_results || {}).map(([toolName, payload]) => ['raw_tool_results', target.region || '', target.role_arn || '', toolName, JSON.stringify(payload)]))
@@ -196,11 +199,11 @@
     titleSlide.addText(context.reportLabel, { x: 0.5, y: 0.5, w: 6.5, h: 0.5, fontSize: 24, bold: true, color: '0F172A' });
     titleSlide.addText(`Generated ${context.generatedAt.toLocaleString()}`, { x: 0.5, y: 1.1, w: 4.5, h: 0.3, fontSize: 14, color: '2563EB' });
     titleSlide.addText(`Targets: ${context.count}\nCluster scopes: ${context.regions.join(', ') || '—'}\nExecution contexts: ${context.roleArns.join(', ') || 'Current execution context'}\nTools: ${context.toolNames.join(', ') || '—'}`, { x: 0.5, y: 1.7, w: 5.8, h: 2.2, fontSize: 12, color: '334155', breakLine: true });
-    titleSlide.addText((context.summaries.slice(0, 4).map((item) => `• ${item.account} @ ${item.region} — operator rows ${item.riskyGroups}, node rows ${item.blackholeRoutes}, storage rows ${item.bucketRisk}, workload rows ${item.spend}`).join('\n')) || '• No sweep targets were returned.', { x: 6.7, y: 1.4, w: 5.2, h: 3.0, fontSize: 12, color: '0F172A', margin: 0.12, fill: { color: 'DBEAFE' }, line: { color: '93C5FD' } });
+    titleSlide.addText((context.summaries.slice(0, 4).map((item) => `• ${item.account} @ ${item.region} — infrastructure ${item.infrastructureRows}, ACM fleet ${item.fleetRows}, ACM policy ${item.policyRows}, ACS ${item.acsRows}, workload ${item.workloadRows}`).join('\n')) || '• No sweep targets were returned.', { x: 6.7, y: 1.4, w: 5.2, h: 3.0, fontSize: 12, color: '0F172A', margin: 0.12, fill: { color: 'DBEAFE' }, line: { color: '93C5FD' } });
 
     const detailSlide = pptx.addSlide();
     detailSlide.addText('Target summary', { x: 0.5, y: 0.4, w: 6.0, h: 0.4, fontSize: 20, bold: true, color: '0F172A' });
-    detailSlide.addText((context.summaries.length ? context.summaries : [{ account: 'No targets', region: '—', riskyGroups: '—', blackholeRoutes: '—', bucketRisk: '—', budgets: '—', spend: '—' }]).map((item) => `• ${item.account} (${item.region})\n  Context: ${item.roleArn}\n  Operator rows: ${item.riskyGroups} · Node rows: ${item.blackholeRoutes} · Storage rows: ${item.bucketRisk} · Quota rows: ${item.budgets} · Workload rows: ${item.spend}`).join('\n'), { x: 0.5, y: 1.0, w: 11.4, h: 5.6, fontSize: 11, color: '0F172A', margin: 0.12, fill: { color: 'FFFFFF' }, line: { color: 'CBD5E1' } });
+    detailSlide.addText((context.summaries.length ? context.summaries : [{ account: 'No targets', region: '—', infrastructureRows: '—', fleetRows: '—', policyRows: '—', acsRows: '—', workloadRows: '—' }]).map((item) => `• ${item.account} (${item.region})\n  Context: ${item.roleArn}\n  Infrastructure rows: ${item.infrastructureRows} · ACM fleet rows: ${item.fleetRows} · ACM policy rows: ${item.policyRows} · ACS rows: ${item.acsRows} · Workload rows: ${item.workloadRows}`).join('\n'), { x: 0.5, y: 1.0, w: 11.4, h: 5.6, fontSize: 11, color: '0F172A', margin: 0.12, fill: { color: 'FFFFFF' }, line: { color: 'CBD5E1' } });
 
     await pptx.writeFile({ fileName: `openshift-sre-posture-radar-${createTimestampSlug()}.pptx` });
   }
@@ -242,7 +245,7 @@
       `Execution contexts: ${context.roleArns.join(', ') || 'Current execution context'}`,
       `Tools: ${context.toolNames.join(', ') || '—'}`
     ]);
-    addBlock('Target summary', context.summaries.length ? context.summaries.map((item) => `${item.account} (${item.region}) — Context: ${item.roleArn}; Operator rows: ${item.riskyGroups}; Node rows: ${item.blackholeRoutes}; Storage rows: ${item.bucketRisk}; Quota rows: ${item.budgets}; Workload rows: ${item.spend}`) : ['No sweep targets were returned.']);
+    addBlock('Target summary', context.summaries.length ? context.summaries.map((item) => `${item.account} (${item.region}) — Context: ${item.roleArn}; Infrastructure rows: ${item.infrastructureRows}; ACM fleet rows: ${item.fleetRows}; ACM policy rows: ${item.policyRows}; ACS rows: ${item.acsRows}; Workload rows: ${item.workloadRows}`) : ['No sweep targets were returned.']);
     doc.save(`openshift-sre-posture-radar-${createTimestampSlug()}.pdf`);
   }
 
@@ -272,7 +275,7 @@
     </div>
     <div class="section">
       <h2>Target summary</h2>
-      <ul>${(context.summaries.length ? context.summaries : [{ account: 'No targets', region: '—', roleArn: '—', riskyGroups: '—', blackholeRoutes: '—', bucketRisk: '—', budgets: '—', spend: '—' }]).map((item) => `<li>${escapeHtml(`${item.account} (${item.region}) — Context: ${item.roleArn}; Operator rows: ${item.riskyGroups}; Node rows: ${item.blackholeRoutes}; Storage rows: ${item.bucketRisk}; Quota rows: ${item.budgets}; Workload rows: ${item.spend}`)}</li>`).join('')}</ul>
+      <ul>${(context.summaries.length ? context.summaries : [{ account: 'No targets', region: '—', roleArn: '—', infrastructureRows: '—', fleetRows: '—', policyRows: '—', acsRows: '—', workloadRows: '—' }]).map((item) => `<li>${escapeHtml(`${item.account} (${item.region}) — Context: ${item.roleArn}; Infrastructure rows: ${item.infrastructureRows}; ACM fleet rows: ${item.fleetRows}; ACM policy rows: ${item.policyRows}; ACS rows: ${item.acsRows}; Workload rows: ${item.workloadRows}`)}</li>`).join('')}</ul>
     </div>
   </body>
 </html>`;
@@ -317,7 +320,6 @@
   }
 
   function renderTarget(target) {
-    const identity = target.caller_identity || {};
     const toolResults = target.tool_results || {};
     const identity = getClusterIdentity(target);
     return `
@@ -329,11 +331,11 @@
         <h3>${identity.name}</h3>
         <p class="agent-console__meta">${identity.detail}</p>
         <ul>
-          <li>Cluster operators reviewed: <strong>${countRows(toolResults.list_cluster_operators)}</strong></li>
-          <li>Node rows reviewed: <strong>${countRows(toolResults.list_nodes)}</strong></li>
-          <li>Route / service rows reviewed: <strong>${countRows(toolResults.list_routes)}</strong></li>
-          <li>Persistent storage rows: <strong>${countRows(toolResults.list_persistent_storage)}</strong></li>
-          <li>Quota policy rows: <strong>${countRows(toolResults.list_resource_quotas)}</strong></li>
+          <li>Infrastructure rows reviewed: <strong>${countRows(toolResults.list_cluster_infrastructure)}</strong></li>
+          <li>ACM fleet rows reviewed: <strong>${countRows(toolResults.list_acm_managed_clusters)}</strong></li>
+          <li>ACM policy rows reviewed: <strong>${countRows(toolResults.list_acm_policies)}</strong></li>
+          <li>ACS secured-cluster rows: <strong>${countRows(toolResults.list_acs_secured_clusters)}</strong></li>
+          <li>Workload rows reviewed: <strong>${countRows(toolResults.list_workload_health)}</strong></li>
         </ul>
       </article>
     `;

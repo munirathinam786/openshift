@@ -14,7 +14,7 @@
           "eyebrow": "AI-assisted operations",
           "title": "OpenShift SRE Console",
           "description": "Run OpenShift SRE prompts, troubleshooting flows, and review structured output in an operator workspace. The LLM runtime controls, cluster scope overrides, and guided diagnostics all live here.",
-          "badges": ["React shell", "Live /chat endpoint", "Operator-safe guidance"],
+          "badges": ["React shell", "Live /chat endpoint", "Operator-safe guidance", "ACM + ACS + platform patterns"],
           "actions": [
             { "label": "Open docs home", "href": "/docs-home/" },
             { "label": "Open FinOps console", "href": "finops-console.html" },
@@ -26,7 +26,7 @@
             { "label": "Tool drilldown", "href": "tool-drilldown.html" }
           ],
           "stats": [
-            { "label": "Primary workflow", "value": "Agent-driven investigations", "detail": "Switch between general prompts, cluster posture reviews, and guided troubleshooting." },
+            { "label": "Primary workflow", "value": "Agent-driven investigations", "detail": "Switch between general prompts, cluster posture reviews, fleet governance, ACS checks, and guided troubleshooting." },
             { "label": "Safety model", "value": "Read-only by default", "detail": "OpenShift mutations remain policy-gated." },
             { "label": "Connected views", "value": "5 operator pages", "detail": "Console, troubleshooting, history, utilization, and drilldown stay linked." }
           ],
@@ -146,11 +146,11 @@
                       <span class="agent-console__history-badge agent-console__history-badge--ok">Read-only safe</span>
                     </div>
                     <h4>Technical troubleshooting</h4>
-                    <p>Focus the agent on incident triage, evidence gathering, suspected root cause, blast radius, and next safe steps across compute, network, containers, logs, alarms, and security signals.</p>
+                    <p>Focus the agent on incident triage, evidence gathering, suspected root cause, blast radius, and next safe steps across OpenShift platform operations, ACM fleet governance, ACS coverage, ROSA / ARO patterns, IBM Z estates, and security signals.</p>
                     <section class="agent-console__troubleshooting-callout">
                       <div>
                         <h5>OpenShift troubleshooting scenarios</h5>
-                        <p class="agent-console__meta">Pick a workflow from the dropdown to load a focused investigation path such as route failures, operator degradation, pod crash loops, storage binding issues, and more.</p>
+                        <p class="agent-console__meta">Pick a workflow from the dropdown to load a focused investigation path such as route failures, ACM fleet drift, ACS coverage gaps, ROSA or ARO posture review, IBM Z capacity checks, operator degradation, storage binding issues, and more.</p>
                       </div>
                       <label class="agent-console__label" for="agent-troubleshooting-scenario">
                         Troubleshooting workflow
@@ -176,6 +176,17 @@
                           </optgroup>
                           <optgroup label="Operators">
                             <option value="olm-csv-subscription-failures">OLM subscription / CSV failures</option>
+                          </optgroup>
+                          <optgroup label="Fleet governance">
+                            <option value="acm-fleet-governance">ACM hub / managed cluster / policy drift</option>
+                          </optgroup>
+                          <optgroup label="Security &amp; compliance">
+                            <option value="acs-security-coverage">ACS central / secured cluster coverage gaps</option>
+                          </optgroup>
+                          <optgroup label="Platform patterns">
+                            <option value="rosa-platform-posture">ROSA platform posture and managed-service dependencies</option>
+                            <option value="aro-platform-posture">ARO platform posture and Azure landing-zone dependencies</option>
+                            <option value="ibmz-architecture-posture">IBM Z architecture and capacity posture</option>
                           </optgroup>
                         </select>
                       </label>
@@ -228,7 +239,9 @@
                     <div class="agent-console__actions">
                       <button class="agent-console__example" type="button" data-agent-load-troubleshooting>Load selected workflow</button>
                       <button class="agent-console__example" type="button" data-agent-module="technical-triage" data-agent-prompt="Act as an OpenShift technical troubleshooting specialist. Investigate the operator issue by gathering evidence from cluster operators, warning events, workload state, platform inventory, and network topology. Return: 1) likely root cause, 2) evidence collected, 3) blast radius, 4) immediate next steps, and 5) deeper follow-up checks if the first hypothesis is wrong.">Load troubleshooting specialist</button>
-                      <button class="agent-console__example" type="button" data-agent-prompt="Investigate a production OpenShift issue by checking cluster operators, warning events, route posture, workload health, and platform dependencies. Summarize the most likely failure path and the next safe operator actions.">Incident triage</button>
+                      <button class="agent-console__example" type="button" data-agent-prompt="Investigate a production OpenShift issue by checking cluster operators, warning events, route posture, workload health, platform dependencies, and ACM or platform-pattern drift where relevant. Summarize the most likely failure path and the next safe operator actions.">Incident triage</button>
+                      <button class="agent-console__example" type="button" data-agent-prompt="Review ACM hub health, managed-cluster availability, platform patterns such as ROSA, ARO, and IBM Z, and governance-policy drift. Summarize the highest-risk fleet issues and the safest next actions.">Fleet governance</button>
+                      <button class="agent-console__example" type="button" data-agent-prompt="Review ACS central health, secured-cluster coverage, network-policy posture, and workload protection gaps. Summarize the highest-risk security coverage issues and the safest next actions.">ACS coverage</button>
                     </div>
                   </article>
                 </div>
@@ -311,7 +324,9 @@
                 <button class="agent-console__example" type="button" data-agent-example="Inspect persistent volumes, persistent volume claims, and storage classes to identify binding or lifecycle risks.">Storage posture</button>
                 <button class="agent-console__example" type="button" data-agent-example="Review subscriptions and ClusterServiceVersions to identify operator lifecycle issues or upgrade drift.">OLM health</button>
                 <button class="agent-console__example" type="button" data-agent-example="List recent warning events across critical namespaces and summarize the highest-risk patterns.">Event review</button>
-                <button class="agent-console__example" type="button" data-agent-example="Provide a broad OpenShift platform inventory summary across cluster version, operators, nodes, projects, workloads, routes, and storage.">Full platform sweep</button>
+                <button class="agent-console__example" type="button" data-agent-example="Provide a broad OpenShift platform inventory summary across cluster infrastructure, operators, nodes, projects, workloads, routes, storage, ACM hub state, managed clusters, ACS coverage, and platform patterns such as ROSA, ARO, and IBM Z.">Full platform sweep</button>
+                <button class="agent-console__example" type="button" data-agent-example="Review ACM hub health, managed-cluster availability, governance policies, and cluster infrastructure so I can compare ROSA, ARO, IPI, UPI, and IBM Z posture in one summary.">ACM fleet summary</button>
+                <button class="agent-console__example" type="button" data-agent-example="Review ACS central services, secured clusters, workload health, and network-policy posture. Summarize any major security coverage gaps and how they differ across platform patterns.">ACS security coverage</button>
                 <button class="agent-console__example" type="button" data-agent-example="Run an OpenShift FinOps drilldown covering node capacity, workload requests and limits, namespace density, storage hygiene, route footprint, operator subscriptions, and quota alignment. Summarize the biggest optimization opportunities and the safest next actions.">FinOps / optimization drilldown</button>
               </div>
               <p class="agent-console__meta">Tip: press <strong>Ctrl/Cmd + Enter</strong> to submit. Any Ollama and cluster scope values entered here are used only for this request.</p>

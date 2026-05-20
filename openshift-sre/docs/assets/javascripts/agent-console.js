@@ -196,6 +196,56 @@
       evidenceSources: ['Subscription state, source, package, and installed CSV', 'CSV phase and display name', 'Related platform symptoms and recent warning events'],
       checks: ['Identify the first unhealthy subscription or failed CSV.', 'Check channel and source alignment for the affected operator.', 'Determine whether the failure is isolated or blocks broader platform functionality.'],
       prompt: 'Act as an OpenShift operator lifecycle troubleshooting specialist. Investigate OLM subscription or CSV failures by checking subscription state, installed CSVs, operator phase, related warning events, and impacted namespaces. Return the likely root cause, evidence, blast radius, and safe next steps.'
+    },
+    {
+      id: 'acm-fleet-governance',
+      category: 'Fleet governance',
+      label: 'ACM hub / managed cluster / policy drift',
+      summary: 'Use when the repository-wide multi-cluster estate looks inconsistent across hub health, managed cluster join state, or governance policy compliance.',
+      symptoms: ['Managed clusters stop reporting to the hub, fleet health differs across platform patterns, or governance policy status drifts between clusters.', 'The investigation needs ACM visibility instead of a single-cluster only view.'],
+      evidenceSources: ['MultiClusterHub phase, version, and availability', 'ManagedCluster joined / available posture and cluster-set distribution', 'ACM policy remediation action, disabled policies, and compliance state'],
+      checks: ['Confirm whether the hub itself is healthy before blaming managed clusters.', 'Compare managed-cluster availability and platform-pattern distribution across ROSA, ARO, IPI, UPI, and IBM Z targets.', 'Identify whether policy drift is caused by disabled policies, noncompliant policy state, or unreachable managed clusters.'],
+      prompt: 'Act as an OpenShift fleet governance specialist. Investigate ACM hub, managed-cluster, and governance-policy issues by checking MultiClusterHub availability, ManagedCluster join and available state, cluster infrastructure patterns, and ACM policy compliance or remediation posture. Return the likely root cause, evidence, blast radius, and safe next steps.'
+    },
+    {
+      id: 'acs-security-coverage',
+      category: 'Security & compliance',
+      label: 'ACS central / secured cluster coverage gaps',
+      summary: 'Use when Red Hat Advanced Cluster Security coverage, central health, or secured-cluster protection looks incomplete.',
+      symptoms: ['ACS central is degraded, secured clusters are not protected evenly, or workload security expectations differ between clusters.', 'Security review needs to correlate ACS installation health with OpenShift network and workload posture.'],
+      evidenceSources: ['ACS Central service availability and phase', 'ACS SecuredCluster availability and central endpoint linkage', 'OpenShift network policy and workload health for protected namespaces'],
+      checks: ['Confirm whether ACS central is healthy before investigating secured-cluster drift.', 'Identify which clusters or namespaces are missing secured-cluster coverage.', 'Correlate ACS posture gaps with workload, policy, or platform issues instead of treating them as isolated security symptoms.'],
+      prompt: 'Act as an OpenShift and ACS security specialist. Investigate ACS central and secured-cluster coverage by checking Central service health, SecuredCluster availability, network-policy posture, workload health, and related operator signals. Return the likely root cause, evidence, blast radius, and safe next steps.'
+    },
+    {
+      id: 'rosa-platform-posture',
+      category: 'Platform patterns',
+      label: 'ROSA platform posture and managed-service dependencies',
+      summary: 'Use when AWS-hosted OpenShift fleet behavior needs to be understood in a ROSA-aware way rather than as generic cluster drift.',
+      symptoms: ['ROSA clusters behave differently from the rest of the estate after a fleet change, upgrade wave, or policy rollout.', 'Operators need a ROSA-specific view of infrastructure pattern, managed-cluster posture, and cluster health.'],
+      evidenceSources: ['Cluster infrastructure platform type and inferred platform pattern', 'ManagedCluster fleet posture for ROSA-labelled targets', 'Cluster operators, nodes, and workload stability for the impacted ROSA scopes'],
+      checks: ['Confirm the cluster infrastructure resolves to an AWS / ROSA pattern before pursuing ROSA-specific hypotheses.', 'Compare healthy and unhealthy ROSA clusters against ARO, IPI, UPI, or IBM Z peers where useful.', 'Separate provider-managed dependency issues from in-cluster operator or workload faults.'],
+      prompt: 'Act as a ROSA platform operations specialist. Investigate ROSA fleet posture by checking cluster infrastructure, ACM managed-cluster state, cluster operators, node readiness, and workload stability. Return the likely root cause, evidence, blast radius, and safe next steps.'
+    },
+    {
+      id: 'aro-platform-posture',
+      category: 'Platform patterns',
+      label: 'ARO platform posture and Azure landing-zone dependencies',
+      summary: 'Use when Azure-hosted OpenShift fleet behavior needs an ARO-aware investigation path instead of generic single-cluster checks.',
+      symptoms: ['ARO clusters drift from the rest of the estate, governance posture differs by Azure footprint, or upgrades impact only Azure-hosted clusters.', 'Operators need to compare ARO health against the broader fleet without losing OpenShift evidence depth.'],
+      evidenceSources: ['Cluster infrastructure platform type and inferred platform pattern', 'ManagedCluster fleet posture for ARO-labelled targets', 'Cluster operators, nodes, and workload stability for impacted ARO scopes'],
+      checks: ['Confirm the cluster infrastructure resolves to an Azure / ARO pattern before pursuing ARO-specific hypotheses.', 'Compare healthy and unhealthy ARO clusters against ROSA, IPI, UPI, or IBM Z peers where useful.', 'Separate landing-zone or provider-aligned drift from in-cluster operator and workload faults.'],
+      prompt: 'Act as an ARO platform operations specialist. Investigate ARO fleet posture by checking cluster infrastructure, ACM managed-cluster state, cluster operators, node readiness, and workload stability. Return the likely root cause, evidence, blast radius, and safe next steps.'
+    },
+    {
+      id: 'ibmz-architecture-posture',
+      category: 'Platform patterns',
+      label: 'IBM Z architecture and capacity posture',
+      summary: 'Use when s390x / IBM Z clusters need an architecture-aware operational review instead of a generic x86-centric investigation.',
+      symptoms: ['IBM Z clusters show different rollout, capacity, or governance behavior than the rest of the fleet.', 'Operators need to validate that architecture-specific posture, node distribution, and policy coverage are still aligned.'],
+      evidenceSources: ['Cluster infrastructure pattern and node architectures', 'ManagedCluster fleet posture for IBM Z targets', 'Cluster operators, node readiness, workload health, and quota posture'],
+      checks: ['Confirm the cluster exposes an IBM Z / s390x architecture signal before pursuing architecture-specific hypotheses.', 'Compare IBM Z targets against ROSA, ARO, IPI, or UPI peers only after architecture and quota posture are clear.', 'Identify whether the issue is architecture-specific, policy-related, or simply another cluster-level operator failure.'],
+      prompt: 'Act as an IBM Z OpenShift platform specialist. Investigate IBM Z architecture posture by checking cluster infrastructure, node architectures, ACM managed-cluster state, cluster operators, quota posture, and workload stability. Return the likely root cause, evidence, blast radius, and safe next steps.'
     }
   ];
   const TROUBLESHOOTING_PRESET_KEY = 'openshift-sre-troubleshooting-presets-v1';
@@ -215,7 +265,12 @@
     pvc_pending: 'PVC Pending or mount failure',
     policy_block: 'Policy or SCC block',
     olm_failed: 'Subscription or CSV failed',
-    warning_events: 'Warning events spike'
+    warning_events: 'Warning events spike',
+    acm_policy_drift: 'ACM policy drift or noncompliance',
+    acm_cluster_unavailable: 'Managed cluster unavailable or not joined',
+    acs_sensor_gap: 'ACS coverage gap or central issue',
+    managed_service_drift: 'Managed service platform drift',
+    architecture_mismatch: 'Architecture or platform pattern mismatch'
   };
   const CATEGORY_WORKFLOW_DEFAULTS = {
     'Core triage': {
@@ -280,6 +335,33 @@
       runbooks: [{ title: 'Operations guide', href: 'operations/' }, { title: 'Architecture reference', href: 'architecture/' }],
       rootCauses: [{ title: 'Subscription channel or source issue', detail: 'The Subscription references a bad channel or source.', confidence: 'high', keywords: ['subscription', 'channel', 'source'] }, { title: 'CSV phase failure', detail: 'The installed CSV is not progressing to Succeeded.', confidence: 'medium', keywords: ['csv', 'failed', 'pending'] }, { title: 'Platform dependency problem', detail: 'An operator lifecycle issue is caused by an underlying platform fault.', confidence: 'medium', keywords: ['operator', 'platform', 'degraded'] }],
       nextActions: ['Identify the first unhealthy subscription.', 'Check CSV phase and operator namespace events.', 'Confirm whether the operator issue is isolated or cascading.']
+    },
+    'Fleet governance': {
+      services: ['ACM', 'Cluster infrastructure', 'ROSA', 'ARO', 'IBM Z'],
+      symptomOptions: ['acm_cluster_unavailable', 'acm_policy_drift', 'managed_service_drift'],
+      checklist: ['Check MultiClusterHub availability and phase first.', 'Compare ManagedCluster joined and available posture across the affected fleet segment.', 'Review ACM policy compliance and disabled-policy state before assuming a transport issue.'],
+      commandHints: ['oc get multiclusterhubs -A', 'oc get managedclusters', 'oc get policies -A', 'oc get infrastructure cluster -o yaml'],
+      runbooks: [{ title: 'Operations guide', href: 'operations/' }, { title: 'Service coverage', href: 'service-coverage/' }],
+      rootCauses: [{ title: 'Hub control-plane issue', detail: 'The ACM hub is degraded or unavailable, so managed-cluster health looks worse than it really is.', confidence: 'high', keywords: ['multiclusterhub', 'hub', 'available', 'phase'] }, { title: 'Managed-cluster connectivity or join drift', detail: 'One or more managed clusters stopped joining or reporting cleanly to ACM.', confidence: 'high', keywords: ['managedcluster', 'joined', 'available', 'fleet'] }, { title: 'Governance policy drift', detail: 'Policies are disabled, noncompliant, or unevenly remediated across the fleet.', confidence: 'medium', keywords: ['policy', 'compliance', 'remediation', 'disabled'] }],
+      nextActions: ['Verify whether the ACM hub is healthy before escalating to cluster owners.', 'Compare affected managed clusters by platform pattern and cluster set.', 'Review noncompliant or disabled policies that align with the issue start.']
+    },
+    'Security & compliance': {
+      services: ['ACS', 'Network policies', 'Workloads'],
+      symptomOptions: ['acs_sensor_gap', 'policy_block', 'warning_events'],
+      checklist: ['Check ACS central service health before reviewing secured-cluster coverage.', 'Identify whether coverage gaps are fleet-wide or isolated to one secured cluster.', 'Correlate ACS symptoms with network-policy posture and workload health.'],
+      commandHints: ['oc get centralservices -A', 'oc get securedclusters -A', 'oc get networkpolicy -A', 'oc get pods -A'],
+      runbooks: [{ title: 'Operations guide', href: 'operations/' }, { title: 'Architecture reference', href: 'architecture/' }],
+      rootCauses: [{ title: 'ACS central degradation', detail: 'Central is unhealthy, so downstream coverage or compliance signals are incomplete.', confidence: 'high', keywords: ['central', 'acs', 'stackrox', 'degraded'] }, { title: 'Secured-cluster rollout gap', detail: 'SecuredCluster coverage is missing or uneven across target clusters.', confidence: 'high', keywords: ['securedcluster', 'sensor', 'coverage', 'cluster'] }, { title: 'Underlying OpenShift policy or workload fault', detail: 'ACS is reporting a real gap caused by network, workload, or operator posture.', confidence: 'medium', keywords: ['networkpolicy', 'workload', 'operator', 'policy'] }],
+      nextActions: ['Confirm ACS central health and namespace placement.', 'Compare protected and unprotected clusters or namespaces.', 'Validate whether the gap is an ACS deployment issue or an OpenShift posture issue.']
+    },
+    'Platform patterns': {
+      services: ['Cluster infrastructure', 'ROSA', 'ARO', 'IBM Z', 'Nodes', 'ACM'],
+      symptomOptions: ['managed_service_drift', 'architecture_mismatch', 'node_not_ready'],
+      checklist: ['Inspect cluster infrastructure and inferred platform pattern first.', 'Check node readiness and architecture signals for the impacted pattern.', 'Compare the affected pattern against a healthy peer pattern before assuming cluster-local fault.'],
+      commandHints: ['oc get infrastructure cluster -o yaml', 'oc get nodes -o wide', 'oc get clusterversion', 'oc get clusteroperators', 'oc get managedclusters'],
+      runbooks: [{ title: 'Architecture reference', href: 'architecture/' }, { title: 'Service coverage', href: 'service-coverage/' }],
+      rootCauses: [{ title: 'Managed service dependency drift', detail: 'A provider-aligned or landing-zone-aligned dependency changed for one platform pattern.', confidence: 'medium', keywords: ['rosa', 'aro', 'managed', 'platform'] }, { title: 'Cluster infrastructure mismatch', detail: 'The cluster reports a different platform pattern or topology than expected, changing how the issue should be investigated.', confidence: 'medium', keywords: ['infrastructure', 'platform', 'topology', 'pattern'] }, { title: 'Architecture-specific capacity or scheduling issue', detail: 'Node architecture, quota, or worker availability differs from the rest of the fleet.', confidence: 'medium', keywords: ['s390x', 'ibm', 'capacity', 'architecture', 'quota'] }],
+      nextActions: ['Confirm the cluster platform pattern from infrastructure signals.', 'Compare the affected pattern with a healthy peer cluster.', 'Separate provider-managed drift from in-cluster operator, node, or workload failures.']
     }
   };
   const SCENARIO_WORKFLOW_OVERRIDES = {
@@ -310,6 +392,26 @@
     'olm-csv-subscription-failures': {
       services: ['OLM'],
       symptomOptions: ['olm_failed', 'warning_events']
+    },
+    'acm-fleet-governance': {
+      services: ['ACM', 'Cluster infrastructure', 'ROSA', 'ARO', 'IBM Z'],
+      symptomOptions: ['acm_cluster_unavailable', 'acm_policy_drift', 'managed_service_drift']
+    },
+    'acs-security-coverage': {
+      services: ['ACS', 'Network policies', 'Workloads'],
+      symptomOptions: ['acs_sensor_gap', 'policy_block']
+    },
+    'rosa-platform-posture': {
+      services: ['ROSA', 'Cluster infrastructure', 'ACM', 'Nodes'],
+      symptomOptions: ['managed_service_drift', 'node_not_ready']
+    },
+    'aro-platform-posture': {
+      services: ['ARO', 'Cluster infrastructure', 'ACM', 'Nodes'],
+      symptomOptions: ['managed_service_drift', 'node_not_ready']
+    },
+    'ibmz-architecture-posture': {
+      services: ['IBM Z', 'Cluster infrastructure', 'Nodes', 'ACM'],
+      symptomOptions: ['architecture_mismatch', 'node_not_ready']
     }
   };
   const ENRICHED_TROUBLESHOOTING_SCENARIOS = TROUBLESHOOTING_SCENARIOS.map((scenario) => {

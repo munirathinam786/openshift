@@ -102,6 +102,12 @@ class OpenShiftSreToolkit:
                 {},
                 self.get_cluster_identity,
             ),
+            "list_cluster_infrastructure": ToolSpec(
+                "list_cluster_infrastructure",
+                "Inspect the cluster infrastructure resource to identify the platform type, topology, and likely platform pattern such as ARO, ROSA, or IBM Z.",
+                {},
+                self.list_cluster_infrastructure,
+            ),
             "list_projects": ToolSpec(
                 "list_projects",
                 "List OpenShift projects / namespaces and summarize phase, labels, and age.",
@@ -203,6 +209,36 @@ class OpenShiftSreToolkit:
                 "List ClusterServiceVersions and summarize phase, operator version, and namespace posture.",
                 {},
                 self.list_cluster_service_versions,
+            ),
+            "list_acm_multicluster_hubs": ToolSpec(
+                "list_acm_multicluster_hubs",
+                "Inspect ACM MultiClusterHub resources to summarize hub availability, lifecycle phase, and placement namespace coverage.",
+                {},
+                self.list_acm_multicluster_hubs,
+            ),
+            "list_acm_managed_clusters": ToolSpec(
+                "list_acm_managed_clusters",
+                "Inspect ACM ManagedCluster resources to summarize fleet join state, availability, and cluster distribution across platform patterns.",
+                {},
+                self.list_acm_managed_clusters,
+            ),
+            "list_acm_policies": ToolSpec(
+                "list_acm_policies",
+                "Inspect ACM governance policies and summarize remediation posture, disabled policies, and compliance state where reported.",
+                {},
+                self.list_acm_policies,
+            ),
+            "list_acs_central_services": ToolSpec(
+                "list_acs_central_services",
+                "Inspect Red Hat Advanced Cluster Security central services to summarize install phase, availability, and namespace placement.",
+                {},
+                self.list_acs_central_services,
+            ),
+            "list_acs_secured_clusters": ToolSpec(
+                "list_acs_secured_clusters",
+                "Inspect Red Hat Advanced Cluster Security secured clusters to summarize sensor deployment, cluster presence, and protection coverage.",
+                {},
+                self.list_acs_secured_clusters,
             ),
             "list_security_context_constraints": ToolSpec(
                 "list_security_context_constraints",
@@ -313,6 +349,23 @@ class OpenShiftSreToolkit:
             return [self._settings.openshift_namespace]
         return ["default"]
 
+    def _all_projects(self) -> list[str]:
+        self._ensure_clients()
+        assert self._core is not None
+        try:
+            return [self._metadata_name(item) for item in self._core.list_namespace().items if self._metadata_name(item)]
+        except ApiException:
+            return self._selected_projects()
+
+    @staticmethod
+    def _namespace_candidates(*groups: list[str]) -> list[str]:
+        ordered: list[str] = []
+        for group in groups:
+            for item in group:
+                if item and item not in ordered:
+                    ordered.append(item)
+        return ordered
+
     @staticmethod
     def _metadata_name(item: Any) -> str | None:
         metadata = getattr(item, "metadata", None)
@@ -354,16 +407,125 @@ class OpenShiftSreToolkit:
             raise
         return list(payload.get("items") or [])
 
+    def _list_custom_any_version(
+        self,
+        *,
+        group: str,
+        versions: list[str] | tuple[str, ...],
+        plural: str,
+        namespace: str | None = None,
+    ) -> list[dict[str, Any]]:
+        for version in versions:
+            items = self._list_custom(group=group, version=version, plural=plural, namespace=namespace)
+            if items:
+                return items
+        return []
+
+    def _list_custom_from_namespaces(
+        self,
+        *,
+        group: str,
+        versions: list[str] | tuple[str, ...],
+        plural: str,
+        namespaces: list[str],
+    ) -> list[dict[str, Any]]:
+        rows: list[dict[str, Any]] = []
+        for namespace in self._namespace_candidates(namespaces):
+            rows.extend(self._list_custom_any_version(group=group, versions=versions, plural=plural, namespace=namespace))
+        return rows
+
+    @staticmethod
+    def _extract_condition_map(conditions: list[dict[str, Any]] | None) -> dict[str, str | None]:
+        mapping: dict[str, str | None] = {}
+        for condition in conditions or []:
+            condition_type = condition.get("type")
+            if condition_type:
+                mapping[str(condition_type)] = condition.get("status")
+        return mapping
+
+    @staticmethod
+    def _guess_platform_pattern(platform_type: str | None, cluster_name: str | None, infrastructure_name: str | None, architectures: list[str]) -> str:
+        joined_name = " ".join(filter(None, [cluster_name, infrastructure_name])).lower()
+        architecture_set = {architecture.lower() for architecture in architectures}
+        if "s390x" in architecture_set or "ibmz" in joined_name or "ibm-z" in joined_name:
+            return "IBM Z"
+        if (platform_type or "").lower() == "aws":
+            return "ROSA" if "rosa" in joined_name else "OpenShift on AWS"
+        if (platform_type or "").lower() == "azure":
+            return "ARO" if "aro" in joined_name else "OpenShift on Azure"
+        if "rosa" in joined_name:
+            return "ROSA"
+        if "aro" in joined_name:
+            return "ARO"
+        return platform_type or "OpenShift platform"
+
     def get_cluster_identity(self) -> dict[str, Any]:
         self._ensure_clients()
         configuration = client.Configuration.get_default_copy()
+        infrastructure = self.list_cluster_infrastructure()
+        infrastructure_row = (infrastructure.get("cluster_infrastructure") or [None])[0] or {}
         return {
             "cluster": self._settings.openshift_cluster,
+            "cluster_name": self._settings.openshift_cluster,
             "api_url": configuration.host,
             "kube_context": self._current_context_name,
+            "current_context": self._current_context_name,
             "default_project": self._settings.openshift_namespace,
             "project_sweep_scope": self._selected_projects(),
             "verify_ssl": self._settings.openshift_verify_ssl,
+            "platform_type": infrastructure_row.get("platform_type"),
+            "platform_pattern": infrastructure_row.get("platform_pattern"),
+            "infrastructure_name": infrastructure_row.get("infrastructure_name"),
+            "node_architectures": infrastructure_row.get("node_architectures") or [],
+        }
+
+    def list_cluster_infrastructure(self) -> dict[str, Any]:
+        items = self._list_custom(group="config.openshift.io", version="v1", plural="infrastructures")
+        item = next((entry for entry in items if (entry.get("metadata") or {}).get("name") == "cluster"), None)
+        if item is None:
+            return {"count": 0, "cluster_infrastructure": []}
+
+        status = item.get("status") or {}
+        platform_status = status.get("platformStatus") or {}
+        platform_type = status.get("platform") or platform_status.get("type") or (item.get("spec") or {}).get("platformSpec", {}).get("type")
+        node_rows = self.list_nodes().get("nodes") or []
+        node_architectures = sorted({
+            str(label_value)
+            for node in node_rows
+            for label_key, label_value in ((node.get("labels") or {}) if isinstance(node.get("labels"), dict) else {}).items()
+            if label_key in {"kubernetes.io/arch", "beta.kubernetes.io/arch"}
+        })
+        if not node_architectures:
+            self._ensure_clients()
+            assert self._core is not None
+            try:
+                live_nodes = self._core.list_node().items
+                node_architectures = sorted({
+                    (self._labels(node).get("kubernetes.io/arch") or self._labels(node).get("beta.kubernetes.io/arch") or "")
+                    for node in live_nodes
+                } - {""})
+            except ApiException:
+                node_architectures = []
+
+        infrastructure_name = status.get("infrastructureName") or (item.get("metadata") or {}).get("name")
+        cluster_name = self._settings.openshift_cluster or infrastructure_name
+        return {
+            "count": 1,
+            "cluster_infrastructure": [
+                {
+                    "cluster_name": cluster_name,
+                    "infrastructure_name": infrastructure_name,
+                    "platform_type": platform_type,
+                    "platform_pattern": self._guess_platform_pattern(platform_type, cluster_name, infrastructure_name, node_architectures),
+                    "api_server_url": status.get("apiServerURL"),
+                    "api_server_internal_url": status.get("apiServerInternalURL"),
+                    "base_domain": status.get("apiServerURL", "").split("api.")[-1] if status.get("apiServerURL") and "api." in status.get("apiServerURL") else status.get("etcdDiscoveryDomain"),
+                    "infrastructure_topology": status.get("infrastructureTopology"),
+                    "control_plane_topology": status.get("controlPlaneTopology"),
+                    "node_architectures": node_architectures,
+                    "platform_status": platform_status,
+                }
+            ],
         }
 
     def list_projects(self) -> dict[str, Any]:
@@ -455,6 +617,7 @@ class OpenShiftSreToolkit:
                 {
                     "node_name": self._metadata_name(node),
                     "roles": roles,
+                    "labels": labels,
                     "ready": ready,
                     "unschedulable": getattr(getattr(node, "spec", None), "unschedulable", False),
                     "kubelet_version": getattr(node_info, "kubelet_version", None),
@@ -770,6 +933,178 @@ class OpenShiftSreToolkit:
                     }
                 )
         return {"count": len(rows), "failed_count": failed_count, "cluster_service_versions": rows}
+
+    def list_acm_multicluster_hubs(self) -> dict[str, Any]:
+        namespaces = self._namespace_candidates(
+            ["open-cluster-management", "open-cluster-management-hub"],
+            self._selected_projects(),
+        )
+        rows = []
+        available_count = 0
+        for item in self._list_custom_from_namespaces(
+            group="operator.open-cluster-management.io",
+            versions=("v1",),
+            plural="multiclusterhubs",
+            namespaces=namespaces,
+        ):
+            metadata = item.get("metadata") or {}
+            status = item.get("status") or {}
+            conditions = self._extract_condition_map(status.get("conditions"))
+            available = conditions.get("Available")
+            if available == "True":
+                available_count += 1
+            rows.append(
+                {
+                    "namespace": metadata.get("namespace"),
+                    "hub_name": metadata.get("name"),
+                    "phase": status.get("phase"),
+                    "current_version": status.get("currentVersion"),
+                    "desired_version": status.get("desiredVersion"),
+                    "available": available,
+                    "updating": conditions.get("Updating"),
+                    "components": status.get("components") or [],
+                }
+            )
+        return {"count": len(rows), "available_count": available_count, "multicluster_hubs": rows}
+
+    def list_acm_managed_clusters(self) -> dict[str, Any]:
+        rows = []
+        available_count = 0
+        joined_count = 0
+        platform_patterns: dict[str, int] = {}
+        for item in self._list_custom_any_version(
+            group="cluster.open-cluster-management.io",
+            versions=("v1", "v1beta1"),
+            plural="managedclusters",
+        ):
+            metadata = item.get("metadata") or {}
+            status = item.get("status") or {}
+            conditions = self._extract_condition_map(status.get("conditions"))
+            labels = metadata.get("labels") or {}
+            vendor = labels.get("vendor") or labels.get("cloud") or labels.get("cluster.open-cluster-management.io/clusterset")
+            cluster_name = metadata.get("name")
+            platform_pattern = self._guess_platform_pattern(vendor, cluster_name, cluster_name, [])
+            platform_patterns[platform_pattern] = platform_patterns.get(platform_pattern, 0) + 1
+            if conditions.get("ManagedClusterConditionAvailable") == "True" or conditions.get("Available") == "True":
+                available_count += 1
+            if conditions.get("ManagedClusterJoined") == "True" or conditions.get("Joined") == "True":
+                joined_count += 1
+            rows.append(
+                {
+                    "cluster_name": cluster_name,
+                    "labels": labels,
+                    "hub_accepted": conditions.get("HubAcceptedManagedCluster") or conditions.get("HubAccepted"),
+                    "joined": conditions.get("ManagedClusterJoined") or conditions.get("Joined"),
+                    "available": conditions.get("ManagedClusterConditionAvailable") or conditions.get("Available"),
+                    "cluster_sets": sorted({value for key, value in labels.items() if "clusterset" in key.lower()}),
+                    "version": (status.get("version") or {}).get("kubernetes"),
+                    "platform_pattern": platform_pattern,
+                }
+            )
+        return {
+            "count": len(rows),
+            "available_count": available_count,
+            "joined_count": joined_count,
+            "platform_pattern_counts": platform_patterns,
+            "managed_clusters": rows,
+        }
+
+    def list_acm_policies(self) -> dict[str, Any]:
+        rows = []
+        disabled_count = 0
+        compliance_type_counts: dict[str, int] = {}
+        for item in self._list_custom_from_namespaces(
+            group="policy.open-cluster-management.io",
+            versions=("v1",),
+            plural="policies",
+            namespaces=self._all_projects(),
+        ):
+            metadata = item.get("metadata") or {}
+            spec = item.get("spec") or {}
+            status = item.get("status") or {}
+            disabled = bool(spec.get("disabled"))
+            compliance = status.get("complianceState") or status.get("compliant") or "Unknown"
+            compliance_type_counts[compliance] = compliance_type_counts.get(compliance, 0) + 1
+            if disabled:
+                disabled_count += 1
+            rows.append(
+                {
+                    "namespace": metadata.get("namespace"),
+                    "policy_name": metadata.get("name"),
+                    "remediation_action": spec.get("remediationAction"),
+                    "disabled": disabled,
+                    "compliance_state": compliance,
+                    "policy_templates": len(spec.get("policy-templates") or []),
+                }
+            )
+        return {
+            "count": len(rows),
+            "disabled_count": disabled_count,
+            "compliance_type_counts": compliance_type_counts,
+            "policies": rows,
+        }
+
+    def list_acs_central_services(self) -> dict[str, Any]:
+        rows = []
+        available_count = 0
+        for item in self._list_custom_from_namespaces(
+            group="platform.stackrox.io",
+            versions=("v1alpha1",),
+            plural="centralservices",
+            namespaces=self._namespace_candidates(
+                ["stackrox", "rhacs-operator", "redhat-acs-operator"],
+                self._all_projects(),
+            ),
+        ):
+            metadata = item.get("metadata") or {}
+            status = item.get("status") or {}
+            conditions = self._extract_condition_map(status.get("conditions"))
+            available = conditions.get("Available")
+            if available == "True":
+                available_count += 1
+            rows.append(
+                {
+                    "namespace": metadata.get("namespace"),
+                    "central_name": metadata.get("name"),
+                    "phase": status.get("phase"),
+                    "version": status.get("version"),
+                    "available": available,
+                    "progressing": conditions.get("Progressing"),
+                    "degraded": conditions.get("Degraded"),
+                }
+            )
+        return {"count": len(rows), "available_count": available_count, "central_services": rows}
+
+    def list_acs_secured_clusters(self) -> dict[str, Any]:
+        rows = []
+        available_count = 0
+        for item in self._list_custom_from_namespaces(
+            group="platform.stackrox.io",
+            versions=("v1alpha1",),
+            plural="securedclusters",
+            namespaces=self._namespace_candidates(
+                ["stackrox", "rhacs-operator", "redhat-acs-operator"],
+                self._all_projects(),
+            ),
+        ):
+            metadata = item.get("metadata") or {}
+            status = item.get("status") or {}
+            conditions = self._extract_condition_map(status.get("conditions"))
+            available = conditions.get("Available")
+            if available == "True":
+                available_count += 1
+            rows.append(
+                {
+                    "namespace": metadata.get("namespace"),
+                    "secured_cluster_name": metadata.get("name"),
+                    "cluster_name": (item.get("spec") or {}).get("clusterName") or metadata.get("name"),
+                    "available": available,
+                    "progressing": conditions.get("Progressing"),
+                    "degraded": conditions.get("Degraded"),
+                    "central_endpoint": ((item.get("spec") or {}).get("centralApiEndpoint") or (item.get("spec") or {}).get("central", {})).get("endpoint") if isinstance((item.get("spec") or {}).get("central"), dict) else (item.get("spec") or {}).get("centralApiEndpoint"),
+                }
+            )
+        return {"count": len(rows), "available_count": available_count, "secured_clusters": rows}
 
     def list_security_context_constraints(self) -> dict[str, Any]:
         rows = []
