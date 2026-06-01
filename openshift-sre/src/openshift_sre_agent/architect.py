@@ -6,11 +6,13 @@ from datetime import datetime, timezone
 from html import escape
 from io import BytesIO
 import json
+import os
 from pathlib import Path
 import re
 import shutil
 import subprocess
 from tempfile import TemporaryDirectory
+import time
 from typing import Any
 import xml.etree.ElementTree as ET
 
@@ -2073,21 +2075,72 @@ def _build_drawio_xml(title: str, diagram_pages: list[dict[str, Any]]) -> str:
     return ET.tostring(mxfile, encoding="unicode")
 
 
-def _export_with_drawio(drawio_xml: str, extension: str) -> bytes | None:
-    binary = shutil.which("drawio") or shutil.which("draw.io")
+def _export_with_drawio(drawio_xml: str, extension: str, *, page_index: int | None = None) -> bytes | None:
+    binary = (
+        shutil.which("drawio")
+        or shutil.which("draw.io")
+        or next(
+            (
+                candidate
+                for candidate in ("/usr/bin/drawio", "/opt/drawio/drawio")
+                if Path(candidate).exists()
+            ),
+            None,
+        )
+    )
     if not binary:
         return None
     with TemporaryDirectory() as tmp_dir:
         input_path = Path(tmp_dir) / "diagram.drawio"
         output_path = Path(tmp_dir) / f"diagram.{extension}"
         input_path.write_text(drawio_xml, encoding="utf-8")
-        command = [binary, "--export", "--format", extension, "--output", str(output_path), str(input_path)]
-        if shutil.which("xvfb-run"):
+        command = [binary]
+        if hasattr(os, "geteuid") and os.geteuid() == 0:
+            command.append("--no-sandbox")
+        command.extend(["--export", "--format", extension, "--output", str(output_path), str(input_path)])
+        if page_index is not None:
+            command.extend(["--page-index", str(page_index)])
+        env = os.environ.copy()
+        xvfb_process: subprocess.Popen[str] | None = None
+        display_reader: int | None = None
+        display_writer: int | None = None
+        if shutil.which("xvfb-run") and shutil.which("xauth"):
             command = ["xvfb-run", "-a", *command]
         try:
-            subprocess.run(command, check=True, capture_output=True, text=True)
+            if not env.get("DISPLAY") and shutil.which("Xvfb") and not (shutil.which("xvfb-run") and shutil.which("xauth")):
+                display_reader, display_writer = os.pipe()
+                xvfb_process = subprocess.Popen(
+                    ["Xvfb", "-displayfd", str(display_writer), "-screen", "0", "1920x1080x24"],
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL,
+                    text=True,
+                    pass_fds=(display_writer,),
+                )
+                os.close(display_writer)
+                display_writer = None
+                display_number = os.read(display_reader, 32).decode("utf-8", errors="ignore").strip()
+                os.close(display_reader)
+                display_reader = None
+                if not display_number:
+                    xvfb_process.terminate()
+                    xvfb_process.wait(timeout=5)
+                    return None
+                env["DISPLAY"] = f":{display_number}"
+                time.sleep(0.4)
+            subprocess.run(command, check=True, capture_output=True, text=True, env=env)
         except Exception:  # noqa: BLE001
             return None
+        finally:
+            if display_writer is not None:
+                os.close(display_writer)
+            if display_reader is not None:
+                os.close(display_reader)
+            if xvfb_process is not None:
+                xvfb_process.terminate()
+                try:
+                    xvfb_process.wait(timeout=5)
+                except Exception:  # noqa: BLE001
+                    xvfb_process.kill()
         if output_path.exists():
             return output_path.read_bytes()
     return None
@@ -2278,7 +2331,7 @@ def generate_architecture_diagram(*, prompt: str, openshift_state: dict[str, Any
     )
     first_page = diagram_pages[0]
     drawio_xml = _build_drawio_xml(title, diagram_pages)
-    page_previews = [
+    fallback_page_previews = [
         {
             "page_number": page["page_number"],
             "page_name": page["page_name"],
@@ -2299,19 +2352,22 @@ def generate_architecture_diagram(*, prompt: str, openshift_state: dict[str, Any
         }
         for page in diagram_pages
     ]
-    svg_preview = _render_svg(
-        first_page["title"],
-        first_page["summary"],
-        first_page["nodes"],
-        first_page["edges"],
-        first_page["positions"],
-        first_page["group_boxes"],
-        first_page.get("zones", []),
-        first_page["total_width"],
-        first_page["total_height"],
-    )
-    svg_bytes = _export_with_drawio(drawio_xml, "svg")
-    png_bytes = _export_with_drawio(drawio_xml, "png")
+    page_previews: list[dict[str, Any]] = []
+    for index, page in enumerate(diagram_pages):
+        drawio_page_svg = _export_with_drawio(drawio_xml, "svg", page_index=index)
+        page_previews.append(
+            {
+                "page_number": page["page_number"],
+                "page_name": page["page_name"],
+                "layout_mode": page["layout_mode"],
+                "title": page["title"],
+                "summary": page["summary"],
+                "svg": drawio_page_svg.decode("utf-8", errors="ignore") if drawio_page_svg else fallback_page_previews[index]["svg"],
+            }
+        )
+    svg_preview = page_previews[0]["svg"] if page_previews else fallback_page_previews[0]["svg"]
+    svg_bytes = _export_with_drawio(drawio_xml, "svg", page_index=0)
+    png_bytes = _export_with_drawio(drawio_xml, "png", page_index=0)
     if png_bytes is None:
         png_bytes = _png_from_svg(svg_preview)
 
