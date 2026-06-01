@@ -1,0 +1,200 @@
+.architect-console {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.architect-console__hero {
+  background: linear-gradient(135deg, rgba(24, 24, 74, 0.95), rgba(14, 116, 144, 0.9));
+  color: #f8fafc;
+}
+
+.architect-console__hero-grid,
+.architect-console__grid,
+.architect-console__result-grid,
+.architect-console__knowledge-grid,
+.architect-console__artifact-grid,
+.architect-console__document-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+}
+
+.architect-console__meta,
+.architect-console__helper {
+  color: rgba(15, 23, 42, 0.72);
+  font-size: 0.93rem;
+}
+
+.architect-console__hero .architect-console__meta,
+.architect-console__hero .architect-console__helper {
+  color: rgba(248, 250, 252, 0.84);
+}
+
+.architect-console__eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.3rem 0.8rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.14);
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.architect-console__pill,
+.architect-console__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.32rem 0.75rem;
+  border-radius: 999px;
+  background: rgba(14, 116, 144, 0.12);
+  color: #0f172a;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.architect-console__badge--ok {
+  background: rgba(22, 163, 74, 0.16);
+  color: #166534;
+}
+
+.architect-console__badge--warn {
+  background: rgba(217, 119, 6, 0.16);
+  color: #92400e;
+}
+
+.architect-console__summary,
+.architect-console__card,
+.architect-console__artifact,
+.architect-console__document,
+.architect-console__knowledge-card {
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  border-radius: 1rem;
+  background: rgba(255, 255, 255, 0.94);
+  padding: 1rem;
+  box-shadow: 0 18px 44px rgba(15, 23, 42, 0.08);
+}
+
+.architect-console__template-grid,
+.architect-console__question-grid,
+.architect-console__metrics,
+.architect-console__knowledge-list,
+.architect-console__artifact-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.architect-console__template-card,
+.architect-console__question,
+.architect-console__metric {
+  flex: 1 1 240px;
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  border-radius: 0.9rem;
+  padding: 0.9rem;
+  background: rgba(248, 250, 252, 0.86);
+}
+
+.architect-console__template-card.is-active {
+  border-color: rgba(14, 116, 144, 0.75);
+  box-shadow: 0 0 0 2px rgba(14, 116, 144, 0.18);
+}
+
+.architect-console__diagram {
+  width: 100%;
+  min-height: 420px;
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  border-radius: 1rem;
+  background: linear-gradient(180deg, rgba(248, 250, 252, 0.96), rgba(226, 232, 240, 0.96));
+  overflow: auto;
+}
+
+.architect-console__diagram svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.architect-console__sources,
+.architect-console__steps {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.architect-console__source,
+.architect-console__step {
+  border-left: 4px solid rgba(14, 116, 144, 0.4);
+  padding-left: 0.8rem;
+}
+
+.architect-console__json,
+.architect-console__document pre,
+.architect-console__artifact pre {
+  max-height: 320px;
+  overflow: auto;
+  padding: 0.9rem;
+  border-radius: 0.9rem;
+  background: #0f172a;
+  color: #e2e8f0;
+  font-size: 0.86rem;
+}
+
+.architect-console__tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.architect-console__tab {
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 999px;
+  padding: 0.45rem 0.9rem;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.architect-console__tab.is-active {
+  background: rgba(14, 116, 144, 0.12);
+  border-color: rgba(14, 116, 144, 0.6);
+}
+
+.architect-console__empty {
+  border: 1px dashed rgba(148, 163, 184, 0.45);
+  border-radius: 1rem;
+  padding: 1rem;
+  color: rgba(15, 23, 42, 0.7);
+  background: rgba(248, 250, 252, 0.85);
+}
+
+.architect-console__artifact-actions .agent-console__button,
+.architect-console__artifact-actions .agent-console__example,
+.architect-console .agent-console__button,
+.architect-console .agent-console__example {
+  min-width: 10rem;
+}
+
+body[data-theme='dark'] .architect-console__summary,
+body[data-theme='dark'] .architect-console__card,
+body[data-theme='dark'] .architect-console__artifact,
+body[data-theme='dark'] .architect-console__document,
+body[data-theme='dark'] .architect-console__knowledge-card,
+body[data-theme='dark'] .architect-console__template-card,
+body[data-theme='dark'] .architect-console__question,
+body[data-theme='dark'] .architect-console__metric,
+body[data-theme='dark'] .architect-console__empty {
+  background: rgba(15, 23, 42, 0.92);
+  color: #e2e8f0;
+  border-color: rgba(71, 85, 105, 0.45);
+}
+
+body[data-theme='dark'] .architect-console__meta,
+body[data-theme='dark'] .architect-console__helper {
+  color: rgba(226, 232, 240, 0.76);
+}
+
+body[data-theme='dark'] .architect-console__diagram {
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0.96), rgba(30, 41, 59, 0.96));
+}

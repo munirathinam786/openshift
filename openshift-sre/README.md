@@ -101,6 +101,7 @@ The MkDocs site under `docs/` is kept as a first-class operator surface.
 
 The OpenShift SRE retains the same major feature lanes:
 
+- `Architect Workspace`
 - `Agent Console`
 - `Platform Console`
 - `Troubleshooting`
@@ -114,6 +115,17 @@ The OpenShift SRE retains the same major feature lanes:
 - `LLM Utilization`
 
 Those pages continue to use the live FastAPI endpoints and the shared React operator shell, while the backend logic now targets OpenShift and Kubernetes operational posture.
+
+The new `Architect Workspace` adds an OpenShift-native design lane rather than a straight port of the AWS architect feature. It includes:
+
+- a platform-pattern catalog for OpenShift fleet, GitOps, disconnected, security, CNV, DR, and migration designs
+- live cluster-state grounding through the existing OpenShift toolkit
+- `HLD`, `LLD`, and assessment document packs generated from the same design run
+- pgvector-backed knowledge retrieval for internal standards, prior designs, and external references
+- research-link ingestion for Red Hat documentation or internal architecture sources
+- draw.io, SVG, and PNG artifact generation from inside the container runtime
+
+That means the architecture lane can build design packs from prompts alone, from live cluster state, or from a hybrid of prompt + live evidence + trained knowledge.
 
 The `Platform Console` now also follows the same landing-shell visual language as the main `Agent Console`, with a platform-specific indigo accent and a runway-style launcher section that stays aligned with the shared operator shell patterns.
 
@@ -163,5 +175,18 @@ The API runtime now also exposes a richer operational health contract:
 - `GET /healthz` for lightweight liveness
 - `GET /readyz` for readiness across LLM and optional persistence dependencies
 - `GET /healthz/full` for subsystem-level detail including provider, database, and docs-site status
+
+The architect workspace adds these design-oriented API groups as well:
+
+- `GET /architect/templates`
+- `POST /architect/openshift-state`
+- `POST /architect/clarify`
+- `POST /architect/assessment`
+- `POST /architect/diagram`
+- `GET /architect/knowledge`
+- `POST /architect/knowledge/train-link`
+- `POST /architect/knowledge/train-files`
+- `POST /architect/knowledge/search`
+- `POST /architect/knowledge/clear`
 
 That keeps the generated `site/` output aligned with the documented source under `docs/` and refreshes the app image in one pass.

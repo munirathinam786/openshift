@@ -15,6 +15,21 @@ services:
       timeout: 5s
       retries: 12
 
+  vector-db:
+    image: docker.io/pgvector/pgvector:pg17
+    container_name: openshift-sre-agent-vector-db
+    environment:
+      POSTGRES_DB: openshift_sre_architect
+      POSTGRES_USER: openshift_sre_architect
+      POSTGRES_PASSWORD: change-me-vector
+    volumes:
+      - openshift-sre-agent-pgvector-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U openshift_sre_architect -d openshift_sre_architect"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+
   app:
     build:
       context: .
@@ -23,6 +38,7 @@ services:
     container_name: openshift-sre-agent
     depends_on:
       - db
+      - vector-db
     environment:
       LEGACY_SITE_DIR: /app/legacy-site
       OLLAMA_BASE_URL: http://host.containers.internal:11434
@@ -39,6 +55,14 @@ services:
       DB_NAME: openshift_sre_agent
       DB_USER: openshift_sre_agent
       DB_PASSWORD: change-me
+      ARCHITECT_RAG_ENABLED: "true"
+      ARCHITECT_VECTOR_DB_HOST: vector-db
+      ARCHITECT_VECTOR_DB_PORT: "5432"
+      ARCHITECT_VECTOR_DB_NAME: openshift_sre_architect
+      ARCHITECT_VECTOR_DB_USER: openshift_sre_architect
+      ARCHITECT_VECTOR_DB_PASSWORD: change-me-vector
+      ARCHITECT_EMBEDDING_MODEL: nomic-embed-text
+      ARCHITECT_RAG_TOP_K: "5"
     ports:
       - "8000:8000"
     volumes:
@@ -48,3 +72,5 @@ services:
 volumes:
   openshift-sre-agent-mysql-data:
     name: openshift-sre-agent-mysql-data
+  openshift-sre-agent-pgvector-data:
+    name: openshift-sre-agent-pgvector-data

@@ -7,6 +7,7 @@ copyright: >-
   <a href="mailto:Sathishkumar.munirathinam@kyndryl.com">Sathishkumar.munirathinam@kyndryl.com</a>
 nav:
   - Home: index.md
+  - Architect Workspace: architect.html
   - LLM Utilization: llm-utilization.html
   - Security Console: security-console.html
   - Platform Console: platform-console.html

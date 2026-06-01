@@ -15,13 +15,21 @@ from typing import Any, AsyncGenerator
 from urllib.parse import urlparse
 
 import httpx
-from fastapi import FastAPI, HTTPException, Query, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI, File, Form, HTTPException, Query, UploadFile, WebSocket, WebSocketDisconnect
 from fastapi.responses import PlainTextResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 from starlette.responses import StreamingResponse
 
 from .agent import OpenShiftSreAgent
+from .architect import (
+    collect_architecture_state,
+    generate_architecture_diagram,
+    get_architect_assessment_scopes,
+    get_architect_diagram_templates,
+    suggest_architecture_clarifications,
+)
+from .architect_rag import ArchitectRagStore
 from .config import LLM_PROVIDER_METADATA, Settings, get_llm_provider_defaults, normalize_llm_provider
 from .logging_config import setup_logging
 from .middleware import (
@@ -38,7 +46,7 @@ from .persistence import HistoryStore
 from .tools import OpenShiftSreToolkit
 
 logger = logging.getLogger(__name__)
-STACK_CONTAINER_NAMES = {"openshift-sre-agent", "openshift-sre-agent-db"}
+STACK_CONTAINER_NAMES = {"openshift-sre-agent", "openshift-sre-agent-db", "openshift-sre-agent-vector-db"}
 AGENT_HELPERS = OpenShiftSreAgent
 
 
@@ -223,6 +231,55 @@ class PlatformAdvisoryRequest(BaseModel):
     tags: list[str] | None = Field(default=None, max_length=10)
 
 
+class ArchitectOpenShiftStateRequest(BaseModel):
+    runtime: RuntimeConfig | None = None
+
+
+class ArchitectDiagramRequest(BaseModel):
+    prompt: str = Field(default="", max_length=4000)
+    runtime: RuntimeConfig | None = None
+    include_live_openshift_state: bool = True
+    include_trained_knowledge: bool = True
+    ollama_requirement: str = Field(default="optional", pattern="^(optional|required)$")
+    openshift_state: dict[str, Any] | None = None
+    research_links: list[str] | None = Field(default=None, max_length=8)
+    reference_diagrams: list[dict[str, Any]] | None = Field(default=None, max_length=4)
+
+
+class ArchitectClarificationRequest(BaseModel):
+    prompt: str = Field(default="", max_length=4000)
+    runtime: RuntimeConfig | None = None
+    include_live_openshift_state: bool = True
+    openshift_state: dict[str, Any] | None = None
+
+
+class ArchitectAssessmentRequest(BaseModel):
+    prompt: str = Field(default="", max_length=4000)
+    runtime: RuntimeConfig | None = None
+    include_live_openshift_state: bool = True
+    include_trained_knowledge: bool = True
+    openshift_state: dict[str, Any] | None = None
+    scope_id: str = Field(default="architecture-readiness", max_length=64)
+    research_links: list[str] | None = Field(default=None, max_length=8)
+
+
+class ArchitectKnowledgeLinkRequest(BaseModel):
+    url: str = Field(min_length=8, max_length=2048)
+    runtime: RuntimeConfig | None = None
+
+
+class ArchitectKnowledgeSearchRequest(BaseModel):
+    query: str = Field(min_length=3, max_length=4000)
+    top_k: int = Field(default=5, ge=1, le=8)
+    runtime: RuntimeConfig | None = None
+
+
+class ArchitectKnowledgeClearRequest(BaseModel):
+    source_uris: list[str] | None = Field(default=None, max_length=100)
+    clear_all: bool = False
+    runtime: RuntimeConfig | None = None
+
+
 class FinopsQueueCreateRequest(BaseModel):
     opportunity_key: str = Field(min_length=1, max_length=255)
     title: str = Field(min_length=1, max_length=255)
@@ -339,6 +396,44 @@ def _runtime_settings(runtime: RuntimeConfig | None) -> Settings:
         verify_ssl=resolved_runtime.verify_ssl,
         agent_max_steps=resolved_runtime.agent_max_steps,
     )
+
+
+def _runtime_from_form_json(value: str | None) -> RuntimeConfig | None:
+    raw = (value or "").strip()
+    if not raw:
+        return None
+    try:
+        return RuntimeConfig.model_validate(json.loads(raw))
+    except Exception as error:  # noqa: BLE001
+        raise HTTPException(status_code=400, detail=f"Invalid runtime form payload: {error}") from error
+
+
+def _architect_rag_store(settings: Settings | None = None) -> ArchitectRagStore:
+    return ArchitectRagStore(settings or BASE_SETTINGS)
+
+
+def _runtime_requires_ollama(runtime: RuntimeConfig | None) -> bool:
+    if runtime is None:
+        return False
+    provider = normalize_llm_provider(runtime.llm_provider)
+    return provider == "ollama"
+
+
+def _train_architect_research_links(settings: Settings, links: list[str] | None) -> list[dict[str, Any]]:
+    normalized_links = [str(item).strip() for item in (links or []) if str(item).strip()][:8]
+    if not normalized_links:
+        return []
+    store = _architect_rag_store(settings)
+    if not store.enabled:
+        return [{"url": link, "trained": False, "reason": "Architect knowledge store is not enabled."} for link in normalized_links]
+    results: list[dict[str, Any]] = []
+    for link in normalized_links:
+        try:
+            result = store.train_url(link)
+            results.append({"url": link, "trained": True, "result": result})
+        except Exception as error:  # noqa: BLE001
+            results.append({"url": link, "trained": False, "reason": str(error)})
+    return results
 
 
 def _execute_agent_prompt(
@@ -1529,6 +1624,13 @@ def platform_console_page():
     return _redirect_site_page("/guide/platform-console.html")
 
 
+@app.api_route("/architect.html", methods=["GET", "HEAD"], include_in_schema=False, response_model=None)
+@app.api_route("/architect/", methods=["GET", "HEAD"], include_in_schema=False, response_model=None)
+@app.api_route("/docs/architect.html", methods=["GET", "HEAD"], include_in_schema=False, response_model=None)
+def architect_page():
+    return _redirect_site_page("/guide/architect.html")
+
+
 @app.api_route("/posture-radar.html", methods=["GET", "HEAD"], include_in_schema=False, response_model=None)
 @app.api_route("/docs/posture-radar.html", methods=["GET", "HEAD"], include_in_schema=False, response_model=None)
 def posture_radar_page():
@@ -1751,6 +1853,299 @@ def platform_advisory(request: PlatformAdvisoryRequest) -> PlatformAdvisoryRespo
 
     response, _, _ = _run_batched_platform_advisory(request)
     return response
+
+
+@app.post("/architect/openshift-state")
+def architect_openshift_state(request: ArchitectOpenShiftStateRequest) -> dict:
+    if _shutting_down:
+        raise HTTPException(status_code=503, detail="Server is shutting down.")
+
+    settings = _runtime_settings(request.runtime)
+    toolkit = OpenShiftSreToolkit(settings)
+    return collect_architecture_state(toolkit)
+
+
+@app.get("/architect/templates")
+def architect_templates() -> dict:
+    return {
+        "templates": get_architect_diagram_templates(),
+        "default_template_id": "custom",
+        "supported_document_types": [
+            {"id": "hld", "label": "High-Level Design", "description": "Executive-ready OpenShift architecture summary with topology, decisions, and operating model."},
+            {"id": "lld", "label": "Low-Level Design", "description": "Implementation-ready OpenShift architecture detail with boundaries, flows, and ownership."},
+            {"id": "assessment", "label": "Architecture Assessment", "description": "OpenShift architecture readiness review covering security, operations, and resilience."},
+        ],
+        "supported_document_formats": [
+            {"id": "drawio", "label": "draw.io (.drawio)", "description": "Editable diagram source for platform architects and SRE teams."},
+            {"id": "svg", "label": "SVG", "description": "Browser-friendly vector preview for docs and review packs."},
+            {"id": "png", "label": "PNG", "description": "Portable image export for slides and board packs."},
+            {"id": "pdf", "label": "PDF", "description": "Portable architecture pack for architecture review boards and CAB."},
+            {"id": "word", "label": "Word-compatible (.doc)", "description": "Editable handoff document for implementation teams."},
+            {"id": "pptx", "label": "PowerPoint (.pptx)", "description": "Slide-ready executive handoff pack."},
+        ],
+        "supported_assessment_scopes": get_architect_assessment_scopes(),
+        "supported_modes": [
+            {"id": "prompt-only", "label": "Prompt-guided", "description": "Design the architecture from the operator brief and selected OpenShift pattern."},
+            {"id": "hybrid", "label": "Prompt + live OpenShift state", "description": "Blend the design brief with live cluster evidence for a grounded platform architecture."},
+            {"id": "live-state", "label": "Live OpenShift state only", "description": "Draft the architecture directly from discovered OpenShift topology when the brief is minimal."},
+        ],
+        "knowledge_inputs": [
+            {"id": "url", "label": "Research links", "description": "Ingest Red Hat, internal, or standards documentation URLs into the pgvector knowledge base."},
+            {"id": "file", "label": "Uploaded documents", "description": "Train the architect knowledge base from HLDs, LLDs, runbooks, or draw.io source files."},
+        ],
+    }
+
+
+@app.get("/architect/knowledge")
+def architect_knowledge_status() -> dict:
+    return _architect_rag_store().status()
+
+
+@app.get("/architect/knowledge/sources")
+def architect_knowledge_sources() -> dict:
+    return {"sources": _architect_rag_store().list_sources()}
+
+
+@app.post("/architect/knowledge/search")
+def architect_knowledge_search(request: ArchitectKnowledgeSearchRequest) -> dict:
+    if _shutting_down:
+        raise HTTPException(status_code=503, detail="Server is shutting down.")
+
+    settings = _runtime_settings(request.runtime)
+    store = _architect_rag_store(settings)
+    try:
+        return store.retrieve(query=request.query, top_k=request.top_k)
+    except RuntimeError as error:
+        raise HTTPException(status_code=503, detail=str(error)) from error
+    except ValueError as error:
+        raise HTTPException(status_code=400, detail=str(error)) from error
+    except httpx.HTTPError as error:
+        raise HTTPException(status_code=502, detail=f"Unable to query the Architect knowledge store: {error}") from error
+
+
+@app.post("/architect/knowledge/train-link")
+def architect_knowledge_train_link(request: ArchitectKnowledgeLinkRequest) -> dict:
+    if _shutting_down:
+        raise HTTPException(status_code=503, detail="Server is shutting down.")
+
+    settings = _runtime_settings(request.runtime)
+    store = _architect_rag_store(settings)
+    try:
+        result = store.train_url(request.url)
+        status = store.status()
+    except RuntimeError as error:
+        raise HTTPException(status_code=503, detail=str(error)) from error
+    except ValueError as error:
+        raise HTTPException(status_code=400, detail=str(error)) from error
+    except httpx.HTTPError as error:
+        raise HTTPException(status_code=502, detail=f"Unable to fetch the research link: {error}") from error
+
+    return {"trained": True, "training_mode": "link", "result": result, "status": status}
+
+
+@app.post("/architect/knowledge/train-files")
+async def architect_knowledge_train_files(files: list[UploadFile] = File(...), runtime: str | None = Form(default=None)) -> dict:
+    if _shutting_down:
+        raise HTTPException(status_code=503, detail="Server is shutting down.")
+    if not files:
+        raise HTTPException(status_code=400, detail="Upload at least one file for Architect knowledge training.")
+
+    runtime_config = _runtime_from_form_json(runtime)
+    settings = _runtime_settings(runtime_config)
+    store = _architect_rag_store(settings)
+    results: list[dict[str, Any]] = []
+    try:
+        for upload in files[:8]:
+            content = await upload.read()
+            results.append(
+                store.train_file(
+                    filename=upload.filename or "uploaded-knowledge.txt",
+                    content=content,
+                    content_type=upload.content_type,
+                )
+            )
+        status = store.status()
+    except RuntimeError as error:
+        raise HTTPException(status_code=503, detail=str(error)) from error
+    except ValueError as error:
+        raise HTTPException(status_code=400, detail=str(error)) from error
+    except httpx.HTTPError as error:
+        raise HTTPException(status_code=502, detail=f"Unable to train Architect knowledge from uploaded files: {error}") from error
+
+    return {
+        "trained": True,
+        "training_mode": "file-upload",
+        "trained_count": len(results),
+        "results": results,
+        "status": status,
+    }
+
+
+@app.post("/architect/knowledge/clear")
+def architect_knowledge_clear(request: ArchitectKnowledgeClearRequest) -> dict:
+    if _shutting_down:
+        raise HTTPException(status_code=503, detail="Server is shutting down.")
+
+    settings = _runtime_settings(request.runtime)
+    store = _architect_rag_store(settings)
+    try:
+        result = store.delete_sources(source_uris=request.source_uris, clear_all=request.clear_all)
+        status = store.status()
+        sources = store.list_sources()
+    except RuntimeError as error:
+        raise HTTPException(status_code=503, detail=str(error)) from error
+    except ValueError as error:
+        raise HTTPException(status_code=400, detail=str(error)) from error
+
+    return {"cleared": True, "result": result, "status": status, "sources": sources}
+
+
+@app.post("/architect/clarify")
+def architect_clarify(request: ArchitectClarificationRequest) -> dict:
+    if _shutting_down:
+        raise HTTPException(status_code=503, detail="Server is shutting down.")
+
+    settings = _runtime_settings(request.runtime)
+    live_state: dict[str, Any] | None = request.openshift_state if isinstance(request.openshift_state, dict) else None
+
+    if request.include_live_openshift_state and not live_state:
+        toolkit = OpenShiftSreToolkit(settings)
+        live_state = collect_architecture_state(toolkit)
+
+    if not request.prompt.strip() and not live_state:
+        raise HTTPException(
+            status_code=400,
+            detail="Provide an architecture prompt or enable live OpenShift-state capture before requesting clarification questions.",
+        )
+
+    clarification_payload = suggest_architecture_clarifications(prompt=request.prompt, openshift_state=live_state)
+    return {
+        "checked_at": datetime.now(timezone.utc).isoformat(),
+        "prompt": request.prompt,
+        "cluster_scope": settings.cluster_scope,
+        "openshift_state": live_state,
+        "openshift_state_included": bool(live_state),
+        **clarification_payload,
+    }
+
+
+@app.post("/architect/assessment")
+def architect_assessment(request: ArchitectAssessmentRequest) -> dict:
+    if _shutting_down:
+        raise HTTPException(status_code=503, detail="Server is shutting down.")
+
+    settings = _runtime_settings(request.runtime)
+    live_state: dict[str, Any] | None = request.openshift_state if isinstance(request.openshift_state, dict) else None
+    if request.include_live_openshift_state and not live_state:
+        toolkit = OpenShiftSreToolkit(settings)
+        live_state = collect_architecture_state(toolkit)
+    if not request.prompt.strip() and not live_state:
+        raise HTTPException(
+            status_code=400,
+            detail="Provide an architecture prompt or enable live OpenShift-state capture before requesting an assessment.",
+        )
+
+    research_training = _train_architect_research_links(settings, request.research_links)
+    knowledge_query = request.prompt.strip() or f"{settings.cluster_scope} OpenShift architecture"
+    try:
+        knowledge_context = (
+            _architect_rag_store(settings).retrieve(query=knowledge_query, top_k=settings.architect_rag_top_k)
+            if request.include_trained_knowledge
+            else {"enabled": settings.architect_rag_enabled, "used": False, "vector_backend": "pgvector", "embedding_model": settings.architect_embedding_model, "items": [], "prompt_guidance": ""}
+        )
+    except Exception as error:  # noqa: BLE001
+        knowledge_context = {"enabled": settings.architect_rag_enabled, "used": False, "vector_backend": "pgvector", "embedding_model": settings.architect_embedding_model, "items": [], "prompt_guidance": "", "error": str(error)}
+
+    assessment_payload = generate_architecture_diagram(
+        prompt=request.prompt,
+        openshift_state=live_state,
+        knowledge_context=knowledge_context,
+        require_model=False,
+        assessment_scope_id=request.scope_id,
+    )
+    return {
+        "checked_at": datetime.now(timezone.utc).isoformat(),
+        "prompt": request.prompt,
+        "cluster_scope": settings.cluster_scope,
+        "openshift_state": live_state,
+        "openshift_state_included": bool(live_state),
+        "research_training": research_training,
+        "knowledge": knowledge_context,
+        "quality_scorecard": assessment_payload.get("rendering", {}).get("quality_scorecard"),
+        "assessment": assessment_payload.get("documents", {}).get("assessment"),
+        "planning": assessment_payload.get("planning"),
+    }
+
+
+@app.post("/architect/diagram")
+def architect_diagram(request: ArchitectDiagramRequest) -> dict:
+    if _shutting_down:
+        raise HTTPException(status_code=503, detail="Server is shutting down.")
+
+    settings = _runtime_settings(request.runtime)
+    live_state: dict[str, Any] | None = request.openshift_state if isinstance(request.openshift_state, dict) else None
+    require_ollama = request.ollama_requirement == "required" or _runtime_requires_ollama(request.runtime)
+
+    if require_ollama and settings.llm_provider != "ollama":
+        raise HTTPException(
+            status_code=400,
+            detail="Ollama is required for this Architect run. Select the Ollama provider or switch the Architect dropdown back to optional.",
+        )
+
+    if request.include_live_openshift_state and not live_state:
+        toolkit = OpenShiftSreToolkit(settings)
+        live_state = collect_architecture_state(toolkit)
+
+    if not request.prompt.strip() and not live_state:
+        raise HTTPException(
+            status_code=400,
+            detail="Provide an architecture prompt or enable live OpenShift-state capture before generating a diagram.",
+        )
+
+    research_training = _train_architect_research_links(settings, request.research_links)
+    knowledge_query = request.prompt.strip() or f"{settings.cluster_scope} OpenShift architecture"
+    try:
+        knowledge_context = (
+            _architect_rag_store(settings).retrieve(query=knowledge_query, top_k=settings.architect_rag_top_k)
+            if request.include_trained_knowledge
+            else {"enabled": settings.architect_rag_enabled, "used": False, "vector_backend": "pgvector", "embedding_model": settings.architect_embedding_model, "items": [], "prompt_guidance": ""}
+        )
+    except Exception as error:  # noqa: BLE001
+        knowledge_context = {
+            "enabled": settings.architect_rag_enabled,
+            "used": False,
+            "vector_backend": "pgvector",
+            "embedding_model": settings.architect_embedding_model,
+            "items": [],
+            "prompt_guidance": "",
+            "error": str(error),
+        }
+
+    try:
+        diagram_payload = generate_architecture_diagram(
+            prompt=request.prompt,
+            openshift_state=live_state,
+            model_client=OllamaClient(settings),
+            reference_diagrams=request.reference_diagrams,
+            knowledge_context=knowledge_context,
+            require_model=require_ollama,
+        )
+    except ValueError as error:
+        raise HTTPException(status_code=400, detail=str(error)) from error
+    except RuntimeError as error:
+        raise HTTPException(status_code=503, detail=str(error)) from error
+
+    return {
+        "checked_at": datetime.now(timezone.utc).isoformat(),
+        "prompt": request.prompt,
+        "provider": settings.llm_provider,
+        "model_name": settings.effective_model_name,
+        "cluster_scope": settings.cluster_scope,
+        "openshift_state": live_state,
+        "openshift_state_included": bool(live_state),
+        "research_training": research_training,
+        **diagram_payload,
+    }
 
 
 @app.post("/chat/stream")

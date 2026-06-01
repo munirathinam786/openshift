@@ -147,6 +147,16 @@ def _validate_database_url(value: str | None) -> str | None:
     return normalized
 
 
+def _validate_vector_database_url(value: str | None) -> str | None:
+    normalized = _normalize_optional_text(value)
+    if normalized is None:
+        return None
+    parsed = urlparse(normalized)
+    if not parsed.scheme:
+        raise ValueError("architect_vector_database_url must include a database scheme such as postgresql://.")
+    return normalized
+
+
 @dataclass(slots=True)
 class Settings:
     """Normalized runtime settings for provider, OpenShift access, persistence, and UI behavior."""
@@ -188,6 +198,15 @@ class Settings:
     enable_prometheus: bool = False
     context_window_tokens: int = 4096
     temperature_override: float | None = None
+    architect_rag_enabled: bool = False
+    architect_vector_database_url: str | None = None
+    architect_vector_db_host: str | None = None
+    architect_vector_db_port: int = 5432
+    architect_vector_db_name: str | None = None
+    architect_vector_db_user: str | None = None
+    architect_vector_db_password: str | None = None
+    architect_embedding_model: str = "nomic-embed-text"
+    architect_rag_top_k: int = 5
     openshift_cluster: str = "local-cluster"
     openshift_namespace: str = "openshift-monitoring"
     openshift_projects: str | None = None
@@ -205,6 +224,7 @@ class Settings:
         self.openshift_api_url = _validate_http_url("openshift_api_url", self.openshift_api_url)
         self.openshift_api_url_field = _validate_http_url("openshift_api_url_field", self.openshift_api_url_field)
         self.database_url = _validate_database_url(self.database_url)
+        self.architect_vector_database_url = _validate_vector_database_url(self.architect_vector_database_url)
         self.cluster_scope = self.cluster_scope.strip()
         self.openshift_cluster = self.openshift_cluster.strip()
         self.openshift_namespace = self.openshift_namespace.strip()
@@ -238,6 +258,21 @@ class Settings:
                 raise ValueError(
                     "database_enabled requires database_url or a complete DB_HOST/DB_NAME/DB_USER/DB_PASSWORD configuration."
                 )
+        if self.architect_vector_db_host and not 1 <= self.architect_vector_db_port <= 65535:
+            raise ValueError("architect_vector_db_port must be between 1 and 65535 when architect_vector_db_host is configured.")
+        if self.architect_rag_enabled and not self.architect_vector_database_url:
+            required_parts = [
+                self.architect_vector_db_host,
+                self.architect_vector_db_name,
+                self.architect_vector_db_user,
+                self.architect_vector_db_password,
+            ]
+            if not all(required_parts):
+                raise ValueError(
+                    "architect_rag_enabled requires architect_vector_database_url or a complete ARCHITECT_VECTOR_DB_HOST/NAME/USER/PASSWORD configuration."
+                )
+        if self.architect_rag_top_k < 1 or self.architect_rag_top_k > 8:
+            raise ValueError("architect_rag_top_k must be between 1 and 8.")
 
     @classmethod
     def load(cls) -> "Settings":
@@ -272,6 +307,19 @@ class Settings:
         prompt_template = getenv("PROMPT_TEMPLATE", "default")
         enable_prometheus = getenv("ENABLE_PROMETHEUS", "false").lower() == "true"
         context_window_tokens = int(getenv("CONTEXT_WINDOW_TOKENS", "4096"))
+        architect_vector_database_url = getenv("ARCHITECT_VECTOR_DATABASE_URL") or None
+        architect_vector_db_host = getenv("ARCHITECT_VECTOR_DB_HOST") or None
+        architect_vector_db_port = int(getenv("ARCHITECT_VECTOR_DB_PORT", "5432"))
+        architect_vector_db_name = getenv("ARCHITECT_VECTOR_DB_NAME") or None
+        architect_vector_db_user = getenv("ARCHITECT_VECTOR_DB_USER") or None
+        architect_vector_db_password = getenv("ARCHITECT_VECTOR_DB_PASSWORD") or None
+        architect_rag_enabled = getenv("ARCHITECT_RAG_ENABLED", "false").lower() == "true" or bool(architect_vector_database_url)
+        if architect_rag_enabled and not architect_vector_database_url and architect_vector_db_host and architect_vector_db_name and architect_vector_db_user and architect_vector_db_password:
+            encoded_vector_password = quote_plus(architect_vector_db_password)
+            architect_vector_database_url = (
+                f"postgresql://{architect_vector_db_user}:{encoded_vector_password}"
+                f"@{architect_vector_db_host}:{architect_vector_db_port}/{architect_vector_db_name}"
+            )
         llm_model_name = getenv("LLM_MODEL_NAME") or None
         llm_base_url = getenv("LLM_BASE_URL") or None
         llm_api_key = getenv("LLM_API_KEY") or None
@@ -318,6 +366,15 @@ class Settings:
             enable_prometheus=enable_prometheus,
             context_window_tokens=context_window_tokens,
             temperature_override=temperature_override,
+            architect_rag_enabled=architect_rag_enabled,
+            architect_vector_database_url=architect_vector_database_url,
+            architect_vector_db_host=architect_vector_db_host,
+            architect_vector_db_port=architect_vector_db_port,
+            architect_vector_db_name=architect_vector_db_name,
+            architect_vector_db_user=architect_vector_db_user,
+            architect_vector_db_password=architect_vector_db_password,
+            architect_embedding_model=getenv("ARCHITECT_EMBEDDING_MODEL", "nomic-embed-text"),
+            architect_rag_top_k=int(getenv("ARCHITECT_RAG_TOP_K", "5")),
             openshift_cluster=openshift_cluster,
             openshift_namespace=openshift_namespace,
             openshift_projects=openshift_projects,
@@ -361,6 +418,15 @@ class Settings:
         db_password: str | None = None,
         fallback_models: str | None = None,
         log_level: str | None = None,
+        architect_rag_enabled: bool | None = None,
+        architect_vector_database_url: str | None = None,
+        architect_vector_db_host: str | None = None,
+        architect_vector_db_port: int | None = None,
+        architect_vector_db_name: str | None = None,
+        architect_vector_db_user: str | None = None,
+        architect_vector_db_password: str | None = None,
+        architect_embedding_model: str | None = None,
+        architect_rag_top_k: int | None = None,
         openshift_cluster: str | None = None,
         openshift_namespace: str | None = None,
         openshift_projects: str | None = None,
@@ -427,6 +493,31 @@ class Settings:
             enable_prometheus=self.enable_prometheus,
             context_window_tokens=self.context_window_tokens,
             temperature_override=self.temperature_override,
+            architect_rag_enabled=self.architect_rag_enabled if architect_rag_enabled is None else architect_rag_enabled,
+            architect_vector_database_url=(
+                architect_vector_database_url
+                if architect_vector_database_url not in (None, "")
+                else self.architect_vector_database_url
+            ),
+            architect_vector_db_host=(
+                architect_vector_db_host if architect_vector_db_host not in (None, "") else self.architect_vector_db_host
+            ),
+            architect_vector_db_port=architect_vector_db_port or self.architect_vector_db_port,
+            architect_vector_db_name=(
+                architect_vector_db_name if architect_vector_db_name not in (None, "") else self.architect_vector_db_name
+            ),
+            architect_vector_db_user=(
+                architect_vector_db_user if architect_vector_db_user not in (None, "") else self.architect_vector_db_user
+            ),
+            architect_vector_db_password=(
+                architect_vector_db_password
+                if architect_vector_db_password not in (None, "")
+                else self.architect_vector_db_password
+            ),
+            architect_embedding_model=(
+                architect_embedding_model if architect_embedding_model not in (None, "") else self.architect_embedding_model
+            ),
+            architect_rag_top_k=architect_rag_top_k or self.architect_rag_top_k,
             openshift_cluster=resolved_cluster,
             openshift_namespace=resolved_namespace,
             openshift_projects=resolved_projects,
@@ -457,3 +548,6 @@ class Settings:
     @property
     def platform_scope(self) -> str:
         return self.openshift_cluster or self.cluster_scope
+
+    def with_reasoning_profile(self, profile: str | None) -> "Settings":
+        return self

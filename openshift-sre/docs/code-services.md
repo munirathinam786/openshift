@@ -4,6 +4,8 @@ This page covers the platform service toolkit, HTTP API, and CLI entry points.
 
 It now also covers the historical persistence layer that stores prompt runs and extracted metrics for the browser dashboard.
 
+It also now covers the OpenShift architect modules that generate draw.io diagrams plus HLD and LLD document packs.
+
 ## `src/openshift_sre_agent/persistence.py`
 
 This module turns ephemeral tool output into a historical telemetry store.
@@ -43,6 +45,7 @@ This module is the FastAPI entry point.
 
 - health and root routing: `/`, `/health`
 - main agent execution: `/chat`
+- architect workspace: `/architect/templates`, `/architect/openshift-state`, `/architect/clarify`, `/architect/assessment`, `/architect/diagram`, and `/architect/knowledge*`
 - historical analytics: `/history/overview`, `/history/runs/{run_id}`, `/history/tools/{tool_name}`, `/history/metrics/{metric_key}`
 - persisted FinOps workflow: `/finops/queue`, `/finops/queue/{item_id}`
 
@@ -53,6 +56,34 @@ The historical overview payload now includes:
 - an executive exception rollup for story-first operator reviews
 
 For concrete request and response examples, see [`API reference`](api-reference.md).
+
+## `src/openshift_sre_agent/architect.py`
+
+This module is the OpenShift-native architecture engine for the `Architect Workspace`.
+
+Its responsibilities are intentionally platform-specific rather than cloud-generic:
+
+- define an OpenShift pattern catalog for fleet, GitOps, disconnected, security, DR, migration, and CNV scenarios
+- collect live architecture state from the existing OpenShift toolkit
+- infer a likely platform pattern from prompt language and live-state signals
+- generate editable draw.io XML plus SVG and PNG-friendly outputs
+- assemble `HLD`, `LLD`, and assessment documents from the same run
+- derive clarification questions and a lightweight architecture quality scorecard
+
+In practical terms, this is the file that turns the existing inspection toolkit into a design workspace instead of another troubleshooting lane.
+
+## `src/openshift_sre_agent/architect_rag.py`
+
+This module adds the architect knowledge store.
+
+It uses `pgvector` plus Ollama embeddings to support:
+
+- training from direct documentation URLs
+- training from uploaded design and reference files
+- listing and clearing knowledge sources
+- retrieving OpenShift-grounded context that can guide the next HLD or LLD generation run
+
+The architect workspace uses it to pull in Red Hat documentation, internal standards, prior design packs, and other approved sources before generating the final diagram and document bundle.
 
 ## `src/openshift_sre_agent/tools.py`
 
@@ -144,6 +175,15 @@ class OpenShiftSreToolkit:
 This file exposes the agent over HTTP, mounts the generated MkDocs site, and lets callers provide per-request runtime overrides.
 
 It now also persists completed runs into the historical store and serves `GET /history/overview` so the dashboard can render stored summaries, trend charts, and recent runs.
+
+The architect endpoints extend that runtime with a dedicated architecture design contract:
+
+- `GET /architect/templates` publishes the OpenShift pattern catalog and supported output types
+- `POST /architect/openshift-state` captures a compact live platform-topology snapshot
+- `POST /architect/clarify` returns design questions when the prompt is too vague for an implementation-ready pack
+- `POST /architect/assessment` generates a scope-specific architecture review
+- `POST /architect/diagram` returns the diagram payload, HLD, LLD, and export artifacts in one response
+- `GET/POST /architect/knowledge*` exposes the pgvector-backed knowledge store for search and training
 
 ````python
 from __future__ import annotations

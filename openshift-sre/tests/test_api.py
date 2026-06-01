@@ -204,6 +204,13 @@ def test_docs_console_alias_redirects_to_guide(client):
     assert resp.headers["location"] == "/guide/console.html"
 
 
+def test_architect_page_redirects_to_guide(client):
+    resp = client.get("/architect.html", follow_redirects=False)
+
+    assert resp.status_code in (302, 307)
+    assert resp.headers["location"] == "/guide/architect.html"
+
+
 def test_root_redirects_to_legacy_docs_when_available(client):
     resp = client.get("/", follow_redirects=False)
 
@@ -294,6 +301,88 @@ def test_llm_providers_endpoint(client):
     assert data["configured_provider"] == "ollama"
     provider_ids = {provider["id"] for provider in data["providers"]}
     assert {"ollama", "openai", "azure-openai", "anthropic", "gemini", "openrouter"}.issubset(provider_ids)
+
+
+def test_architect_templates_endpoint(client):
+    resp = client.get("/architect/templates")
+
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["default_template_id"] == "custom"
+    assert any(item["id"] == "multicluster-fleet" for item in data["templates"])
+    assert any(item["id"] == "hld" for item in data["supported_document_types"])
+
+
+def test_architect_knowledge_status_endpoint(client):
+    resp = client.get("/architect/knowledge")
+
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["vector_backend"] == "pgvector"
+    assert data["enabled"] is False
+
+
+def test_architect_diagram_endpoint_returns_openshift_pack(client, api_mocks):
+    api_module = api_mocks["module"]
+    api_module.generate_architecture_diagram = MagicMock(
+        return_value={
+            "planning": {
+                "pattern_id": "custom",
+                "pattern_label": "Custom OpenShift architecture",
+                "confidence": "medium",
+                "reasoning_summary": "Prompt-driven generation.",
+            },
+            "documents": {
+                "hld": {
+                    "title": "Custom OpenShift architecture — HLD",
+                    "summary": "Executive-ready pack.",
+                    "sections": [{"title": "Executive summary", "body": ["Executive-ready pack."]}],
+                },
+                "lld": {
+                    "title": "Custom OpenShift architecture — LLD",
+                    "summary": "Implementation-ready pack.",
+                    "sections": [{"title": "Implementation detail", "body": ["Implementation-ready pack."]}],
+                },
+                "assessment": {
+                    "title": "Custom OpenShift architecture — assessment",
+                    "summary": "Assessment-ready pack.",
+                    "sections": [{"title": "Assessment findings", "body": ["Assessment-ready pack."]}],
+                },
+            },
+            "rendering": {
+                "quality_scorecard": {"overall_score": 82, "max_score": 100, "quality_band": "Solid"}
+            },
+            "knowledge": {"enabled": False, "used": False, "items": []},
+            "artifacts": {
+                "drawio_xml": "<mxfile></mxfile>",
+                "svg": "<svg></svg>",
+                "svg_preview": "<svg></svg>",
+                "png_base64": None,
+                "filenames": {
+                    "drawio": "architecture.drawio",
+                    "svg": "architecture.svg",
+                    "png": "architecture.png",
+                },
+            },
+            "diagram": {"title": "Custom OpenShift architecture", "summary": "Executive-ready pack.", "nodes": [], "edges": []},
+        }
+    )
+
+    resp = client.post(
+        "/architect/diagram",
+        json={
+            "prompt": "Design an OpenShift GitOps architecture with ACM governance and DR protection.",
+            "include_live_openshift_state": False,
+            "include_trained_knowledge": False,
+        },
+    )
+
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["planning"]["pattern_label"] == "Custom OpenShift architecture"
+    assert data["documents"]["hld"]["title"].endswith("HLD")
+    assert data["rendering"]["quality_scorecard"]["overall_score"] == 82
+    assert data["artifacts"]["drawio_xml"] == "<mxfile></mxfile>"
 
 
 def test_runtime_observability_endpoint(client, api_mocks):

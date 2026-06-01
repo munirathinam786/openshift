@@ -29,6 +29,8 @@ The main source files in this layer are:
 - `docs/assets/stylesheets/agent-console.css`
 - `tests/*.py`
 
+That list now also includes the architect-specific operator page and its runtime dependencies.
+
 Generated output such as `site/` is intentionally not treated as authored source, but it is produced directly from the files documented here.
 
 ## Packaging and Python entrypoints
@@ -124,6 +126,7 @@ It provides:
 This shell is reused by the custom operator pages:
 
 - `docs/console.html`
+- `docs/architect.html`
 - `docs/finops-console.html`
 - `docs/history.html`
 - `docs/troubleshooting.html`
@@ -253,6 +256,22 @@ The page was also visually tightened so the landing shell and the “Platform op
 
 The platform page deliberately complements Troubleshooting and Security: it is optimized for planned operational readiness work, not just incident response or audit narratives.
 
+#### `docs/architect.html`
+
+This page is the dedicated OpenShift architecture workspace.
+
+It combines:
+
+- template-driven OpenShift architecture generation
+- direct prompt editing for custom HLD or LLD creation
+- live OpenShift state capture through `/architect/openshift-state`
+- clarification and assessment lanes through `/architect/clarify` and `/architect/assessment`
+- pgvector-backed knowledge search, link training, and file-upload training through `/architect/knowledge*`
+- draw.io, SVG, and PNG export for the generated diagram artifacts
+- HLD, LLD, and assessment document export from the browser surface
+
+The page is intentionally different from the platform console: it is designed for architecture handoff, design review, and implementation planning rather than day-2 operational posture.
+
 #### `docs/security-console.html`
 
 This page is the dedicated audit and cloud-security workspace.
@@ -333,6 +352,20 @@ It handles:
 - a report-highlight lane for executive/report-style responses
 - client-side `.pptx` generation so generated reports can be exported as PowerPoint decks directly from the tool
 - client-side `.pdf` generation so the same report narrative can be downloaded as a lightweight executive brief
+
+### `docs/assets/javascripts/architect-console.js`
+
+This script implements the Architect Workspace React controller.
+
+It handles:
+
+- loading the OpenShift pattern catalog from `/architect/templates`
+- collecting live platform state from `/architect/openshift-state`
+- submitting clarification, assessment, and diagram-generation requests
+- managing the pgvector knowledge store from the browser, including URL and file training
+- previewing retrieved knowledge snippets before generation
+- rendering the SVG diagram preview plus HLD, LLD, and assessment document sections
+- exporting draw.io, SVG, PNG, markdown, Word-compatible, PDF, and PowerPoint outputs
 
 ### `docs/assets/javascripts/security-console.js`
 
@@ -428,6 +461,17 @@ It now covers:
 - template/watchlist cards, readiness scorecards, compare tables, and sweep-result surfaces
 - responsive and dark-mode polish for platform cards, summaries, trace surfaces, and feature-selection blocks
 
+### `docs/assets/stylesheets/architect-console.css`
+
+This stylesheet adds architect-specific presentation on top of the shared operator design system.
+
+It covers:
+
+- the architecture-lane hero and result cards
+- template, question, knowledge, artifact, and document layouts
+- the SVG diagram viewport styling
+- export controls and dark-mode polish for the architect workspace
+
 ### `docs/assets/stylesheets/security-console.css`
 
 This stylesheet is intentionally small.
@@ -459,6 +503,13 @@ At runtime it launches:
 
 That keeps the image simple: one service, one port, one bundled docs site.
 
+The architect lane adds extra container responsibilities as well:
+
+- install `draw.io` inside the image for editable diagram export
+- install `xvfb` so the Electron-based draw.io CLI can render in a headless container
+- install `tesseract-ocr` and the GUI/runtime libraries that draw.io depends on
+- install the architect Python dependencies such as `psycopg`, `pgvector`, `pypdf`, `cairosvg`, and `python-multipart`
+
 ### `compose.yaml`
 
 This file defines the local multi-container stack.
@@ -467,8 +518,11 @@ The important services are:
 
 - `app` for FastAPI + MkDocs delivery
 - `db` for MariaDB-backed persistence
+- `vector-db` for pgvector-backed architect knowledge retrieval
 
 This is what enables the live historical dashboard instead of a purely ephemeral prompt experience.
+
+The architect lane now uses the `vector-db` service to store trained architecture knowledge and retrieved context for HLD or LLD grounding.
 
 ### `scripts/podman-compose.sh`
 
@@ -537,6 +591,10 @@ This is especially important because the dashboard depends on shaped historical 
 
 It now also covers the new database pool telemetry exposed through the observability snapshot.
 
+### `tests/test_api.py`
+
+This file now also includes focused contract tests for the architect workspace, including page redirects, template discovery, knowledge-status responses, and diagram payload generation.
+
 ### `tests/test_config_validation.py`
 
 Validates enterprise-style runtime configuration rules so invalid URLs or incomplete database settings fail early instead of surfacing as delayed runtime errors.
@@ -577,8 +635,10 @@ If you want to extend the runtime layer, these are the highest-leverage places:
 - add new docs shell behaviors in `ui/src/app-shell.jsx`
 - add new dashboard visuals in `docs/assets/javascripts/history-dashboard.js`
 - add FinOps workflow or report-export behavior in `docs/assets/javascripts/finops-console.js`
+- add architecture-design workflows in `docs/assets/javascripts/architect-console.js`
 - add platform lifecycle, DR, or migration workflows in `docs/assets/javascripts/platform-console.js`
 - expand shared visual language in `docs/assets/stylesheets/agent-console.css`
+- refine architect-specific visuals in `docs/assets/stylesheets/architect-console.css`
 - refine FinOps-specific visuals in `docs/assets/stylesheets/finops-console.css`
 - refine platform-specific visuals in `docs/assets/stylesheets/platform-console.css`
 - add productivity helpers and workflow affordances in `docs/assets/javascripts/agent-console.js`
