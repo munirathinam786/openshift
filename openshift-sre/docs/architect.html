@@ -53,7 +53,20 @@
             { "title": "OpenShift-first pattern catalog", "description": "Templates cover multicluster fleet, GitOps delivery, security and governance, disconnected environments, CNV, DR, migration, and more." },
             { "title": "Grounded design generation", "description": "Blend live cluster state with trained knowledge and research links so the generated HLD or LLD reflects the real platform, not a generic diagram farm." },
             { "title": "Container-installed draw.io path", "description": "The stack now installs draw.io, xvfb, and related runtime dependencies inside the container so the architecture lane can export editable diagrams and images." }
-          ]
+          ],
+          "featureGroups": [
+            {
+              "kicker": "Architect workspace",
+              "title": "Design, assess, and export OpenShift architectures in one operator lane",
+              "description": "This page is built for platform architects, SRE leads, and delivery teams who need design packs that stay grounded in real cluster evidence, reusable platform patterns, and approved reference material.",
+              "items": [
+                { "title": "Pattern-led architecture builder", "description": "Start from multicluster fleet, GitOps, disconnected, CNV, DR, migration, security, or custom patterns and adapt them to the exact target estate.", "meta": "Launcher", "href": "#architect-launcher" },
+                { "title": "Knowledge-grounded generation", "description": "Train the architect store from Red Hat docs or internal standards, then preview retrieved context before generating the HLD or LLD pack.", "meta": "Knowledge", "href": "#architect-knowledge" },
+                { "title": "Document and artifact export", "description": "Export draw.io, SVG, PNG, markdown, PDF, PowerPoint, and Word-compatible handoff content from the same result set.", "meta": "Delivery", "href": "#architect-artifacts" }
+              ]
+            }
+          ],
+          "notice": "This page uses the live FastAPI backend on http://127.0.0.1:8000/ and combines prompt intent, optional live OpenShift state, and pgvector-grounded knowledge so architecture packs stay aligned with the actual platform estate."
         }
       </script>
     </div>
@@ -71,6 +84,7 @@
             </ul>
           </section>
           <div id="architect-root"></div>
+          <div id="architect-workspace" hidden></div>
         </article>
       </div>
     </main>

@@ -85,6 +85,12 @@ body[data-shell-page="security"] {
   --agent-accent-soft: rgba(14, 116, 144, 0.14);
 }
 
+body[data-shell-page="architect"] {
+  --agent-accent-rgb: 8, 145, 178;
+  --agent-accent-strong: #0891b2;
+  --agent-accent-soft: rgba(8, 145, 178, 0.14);
+}
+
 body[data-shell-page="platform"] {
   --agent-accent-rgb: 79, 70, 229;
   --agent-accent-strong: #4f46e5;
