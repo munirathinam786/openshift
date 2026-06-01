@@ -331,17 +331,25 @@ def test_architect_diagram_endpoint_returns_openshift_pack(client, api_mocks):
                 "pattern_label": "Custom OpenShift architecture",
                 "confidence": "medium",
                 "reasoning_summary": "Prompt-driven generation.",
+                "architect_profile": "Senior Red Hat OpenShift architect",
+                "version_baseline": "OpenShift 4.20+",
             },
             "documents": {
                 "hld": {
                     "title": "Custom OpenShift architecture — HLD",
                     "summary": "Executive-ready pack.",
                     "sections": [{"title": "Executive summary", "body": ["Executive-ready pack."]}],
+                    "target_page_count": 50,
+                    "estimated_page_count": 52,
+                    "page_target_met": True,
                 },
                 "lld": {
                     "title": "Custom OpenShift architecture — LLD",
                     "summary": "Implementation-ready pack.",
                     "sections": [{"title": "Implementation detail", "body": ["Implementation-ready pack."]}],
+                    "target_page_count": 100,
+                    "estimated_page_count": 106,
+                    "page_target_met": True,
                 },
                 "assessment": {
                     "title": "Custom OpenShift architecture — assessment",
@@ -350,6 +358,15 @@ def test_architect_diagram_endpoint_returns_openshift_pack(client, api_mocks):
                 },
             },
             "rendering": {
+                "diagram_pages": [
+                    {"page_number": 1, "page_name": "Holistic OpenShift architecture"},
+                    {"page_number": 2, "page_name": "Architecture explanation and design narrative"},
+                    {"page_number": 3, "page_name": "Component architecture and cluster topology"},
+                    {"page_number": 4, "page_name": "DMZ, firewall, and bastion lanes"},
+                    {"page_number": 5, "page_name": "ACM, ACS, Quay, ODF, and GitOps placement bands"},
+                    {"page_number": 6, "page_name": "Rack, node, VLAN, and infrastructure topology"},
+                    {"page_number": 7, "page_name": "Delivery, resilience, and recovery"},
+                ],
                 "quality_scorecard": {"overall_score": 82, "max_score": 100, "quality_band": "Solid"}
             },
             "knowledge": {"enabled": False, "used": False, "items": []},
@@ -357,6 +374,11 @@ def test_architect_diagram_endpoint_returns_openshift_pack(client, api_mocks):
                 "drawio_xml": "<mxfile></mxfile>",
                 "svg": "<svg></svg>",
                 "svg_preview": "<svg></svg>",
+                "preview_page_name": "Holistic OpenShift architecture",
+                "page_previews": [
+                    {"page_number": 1, "page_name": "Holistic OpenShift architecture", "layout_mode": "overview", "title": "Holistic OpenShift architecture", "summary": "Executive architecture overview.", "svg": "<svg></svg>"},
+                    {"page_number": 2, "page_name": "Architecture explanation and design narrative", "layout_mode": "explanation", "title": "Architecture explanation and design narrative", "summary": "Narrative page.", "svg": "<svg></svg>"},
+                ],
                 "png_base64": None,
                 "filenames": {
                     "drawio": "architecture.drawio",
@@ -383,6 +405,8 @@ def test_architect_diagram_endpoint_returns_openshift_pack(client, api_mocks):
     assert data["documents"]["hld"]["title"].endswith("HLD")
     assert data["rendering"]["quality_scorecard"]["overall_score"] == 82
     assert data["artifacts"]["drawio_xml"] == "<mxfile></mxfile>"
+    assert data["artifacts"]["preview_page_name"] == "Holistic OpenShift architecture"
+    assert data["artifacts"]["page_previews"][0]["page_name"] == "Holistic OpenShift architecture"
 
 
 def test_runtime_observability_endpoint(client, api_mocks):

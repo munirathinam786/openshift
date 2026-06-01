@@ -121,6 +121,8 @@ The new `Architect Workspace` adds an OpenShift-native design lane rather than a
 - a platform-pattern catalog for OpenShift fleet, GitOps, disconnected, security, CNV, DR, and migration designs
 - live cluster-state grounding through the existing OpenShift toolkit
 - `HLD`, `LLD`, and assessment document packs generated from the same design run
+- a senior-architect skill set for preparing both `HLD` and `LLD` outputs with explicit background, objectives, AS-IS, TO-BE, topology, component, network, security, DR, migration, validation, and appendix structure
+- enterprise document scaling rules that target review-ready `HLD` depth and implementation-grade `LLD` depth rather than short markdown summaries
 - pgvector-backed knowledge retrieval for internal standards, prior designs, and external references
 - research-link ingestion for Red Hat documentation or internal architecture sources
 - draw.io, SVG, and PNG artifact generation from inside the container runtime

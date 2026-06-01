@@ -824,10 +824,24 @@ def _layout_nodes(nodes: list[DiagramNode]) -> tuple[dict[str, dict[str, float]]
     return positions, group_boxes, total_width, total_height
 
 
-def _zone(*, title: str, x: float, y: float, width: float, height: float, fill: str, stroke: str, subtitle: str = "", dashed: bool = False, radius: float = 18.0) -> dict[str, Any]:
+def _zone(
+    *,
+    title: str,
+    x: float,
+    y: float,
+    width: float,
+    height: float,
+    fill: str,
+    stroke: str,
+    subtitle: str = "",
+    notes: list[str] | None = None,
+    dashed: bool = False,
+    radius: float = 18.0,
+) -> dict[str, Any]:
     return {
         "title": title,
         "subtitle": subtitle,
+        "notes": list(notes or []),
         "x": x,
         "y": y,
         "width": width,
@@ -1002,6 +1016,113 @@ def _layout_infra_topology_page(nodes: list[DiagramNode]) -> tuple[dict[str, dic
     return positions, zones, total_width, total_height
 
 
+def _layout_explanation_page(nodes: list[DiagramNode]) -> tuple[dict[str, dict[str, float]], list[dict[str, Any]], float, float]:
+    total_width = 1560.0
+    total_height = 1180.0
+    grouped: dict[str, list[DiagramNode]] = {group: [] for group in GROUP_ORDER}
+    for node in nodes:
+        grouped.setdefault(node.group, []).append(node)
+
+    def node_notes(groups: list[str], *, prefix: str, limit: int = 4) -> list[str]:
+        selected: list[str] = []
+        for group in groups:
+            for node in grouped.get(group, [])[:limit]:
+                selected.append(f"{prefix}{node.label}: {node.detail}")
+                if len(selected) >= limit:
+                    return selected
+        return selected
+
+    zones = [
+        _zone(
+            title="Architecture explanation and design narrative",
+            subtitle="Why this architecture exists, what it optimizes for, and how the review pack should be read by platform, network, security, and operations teams.",
+            notes=[
+                "Page 1 gives the holistic executive picture; the remaining pages decompose the same design into component, perimeter, placement, infrastructure, and recovery lenses.",
+                "The pack is intentionally structured like an enterprise Red Hat review document rather than a single generic Kubernetes sheet.",
+                "Cluster boundaries, ingress controls, storage posture, observability, and DR semantics are treated as first-class architecture content.",
+            ],
+            x=60,
+            y=70,
+            width=1440,
+            height=180,
+            fill="#EFF6FF",
+            stroke="#2563EB",
+        ),
+        _zone(
+            title="Primary platform component view",
+            subtitle="The component pages should explain cluster roles, shared services, and operator ownership before implementation begins.",
+            notes=node_notes(["fleet", "control-plane", "workload"], prefix="• ", limit=4),
+            x=60,
+            y=280,
+            width=690,
+            height=220,
+            fill="#F8FAFC",
+            stroke="#475569",
+        ),
+        _zone(
+            title="Network, security, and perimeter explanation",
+            subtitle="Separate the access story from the component story so DMZ, bastion, firewall, DNS, and ingress decisions remain reviewable.",
+            notes=node_notes(["network", "security"], prefix="• ", limit=4),
+            x=810,
+            y=280,
+            width=690,
+            height=220,
+            fill="#FEF2F2",
+            stroke="#DC2626",
+        ),
+        _zone(
+            title="Operations, delivery, and resilience explanation",
+            subtitle="Show how the platform is delivered, observed, protected, and recovered—not just how it is installed.",
+            notes=node_notes(["delivery", "operations", "data"], prefix="• ", limit=4),
+            x=60,
+            y=530,
+            width=690,
+            height=220,
+            fill="#F5F3FF",
+            stroke="#7C3AED",
+        ),
+        _zone(
+            title="Version baseline and architecture guardrails",
+            subtitle="The generated HLD/LLD should stay grounded on supported Red Hat constructs and explicit enterprise operating assumptions.",
+            notes=[
+                "• OpenShift Container Platform 4.20 and later.",
+                "• ACM 2.14+ and OpenShift GitOps 1.18+ where the design requires them.",
+                "• Prefer supported operators and OpenShift-native services over bespoke platform components.",
+                "• Document DNS, certificates, ports, load balancing, backup, and DR expectations explicitly.",
+            ],
+            x=810,
+            y=530,
+            width=690,
+            height=220,
+            fill="#ECFDF5",
+            stroke="#16A34A",
+        ),
+        _zone(
+            title="Anchor component map",
+            subtitle="Representative components referenced by the narrative page so the explanation stays tied to the actual architecture pack.",
+            x=60,
+            y=790,
+            width=1440,
+            height=320,
+            fill="#FFFFFF",
+            stroke="#94A3B8",
+            dashed=True,
+        ),
+    ]
+
+    positions = _layout_nodes_in_rect(
+        nodes,
+        x=60,
+        y=790,
+        width=1440,
+        height=320,
+        columns=max(1, min(4, len(nodes) or 1)),
+        node_width=300.0,
+        node_height=82.0,
+    )
+    return positions, zones, total_width, total_height
+
+
 def _layout_page(
     *,
     layout_mode: str,
@@ -1018,6 +1139,9 @@ def _layout_page(
         return positions, {}, zones, total_width, total_height
     if layout_mode == "infra-topology":
         positions, zones, total_width, total_height = _layout_infra_topology_page(nodes)
+        return positions, {}, zones, total_width, total_height
+    if layout_mode == "explanation":
+        positions, zones, total_width, total_height = _layout_explanation_page(nodes)
         return positions, {}, zones, total_width, total_height
     positions, group_boxes, total_width, total_height = _layout_nodes(nodes)
     return positions, group_boxes, [], total_width, total_height
@@ -1057,8 +1181,15 @@ def _diagram_page_specs(
             "layout_mode": "grouped",
         },
         {
-            "page_name": "Hub, spoke, and shared services topology",
-            "title": f"{planning.pattern_label} — hub and spoke topology",
+            "page_name": "Architecture explanation and design narrative",
+            "title": f"{planning.pattern_label} — architecture explanation",
+            "summary": "A narrative page that explains how to read the architecture pack before diving into the deeper component and infrastructure views.",
+            "groups": GROUP_ORDER,
+            "layout_mode": "explanation",
+        },
+        {
+            "page_name": "Component architecture and cluster topology",
+            "title": f"{planning.pattern_label} — component and cluster view",
             "summary": "Dedicated hub / spoke cluster blocks with shared platform services, closely aligned to enterprise OpenShift fleet presentation patterns.",
             "groups": ["context", "fleet", "control-plane", "delivery", "operations", "workload", "data", "network"],
             "layout_mode": "hub-spoke",
@@ -1744,10 +1875,20 @@ def _render_svg(
         parts.append(
             f'<text x="{zone["x"] + 14}" y="{zone["y"] + 24}" font-size="14" font-weight="700" fill="#0F172A">{escape(zone["title"])}</text>'
         )
+        next_y = zone["y"] + 42
         if zone.get("subtitle"):
-            parts.append(
-                f'<text x="{zone["x"] + 14}" y="{zone["y"] + 42}" font-size="11" fill="#475569">{escape(str(zone["subtitle"]))}</text>'
-            )
+            for line in _wrap_text(str(zone["subtitle"]), 88):
+                parts.append(
+                    f'<text x="{zone["x"] + 14}" y="{next_y}" font-size="11" fill="#475569">{escape(line)}</text>'
+                )
+                next_y += 14
+        for note in zone.get("notes", []):
+            for line in _wrap_text(str(note), 86):
+                parts.append(
+                    f'<text x="{zone["x"] + 18}" y="{next_y}" font-size="10.5" fill="#334155">{escape(line)}</text>'
+                )
+                next_y += 13
+            next_y += 2
     for group, box in group_boxes.items():
         style = GROUP_STYLES[group]
         parts.append(
@@ -1849,7 +1990,11 @@ def _build_drawio_xml(title: str, diagram_pages: list[dict[str, Any]]) -> str:
         cell_counter += 1
 
         for zone in page.get("zones", []):
-            zone_value = zone["title"] if not zone.get("subtitle") else f"{zone['title']}\n{zone['subtitle']}"
+            zone_lines = [zone["title"]]
+            if zone.get("subtitle"):
+                zone_lines.append(str(zone["subtitle"]))
+            zone_lines.extend(str(item) for item in zone.get("notes", []))
+            zone_value = "\n".join(zone_lines)
             zone_cell = ET.SubElement(
                 root,
                 "mxCell",
@@ -2133,6 +2278,27 @@ def generate_architecture_diagram(*, prompt: str, openshift_state: dict[str, Any
     )
     first_page = diagram_pages[0]
     drawio_xml = _build_drawio_xml(title, diagram_pages)
+    page_previews = [
+        {
+            "page_number": page["page_number"],
+            "page_name": page["page_name"],
+            "layout_mode": page["layout_mode"],
+            "title": page["title"],
+            "summary": page["summary"],
+            "svg": _render_svg(
+                page["title"],
+                page["summary"],
+                page["nodes"],
+                page["edges"],
+                page["positions"],
+                page["group_boxes"],
+                page.get("zones", []),
+                page["total_width"],
+                page["total_height"],
+            ),
+        }
+        for page in diagram_pages
+    ]
     svg_preview = _render_svg(
         first_page["title"],
         first_page["summary"],
@@ -2199,6 +2365,7 @@ def generate_architecture_diagram(*, prompt: str, openshift_state: dict[str, Any
             "svg": svg_bytes.decode("utf-8", errors="ignore") if svg_bytes else svg_preview,
             "png_base64": base64.b64encode(png_bytes).decode("ascii") if png_bytes else None,
             "preview_page_name": first_page["page_name"],
+            "page_previews": page_previews,
             "filenames": {
                 "drawio": f"{_slugify(title)}.drawio",
                 "svg": f"{_slugify(title)}.svg",

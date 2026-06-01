@@ -26,22 +26,30 @@ def test_generate_architecture_diagram_returns_4_20_grounded_multi_page_pack():
 
     assert payload["planning"]["architect_profile"] == "Senior Red Hat OpenShift architect"
     assert "4.20" in payload["planning"]["version_baseline"]
-    assert len(payload["rendering"]["diagram_pages"]) >= 6
-    page_names = {page["page_name"] for page in payload["rendering"]["diagram_pages"]}
-    assert "Hub, spoke, and shared services topology" in page_names
-    assert "DMZ, firewall, and bastion lanes" in page_names
-    assert "ACM, ACS, Quay, ODF, and GitOps placement bands" in page_names
-    assert "Rack, node, VLAN, and infrastructure topology" in page_names
+    expected_page_names = [
+        "Holistic OpenShift architecture",
+        "Architecture explanation and design narrative",
+        "Component architecture and cluster topology",
+        "DMZ, firewall, and bastion lanes",
+        "ACM, ACS, Quay, ODF, and GitOps placement bands",
+        "Rack, node, VLAN, and infrastructure topology",
+        "Delivery, resilience, and recovery",
+    ]
+    assert len(payload["rendering"]["diagram_pages"]) >= len(expected_page_names)
+    assert [page["page_name"] for page in payload["rendering"]["diagram_pages"][:7]] == expected_page_names
     assert payload["documents"]["hld"]["target_page_count"] == 50
     assert payload["documents"]["lld"]["target_page_count"] == 100
     assert payload["documents"]["hld"]["estimated_page_count"] >= payload["documents"]["hld"]["target_page_count"]
     assert payload["documents"]["lld"]["estimated_page_count"] >= payload["documents"]["lld"]["target_page_count"]
     assert payload["documents"]["hld"]["page_target_met"] is True
     assert payload["documents"]["lld"]["page_target_met"] is True
-    assert payload["artifacts"]["drawio_xml"].count("<diagram") >= 6
+    assert payload["artifacts"]["drawio_xml"].count("<diagram") >= len(expected_page_names)
+    assert len(payload["artifacts"]["page_previews"]) >= len(expected_page_names)
+    assert [page["page_name"] for page in payload["artifacts"]["page_previews"][:7]] == expected_page_names
     assert "img/lib/mscae/OpenShift.svg" in payload["artifacts"]["drawio_xml"]
     assert "DMZ and edge ingress lane" in payload["artifacts"]["drawio_xml"]
     assert "ODF / OADP / data protection band" in payload["artifacts"]["drawio_xml"]
+    assert "Architecture explanation and design narrative" in payload["artifacts"]["drawio_xml"]
     assert (
         "shape=mxgraph.kubernetes.icon;prIcon=pod" in payload["artifacts"]["drawio_xml"]
         or "mxgraph.networks.switch" in payload["artifacts"]["drawio_xml"]
