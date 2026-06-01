@@ -21,6 +21,29 @@
     return Number.isNaN(date.getTime()) ? String(value) : date.toLocaleString();
   };
   const stripHtml = (value) => String(value || '').replace(/<[^>]+>/g, '');
+  const pickPreferredOllamaModel = (payload) => {
+    const models = Array.isArray(payload?.models) ? payload.models : [];
+    const names = models.map((model) => model?.name || model?.model).filter(Boolean);
+    if (!names.length) {
+      return '';
+    }
+    const configured = String(payload?.configured_model_name || '').trim();
+    if (configured && names.includes(configured)) {
+      return configured;
+    }
+    const loaded = models.find((model) => model?.loaded && (model?.name || model?.model));
+    if (loaded) {
+      return loaded.name || loaded.model;
+    }
+    const firstGenerative = models.find((model) => {
+      const name = String(model?.name || model?.model || '').toLowerCase();
+      return name && !name.includes('embed');
+    });
+    if (firstGenerative) {
+      return firstGenerative.name || firstGenerative.model;
+    }
+    return names[0];
+  };
 
   async function fetchJson(url, options) {
     const response = await fetch(url, options);
@@ -33,6 +56,25 @@
     }
     if (!response.ok) {
       throw new Error(payload.detail || `Request failed with status ${response.status}`);
+    }
+    return payload;
+  }
+
+  async function fetchOllamaModels(ollamaBaseUrl = '') {
+    const params = new URLSearchParams();
+    if (ollamaBaseUrl) {
+      params.set('ollama_base_url', ollamaBaseUrl);
+    }
+    const response = await fetch(`/ollama/models${params.toString() ? `?${params}` : ''}`);
+    const text = await response.text();
+    let payload = {};
+    try {
+      payload = text ? JSON.parse(text) : {};
+    } catch {
+      payload = { detail: text };
+    }
+    if (!response.ok) {
+      throw new Error(payload.detail || `Model list request failed with status ${response.status}`);
     }
     return payload;
   }
@@ -56,6 +98,8 @@
     const [knowledgeStatus, setKnowledgeStatus] = useState(null);
     const [knowledgeSources, setKnowledgeSources] = useState([]);
     const [providerCatalog, setProviderCatalog] = useState(llmRuntime.fallbackCatalog || { providers: [] });
+    const [modelCatalog, setModelCatalog] = useState({ configured_model_name: '', models: [] });
+    const [modelsLoading, setModelsLoading] = useState(false);
     const [providerId, setProviderId] = useState('ollama');
     const [ollamaBaseUrl, setOllamaBaseUrl] = useState('');
     const [modelName, setModelName] = useState('');
@@ -92,8 +136,35 @@
     const [suggestedTemplateApplied, setSuggestedTemplateApplied] = useState(false);
 
     const selectedTemplate = useMemo(() => (catalog.templates || []).find((item) => item.id === templateId) || (catalog.templates || [])[0] || null, [catalog.templates, templateId]);
-    const suggestedModels = useMemo(() => (llmRuntime.getSuggestedModels ? llmRuntime.getSuggestedModels(providerCatalog, providerId) : []), [providerCatalog, providerId]);
+    const suggestedModels = useMemo(() => (llmRuntime.getSuggestedModels ? llmRuntime.getSuggestedModels(providerCatalog, providerId, modelCatalog) : []), [providerCatalog, providerId, modelCatalog]);
     const documentPack = useMemo(() => diagramResult?.documents?.[activeDocument] || assessmentResult?.assessment || null, [diagramResult, assessmentResult, activeDocument]);
+    const ollamaOptionMap = useMemo(() => {
+      const options = new Map();
+      const catalogModels = Array.isArray(modelCatalog?.models) ? modelCatalog.models : [];
+      catalogModels.forEach((model) => {
+        const name = model?.name || model?.model;
+        if (!name) return;
+        const suffix = [model.loaded ? 'loaded' : '', model.parameter_size || ''].filter(Boolean).join(' · ');
+        options.set(name, suffix ? `${name} · ${suffix}` : name);
+      });
+      suggestedModels.forEach((name) => {
+        if (name && !options.has(name)) {
+          options.set(name, name);
+        }
+      });
+      const fallbackModel = modelName || modelCatalog?.configured_model_name || providerCatalog?.configured_model_name || '';
+      if (fallbackModel && !options.has(fallbackModel)) {
+        options.set(fallbackModel, fallbackModel);
+      }
+      return options;
+    }, [modelCatalog, suggestedModels, modelName, providerCatalog]);
+    const preferredOllamaModel = useMemo(() => pickPreferredOllamaModel(modelCatalog), [modelCatalog]);
+    const selectedOllamaModel = useMemo(() => {
+      if (modelName && ollamaOptionMap.has(modelName)) {
+        return modelName;
+      }
+      return preferredOllamaModel || '';
+    }, [modelName, ollamaOptionMap, preferredOllamaModel]);
 
     const runtime = useMemo(() => ({
       ...(llmRuntime.buildLlmRuntime?.({ provider: providerId, ollamaBaseUrl, modelName, externalModelName, externalBaseUrl, externalApiKey, externalApiVersion, externalOrganization }, providerCatalog) || {}),
@@ -141,7 +212,8 @@
           setProviderCatalog(catalogPayload);
           setProviderId(resolvedProviderId);
           setOllamaBaseUrl(catalogPayload.configured_base_url || '');
-          setModelName(catalogPayload.configured_model_name || '');
+          setModelName(resolvedProviderId === 'ollama' ? '' : (catalogPayload.configured_model_name || ''));
+          setExternalModelName(catalogPayload.configured_model_name || '');
           await loadCatalog();
         } catch (error) {
           if (!cancelled) {
@@ -153,6 +225,54 @@
         cancelled = true;
       };
     }, []);
+
+    const refreshModels = async (baseUrl = ollamaBaseUrl) => {
+      if ((llmRuntime.normalizeProviderId?.(providerCatalog, providerId) || 'ollama') !== 'ollama') {
+        setModelsLoading(false);
+        return;
+      }
+      setModelsLoading(true);
+      try {
+        const payload = await fetchOllamaModels(baseUrl || '');
+        setModelCatalog(payload);
+        setModelName((current) => {
+          const availableNames = Array.isArray(payload.models) ? payload.models.map((model) => model?.name || model?.model).filter(Boolean) : [];
+          if (current && availableNames.includes(current)) {
+            return current;
+          }
+          return pickPreferredOllamaModel(payload) || current || '';
+        });
+      } catch (error) {
+        setStatus({ message: error instanceof Error ? error.message : 'Unable to load available Ollama models.', tone: 'error' });
+      } finally {
+        setModelsLoading(false);
+      }
+    };
+
+    useEffect(() => {
+      if ((llmRuntime.normalizeProviderId?.(providerCatalog, providerId) || 'ollama') === 'ollama') {
+        refreshModels(ollamaBaseUrl);
+      }
+    }, [providerCatalog, providerId, ollamaBaseUrl]);
+
+    useEffect(() => {
+      if ((llmRuntime.normalizeProviderId?.(providerCatalog, providerId) || 'ollama') !== 'ollama') {
+        return;
+      }
+      if (selectedOllamaModel && selectedOllamaModel !== modelName) {
+        setModelName(selectedOllamaModel);
+      }
+    }, [providerCatalog, providerId, selectedOllamaModel, modelName]);
+
+    useEffect(() => {
+      const provider = llmRuntime.getProvider?.(providerCatalog, providerId) || providerCatalog?.providers?.[0];
+      if (!provider || provider.id === 'ollama') {
+        return;
+      }
+      setExternalModelName((current) => current || provider.default_model || providerCatalog?.configured_model_name || '');
+      setExternalBaseUrl((current) => current || provider.default_base_url || '');
+      setExternalApiVersion((current) => current || provider.default_api_version || '');
+    }, [providerCatalog, providerId]);
 
     useEffect(() => {
       if (!selectedTemplate || suggestedTemplateApplied) return;
@@ -457,7 +577,12 @@
                 providerId === 'ollama'
                   ? h('label', { className: 'agent-console__label' }, ['Ollama base URL', h('input', { className: 'agent-console__input', value: ollamaBaseUrl, onChange: (event) => setOllamaBaseUrl(event.target.value), placeholder: 'http://host.containers.internal:11434' })])
                   : h('label', { className: 'agent-console__label' }, ['Hosted base URL', h('input', { className: 'agent-console__input', value: externalBaseUrl, onChange: (event) => setExternalBaseUrl(event.target.value), placeholder: 'https://api.openai.com/v1' })]),
-                h('label', { className: 'agent-console__label' }, [(providerId === 'ollama' ? 'Local model' : 'Hosted model'), h('input', { className: 'agent-console__input', value: providerId === 'ollama' ? modelName : externalModelName, list: 'architect-suggested-models', onChange: (event) => providerId === 'ollama' ? setModelName(event.target.value) : setExternalModelName(event.target.value), placeholder: suggestedModels[0] || 'model name' }), h('datalist', { id: 'architect-suggested-models' }, suggestedModels.map((model) => h('option', { key: model, value: model }))) ]),
+                providerId === 'ollama'
+                  ? h('label', { className: 'agent-console__label' }, ['Local model', h('div', { className: 'finops-settings__model-picker' }, [
+                      h('select', { className: 'agent-console__input', value: selectedOllamaModel, onChange: (event) => setModelName(event.target.value), disabled: modelsLoading && ollamaOptionMap.size === 0 }, Array.from(ollamaOptionMap.entries()).map(([value, label]) => h('option', { key: value, value }, label))),
+                      h('button', { className: 'agent-console__example', type: 'button', onClick: () => refreshModels(ollamaBaseUrl), disabled: modelsLoading }, modelsLoading ? 'Refreshing…' : 'Refresh')
+                    ])])
+                  : h('label', { className: 'agent-console__label' }, ['Hosted model', h('input', { className: 'agent-console__input', value: externalModelName, list: 'architect-suggested-models', onChange: (event) => setExternalModelName(event.target.value), placeholder: suggestedModels[0] || 'model name' }), h('datalist', { id: 'architect-suggested-models' }, suggestedModels.map((model) => h('option', { key: model, value: model }))) ]),
                 h('label', { className: 'agent-console__label' }, ['Kube context name', h('input', { className: 'agent-console__input', value: kubeContextName, onChange: (event) => setKubeContextName(event.target.value), placeholder: 'Optional kube context override' })]),
                 h('label', { className: 'agent-console__label' }, ['OpenShift API URL', h('input', { className: 'agent-console__input', value: openshiftApiUrl, onChange: (event) => setOpenshiftApiUrl(event.target.value), placeholder: 'https://api.cluster.example:6443' })]),
                 h('label', { className: 'agent-console__label' }, ['OpenShift token', h('input', { className: 'agent-console__input', type: 'password', value: openshiftToken, onChange: (event) => setOpenshiftToken(event.target.value), placeholder: 'Optional bearer token' })]),
