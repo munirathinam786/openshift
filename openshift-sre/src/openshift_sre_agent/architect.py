@@ -931,14 +931,14 @@ def _layout_hub_spoke_page(nodes: list[DiagramNode]) -> tuple[dict[str, dict[str
 
 
 def _layout_security_lanes_page(nodes: list[DiagramNode]) -> tuple[dict[str, dict[str, float]], list[dict[str, Any]], float, float]:
-    total_width = 1500.0
-    total_height = 980.0
+    total_width = 1600.0
+    total_height = 1040.0
     zones = [
-        _zone(title="Internet / upstream services", subtitle="External users, public DNS, upstream registries, and provider dependencies", x=60, y=70, width=1380, height=120, fill="#FFF7ED", stroke="#EA580C"),
-        _zone(title="DMZ and edge ingress lane", subtitle="Public routes, load balancing, ingress controllers, and controlled exposure", x=60, y=220, width=1380, height=150, fill="#F8FAFC", stroke="#475569", dashed=True),
-        _zone(title="Firewall, bastion, and access lane", subtitle="Segmentation, bastion/jump access, identity, and trust-boundary controls", x=60, y=400, width=1380, height=170, fill="#FEF2F2", stroke="#DC2626"),
-        _zone(title="Cluster core and service plane", subtitle="Control plane, application, storage, and platform runtime inside the protected zone", x=60, y=600, width=1380, height=180, fill="#F0FDF4", stroke="#16A34A"),
-        _zone(title="Security operations and evidence", subtitle="Monitoring, logging, alerts, policy evidence, and incident response handoff", x=60, y=810, width=1380, height=110, fill="#EEF2FF", stroke="#4338CA"),
+        _zone(title="Internet / upstream services", subtitle="External users, public DNS, upstream registries, and provider dependencies", x=60, y=86, width=1480, height=118, fill="#FFF7ED", stroke="#EA580C"),
+        _zone(title="DMZ and edge ingress lane", subtitle="Public routes, load balancing, ingress controllers, and controlled exposure", x=60, y=230, width=1480, height=156, fill="#F8FAFC", stroke="#475569", dashed=True),
+        _zone(title="Firewall, bastion, and access lane", subtitle="Segmentation, bastion/jump access, identity, and trust-boundary controls", x=60, y=412, width=1480, height=176, fill="#FEF2F2", stroke="#DC2626"),
+        _zone(title="Cluster core and service plane", subtitle="Control plane, application, storage, and platform runtime inside the protected zone", x=60, y=614, width=1480, height=196, fill="#F0FDF4", stroke="#16A34A"),
+        _zone(title="Security operations and evidence", subtitle="Monitoring, logging, alerts, policy evidence, and incident response handoff", x=60, y=836, width=1480, height=126, fill="#EEF2FF", stroke="#4338CA"),
     ]
 
     remaining = list(nodes)
@@ -949,11 +949,11 @@ def _layout_security_lanes_page(nodes: list[DiagramNode]) -> tuple[dict[str, dic
     ops_nodes = remaining
 
     positions: dict[str, dict[str, float]] = {}
-    positions.update(_layout_nodes_in_rect(upstream_nodes or nodes[:2], x=60, y=70, width=1380, height=120, columns=max(1, min(4, len(upstream_nodes or nodes[:2]))), node_width=220.0, node_height=68.0))
-    positions.update(_layout_nodes_in_rect(dmz_nodes or nodes[:2], x=60, y=220, width=1380, height=150, columns=max(1, min(4, len(dmz_nodes or nodes[:2]))), node_width=240.0, node_height=76.0))
-    positions.update(_layout_nodes_in_rect(access_nodes or nodes[:3], x=60, y=400, width=1380, height=170, columns=max(1, min(4, len(access_nodes or nodes[:3]))), node_width=250.0, node_height=84.0))
-    positions.update(_layout_nodes_in_rect(core_nodes or nodes[:4], x=60, y=600, width=1380, height=180, columns=max(1, min(4, len(core_nodes or nodes[:4]))), node_width=250.0, node_height=84.0))
-    positions.update(_layout_nodes_in_rect(ops_nodes or nodes[:2], x=60, y=810, width=1380, height=110, columns=max(1, min(4, len(ops_nodes or nodes[:2]))), node_width=240.0, node_height=68.0))
+    positions.update(_layout_nodes_in_rect(upstream_nodes or nodes[:3], x=60, y=86, width=1480, height=118, columns=max(1, min(5, len(upstream_nodes or nodes[:3]))), node_width=228.0, node_height=64.0))
+    positions.update(_layout_nodes_in_rect(dmz_nodes or nodes[:3], x=60, y=230, width=1480, height=156, columns=max(1, min(5, len(dmz_nodes or nodes[:3]))), node_width=220.0, node_height=70.0))
+    positions.update(_layout_nodes_in_rect(access_nodes or nodes[:4], x=60, y=412, width=1480, height=176, columns=max(1, min(5, len(access_nodes or nodes[:4]))), node_width=228.0, node_height=74.0))
+    positions.update(_layout_nodes_in_rect(core_nodes or nodes[:5], x=60, y=614, width=1480, height=196, columns=max(1, min(5, len(core_nodes or nodes[:5]))), node_width=228.0, node_height=76.0))
+    positions.update(_layout_nodes_in_rect(ops_nodes or nodes[:3], x=60, y=836, width=1480, height=126, columns=max(1, min(5, len(ops_nodes or nodes[:3]))), node_width=228.0, node_height=64.0))
     return positions, zones, total_width, total_height
 
 
@@ -985,17 +985,17 @@ def _layout_service_bands_page(nodes: list[DiagramNode]) -> tuple[dict[str, dict
 
 
 def _layout_infra_topology_page(nodes: list[DiagramNode]) -> tuple[dict[str, dict[str, float]], list[dict[str, Any]], float, float]:
-    total_width = 1600.0
-    total_height = 1020.0
+    total_width = 1700.0
+    total_height = 1120.0
     zones = [
-        _zone(title="User VLAN", subtitle="Application and east-west network presentation", x=60, y=70, width=1480, height=110, fill="#EFF6FF", stroke="#0284C7"),
-        _zone(title="Management VLAN", subtitle="API, provisioning, bastion, node management, and service administration", x=60, y=210, width=1480, height=110, fill="#ECFDF5", stroke="#16A34A"),
-        _zone(title="Rack and node topology", subtitle="Cluster and site blocks arranged like rack-aligned node lanes", x=60, y=350, width=1480, height=340, fill="#F8FAFC", stroke="#475569", dashed=True),
-        _zone(title="Platform services and infrastructure", subtitle="ODF, Quay, GitOps, monitoring, ACS, and supporting infra services", x=60, y=720, width=1480, height=240, fill="#F5F3FF", stroke="#7C3AED"),
-        _zone(title="Rack A", subtitle="Hub / infra", x=90, y=410, width=300, height=230, fill="#FFFFFF", stroke="#94A3B8", dashed=True, radius=14.0),
-        _zone(title="Rack B", subtitle="Primary cluster", x=430, y=410, width=300, height=230, fill="#FFFFFF", stroke="#94A3B8", dashed=True, radius=14.0),
-        _zone(title="Rack C", subtitle="Recovery cluster", x=770, y=410, width=300, height=230, fill="#FFFFFF", stroke="#94A3B8", dashed=True, radius=14.0),
-        _zone(title="Rack D", subtitle="Shared services", x=1110, y=410, width=300, height=230, fill="#FFFFFF", stroke="#94A3B8", dashed=True, radius=14.0),
+        _zone(title="User VLAN", subtitle="Application and east-west network presentation", x=60, y=86, width=1580, height=102, fill="#EFF6FF", stroke="#0284C7"),
+        _zone(title="Management VLAN", subtitle="API, provisioning, bastion, node management, and service administration", x=60, y=214, width=1580, height=102, fill="#ECFDF5", stroke="#16A34A"),
+        _zone(title="Rack and node topology", subtitle="Cluster and site blocks arranged like rack-aligned node lanes", x=60, y=342, width=1580, height=454, fill="#F8FAFC", stroke="#475569", dashed=True),
+        _zone(title="Platform services and infrastructure", subtitle="ODF, Quay, GitOps, monitoring, ACS, and supporting infra services", x=60, y=822, width=1580, height=236, fill="#F5F3FF", stroke="#7C3AED"),
+        _zone(title="Rack A", subtitle="Hub / infra", x=94, y=400, width=334, height=330, fill="#FFFFFF", stroke="#94A3B8", dashed=True, radius=14.0),
+        _zone(title="Rack B", subtitle="Primary cluster", x=472, y=400, width=334, height=330, fill="#FFFFFF", stroke="#94A3B8", dashed=True, radius=14.0),
+        _zone(title="Rack C", subtitle="Recovery cluster", x=850, y=400, width=334, height=330, fill="#FFFFFF", stroke="#94A3B8", dashed=True, radius=14.0),
+        _zone(title="Rack D", subtitle="Shared services", x=1228, y=400, width=334, height=330, fill="#FFFFFF", stroke="#94A3B8", dashed=True, radius=14.0),
     ]
 
     remaining = list(nodes)
@@ -1007,14 +1007,14 @@ def _layout_infra_topology_page(nodes: list[DiagramNode]) -> tuple[dict[str, dic
     rack_d_nodes = remaining
 
     positions: dict[str, dict[str, float]] = {}
-    positions.update(_layout_nodes_in_rect(user_vlan_nodes or nodes[:3], x=60, y=70, width=1480, height=110, columns=max(1, min(4, len(user_vlan_nodes or nodes[:3]))), node_width=240.0, node_height=68.0))
-    positions.update(_layout_nodes_in_rect(mgmt_nodes or nodes[:3], x=60, y=210, width=1480, height=110, columns=max(1, min(4, len(mgmt_nodes or nodes[:3]))), node_width=240.0, node_height=68.0))
-    positions.update(_layout_nodes_in_rect(rack_a_nodes or nodes[:2], x=90, y=410, width=300, height=230, columns=1, node_width=250.0, node_height=78.0))
-    positions.update(_layout_nodes_in_rect(rack_b_nodes or nodes[:2], x=430, y=410, width=300, height=230, columns=1, node_width=250.0, node_height=78.0))
-    positions.update(_layout_nodes_in_rect(rack_c_nodes or nodes[:2], x=770, y=410, width=300, height=230, columns=1, node_width=250.0, node_height=78.0))
-    positions.update(_layout_nodes_in_rect(rack_d_nodes or nodes[:3], x=1110, y=410, width=300, height=230, columns=1, node_width=250.0, node_height=78.0))
+    positions.update(_layout_nodes_in_rect(user_vlan_nodes or nodes[:4], x=60, y=86, width=1580, height=102, columns=max(1, min(6, len(user_vlan_nodes or nodes[:4]))), node_width=214.0, node_height=60.0))
+    positions.update(_layout_nodes_in_rect(mgmt_nodes or nodes[:4], x=60, y=214, width=1580, height=102, columns=max(1, min(6, len(mgmt_nodes or nodes[:4]))), node_width=214.0, node_height=60.0))
+    positions.update(_layout_nodes_in_rect(rack_a_nodes or nodes[:3], x=94, y=422, width=334, height=250, columns=2, node_width=138.0, node_height=64.0))
+    positions.update(_layout_nodes_in_rect(rack_b_nodes or nodes[:3], x=472, y=422, width=334, height=250, columns=2, node_width=138.0, node_height=64.0))
+    positions.update(_layout_nodes_in_rect(rack_c_nodes or nodes[:3], x=850, y=422, width=334, height=250, columns=2, node_width=138.0, node_height=64.0))
+    positions.update(_layout_nodes_in_rect(rack_d_nodes or nodes[:4], x=1228, y=422, width=334, height=250, columns=2, node_width=138.0, node_height=64.0))
     all_service_nodes = rack_a_nodes + rack_b_nodes + rack_c_nodes + rack_d_nodes
-    positions.update(_layout_nodes_in_rect(all_service_nodes[:6] or nodes[:4], x=60, y=720, width=1480, height=240, columns=max(1, min(4, len(all_service_nodes[:6] or nodes[:4]))), node_width=260.0, node_height=82.0))
+    positions.update(_layout_nodes_in_rect(all_service_nodes[:10] or nodes[:5], x=60, y=822, width=1580, height=236, columns=max(1, min(5, len(all_service_nodes[:10] or nodes[:5]))), node_width=250.0, node_height=76.0))
     return positions, zones, total_width, total_height
 
 
@@ -1956,8 +1956,201 @@ def _drawio_text(value: str) -> str:
     return escape(value).replace("\n", "&#xa;")
 
 
+def _append_drawio_page_frame(root: ET.Element, *, page: dict[str, Any], cell_counter: int, page_total: int) -> int:
+    frame_id = str(cell_counter)
+    cell_counter += 1
+    frame_cell = ET.SubElement(
+        root,
+        "mxCell",
+        id=frame_id,
+        value="",
+        style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#CBD5E1;strokeWidth=2;arcSize=18;",
+        vertex="1",
+        parent="1",
+    )
+    ET.SubElement(frame_cell, "mxGeometry", x="18", y="18", width=str(max(400, int(page["total_width"]) - 36)), height=str(max(260, int(page["total_height"]) - 36)), **{"as": "geometry"})
+
+    header_id = str(cell_counter)
+    cell_counter += 1
+    header_cell = ET.SubElement(
+        root,
+        "mxCell",
+        id=header_id,
+        value="",
+        style="rounded=1;whiteSpace=wrap;html=1;fillColor=#111827;strokeColor=#111827;strokeWidth=1;arcSize=12;",
+        vertex="1",
+        parent="1",
+    )
+    ET.SubElement(header_cell, "mxGeometry", x="28", y="22", width=str(max(360, int(page["total_width"]) - 56)), height="54", **{"as": "geometry"})
+
+    brand_id = str(cell_counter)
+    cell_counter += 1
+    brand_value = _drawio_text("OPENSHIFT 4.20+\nArchitect review pack")
+    brand_cell = ET.SubElement(
+        root,
+        "mxCell",
+        id=brand_id,
+        value=brand_value,
+        style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=10;fontColor=#E2E8F0;fontStyle=1;",
+        vertex="1",
+        parent="1",
+    )
+    ET.SubElement(brand_cell, "mxGeometry", x="46", y="29", width="200", height="34", **{"as": "geometry"})
+
+    meta_id = str(cell_counter)
+    cell_counter += 1
+    meta_value = _drawio_text(
+        f"Page {page['page_number']} / {page_total}\n{page['page_name']}\nSenior Red Hat OpenShift architect"
+    )
+    meta_cell = ET.SubElement(
+        root,
+        "mxCell",
+        id=meta_id,
+        value=meta_value,
+        style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#111827;strokeWidth=1.5;fontSize=10;fontStyle=1;align=left;verticalAlign=middle;spacing=8;",
+        vertex="1",
+        parent="1",
+    )
+    ET.SubElement(meta_cell, "mxGeometry", x=str(max(280, int(page["total_width"]) - 326)), y="28", width="270", height="42", **{"as": "geometry"})
+    return cell_counter
+
+
+def _append_drawio_security_overlays(root: ET.Element, *, page: dict[str, Any], cell_counter: int) -> int:
+    zone_lookup = {str(zone.get("title", "")): zone for zone in page.get("zones", [])}
+    dmz_zone = zone_lookup.get("DMZ and edge ingress lane")
+    access_zone = zone_lookup.get("Firewall, bastion, and access lane")
+    core_zone = zone_lookup.get("Cluster core and service plane")
+    if dmz_zone:
+        dmz_id = str(cell_counter)
+        cell_counter += 1
+        dmz_cell = ET.SubElement(root, "mxCell", id=dmz_id, value=_drawio_text("DMZ"), style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF7ED;strokeColor=#EA580C;strokeWidth=2;fontStyle=1;fontSize=16;align=center;verticalAlign=middle;", vertex="1", parent="1")
+        ET.SubElement(dmz_cell, "mxGeometry", x=str(dmz_zone["x"] + 18), y=str(dmz_zone["y"] + 16), width="88", height="34", **{"as": "geometry"})
+    if access_zone:
+        for offset in range(3):
+            firewall_id = str(cell_counter)
+            cell_counter += 1
+            firewall_cell = ET.SubElement(root, "mxCell", id=firewall_id, value="", style="sketch=0;pointerEvents=1;shadow=0;dashed=0;html=1;strokeColor=none;labelPosition=center;verticalLabelPosition=bottom;verticalAlign=top;outlineConnect=0;align=center;shape=mxgraph.office.concepts.firewall;fillColor=#DA4026;", vertex="1", parent="1")
+            ET.SubElement(firewall_cell, "mxGeometry", x=str(access_zone["x"] + 210 + (offset * 310)), y=str(access_zone["y"] + 18), width="38", height="34", **{"as": "geometry"})
+        trust_id = str(cell_counter)
+        cell_counter += 1
+        trust_cell = ET.SubElement(root, "mxCell", id=trust_id, value=_drawio_text("Trust boundary\nFirewall / bastion / identity controls"), style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#DC2626;strokeWidth=2;fontSize=11;fontStyle=1;align=center;verticalAlign=middle;", vertex="1", parent="1")
+        ET.SubElement(trust_cell, "mxGeometry", x=str(access_zone["x"] + access_zone["width"] - 270), y=str(access_zone["y"] + 16), width="228", height="52", **{"as": "geometry"})
+    if core_zone:
+        protected_id = str(cell_counter)
+        cell_counter += 1
+        protected_cell = ET.SubElement(root, "mxCell", id=protected_id, value=_drawio_text("Protected cluster core"), style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DCFCE7;strokeColor=#16A34A;strokeWidth=2;fontSize=14;fontStyle=1;align=center;verticalAlign=middle;", vertex="1", parent="1")
+        ET.SubElement(protected_cell, "mxGeometry", x=str(core_zone["x"] + 18), y=str(core_zone["y"] + 16), width="196", height="32", **{"as": "geometry"})
+    return cell_counter
+
+
+def _append_drawio_rack_overlays(root: ET.Element, *, page: dict[str, Any], cell_counter: int) -> int:
+    rack_zones = [zone for zone in page.get("zones", []) if str(zone.get("title", "")).startswith("Rack ")]
+    for rack_zone in rack_zones:
+        shell_id = str(cell_counter)
+        cell_counter += 1
+        shell_cell = ET.SubElement(root, "mxCell", id=shell_id, value="", style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#111827;strokeWidth=1.6;", vertex="1", parent="1")
+        ET.SubElement(shell_cell, "mxGeometry", x=str(rack_zone["x"] + 22), y=str(rack_zone["y"] + 38), width=str(rack_zone["width"] - 44), height=str(rack_zone["height"] - 86), **{"as": "geometry"})
+
+        stripe_specs = [
+            ("VM", "#4A90E2", 78),
+            ("vSAN", "#16A34A", 54),
+            ("Hypervisor", "#166534", 34),
+            ("Bare metal", "#334155", 22),
+        ]
+        current_y = rack_zone["y"] + rack_zone["height"] - 22
+        for label, fill, height in reversed(stripe_specs):
+            current_y -= height
+            stripe_id = str(cell_counter)
+            cell_counter += 1
+            stripe_cell = ET.SubElement(root, "mxCell", id=stripe_id, value=_drawio_text(label), style=f"rounded=0;whiteSpace=wrap;html=1;fillColor={fill};strokeColor={fill};fontColor=#FFFFFF;fontSize=11;fontStyle=1;align=center;verticalAlign=middle;", vertex="1", parent="1")
+            ET.SubElement(stripe_cell, "mxGeometry", x=str(rack_zone["x"] + 22), y=str(current_y), width=str(rack_zone["width"] - 44), height=str(height), **{"as": "geometry"})
+
+        for slot in range(3):
+            server_id = str(cell_counter)
+            cell_counter += 1
+            server_cell = ET.SubElement(root, "mxCell", id=server_id, value="", style="image;aspect=fixed;perimeter=ellipsePerimeter;html=1;align=center;fontSize=12;verticalAlign=top;fontColor=#364149;shadow=0;dashed=0;image=img/lib/cumulus/server_bare_metal.svg;", vertex="1", parent="1")
+            ET.SubElement(server_cell, "mxGeometry", x=str(rack_zone["x"] + 36 + (slot * ((rack_zone["width"] - 120) / 2))), y=str(rack_zone["y"] + rack_zone["height"] - 44), width="78", height="18", **{"as": "geometry"})
+
+    vlan_zones = [zone for zone in page.get("zones", []) if str(zone.get("title", "")).endswith("VLAN")]
+    for vlan_zone in vlan_zones:
+        switch_fill = "#0284C7" if "User" in str(vlan_zone.get("title", "")) else "#16A34A"
+        switch_label = "User VLAN switch fabric" if "User" in str(vlan_zone.get("title", "")) else "Management VLAN switch fabric"
+        switch_id = str(cell_counter)
+        cell_counter += 1
+        switch_cell = ET.SubElement(root, "mxCell", id=switch_id, value="", style="fontColor=#0066CC;verticalAlign=top;verticalLabelPosition=bottom;labelPosition=center;align=center;html=1;outlineConnect=0;fillColor=#CCCCCC;strokeColor=#6881B3;gradientColor=none;gradientDirection=north;strokeWidth=2;shape=mxgraph.networks.switch;", vertex="1", parent="1")
+        ET.SubElement(switch_cell, "mxGeometry", x=str(vlan_zone["x"] + 22), y=str(vlan_zone["y"] + 18), width="160", height="24", **{"as": "geometry"})
+        switch_text_id = str(cell_counter)
+        cell_counter += 1
+        switch_text = ET.SubElement(root, "mxCell", id=switch_text_id, value=_drawio_text(switch_label), style=f"text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=11;fontStyle=1;fontColor={switch_fill};", vertex="1", parent="1")
+        ET.SubElement(switch_text, "mxGeometry", x=str(vlan_zone["x"] + 196), y=str(vlan_zone["y"] + 17), width="220", height="22", **{"as": "geometry"})
+    return cell_counter
+
+
+def _append_drawio_legend(root: ET.Element, *, page: dict[str, Any], cell_counter: int) -> int:
+    legend_width = 256
+    legend_height = 150 if page.get("layout_mode") == "infra-topology" else 132
+    legend_x = max(48, int(page["total_width"]) - legend_width - 34)
+    legend_y = max(86, int(page["total_height"]) - legend_height - 32)
+
+    legend_box_id = str(cell_counter)
+    cell_counter += 1
+    legend_box = ET.SubElement(root, "mxCell", id=legend_box_id, value="", style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#111827;strokeWidth=1.6;arcSize=16;", vertex="1", parent="1")
+    ET.SubElement(legend_box, "mxGeometry", x=str(legend_x), y=str(legend_y), width=str(legend_width), height=str(legend_height), **{"as": "geometry"})
+
+    legend_title_id = str(cell_counter)
+    cell_counter += 1
+    legend_title = ET.SubElement(root, "mxCell", id=legend_title_id, value=_drawio_text("Legend"), style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontSize=13;fontStyle=1;", vertex="1", parent="1")
+    ET.SubElement(legend_title, "mxGeometry", x=str(legend_x + 88), y=str(legend_y + 8), width="80", height="20", **{"as": "geometry"})
+
+    rows: list[tuple[str, str, str]] = [("swatch", "#2563EB", "OpenShift domain grouping")]
+    if page.get("layout_mode") == "infra-topology":
+        rows.extend([
+            ("line-magenta", "#FF33FF", "User VLAN path"),
+            ("line-green", "#16A34A", "Management VLAN / protected path"),
+            ("firewall", "#DA4026", "Firewall / DMZ control"),
+            ("pill", "#111827", "Rack / cluster review frame"),
+        ])
+    else:
+        rows.extend([
+            ("firewall", "#DA4026", "Firewall / bastion boundary"),
+            ("line-green", "#16A34A", "Protected cluster plane"),
+            ("pill", "#111827", "Page frame and review block"),
+        ])
+
+    current_y = legend_y + 34
+    for marker, color, label in rows[:5]:
+        if marker == "swatch":
+            marker_id = str(cell_counter)
+            cell_counter += 1
+            marker_cell = ET.SubElement(root, "mxCell", id=marker_id, value="", style=f"rounded=1;whiteSpace=wrap;html=1;fillColor=#DBEAFE;strokeColor={color};strokeWidth=2;", vertex="1", parent="1")
+            ET.SubElement(marker_cell, "mxGeometry", x=str(legend_x + 16), y=str(current_y), width="24", height="14", **{"as": "geometry"})
+        elif marker.startswith("line"):
+            marker_id = str(cell_counter)
+            cell_counter += 1
+            marker_cell = ET.SubElement(root, "mxCell", id=marker_id, value="", style=f"shape=line;strokeColor={color};strokeWidth=3;", vertex="1", parent="1")
+            ET.SubElement(marker_cell, "mxGeometry", x=str(legend_x + 14), y=str(current_y + 7), width="28", height="1", **{"as": "geometry"})
+        elif marker == "firewall":
+            marker_id = str(cell_counter)
+            cell_counter += 1
+            marker_cell = ET.SubElement(root, "mxCell", id=marker_id, value="", style="sketch=0;pointerEvents=1;shadow=0;dashed=0;html=1;strokeColor=none;labelPosition=center;verticalLabelPosition=bottom;verticalAlign=top;outlineConnect=0;align=center;shape=mxgraph.office.concepts.firewall;fillColor=#DA4026;", vertex="1", parent="1")
+            ET.SubElement(marker_cell, "mxGeometry", x=str(legend_x + 15), y=str(current_y - 2), width="24", height="22", **{"as": "geometry"})
+        else:
+            marker_id = str(cell_counter)
+            cell_counter += 1
+            marker_cell = ET.SubElement(root, "mxCell", id=marker_id, value="", style=f"rounded=1;whiteSpace=wrap;html=1;fillColor={color};strokeColor={color};arcSize=18;", vertex="1", parent="1")
+            ET.SubElement(marker_cell, "mxGeometry", x=str(legend_x + 15), y=str(current_y), width="26", height="12", **{"as": "geometry"})
+
+        label_id = str(cell_counter)
+        cell_counter += 1
+        label_cell = ET.SubElement(root, "mxCell", id=label_id, value=_drawio_text(label), style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=11;", vertex="1", parent="1")
+        ET.SubElement(label_cell, "mxGeometry", x=str(legend_x + 52), y=str(current_y - 2), width=str(legend_width - 66), height="20", **{"as": "geometry"})
+        current_y += 24
+    return cell_counter
+
+
 def _build_drawio_xml(title: str, diagram_pages: list[dict[str, Any]]) -> str:
     mxfile = ET.Element("mxfile", host="app.diagrams.net", modified=datetime.now(timezone.utc).isoformat(), agent="openshift-sre-architect", version="24.7.17")
+    page_total = len(diagram_pages)
     for page in diagram_pages:
         diagram = ET.SubElement(mxfile, "diagram", id=str(page["page_id"]), name=str(page["page_name"] or title))
         graph_model = ET.SubElement(
@@ -1984,11 +2177,12 @@ def _build_drawio_xml(title: str, diagram_pages: list[dict[str, Any]]) -> str:
         ET.SubElement(root, "mxCell", id="1", parent="0")
 
         cell_counter = 2
+        cell_counter = _append_drawio_page_frame(root, page=page, cell_counter=cell_counter, page_total=page_total)
         title_cell = ET.SubElement(root, "mxCell", id=str(cell_counter), value=_drawio_text(page["title"]), style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=20;fontStyle=1;", vertex="1", parent="1")
-        ET.SubElement(title_cell, "mxGeometry", x="40", y="12", width=str(max(600, int(page["total_width"]) - 80)), height="26", **{"as": "geometry"})
+        ET.SubElement(title_cell, "mxGeometry", x="46", y="30", width=str(max(520, int(page["total_width"]) - 420)), height="26", **{"as": "geometry"})
         cell_counter += 1
         summary_cell = ET.SubElement(root, "mxCell", id=str(cell_counter), value=_drawio_text(page["summary"]), style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=11;fontColor=#475569;", vertex="1", parent="1")
-        ET.SubElement(summary_cell, "mxGeometry", x="40", y="36", width=str(max(600, int(page["total_width"]) - 80)), height="20", **{"as": "geometry"})
+        ET.SubElement(summary_cell, "mxGeometry", x="46", y="56", width=str(max(520, int(page["total_width"]) - 420)), height="18", **{"as": "geometry"})
         cell_counter += 1
 
         for zone in page.get("zones", []):
@@ -2020,6 +2214,11 @@ def _build_drawio_xml(title: str, diagram_pages: list[dict[str, Any]]) -> str:
                 **{"as": "geometry"},
             )
             cell_counter += 1
+
+        if page.get("layout_mode") == "security-lanes":
+            cell_counter = _append_drawio_security_overlays(root, page=page, cell_counter=cell_counter)
+        if page.get("layout_mode") == "infra-topology":
+            cell_counter = _append_drawio_rack_overlays(root, page=page, cell_counter=cell_counter)
 
         node_ids: dict[str, str] = {}
         for group, box in page["group_boxes"].items():
@@ -2061,6 +2260,26 @@ def _build_drawio_xml(title: str, diagram_pages: list[dict[str, Any]]) -> str:
                 height=str(icon_profile["height"]),
                 **{"as": "geometry"},
             )
+            badge_id = str(cell_counter)
+            cell_counter += 1
+            badge_cell = ET.SubElement(
+                root,
+                "mxCell",
+                id=badge_id,
+                value=_drawio_text(GROUP_ICON_LABELS.get(node.group, node.group[:3].upper())),
+                style=f"rounded=1;whiteSpace=wrap;html=1;fillColor={style['stroke']};strokeColor={style['stroke']};fontColor=#FFFFFF;fontStyle=1;fontSize=9;align=center;verticalAlign=middle;arcSize=12;",
+                vertex="1",
+                parent="1",
+            )
+            ET.SubElement(
+                badge_cell,
+                "mxGeometry",
+                x=str(position["x"] + position["width"] - 50),
+                y=str(position["y"] + 8),
+                width="38",
+                height="16",
+                **{"as": "geometry"},
+            )
 
         for edge in page["edges"]:
             source_id = node_ids.get(edge.source)
@@ -2071,6 +2290,9 @@ def _build_drawio_xml(title: str, diagram_pages: list[dict[str, Any]]) -> str:
             cell_counter += 1
             edge_cell = ET.SubElement(root, "mxCell", id=edge_id, value=_drawio_text(edge.label), style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#64748B;fontSize=11;endArrow=block;endFill=1;", edge="1", parent="1", source=source_id, target=target_id)
             ET.SubElement(edge_cell, "mxGeometry", relative="1", **{"as": "geometry"})
+
+            if page.get("layout_mode") in {"security-lanes", "infra-topology", "service-bands"}:
+                cell_counter = _append_drawio_legend(root, page=page, cell_counter=cell_counter)
 
     return ET.tostring(mxfile, encoding="unicode")
 

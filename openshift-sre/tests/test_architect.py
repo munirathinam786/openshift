@@ -50,6 +50,11 @@ def test_generate_architecture_diagram_returns_4_20_grounded_multi_page_pack():
     assert "DMZ and edge ingress lane" in payload["artifacts"]["drawio_xml"]
     assert "ODF / OADP / data protection band" in payload["artifacts"]["drawio_xml"]
     assert "Architecture explanation and design narrative" in payload["artifacts"]["drawio_xml"]
+    assert "OPENSHIFT 4.20+" in payload["artifacts"]["drawio_xml"]
+    assert "Senior Red Hat OpenShift architect" in payload["artifacts"]["drawio_xml"]
+    assert "Legend" in payload["artifacts"]["drawio_xml"]
+    assert "Trust boundary" in payload["artifacts"]["drawio_xml"]
+    assert "Management VLAN switch fabric" in payload["artifacts"]["drawio_xml"]
     assert (
         "shape=mxgraph.kubernetes.icon;prIcon=pod" in payload["artifacts"]["drawio_xml"]
         or "mxgraph.networks.switch" in payload["artifacts"]["drawio_xml"]
