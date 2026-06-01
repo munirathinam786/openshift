@@ -141,3 +141,48 @@ def test_generate_architecture_diagram_preserves_exact_reference_drawio_when_req
     assert payload["rendering"]["diagram_pages"][0]["layout_mode"] == "reference-exact"
     assert payload["artifacts"]["page_previews"][0]["page_name"] == "Page-1"
     assert payload["artifacts"]["page_previews"][0]["svg"]
+
+
+def test_generate_architecture_diagram_uses_reference_as_holistic_quality_floor_when_not_exact():
+    reference_drawio = (
+        '<mxfile host="app.diagrams.net" version="29.0.3">'
+        '<diagram id="page-1" name="Page-1">'
+        '<mxGraphModel dx="1106" dy="812" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">'
+        '<root>'
+        '<mxCell id="0" />'
+        '<mxCell id="1" parent="0" />'
+        '<mxCell id="2" value="Reference holistic baseline" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">'
+        '<mxGeometry x="160" y="120" width="320" height="80" as="geometry" />'
+        '</mxCell>'
+        '</root>'
+        '</mxGraphModel>'
+        '</diagram>'
+        '</mxfile>'
+    )
+
+    payload = generate_architecture_diagram(
+        prompt=(
+            "Design an on-prem bare-metal OpenShift architecture with management VLAN, user VLAN, paired firewalls, "
+            "console port access, Bond0 over ETH0 and ETH1, ODF Rook Ceph storage, and rack-aligned control plane and workers."
+        ),
+        openshift_state={
+            "summary": "Reference-guided bare-metal review run.",
+            "resource_counts": {"managed_clusters": 1, "ingress_controllers": 2, "persistent_volume_claims": 18},
+            "raw": {},
+        },
+        reference_diagrams=[
+            {
+                "filename": "ocp.drawio",
+                "drawio_xml": reference_drawio,
+                "mode": "reference",
+            }
+        ],
+        knowledge_context={"enabled": True, "used": False, "items": []},
+    )
+
+    assert payload["reference_diagrams_used"] == 1
+    assert payload["rendering"]["diagram_pages"][0]["layout_mode"] == "reference-guided-holistic"
+    assert payload["rendering"]["diagram_pages"][0]["page_name"] == "Holistic OpenShift architecture"
+    assert payload["artifacts"]["page_previews"][0]["page_name"] == "Holistic OpenShift architecture"
+    assert "Reference holistic baseline" in payload["artifacts"]["drawio_xml"]
+    assert "Architecture explanation and design narrative" in payload["artifacts"]["drawio_xml"]

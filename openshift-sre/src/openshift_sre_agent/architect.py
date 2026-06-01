@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import base64
+import copy
 from dataclasses import asdict, dataclass
 from datetime import datetime, timezone
 from html import escape
@@ -2520,6 +2521,39 @@ def _extract_exact_reference_diagram(reference_diagrams: list[dict[str, Any]] | 
     return None
 
 
+def _extract_reference_diagram(reference_diagrams: list[dict[str, Any]] | None) -> dict[str, Any] | None:
+    for item in reference_diagrams or []:
+        if not isinstance(item, dict):
+            continue
+        for key in ("drawio_xml", "xml", "content", "text"):
+            content = item.get(key)
+            if isinstance(content, str) and "<mxfile" in content:
+                return {
+                    "name": item.get("filename") or item.get("name") or "reference.drawio",
+                    "drawio_xml": content,
+                }
+    return None
+
+
+def _merge_reference_first_page(reference_drawio_xml: str, generated_drawio_xml: str) -> str:
+    try:
+        reference_root = ET.fromstring(reference_drawio_xml)
+        generated_root = ET.fromstring(generated_drawio_xml)
+    except ET.ParseError:
+        return generated_drawio_xml
+
+    reference_diagrams = reference_root.findall("diagram")
+    generated_diagrams = generated_root.findall("diagram")
+    if not reference_diagrams:
+        return generated_drawio_xml
+
+    merged_root = ET.Element("mxfile", attrib=generated_root.attrib)
+    merged_root.append(copy.deepcopy(reference_diagrams[0]))
+    for diagram in generated_diagrams[1:]:
+        merged_root.append(copy.deepcopy(diagram))
+    return ET.tostring(merged_root, encoding="unicode")
+
+
 def _reference_preview_svg(page_name: str, source_name: str) -> str:
     safe_page_name = escape(page_name or "Reference diagram")
     safe_source_name = escape(source_name or "reference.drawio")
@@ -2780,6 +2814,8 @@ def generate_architecture_diagram(*, prompt: str, openshift_state: dict[str, Any
     title = f"{planning.pattern_label} architecture"
     summary = live_summaries[0] if live_summaries else planning.reasoning_summary
     exact_reference = _extract_exact_reference_diagram(reference_diagrams)
+    reference_baseline = None if exact_reference else _extract_reference_diagram(reference_diagrams)
+    reference_artifacts: dict[str, Any] | None = None
     if exact_reference:
         drawio_xml = exact_reference["drawio_xml"]
         reference_artifacts = _build_reference_drawio_artifacts(drawio_xml, exact_reference["name"])
@@ -2851,6 +2887,44 @@ def generate_architecture_diagram(*, prompt: str, openshift_state: dict[str, Any
             for page in diagram_pages
         ]
 
+        if reference_baseline and page_previews and rendering_pages:
+            reference_artifacts = _build_reference_drawio_artifacts(reference_baseline["drawio_xml"], reference_baseline["name"])
+            drawio_xml = _merge_reference_first_page(reference_baseline["drawio_xml"], drawio_xml)
+            reference_preview = dict((reference_artifacts.get("page_previews") or [])[0]) if (reference_artifacts.get("page_previews") or []) else {
+                "page_number": 1,
+                "page_name": "Holistic OpenShift architecture",
+                "layout_mode": "reference-guided-holistic",
+                "title": title,
+                "summary": "Reference-guided holistic view preserving the uploaded draw.io quality floor.",
+                "svg": reference_artifacts.get("svg_preview", svg_preview),
+                "png_base64": reference_artifacts.get("png_base64"),
+            }
+            reference_preview.update(
+                {
+                    "page_number": 1,
+                    "page_name": "Holistic OpenShift architecture",
+                    "layout_mode": "reference-guided-holistic",
+                    "title": title,
+                    "summary": "Reference-guided holistic view that preserves the uploaded draw.io quality floor while the rest of the pack adapts to the latest requirements.",
+                }
+            )
+            page_previews = [reference_preview, *page_previews[1:]]
+            rendering_pages = [
+                {
+                    "page_number": 1,
+                    "page_name": "Holistic OpenShift architecture",
+                    "layout_mode": "reference-guided-holistic",
+                    "title": title,
+                    "summary": "Reference-guided holistic view that preserves the uploaded draw.io quality floor while the rest of the pack adapts to the latest requirements.",
+                    "included_groups": rendering_pages[0].get("included_groups", []),
+                    "node_count": rendering_pages[0].get("node_count", 0),
+                    "edge_count": rendering_pages[0].get("edge_count", 0),
+                },
+                *rendering_pages[1:],
+            ]
+            first_page = rendering_pages[0]
+            svg_preview = reference_preview.get("svg") or svg_preview
+
     svg_bytes = _export_with_drawio(drawio_xml, "svg", page_index=0)
     png_bytes = _export_with_drawio(drawio_xml, "png", page_index=0)
     if png_bytes is None:
@@ -2861,7 +2935,7 @@ def generate_architecture_diagram(*, prompt: str, openshift_state: dict[str, Any
         "lld": _document_sections("lld", title, planning, nodes, edges, prompt, openshift_state, knowledge_context, assessment_scope_id=assessment_scope_id),
         "assessment": _document_sections("assessment", title, planning, nodes, edges, prompt, openshift_state, knowledge_context, assessment_scope_id=assessment_scope_id),
     }
-    score = min(100, 60 + (len(nodes) * 3) + (len(rendering_pages) * 2) + (6 if openshift_state else 0) + (4 if knowledge_context and knowledge_context.get("used") else 0) + (8 if exact_reference else 0))
+    score = min(100, 60 + (len(nodes) * 3) + (len(rendering_pages) * 2) + (6 if openshift_state else 0) + (4 if knowledge_context and knowledge_context.get("used") else 0) + (8 if exact_reference else 0) + (5 if reference_baseline else 0))
     quality_scorecard = {
         "overall_score": score,
         "max_score": 100,
@@ -2891,11 +2965,11 @@ def generate_architecture_diagram(*, prompt: str, openshift_state: dict[str, Any
         "artifacts": {
             "drawio_xml": drawio_xml,
             "svg_preview": svg_preview,
-            "svg": reference_artifacts["svg"] if exact_reference else (svg_bytes.decode("utf-8", errors="ignore") if svg_bytes else svg_preview),
+            "svg": reference_artifacts["svg"] if (exact_reference and reference_artifacts) else (svg_bytes.decode("utf-8", errors="ignore") if svg_bytes else svg_preview),
             "png_base64": base64.b64encode(png_bytes).decode("ascii") if png_bytes else None,
             "preview_page_name": first_page["page_name"],
             "page_previews": page_previews,
-            "filenames": reference_artifacts["filenames"] if exact_reference else {
+            "filenames": reference_artifacts["filenames"] if (exact_reference and reference_artifacts) else {
                 "drawio": f"{_slugify(title)}.drawio",
                 "svg": f"{_slugify(title)}.svg",
                 "png": f"{_slugify(title)}.png",

@@ -711,8 +711,10 @@
     const generateDiagram = async () => {
       setBusy(true);
       setStatus({
-        message: preserveReferenceExact && referenceDiagramFiles.length
-          ? 'Generating the architecture pack while preserving the uploaded draw.io reference exactly…'
+        message: referenceDiagramFiles.length
+          ? (preserveReferenceExact
+            ? 'Generating the architecture pack while preserving the uploaded draw.io reference exactly…'
+            : 'Generating the architecture pack using the uploaded draw.io as the holistic quality floor while adapting the rest to the latest requirements…')
           : 'Generating the shared OpenShift architecture pack plus separate HLD and LLD documents…',
         tone: ''
       });
@@ -741,8 +743,10 @@
         setActiveDiagramPage(0);
         setLiveState(payload.openshift_state || liveState);
         setStatus({
-          message: preserveReferenceExact && referenceDiagrams.length
-            ? 'Architecture pack generated successfully using the uploaded draw.io diagram unchanged.'
+          message: referenceDiagrams.length
+            ? (preserveReferenceExact
+              ? 'Architecture pack generated successfully using the uploaded draw.io diagram unchanged.'
+              : 'Architecture pack generated successfully with the uploaded draw.io as the holistic baseline.')
             : 'Architecture pack generated successfully.',
           tone: 'ok'
         });
@@ -964,8 +968,8 @@
             h('label', { className: 'agent-console__label' }, [h('span', null, 'Preserve uploaded reference exactly'), h('input', { type: 'checkbox', checked: preserveReferenceExact, onChange: (event) => setPreserveReferenceExact(event.target.checked) })]),
             h('label', { className: 'agent-console__label' }, ['Research links (one per line)', h('textarea', { className: 'agent-console__textarea', rows: 4, value: researchLinks, onChange: (event) => setResearchLinks(event.target.value), placeholder: 'https://docs.redhat.com/...\nhttps://internal/wiki/openshift-patterns' })]),
             h('p', { className: 'architect-console__helper' }, referenceDiagramFiles.length
-              ? `${referenceDiagramFiles.length} reference file(s) selected.${preserveReferenceExact ? ' The uploaded draw.io XML will be used unchanged.' : ''}`
-              : 'Upload a draw.io reference if you want the architect lane to preserve an exact diagram instead of regenerating it. Paste Red Hat or internal URLs here if you want the architect lane to ingest them before generation.'),
+              ? `${referenceDiagramFiles.length} reference file(s) selected.${preserveReferenceExact ? ' The uploaded draw.io XML will be used unchanged.' : ' The uploaded draw.io will be used as the holistic quality floor while the rest of the pack adapts to changing requirements.'}`
+              : 'Upload a draw.io reference if you want the architect lane to either preserve it exactly or use it as the holistic quality floor for generated packs. Paste Red Hat or internal URLs here if you want the architect lane to ingest them before generation.'),
             h('p', { className: 'architect-console__helper' }, 'Paste Red Hat or internal URLs here if you want the architect lane to ingest them before generation. The workspace can ground the design on those sources whenever the pgvector knowledge store is enabled.')
           ]),
           h('article', { className: 'architect-console__card' }, [
