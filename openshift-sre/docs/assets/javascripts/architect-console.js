@@ -98,6 +98,21 @@
   const escapeHtmlValue = (value) => String(value || '').replace(/[<&>]/g, (char) => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;' }[char]));
   const diagramFilename = (pageName, extension) => `${slugify(pageName || `diagram-page-${extension}`)}.${extension}`;
 
+  async function buildReferenceDiagramPayload(files, { preserveExact = false } = {}) {
+    const selectedFiles = Array.from(files || []).slice(0, 4);
+    if (!selectedFiles.length) {
+      return [];
+    }
+    return Promise.all(selectedFiles.map(async (file) => ({
+      filename: file.name,
+      mime_type: file.type || 'application/xml',
+      drawio_xml: await file.text(),
+      preserve_exact: preserveExact,
+      use_as_canonical: preserveExact,
+      mode: preserveExact ? 'exact' : 'reference',
+    })));
+  }
+
   async function svgMarkupToPngDataUrl(svgMarkup) {
     if (!svgMarkup) {
       throw new Error('No SVG markup is available for this preview page.');
@@ -374,6 +389,8 @@
     const [knowledgeQuery, setKnowledgeQuery] = useState('');
     const [knowledgeSearch, setKnowledgeSearch] = useState(null);
     const [knowledgeFiles, setKnowledgeFiles] = useState([]);
+    const [referenceDiagramFiles, setReferenceDiagramFiles] = useState([]);
+    const [preserveReferenceExact, setPreserveReferenceExact] = useState(false);
     const [status, setStatus] = useState({ message: 'Load a template, add your architecture brief, and generate an OpenShift design pack.', tone: '' });
     const [knowledgeMessage, setKnowledgeMessage] = useState({ message: '', tone: '' });
     const [busy, setBusy] = useState(false);
@@ -693,8 +710,17 @@
 
     const generateDiagram = async () => {
       setBusy(true);
-      setStatus({ message: 'Generating the shared OpenShift architecture pack plus separate HLD and LLD documents…', tone: '' });
+      setStatus({
+        message: preserveReferenceExact && referenceDiagramFiles.length
+          ? 'Generating the architecture pack while preserving the uploaded draw.io reference exactly…'
+          : 'Generating the shared OpenShift architecture pack plus separate HLD and LLD documents…',
+        tone: ''
+      });
       try {
+        const referenceDiagrams = await buildReferenceDiagramPayload(referenceDiagramFiles, { preserveExact: preserveReferenceExact });
+        if (preserveReferenceExact && !referenceDiagrams.length) {
+          throw new Error('Upload at least one draw.io reference file before enabling exact preservation.');
+        }
         const payload = await fetchJson('/architect/diagram', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -706,6 +732,7 @@
             ollama_requirement: ollamaRequirement,
             openshift_state: liveState,
             research_links: parseLines(researchLinks),
+            reference_diagrams: referenceDiagrams,
           })
         });
         setDiagramResult(payload);
@@ -713,7 +740,12 @@
         setActiveDocument('hld');
         setActiveDiagramPage(0);
         setLiveState(payload.openshift_state || liveState);
-        setStatus({ message: 'Architecture pack generated successfully.', tone: 'ok' });
+        setStatus({
+          message: preserveReferenceExact && referenceDiagrams.length
+            ? 'Architecture pack generated successfully using the uploaded draw.io diagram unchanged.'
+            : 'Architecture pack generated successfully.',
+          tone: 'ok'
+        });
         refreshKnowledge();
       } catch (error) {
         setStatus({ message: error instanceof Error ? error.message : 'Unable to generate the architecture pack.', tone: 'error' });
@@ -910,6 +942,7 @@
               h('li', { key: 'state' }, includeLiveState ? 'Live OpenShift state grounding enabled.' : 'Prompt-only generation enabled.'),
               h('li', { key: 'knowledge' }, includeKnowledge ? 'Trained knowledge will be used when available.' : 'Knowledge retrieval disabled for this run.'),
               h('li', { key: 'research' }, parseLines(researchLinks).length ? `${parseLines(researchLinks).length} research link(s) queued for ingestion.` : 'No research links queued.'),
+              h('li', { key: 'reference' }, referenceDiagramFiles.length ? `${referenceDiagramFiles.length} reference diagram(s) queued${preserveReferenceExact ? ' for exact preservation' : ''}.` : 'No reference diagram queued.'),
               h('li', { key: 'scope' }, `Assessment scope: ${assessmentScope}`)
             ])
           ])
@@ -927,7 +960,12 @@
             h('label', { className: 'agent-console__label' }, ['Template', h('select', { className: 'agent-console__input', value: templateId, onChange: (event) => setTemplateId(event.target.value) }, (catalog.templates || []).map((item) => h('option', { key: item.id, value: item.id }, `${item.label} · ${item.category}`)))]),
             h('div', { className: 'architect-console__template-grid' }, (catalog.templates || []).slice(0, 6).map((item) => h('article', { className: `architect-console__template-card ${item.id === templateId ? 'is-active' : ''}`, key: item.id }, [h('strong', null, item.label), h('p', { className: 'architect-console__meta' }, item.description), h('span', { className: 'architect-console__pill' }, item.mode || 'prompt-only')]))),
             h('label', { className: 'agent-console__label' }, ['Architecture brief', h('textarea', { className: 'agent-console__textarea', rows: 10, value: prompt, onChange: (event) => { setPrompt(event.target.value); setSuggestedTemplateApplied(true); }, onKeyDown: (event) => { if ((event.metaKey || event.ctrlKey) && event.key === 'Enter') { event.preventDefault(); generateDiagram(); } }, placeholder: 'Describe the OpenShift architecture you want, including platform pattern, ingress, security, GitOps, DR, migration, or application concerns.' })]),
+            h('label', { className: 'agent-console__label' }, ['Reference draw.io file', h('input', { className: 'agent-console__input', type: 'file', accept: '.drawio,.xml', multiple: true, onChange: (event) => setReferenceDiagramFiles(Array.from(event.target.files || [])) })]),
+            h('label', { className: 'agent-console__label' }, [h('span', null, 'Preserve uploaded reference exactly'), h('input', { type: 'checkbox', checked: preserveReferenceExact, onChange: (event) => setPreserveReferenceExact(event.target.checked) })]),
             h('label', { className: 'agent-console__label' }, ['Research links (one per line)', h('textarea', { className: 'agent-console__textarea', rows: 4, value: researchLinks, onChange: (event) => setResearchLinks(event.target.value), placeholder: 'https://docs.redhat.com/...\nhttps://internal/wiki/openshift-patterns' })]),
+            h('p', { className: 'architect-console__helper' }, referenceDiagramFiles.length
+              ? `${referenceDiagramFiles.length} reference file(s) selected.${preserveReferenceExact ? ' The uploaded draw.io XML will be used unchanged.' : ''}`
+              : 'Upload a draw.io reference if you want the architect lane to preserve an exact diagram instead of regenerating it. Paste Red Hat or internal URLs here if you want the architect lane to ingest them before generation.'),
             h('p', { className: 'architect-console__helper' }, 'Paste Red Hat or internal URLs here if you want the architect lane to ingest them before generation. The workspace can ground the design on those sources whenever the pgvector knowledge store is enabled.')
           ]),
           h('article', { className: 'architect-console__card' }, [

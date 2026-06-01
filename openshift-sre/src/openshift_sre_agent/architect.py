@@ -2504,6 +2504,114 @@ def _png_from_svg(svg_markup: str) -> bytes | None:
         return None
 
 
+def _extract_exact_reference_diagram(reference_diagrams: list[dict[str, Any]] | None) -> dict[str, Any] | None:
+    for item in reference_diagrams or []:
+        if not isinstance(item, dict):
+            continue
+        if not (item.get("use_as_canonical") or item.get("preserve_exact") or str(item.get("mode") or "").lower() == "exact"):
+            continue
+        for key in ("drawio_xml", "xml", "content", "text"):
+            content = item.get(key)
+            if isinstance(content, str) and "<mxfile" in content:
+                return {
+                    "name": item.get("filename") or item.get("name") or "reference.drawio",
+                    "drawio_xml": content,
+                }
+    return None
+
+
+def _reference_preview_svg(page_name: str, source_name: str) -> str:
+    safe_page_name = escape(page_name or "Reference diagram")
+    safe_source_name = escape(source_name or "reference.drawio")
+    return (
+        "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"1600\" height=\"900\" viewBox=\"0 0 1600 900\">"
+        "<rect width=\"1600\" height=\"900\" fill=\"#f8fafc\" />"
+        "<rect x=\"84\" y=\"84\" width=\"1432\" height=\"732\" rx=\"24\" fill=\"#ffffff\" stroke=\"#0f172a\" stroke-width=\"4\" />"
+        f"<text x=\"120\" y=\"180\" fill=\"#0f172a\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"36\" font-weight=\"700\">{safe_page_name}</text>"
+        f"<text x=\"120\" y=\"236\" fill=\"#334155\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"24\">Exact reference diagram preserved from {safe_source_name}.</text>"
+        "<text x=\"120\" y=\"304\" fill=\"#64748b\" font-family=\"Arial, Helvetica, sans-serif\" font-size=\"22\">Preview export is unavailable in this runtime, but the draw.io XML artifact remains unchanged.</text>"
+        "</svg>"
+    )
+
+
+def _reference_diagram_pages(drawio_xml: str, source_name: str) -> list[dict[str, Any]]:
+    try:
+        root = ET.fromstring(drawio_xml)
+        diagrams = root.findall("diagram")
+    except ET.ParseError:
+        diagrams = []
+
+    pages = [
+        {
+            "page_number": index + 1,
+            "page_name": diagram.attrib.get("name") or f"Reference page {index + 1}",
+            "layout_mode": "reference-exact",
+            "title": diagram.attrib.get("name") or f"Reference page {index + 1}",
+            "summary": f"Exact reference diagram preserved from {source_name}.",
+            "included_groups": ["reference"],
+            "node_count": 0,
+            "edge_count": 0,
+        }
+        for index, diagram in enumerate(diagrams)
+    ]
+    return pages or [
+        {
+            "page_number": 1,
+            "page_name": Path(source_name or "reference.drawio").stem or "Reference page 1",
+            "layout_mode": "reference-exact",
+            "title": Path(source_name or "reference.drawio").stem or "Reference page 1",
+            "summary": f"Exact reference diagram preserved from {source_name}.",
+            "included_groups": ["reference"],
+            "node_count": 0,
+            "edge_count": 0,
+        }
+    ]
+
+
+def _build_reference_drawio_artifacts(drawio_xml: str, source_name: str) -> dict[str, Any]:
+    pages = _reference_diagram_pages(drawio_xml, source_name)
+    page_previews: list[dict[str, Any]] = []
+    for index, page in enumerate(pages):
+        drawio_page_svg = _export_with_drawio(drawio_xml, "svg", page_index=index)
+        preview_svg = drawio_page_svg.decode("utf-8", errors="ignore") if drawio_page_svg else _reference_preview_svg(page["page_name"], source_name)
+        page_png = _export_with_drawio(drawio_xml, "png", page_index=index)
+        if page_png is None:
+            page_png = _png_from_svg(preview_svg)
+        page_previews.append(
+            {
+                "page_number": page["page_number"],
+                "page_name": page["page_name"],
+                "layout_mode": page["layout_mode"],
+                "title": page["title"],
+                "summary": page["summary"],
+                "svg": preview_svg,
+                "png_base64": base64.b64encode(page_png).decode("ascii") if page_png else None,
+            }
+        )
+
+    svg_bytes = _export_with_drawio(drawio_xml, "svg", page_index=0)
+    png_bytes = _export_with_drawio(drawio_xml, "png", page_index=0)
+    svg_preview = page_previews[0]["svg"] if page_previews else _reference_preview_svg("Reference page 1", source_name)
+    if png_bytes is None:
+        png_bytes = _png_from_svg(svg_preview)
+
+    filename = Path(source_name or "reference.drawio").name or "reference.drawio"
+    stem = Path(filename).stem or "reference-diagram"
+    return {
+        "pages": pages,
+        "svg_preview": svg_preview,
+        "svg": svg_bytes.decode("utf-8", errors="ignore") if svg_bytes else svg_preview,
+        "png_base64": base64.b64encode(png_bytes).decode("ascii") if png_bytes else None,
+        "page_previews": page_previews,
+        "preview_page_name": pages[0]["page_name"],
+        "filenames": {
+            "drawio": filename,
+            "svg": f"{_slugify(stem)}.svg",
+            "png": f"{_slugify(stem)}.png",
+        },
+    }
+
+
 def _assessment_dimensions(nodes: list[DiagramNode], prompt: str, openshift_state: dict[str, Any] | None) -> list[dict[str, Any]]:
     labels = " ".join([node.label.lower() + " " + node.detail.lower() for node in nodes]) + " " + (prompt or "").lower()
     counts = (openshift_state or {}).get("resource_counts") or {}
@@ -2671,55 +2779,78 @@ def generate_architecture_diagram(*, prompt: str, openshift_state: dict[str, Any
     planning, nodes, edges, live_summaries = _build_nodes_and_edges(prompt, openshift_state)
     title = f"{planning.pattern_label} architecture"
     summary = live_summaries[0] if live_summaries else planning.reasoning_summary
-    diagram_pages = _diagram_page_specs(
-        title=title,
-        planning=planning,
-        nodes=nodes,
-        edges=edges,
-        openshift_state=openshift_state,
-    )
-    first_page = diagram_pages[0]
-    drawio_xml = _build_drawio_xml(title, diagram_pages)
-    fallback_page_previews = [
-        {
-            "page_number": page["page_number"],
-            "page_name": page["page_name"],
-            "layout_mode": page["layout_mode"],
-            "title": page["title"],
-            "summary": page["summary"],
-            "svg": _render_svg(
-                page["title"],
-                page["summary"],
-                page["nodes"],
-                page["edges"],
-                page["positions"],
-                page["group_boxes"],
-                page.get("zones", []),
-                page["total_width"],
-                page["total_height"],
-            ),
-        }
-        for page in diagram_pages
-    ]
-    page_previews: list[dict[str, Any]] = []
-    for index, page in enumerate(diagram_pages):
-        drawio_page_svg = _export_with_drawio(drawio_xml, "svg", page_index=index)
-        preview_svg = drawio_page_svg.decode("utf-8", errors="ignore") if drawio_page_svg else fallback_page_previews[index]["svg"]
-        page_png = _export_with_drawio(drawio_xml, "png", page_index=index)
-        if page_png is None:
-            page_png = _png_from_svg(preview_svg)
-        page_previews.append(
+    exact_reference = _extract_exact_reference_diagram(reference_diagrams)
+    if exact_reference:
+        drawio_xml = exact_reference["drawio_xml"]
+        reference_artifacts = _build_reference_drawio_artifacts(drawio_xml, exact_reference["name"])
+        rendering_pages = reference_artifacts["pages"]
+        first_page = rendering_pages[0]
+        svg_preview = reference_artifacts["svg_preview"]
+        page_previews = reference_artifacts["page_previews"]
+    else:
+        diagram_pages = _diagram_page_specs(
+            title=title,
+            planning=planning,
+            nodes=nodes,
+            edges=edges,
+            openshift_state=openshift_state,
+        )
+        first_page = diagram_pages[0]
+        drawio_xml = _build_drawio_xml(title, diagram_pages)
+        fallback_page_previews = [
             {
                 "page_number": page["page_number"],
                 "page_name": page["page_name"],
                 "layout_mode": page["layout_mode"],
                 "title": page["title"],
                 "summary": page["summary"],
-                "svg": preview_svg,
-                "png_base64": base64.b64encode(page_png).decode("ascii") if page_png else None,
+                "svg": _render_svg(
+                    page["title"],
+                    page["summary"],
+                    page["nodes"],
+                    page["edges"],
+                    page["positions"],
+                    page["group_boxes"],
+                    page.get("zones", []),
+                    page["total_width"],
+                    page["total_height"],
+                ),
             }
-        )
-    svg_preview = page_previews[0]["svg"] if page_previews else fallback_page_previews[0]["svg"]
+            for page in diagram_pages
+        ]
+        page_previews = []
+        for index, page in enumerate(diagram_pages):
+            drawio_page_svg = _export_with_drawio(drawio_xml, "svg", page_index=index)
+            preview_svg = drawio_page_svg.decode("utf-8", errors="ignore") if drawio_page_svg else fallback_page_previews[index]["svg"]
+            page_png = _export_with_drawio(drawio_xml, "png", page_index=index)
+            if page_png is None:
+                page_png = _png_from_svg(preview_svg)
+            page_previews.append(
+                {
+                    "page_number": page["page_number"],
+                    "page_name": page["page_name"],
+                    "layout_mode": page["layout_mode"],
+                    "title": page["title"],
+                    "summary": page["summary"],
+                    "svg": preview_svg,
+                    "png_base64": base64.b64encode(page_png).decode("ascii") if page_png else None,
+                }
+            )
+        svg_preview = page_previews[0]["svg"] if page_previews else fallback_page_previews[0]["svg"]
+        rendering_pages = [
+            {
+                "page_number": page["page_number"],
+                "page_name": page["page_name"],
+                "layout_mode": page["layout_mode"],
+                "title": page["title"],
+                "summary": page["summary"],
+                "included_groups": page["included_groups"],
+                "node_count": len(page["nodes"]),
+                "edge_count": len(page["edges"]),
+            }
+            for page in diagram_pages
+        ]
+
     svg_bytes = _export_with_drawio(drawio_xml, "svg", page_index=0)
     png_bytes = _export_with_drawio(drawio_xml, "png", page_index=0)
     if png_bytes is None:
@@ -2730,7 +2861,7 @@ def generate_architecture_diagram(*, prompt: str, openshift_state: dict[str, Any
         "lld": _document_sections("lld", title, planning, nodes, edges, prompt, openshift_state, knowledge_context, assessment_scope_id=assessment_scope_id),
         "assessment": _document_sections("assessment", title, planning, nodes, edges, prompt, openshift_state, knowledge_context, assessment_scope_id=assessment_scope_id),
     }
-    score = min(100, 60 + (len(nodes) * 3) + (len(diagram_pages) * 2) + (6 if openshift_state else 0) + (4 if knowledge_context and knowledge_context.get("used") else 0))
+    score = min(100, 60 + (len(nodes) * 3) + (len(rendering_pages) * 2) + (6 if openshift_state else 0) + (4 if knowledge_context and knowledge_context.get("used") else 0) + (8 if exact_reference else 0))
     quality_scorecard = {
         "overall_score": score,
         "max_score": 100,
@@ -2755,28 +2886,16 @@ def generate_architecture_diagram(*, prompt: str, openshift_state: dict[str, Any
         "documents": documents,
         "rendering": {
             "quality_scorecard": quality_scorecard,
-            "diagram_pages": [
-                {
-                    "page_number": page["page_number"],
-                    "page_name": page["page_name"],
-                    "layout_mode": page["layout_mode"],
-                    "title": page["title"],
-                    "summary": page["summary"],
-                    "included_groups": page["included_groups"],
-                    "node_count": len(page["nodes"]),
-                    "edge_count": len(page["edges"]),
-                }
-                for page in diagram_pages
-            ],
+            "diagram_pages": rendering_pages,
         },
         "artifacts": {
             "drawio_xml": drawio_xml,
             "svg_preview": svg_preview,
-            "svg": svg_bytes.decode("utf-8", errors="ignore") if svg_bytes else svg_preview,
+            "svg": reference_artifacts["svg"] if exact_reference else (svg_bytes.decode("utf-8", errors="ignore") if svg_bytes else svg_preview),
             "png_base64": base64.b64encode(png_bytes).decode("ascii") if png_bytes else None,
             "preview_page_name": first_page["page_name"],
             "page_previews": page_previews,
-            "filenames": {
+            "filenames": reference_artifacts["filenames"] if exact_reference else {
                 "drawio": f"{_slugify(title)}.drawio",
                 "svg": f"{_slugify(title)}.svg",
                 "png": f"{_slugify(title)}.png",

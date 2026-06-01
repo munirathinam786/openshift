@@ -2096,7 +2096,7 @@ def architect_diagram(request: ArchitectDiagramRequest) -> dict:
         toolkit = OpenShiftSreToolkit(settings)
         live_state = collect_architecture_state(toolkit)
 
-    if not request.prompt.strip() and not live_state:
+    if not request.prompt.strip() and not live_state and not request.reference_diagrams:
         raise HTTPException(
             status_code=400,
             detail="Provide an architecture prompt or enable live OpenShift-state capture before generating a diagram.",
