@@ -309,6 +309,7 @@ def test_architect_templates_endpoint(client):
     assert resp.status_code == 200
     data = resp.json()
     assert data["default_template_id"] == "custom"
+    assert any(item["id"] == "onprem-baremetal" for item in data["templates"])
     assert any(item["id"] == "multicluster-fleet" for item in data["templates"])
     assert any(item["id"] == "hld" for item in data["supported_document_types"])
 

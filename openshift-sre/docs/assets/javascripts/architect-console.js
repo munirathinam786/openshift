@@ -144,6 +144,14 @@
     return new Blob([bytes], { type: mime });
   }
 
+  async function getPreviewImageData(preview) {
+    const pngBase64 = String(preview?.png_base64 || '').trim();
+    if (pngBase64) {
+      return `data:image/png;base64,${pngBase64}`;
+    }
+    return svgMarkupToPngDataUrl(preview?.svg || '');
+  }
+
   async function buildArchitectPdf({ pack, diagramResult, activeDocument, generatedAt }) {
     const jsPdf = window.jspdf?.jsPDF;
     if (!jsPdf) {
@@ -259,9 +267,9 @@
       `Diagram pages: ${pagePreviews.length || 0}`,
     ].forEach((line, index) => doc.text(line, margin + 16, 224 + (index * 16), { maxWidth: contentWidth - 32 }));
 
-    if (pagePreviews[0]?.svg) {
+    if (pagePreviews[0]?.svg || pagePreviews[0]?.png_base64) {
       try {
-        const coverImage = await svgMarkupToPngDataUrl(pagePreviews[0].svg);
+        const coverImage = await getPreviewImageData(pagePreviews[0]);
         doc.addImage(coverImage, 'PNG', margin, 330, contentWidth, 270, undefined, 'FAST');
       } catch {
         // ignore cover image conversion failures and still export the pack
@@ -279,7 +287,7 @@
       doc.setFillColor(248, 250, 252);
       doc.roundedRect(margin, cursorY, contentWidth, 430, 18, 18, 'F');
       try {
-        const imageData = await svgMarkupToPngDataUrl(preview.svg);
+        const imageData = await getPreviewImageData(preview);
         doc.addImage(imageData, 'PNG', margin + 12, cursorY + 12, contentWidth - 24, 406, undefined, 'FAST');
       } catch {
         doc.setTextColor(71, 85, 105);

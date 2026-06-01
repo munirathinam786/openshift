@@ -194,6 +194,40 @@ ARCHITECT_DIAGRAM_TEMPLATES = [
         ],
     },
     {
+        "id": "onprem-baremetal",
+        "label": "On-prem bare-metal OpenShift",
+        "category": "On-prem",
+        "description": "Holistic on-prem OpenShift for rack, VLAN, firewall, bonded-NIC, console, and ODF review packs that should feel close to enterprise ocp.drawio-style diagrams.",
+        "prompt": "Create an on-prem bare-metal OpenShift architecture that mirrors an enterprise rack-and-network review drawing: paired edge firewalls, separate management VLAN and user VLAN switch fabrics, console or BMC access, bonded NIC uplinks using Bond0 over ETH0 and ETH1, rack-aligned control-plane and worker nodes, ODF / Rook-Ceph data paths, and explicit shared services for ACM, ACS, GitOps, Quay, observability, backup, and disaster recovery.",
+        "mode": "hybrid",
+        "skills": ["On-prem", "Bare metal", "VLAN", "ODF", "Rack topology", "HLD", "LLD"],
+        "default_nodes": [
+            {"node_id": "dc_context", "label": "On-prem data center and enterprise edge", "group": "context", "detail": "Upstream WAN, enterprise security zones, DNS, and route ownership around the OpenShift estate."},
+            {"node_id": "edge_firewalls", "label": "Paired edge firewalls", "group": "security", "detail": "DMZ and trust-boundary controls between upstream access and the OpenShift management and user VLAN fabrics."},
+            {"node_id": "management_vlan", "label": "Management VLAN switch fabric", "group": "network", "detail": "Management network for API, provisioning, BMC or console access, operator administration, and day-2 control traffic."},
+            {"node_id": "user_vlan", "label": "User VLAN switch fabric", "group": "network", "detail": "Application, ingress, east-west, and consumer-facing traffic network for workloads and platform routes."},
+            {"node_id": "console_ports", "label": "Console port and BMC access", "group": "security", "detail": "Console or BMC network for bootstrap, control-plane, and worker recovery access plus change-controlled break-glass paths."},
+            {"node_id": "control_plane_rack", "label": "Control-plane rack", "group": "control-plane", "detail": "Bootstrap and control-plane nodes on bare metal with Bond0 uplinks over ETH0 and ETH1 plus management attachments."},
+            {"node_id": "worker_rack", "label": "Worker rack", "group": "workload", "detail": "Bare-metal worker nodes with bonded uplinks, user VLAN exposure, and workload scale-out lanes."},
+            {"node_id": "platform_services_rack", "label": "Shared platform services rack", "group": "delivery", "detail": "ACM, ACS, GitOps, Quay, registry mirroring, and supporting operator-run shared services."},
+            {"node_id": "odf_rook", "label": "ODF / Rook-Ceph data path", "group": "data", "detail": "NVMe-backed ODF with MON, MGR, MDS, and OSD service lanes plus snapshot and backup integration."},
+            {"node_id": "ops_lane", "label": "Observability, backup, and DR lane", "group": "operations", "detail": "Monitoring, logging, alerting, OADP, DR orchestration, and validation runbooks for steady state and recovery."},
+        ],
+        "default_edges": [
+            {"source": "dc_context", "target": "edge_firewalls", "label": "enterprise ingress / egress"},
+            {"source": "edge_firewalls", "target": "management_vlan", "label": "protected management path"},
+            {"source": "edge_firewalls", "target": "user_vlan", "label": "protected user path"},
+            {"source": "management_vlan", "target": "console_ports", "label": "console / BMC"},
+            {"source": "management_vlan", "target": "control_plane_rack", "label": "API / provisioning"},
+            {"source": "user_vlan", "target": "worker_rack", "label": "apps / ingress"},
+            {"source": "control_plane_rack", "target": "worker_rack", "label": "cluster control"},
+            {"source": "platform_services_rack", "target": "control_plane_rack", "label": "governance / GitOps / registry"},
+            {"source": "worker_rack", "target": "odf_rook", "label": "ODF data path"},
+            {"source": "control_plane_rack", "target": "ops_lane", "label": "telemetry / backup / DR"},
+            {"source": "worker_rack", "target": "ops_lane", "label": "logs / alerts / restore"},
+        ],
+    },
+    {
         "id": "multicluster-fleet",
         "label": "ACM multicluster fleet",
         "category": "Platform",
@@ -372,6 +406,7 @@ ARCHITECT_DIAGRAM_TEMPLATES = [
 ]
 TEMPLATE_LOOKUP = {item["id"]: item for item in ARCHITECT_DIAGRAM_TEMPLATES}
 PATTERN_RULES = [
+    ("onprem-baremetal", ["on-prem", "on prem", "bare metal", "baremetal", "management vlan", "user vlan", "bond0", "eth0", "eth1", "console port", "bmc", "idrac", "rook", "ceph", "rack"]),
     ("airgapped-disconnected", ["airgap", "air-gap", "disconnected", "mirror registry", "offline"]),
     ("multicluster-fleet", ["multicluster", "fleet", "acm", "managed cluster", "hub"]),
     ("gitops-delivery", ["gitops", "argocd", "argo cd", "tekton", "pipeline", "cicd", "ci/cd"]),
@@ -499,6 +534,11 @@ def _normalize_prompt(pattern_id: str, prompt: str) -> PromptNormalization:
         "solution design views, components, sizing, network requirements, firewall ports, certificates, DNS, load balancing, DR/BCP, "
         "migration, assumptions, decisions, and annexures."
     )
+    if pattern_id == "onprem-baremetal":
+        output_expectations += (
+            " The holistic page must read like an on-prem architecture review board drawing with paired firewalls, user and management VLAN switch fabrics, "
+            "console or BMC access, Bond0 and ETH uplinks, rack-aligned control-plane and worker nodes, and explicit ODF / Rook-Ceph storage lanes."
+        )
     normalized_prompt = (
         f"{senior_architect_brief} {template['prompt']} {repository_context} {output_expectations} "
         f"Preserve the operator's original OpenShift goals and constraints: {prompt.strip()}"
@@ -613,6 +653,27 @@ def suggest_architecture_clarifications(*, prompt: str, openshift_state: dict[st
                     question="Which mirrored registry, operator catalog, and release-content sources should the disconnected design use?",
                     rationale="Disconnected OpenShift designs are far more useful when they reflect the actual mirror and content-sync path instead of a generic placeholder.",
                     placeholder="Example: Quay mirror in the management zone, weekly release sync, mirrored certified operators only.",
+                )
+            )
+    if pattern_id == "onprem-baremetal":
+        if not any(token in prompt_lower for token in ["management vlan", "user vlan", "network", "switch"]):
+            questions.append(
+                ClarificationQuestion(
+                    question_id="onprem_vlan_design",
+                    title="VLAN and switch fabrics",
+                    question="What management VLAN, user VLAN, and switch-fabric assumptions should the on-prem OpenShift design show?",
+                    rationale="The holistic on-prem drawing becomes far more useful when VLAN separation and switch ownership are explicit instead of implied.",
+                    placeholder="Example: dual management VLAN switches for API/BMC, dual user VLAN switches for ingress and app traffic, bonded uplinks on all nodes.",
+                )
+            )
+        if not any(token in prompt_lower for token in ["odf", "rook", "ceph", "storage"]):
+            questions.append(
+                ClarificationQuestion(
+                    question_id="onprem_storage_design",
+                    title="ODF and storage lane",
+                    question="Should the on-prem design show ODF / Rook-Ceph, external storage, or another storage topology for persistent workloads?",
+                    rationale="On-prem OpenShift diagrams usually need explicit storage topology and recovery paths, especially when ODF is part of the reference design.",
+                    placeholder="Example: ODF internal mode on worker nodes with NVMe OSDs, CSI snapshots, and OADP backups to S3-compatible storage.",
                 )
             )
         if not any(token in prompt_lower for token in ["proxy", "bastion", "jump", "transfer"]):
@@ -1018,6 +1079,47 @@ def _layout_infra_topology_page(nodes: list[DiagramNode]) -> tuple[dict[str, dic
     return positions, zones, total_width, total_height
 
 
+def _layout_onprem_holistic_page(nodes: list[DiagramNode]) -> tuple[dict[str, dict[str, float]], list[dict[str, Any]], float, float]:
+    total_width = 1720.0
+    total_height = 1140.0
+    zones = [
+        _zone(title="Enterprise edge and upstream dependencies", subtitle="Users, WAN, enterprise DNS, load-balancing, and upstream service ownership around the on-prem OpenShift estate", x=60, y=78, width=1600, height=118, fill="#FFF7ED", stroke="#EA580C"),
+        _zone(title="DMZ and firewall presentation lane", subtitle="Paired firewall, proxy, bastion, and trust-boundary controls before traffic enters the cluster fabrics", x=60, y=218, width=1600, height=136, fill="#FEF2F2", stroke="#DC2626"),
+        _zone(title="Management VLAN", subtitle="API, provisioning, console or BMC, operator administration, and day-2 management connectivity", x=60, y=376, width=1600, height=96, fill="#ECFDF5", stroke="#16A34A"),
+        _zone(title="User VLAN", subtitle="Ingress, application exposure, service access, and east-west workload presentation across the user network", x=60, y=494, width=1600, height=96, fill="#EFF6FF", stroke="#0284C7"),
+        _zone(title="Rack and node topology", subtitle="Rack-aligned bare-metal platform showing control-plane, worker, and shared-service blocks like an enterprise data-center review drawing", x=60, y=614, width=1600, height=336, fill="#F8FAFC", stroke="#475569", dashed=True),
+        _zone(title="Platform services and ODF data path", subtitle="Shared services, ODF / Rook-Ceph lanes, observability, backup, and DR orchestration supporting the on-prem cluster", x=60, y=972, width=1600, height=118, fill="#F5F3FF", stroke="#7C3AED"),
+        _zone(title="Rack A", subtitle="Edge and management", x=94, y=670, width=350, height=236, fill="#FFFFFF", stroke="#94A3B8", dashed=True, radius=14.0),
+        _zone(title="Rack B", subtitle="Control plane", x=486, y=670, width=350, height=236, fill="#FFFFFF", stroke="#94A3B8", dashed=True, radius=14.0),
+        _zone(title="Rack C", subtitle="Workers and workloads", x=878, y=670, width=350, height=236, fill="#FFFFFF", stroke="#94A3B8", dashed=True, radius=14.0),
+        _zone(title="Rack D", subtitle="Shared services and storage", x=1270, y=670, width=350, height=236, fill="#FFFFFF", stroke="#94A3B8", dashed=True, radius=14.0),
+    ]
+
+    remaining = list(nodes)
+    upstream_nodes, remaining = _ordered_subset(remaining, lambda node: node.group == "context" or _node_matches(node, "enterprise", "wan", "dns", "upstream", "edge", "user"))
+    dmz_nodes, remaining = _ordered_subset(remaining, lambda node: node.group == "security" or _node_matches(node, "firewall", "dmz", "bastion", "proxy", "console", "bmc"))
+    management_nodes, remaining = _ordered_subset(remaining, lambda node: _node_matches(node, "management vlan", "api", "provisioning", "console", "bond0", "eth0", "eth1", "bmc"))
+    user_nodes, remaining = _ordered_subset(remaining, lambda node: _node_matches(node, "user vlan", "ingress", "route", "application", "workload", "worker"))
+    rack_a_nodes, remaining = _ordered_subset(remaining, lambda node: _node_matches(node, "firewall", "console", "management", "acm", "hub", "quay"))
+    rack_b_nodes, remaining = _ordered_subset(remaining, lambda node: node.group == "control-plane" or _node_matches(node, "control-plane", "master", "bootstrap", "api"))
+    rack_c_nodes, remaining = _ordered_subset(remaining, lambda node: node.group == "workload" or _node_matches(node, "worker", "workload", "ingress"))
+    rack_d_nodes, remaining = _ordered_subset(remaining, lambda node: node.group in {"delivery", "data", "operations"} or _node_matches(node, "odf", "rook", "ceph", "backup", "dr", "gitops", "observability"))
+    service_nodes = remaining
+
+    positions: dict[str, dict[str, float]] = {}
+    positions.update(_layout_nodes_in_rect(upstream_nodes or nodes[:3], x=60, y=78, width=1600, height=118, columns=max(1, min(5, len(upstream_nodes or nodes[:3]))), node_width=260.0, node_height=66.0))
+    positions.update(_layout_nodes_in_rect(dmz_nodes or nodes[:4], x=60, y=218, width=1600, height=136, columns=max(1, min(5, len(dmz_nodes or nodes[:4]))), node_width=250.0, node_height=74.0))
+    positions.update(_layout_nodes_in_rect(management_nodes or nodes[:4], x=60, y=376, width=1600, height=96, columns=max(1, min(6, len(management_nodes or nodes[:4]))), node_width=230.0, node_height=60.0))
+    positions.update(_layout_nodes_in_rect(user_nodes or nodes[:4], x=60, y=494, width=1600, height=96, columns=max(1, min(6, len(user_nodes or nodes[:4]))), node_width=230.0, node_height=60.0))
+    positions.update(_layout_nodes_in_rect(rack_a_nodes or nodes[:3], x=94, y=700, width=350, height=172, columns=2, node_width=148.0, node_height=66.0))
+    positions.update(_layout_nodes_in_rect(rack_b_nodes or nodes[:3], x=486, y=700, width=350, height=172, columns=2, node_width=148.0, node_height=66.0))
+    positions.update(_layout_nodes_in_rect(rack_c_nodes or nodes[:3], x=878, y=700, width=350, height=172, columns=2, node_width=148.0, node_height=66.0))
+    positions.update(_layout_nodes_in_rect(rack_d_nodes or nodes[:4], x=1270, y=700, width=350, height=172, columns=2, node_width=148.0, node_height=66.0))
+    combined_service_nodes = (rack_d_nodes + service_nodes)[:10] or nodes[:5]
+    positions.update(_layout_nodes_in_rect(combined_service_nodes, x=60, y=972, width=1600, height=118, columns=max(1, min(5, len(combined_service_nodes))), node_width=250.0, node_height=66.0))
+    return positions, zones, total_width, total_height
+
+
 def _layout_explanation_page(nodes: list[DiagramNode]) -> tuple[dict[str, dict[str, float]], list[dict[str, Any]], float, float]:
     total_width = 1560.0
     total_height = 1180.0
@@ -1130,6 +1232,9 @@ def _layout_page(
     layout_mode: str,
     nodes: list[DiagramNode],
 ) -> tuple[dict[str, dict[str, float]], dict[str, dict[str, float]], list[dict[str, Any]], float, float]:
+    if layout_mode == "onprem-holistic":
+        positions, zones, total_width, total_height = _layout_onprem_holistic_page(nodes)
+        return positions, {}, zones, total_width, total_height
     if layout_mode == "hub-spoke":
         positions, zones, total_width, total_height = _layout_hub_spoke_page(nodes)
         return positions, {}, zones, total_width, total_height
@@ -1162,8 +1267,13 @@ def _diagram_page_specs(
     openshift_state: dict[str, Any] | None,
 ) -> list[dict[str, Any]]:
     counts = (openshift_state or {}).get("resource_counts") or {}
+    is_onprem_baremetal = planning.pattern_id == "onprem-baremetal"
     summaries = {
-        "holistic": planning.reasoning_summary,
+        "holistic": (
+            "Holistic on-prem OpenShift view with enterprise edge, paired firewalls, management and user VLAN switch fabrics, bonded bare-metal racks, and explicit ODF / Rook-Ceph service lanes."
+            if is_onprem_baremetal
+            else planning.reasoning_summary
+        ),
         "topology": (
             f"Site and topology view covering managed clusters={counts.get('managed_clusters', 0)}, ingress controllers={counts.get('ingress_controllers', 0)}, "
             f"and workload/data placement assumptions."
@@ -1180,7 +1290,7 @@ def _diagram_page_specs(
             "title": title,
             "summary": summaries["holistic"],
             "groups": GROUP_ORDER,
-            "layout_mode": "grouped",
+            "layout_mode": "onprem-holistic" if is_onprem_baremetal else "grouped",
         },
         {
             "page_name": "Architecture explanation and design narrative",
@@ -1685,6 +1795,15 @@ def _padding_sections(
 
 def _node_icon_profile(node: DiagramNode) -> dict[str, str | float]:
     text = f"{node.label} {node.detail}".lower()
+    if any(token in text for token in ["bond0", "eth0", "eth1", "console port", "bmc", "idrac", "ilo"]):
+        return {
+            "kind": "nic",
+            "accent": "#005F4B",
+            "drawio_style": "sketch=0;pointerEvents=1;shadow=0;dashed=0;html=1;strokeColor=none;fillColor=#005F4B;labelPosition=center;verticalLabelPosition=bottom;verticalAlign=top;align=center;outlineConnect=0;shape=mxgraph.veeam2.network_card;",
+            "drawio_value": "",
+            "width": 28.0,
+            "height": 20.0,
+        }
     if any(token in text for token in ["acm", "hub cluster", "fleet", "managed cluster", "multicluster"]):
         return {
             "kind": "acm",
@@ -1820,6 +1939,14 @@ def _svg_icon_markup(kind: str, accent: str, x: float, y: float) -> str:
             f'<ellipse cx="{x + 14}" cy="{y + 8}" rx="10" ry="4" fill="#F5F3FF" stroke="{accent}" stroke-width="2"/>'
             f'<rect x="{x + 4}" y="{y + 8}" width="20" height="11" fill="#F5F3FF" stroke="{accent}" stroke-width="2"/>'
             f'<ellipse cx="{x + 14}" cy="{y + 19}" rx="10" ry="4" fill="#F5F3FF" stroke="{accent}" stroke-width="2"/>'
+        )
+    if kind == "nic":
+        return (
+            f'<rect x="{x + 2}" y="{y + 6}" width="24" height="14" rx="2" fill="#ECFDF5" stroke="{accent}" stroke-width="2"/>'
+            f'<rect x="{x + 7}" y="{y + 3}" width="14" height="4" rx="1" fill="{accent}"/>'
+            f'<circle cx="{x + 9}" cy="{y + 13}" r="1.5" fill="{accent}"/>'
+            f'<circle cx="{x + 14}" cy="{y + 13}" r="1.5" fill="{accent}"/>'
+            f'<circle cx="{x + 19}" cy="{y + 13}" r="1.5" fill="{accent}"/>'
         )
     if kind == "server":
         bays = ''.join(f'<rect x="{x + 6}" y="{y + 6 + (slot * 5)}" width="16" height="2.5" rx="1" fill="#FFFFFF"/>' for slot in range(3))
@@ -2217,7 +2344,7 @@ def _build_drawio_xml(title: str, diagram_pages: list[dict[str, Any]]) -> str:
 
         if page.get("layout_mode") == "security-lanes":
             cell_counter = _append_drawio_security_overlays(root, page=page, cell_counter=cell_counter)
-        if page.get("layout_mode") == "infra-topology":
+        if page.get("layout_mode") in {"infra-topology", "onprem-holistic"}:
             cell_counter = _append_drawio_rack_overlays(root, page=page, cell_counter=cell_counter)
 
         node_ids: dict[str, str] = {}
@@ -2291,7 +2418,7 @@ def _build_drawio_xml(title: str, diagram_pages: list[dict[str, Any]]) -> str:
             edge_cell = ET.SubElement(root, "mxCell", id=edge_id, value=_drawio_text(edge.label), style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#64748B;fontSize=11;endArrow=block;endFill=1;", edge="1", parent="1", source=source_id, target=target_id)
             ET.SubElement(edge_cell, "mxGeometry", relative="1", **{"as": "geometry"})
 
-        if page.get("layout_mode") in {"security-lanes", "infra-topology", "service-bands"}:
+        if page.get("layout_mode") in {"security-lanes", "infra-topology", "service-bands", "onprem-holistic"}:
             cell_counter = _append_drawio_legend(root, page=page, cell_counter=cell_counter)
 
     return ET.tostring(mxfile, encoding="unicode")
@@ -2577,6 +2704,10 @@ def generate_architecture_diagram(*, prompt: str, openshift_state: dict[str, Any
     page_previews: list[dict[str, Any]] = []
     for index, page in enumerate(diagram_pages):
         drawio_page_svg = _export_with_drawio(drawio_xml, "svg", page_index=index)
+        preview_svg = drawio_page_svg.decode("utf-8", errors="ignore") if drawio_page_svg else fallback_page_previews[index]["svg"]
+        page_png = _export_with_drawio(drawio_xml, "png", page_index=index)
+        if page_png is None:
+            page_png = _png_from_svg(preview_svg)
         page_previews.append(
             {
                 "page_number": page["page_number"],
@@ -2584,7 +2715,8 @@ def generate_architecture_diagram(*, prompt: str, openshift_state: dict[str, Any
                 "layout_mode": page["layout_mode"],
                 "title": page["title"],
                 "summary": page["summary"],
-                "svg": drawio_page_svg.decode("utf-8", errors="ignore") if drawio_page_svg else fallback_page_previews[index]["svg"],
+                "svg": preview_svg,
+                "png_base64": base64.b64encode(page_png).decode("ascii") if page_png else None,
             }
         )
     svg_preview = page_previews[0]["svg"] if page_previews else fallback_page_previews[0]["svg"]

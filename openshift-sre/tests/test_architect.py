@@ -62,3 +62,37 @@ def test_generate_architecture_diagram_returns_4_20_grounded_multi_page_pack():
         or "mxgraph.office.concepts.firewall" in payload["artifacts"]["drawio_xml"]
     )
     assert payload["artifacts"]["preview_page_name"] == "Holistic OpenShift architecture"
+
+
+def test_generate_onprem_baremetal_architecture_includes_reference_style_prompt_and_pdf_ready_pages():
+    payload = generate_architecture_diagram(
+        prompt=(
+            "Design an on-prem bare-metal OpenShift architecture with management VLAN, user VLAN, paired firewalls, "
+            "console port access, Bond0 over ETH0 and ETH1, ODF Rook Ceph storage, and rack-aligned control plane and workers."
+        ),
+        openshift_state={
+            "summary": "Bare-metal production estate with ODF and shared services.",
+            "resource_counts": {
+                "managed_clusters": 1,
+                "ingress_controllers": 2,
+                "degraded_operators": 0,
+                "argocd_instances": 1,
+                "persistent_volume_claims": 18,
+                "backup_locations": 1,
+                "dr_policies": 1,
+                "virtual_machines": 0,
+            },
+            "raw": {},
+        },
+        knowledge_context={"enabled": True, "used": True, "items": []},
+    )
+
+    assert payload["planning"]["pattern_id"] == "onprem-baremetal"
+    assert "management VLAN" in payload["planning"]["normalized_prompt"]
+    assert "Bond0" in payload["planning"]["normalized_prompt"]
+    assert payload["rendering"]["diagram_pages"][0]["layout_mode"] == "onprem-holistic"
+    assert "Management VLAN switch fabric" in payload["artifacts"]["drawio_xml"]
+    assert "User VLAN switch fabric" in payload["artifacts"]["drawio_xml"]
+    assert "ODF / Rook-Ceph data path" in payload["artifacts"]["drawio_xml"]
+    assert "shape=mxgraph.veeam2.network_card" in payload["artifacts"]["drawio_xml"]
+    assert all("png_base64" in page for page in payload["artifacts"]["page_previews"])
