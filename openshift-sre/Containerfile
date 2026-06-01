@@ -41,6 +41,7 @@ RUN apt-get update && \
         libxtst6 \
         tesseract-ocr \
         wget \
+        xauth \
         xdg-utils \
         xvfb && \
     arch="$(dpkg --print-architecture)" && \

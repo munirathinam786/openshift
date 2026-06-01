@@ -162,7 +162,7 @@ REPO_ARCHITECTURAL_PRIORITIES = [
     "Capture ingress, DNS, certificates, load balancing, firewall ports, and east-west connectivity as architecture content, not implementation afterthoughts.",
     "Explain business continuity with backup, restore, replication, failover, relocate, and failback workflows across multicluster estates using ACM and related platform services when relevant.",
     "Reflect the repository's deployment patterns across bare metal IPI and UPI, ROSA, ARO, IBM Z, multicluster management, DR, and migration use cases.",
-    "Generate editable draw.io output with multiple architecture views so document exports can mirror enterprise HLD and LLD review packs.",
+    "Generate editable draw.io output with multiple architecture views so the shared architecture pack and the separate HLD and LLD exports mirror enterprise review expectations.",
 ]
 ARCHITECT_ASSESSMENT_SCOPES = [
     {"id": "architecture-readiness", "label": "Architecture readiness", "description": "Balanced OpenShift architecture review across topology, security, operations, and resilience."},
@@ -494,8 +494,8 @@ def _normalize_prompt(pattern_id: str, prompt: str) -> PromptNormalization:
     )
     repository_context = " ".join(REPO_ARCHITECTURAL_PRIORITIES[:5])
     output_expectations = (
-        "Produce a multi-page draw.io architecture pack with at least holistic, topology, security-and-operations, and "
-        "delivery-and-resilience views. Expand the HLD and LLD using enterprise document rhythm: background, objectives, AS-IS, TO-BE, "
+        "Produce a multi-page shared draw.io architecture pack with at least holistic, topology, security-and-operations, and "
+        "delivery-and-resilience views. Expand the separate HLD and LLD documents using enterprise document rhythm: background, objectives, AS-IS, TO-BE, "
         "solution design views, components, sizing, network requirements, firewall ports, certificates, DNS, load balancing, DR/BCP, "
         "migration, assumptions, decisions, and annexures."
     )
@@ -631,7 +631,7 @@ def suggest_architecture_clarifications(*, prompt: str, openshift_state: dict[st
                 question_id="cluster_roles",
                 title="Cluster roles and environments",
                 question="What cluster roles or environment labels should I use for the main clusters in this design?",
-                rationale="Cluster role names help the HLD and LLD explain who does what across primary, DR, hub, edge, and workload clusters.",
+                rationale="Cluster role names help the separate HLD and LLD explain who does what across primary, DR, hub, edge, and workload clusters.",
                 placeholder="Example: acm-hub, prod-east, prod-west, dr-west, edge-factory, sandbox.",
             )
         )
@@ -651,7 +651,7 @@ def suggest_architecture_clarifications(*, prompt: str, openshift_state: dict[st
                 question_id="storage_protection",
                 title="Storage and protection",
                 question="What storage, snapshot, or backup expectations should I include in the architecture?",
-                rationale="HLD and LLD packages are much stronger when storage and restore posture are explicit instead of implied.",
+                rationale="The separate HLD and LLD outputs are much stronger when storage and restore posture are explicit instead of implied.",
                 placeholder="Example: ODF for app data, CSI snapshots, OADP to S3-compatible storage, quarterly restore test.",
             )
         )
@@ -661,7 +661,7 @@ def suggest_architecture_clarifications(*, prompt: str, openshift_state: dict[st
                 question_id="recovery_targets",
                 title="Recovery targets",
                 question="Should the design include explicit RTO/RPO, failover, or recovery-state expectations?",
-                rationale="Recovery objectives change the architecture and the review language for both HLD and LLD outputs.",
+                rationale="Recovery objectives change the architecture and the review language for both the HLD and LLD outputs.",
                 placeholder="Example: RTO 4h, RPO 30m, warm standby cluster, relocate stateful apps only after storage sync health is green.",
             )
         )
@@ -670,7 +670,7 @@ def suggest_architecture_clarifications(*, prompt: str, openshift_state: dict[st
         "needs_clarification": bool(questions),
         "planning": asdict(planning),
         "summary": (
-            "This prompt can already produce an OpenShift architecture pack. Answer the questions below if you want a more implementation-ready HLD or LLD."
+            "This prompt can already produce the shared OpenShift architecture pack. Answer the questions below if you want more implementation-ready HLD or LLD outputs."
             if questions
             else "The current prompt already has enough detail for the OpenShift architect workspace to proceed."
         ),
@@ -1085,7 +1085,7 @@ def _layout_explanation_page(nodes: list[DiagramNode]) -> tuple[dict[str, dict[s
         ),
         _zone(
             title="Version baseline and architecture guardrails",
-            subtitle="The generated HLD/LLD should stay grounded on supported Red Hat constructs and explicit enterprise operating assumptions.",
+            subtitle="The shared architecture pack plus the separate HLD and LLD outputs should stay grounded on supported Red Hat constructs and explicit enterprise operating assumptions.",
             notes=[
                 "• OpenShift Container Platform 4.20 and later.",
                 "• ACM 2.14+ and OpenShift GitOps 1.18+ where the design requires them.",
@@ -1985,7 +1985,7 @@ def _append_drawio_page_frame(root: ET.Element, *, page: dict[str, Any], cell_co
 
     brand_id = str(cell_counter)
     cell_counter += 1
-    brand_value = _drawio_text("OPENSHIFT 4.20+\nArchitect review pack")
+    brand_value = _drawio_text("OPENSHIFT 4.20+\nArchitecture review pack")
     brand_cell = ET.SubElement(
         root,
         "mxCell",
@@ -2291,8 +2291,8 @@ def _build_drawio_xml(title: str, diagram_pages: list[dict[str, Any]]) -> str:
             edge_cell = ET.SubElement(root, "mxCell", id=edge_id, value=_drawio_text(edge.label), style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#64748B;fontSize=11;endArrow=block;endFill=1;", edge="1", parent="1", source=source_id, target=target_id)
             ET.SubElement(edge_cell, "mxGeometry", relative="1", **{"as": "geometry"})
 
-            if page.get("layout_mode") in {"security-lanes", "infra-topology", "service-bands"}:
-                cell_counter = _append_drawio_legend(root, page=page, cell_counter=cell_counter)
+        if page.get("layout_mode") in {"security-lanes", "infra-topology", "service-bands"}:
+            cell_counter = _append_drawio_legend(root, page=page, cell_counter=cell_counter)
 
     return ET.tostring(mxfile, encoding="unicode")
 
@@ -2440,7 +2440,7 @@ def _document_sections(document_type: str, title: str, planning: PromptNormaliza
         {
             "title": "Architecture pattern",
             "decision": f"Use the {planning.pattern_label} pattern as the primary OpenShift reference design.",
-            "rationale": "The detected platform pattern aligns the HLD and LLD narrative with a consistent topology, ownership model, and operating story.",
+            "rationale": "The detected platform pattern aligns the shared architecture pack plus the HLD and LLD narratives with a consistent topology, ownership model, and operating story.",
             "consequences": "The final pack can explain platform, security, networking, data, and operations from one coherent reference model.",
         },
         {

@@ -4,7 +4,7 @@ This page covers the platform service toolkit, HTTP API, and CLI entry points.
 
 It now also covers the historical persistence layer that stores prompt runs and extracted metrics for the browser dashboard.
 
-It also now covers the OpenShift architect modules that generate draw.io diagrams plus HLD and LLD document packs.
+It also now covers the OpenShift architect modules that generate a shared draw.io-backed architecture pack plus separate HLD and LLD document packs.
 
 ## `src/openshift_sre_agent/persistence.py`
 
@@ -67,7 +67,7 @@ Its responsibilities are intentionally platform-specific rather than cloud-gener
 - collect live architecture state from the existing OpenShift toolkit
 - infer a likely platform pattern from prompt language and live-state signals
 - generate editable draw.io XML plus SVG and PNG-friendly outputs
-- assemble `HLD`, `LLD`, and assessment documents from the same run
+- assemble a shared architecture pack plus separate `HLD`, `LLD`, and assessment documents from the same run
 - derive clarification questions and a lightweight architecture quality scorecard
 
 In practical terms, this is the file that turns the existing inspection toolkit into a design workspace instead of another troubleshooting lane.

@@ -4,8 +4,10 @@
     return;
   }
 
-  const { createElement: h, useEffect, useMemo, useState } = window.React;
+  const { createElement: h, useEffect, useMemo, useRef, useState } = window.React;
   const llmRuntime = window.OpenShiftSreLlmRuntime || {};
+  const DRAWIO_EMBED_ORIGIN = 'https://embed.diagrams.net';
+  const DRAWIO_EMBED_URL = `${DRAWIO_EMBED_ORIGIN}/?embed=1&ui=min&spin=Loading+native+draw.io+preview...&proto=json&saveAndExit=0&noSaveBtn=1&noExitBtn=1&modified=0&libraries=0`;
   const safeJson = (value) => {
     if (!value) return null;
     try {
@@ -294,7 +296,7 @@
     (pack.sections || []).slice(0, 24).forEach((section, index) => addParagraph(`${index + 1}. ${section.title}`, { fontSize: 11, leading: 14, bullet: false }));
 
     doc.addPage();
-    resetPage('Design summary and decision frame', 'High-level context used to structure the HLD/LLD narrative.');
+    resetPage('Design summary and decision frame', 'High-level context used to structure the shared architecture pack and the separate HLD / LLD narratives.');
     addSectionTitle('Assumptions');
     (pack.assumptions || []).forEach((line) => addParagraph(line, { bullet: true }));
     addSectionTitle('Architectural decisions');
@@ -330,6 +332,9 @@
   }
 
   function ArchitectApp() {
+    const viewerFrameRef = useRef(null);
+    const viewerInitializedRef = useRef(false);
+    const latestDrawioXmlRef = useRef('');
     const [catalog, setCatalog] = useState({ templates: [], supported_assessment_scopes: [] });
     const [knowledgeStatus, setKnowledgeStatus] = useState(null);
     const [knowledgeSources, setKnowledgeSources] = useState([]);
@@ -371,6 +376,8 @@
     const [activeDiagramPage, setActiveDiagramPage] = useState(0);
     const [liveState, setLiveState] = useState(null);
     const [suggestedTemplateApplied, setSuggestedTemplateApplied] = useState(false);
+    const [viewerLoaded, setViewerLoaded] = useState(false);
+    const [viewerStatus, setViewerStatus] = useState('Generate a diagram to render the editable draw.io preview directly in the browser.');
 
     const selectedTemplate = useMemo(() => (catalog.templates || []).find((item) => item.id === templateId) || (catalog.templates || [])[0] || null, [catalog.templates, templateId]);
     const suggestedModels = useMemo(() => (llmRuntime.getSuggestedModels ? llmRuntime.getSuggestedModels(providerCatalog, providerId, modelCatalog) : []), [providerCatalog, providerId, modelCatalog]);
@@ -536,6 +543,84 @@
       setActiveDiagramPage(0);
     }, [diagramResult]);
 
+    const loadEmbeddedViewer = (drawioXml) => {
+      const targetWindow = viewerFrameRef.current?.contentWindow;
+      if (!viewerInitializedRef.current || !targetWindow || !drawioXml) {
+        return false;
+      }
+
+      setViewerLoaded(false);
+      setViewerStatus('Rendering the editable draw.io preview from the generated architecture pack…');
+      targetWindow.postMessage(JSON.stringify({
+        action: 'load',
+        xml: drawioXml,
+        autosave: 0,
+        saveAndExit: 0,
+        noSaveBtn: 1,
+        noExitBtn: 1,
+        modified: 0,
+        title: 'OpenShift architecture draw.io preview',
+        border: 24,
+        background: '#ffffff',
+      }), DRAWIO_EMBED_ORIGIN);
+      return true;
+    };
+
+    useEffect(() => {
+      const onMessage = (event) => {
+        if (event.origin !== DRAWIO_EMBED_ORIGIN) {
+          return;
+        }
+
+        let payload = event.data;
+        if (typeof payload === 'string') {
+          try {
+            payload = JSON.parse(payload);
+          } catch {
+            return;
+          }
+        }
+        if (!payload || typeof payload !== 'object') {
+          return;
+        }
+
+        if (payload.event === 'init' || payload.event === 'ready') {
+          viewerInitializedRef.current = true;
+          if (!latestDrawioXmlRef.current) {
+            setViewerStatus('Generate a diagram to render the editable draw.io preview directly in the browser.');
+            return;
+          }
+          loadEmbeddedViewer(latestDrawioXmlRef.current);
+          return;
+        }
+
+        if (payload.event === 'load') {
+          setViewerLoaded(true);
+          setViewerStatus('Editable draw.io preview rendered successfully from the generated architecture pack.');
+          return;
+        }
+
+        if (payload.error) {
+          setViewerLoaded(false);
+          setViewerStatus('The embedded draw.io preview is unavailable in this session. The SVG page preview remains available below.');
+        }
+      };
+
+      window.addEventListener('message', onMessage);
+      return () => window.removeEventListener('message', onMessage);
+    }, []);
+
+    useEffect(() => {
+      const drawioXml = diagramResult?.artifacts?.drawio_xml || '';
+      latestDrawioXmlRef.current = drawioXml;
+      if (!drawioXml) {
+        setViewerLoaded(false);
+        setViewerStatus('Generate a diagram to render the editable draw.io preview directly in the browser.');
+        return;
+      }
+      loadEmbeddedViewer(drawioXml);
+    }, [diagramResult]);
+
     const applyTemplate = () => {
       if (!selectedTemplate) return;
       setPrompt(selectedTemplate.prompt || '');
@@ -600,7 +685,7 @@
 
     const generateDiagram = async () => {
       setBusy(true);
-      setStatus({ message: 'Generating the OpenShift architecture diagram and document pack…', tone: '' });
+      setStatus({ message: 'Generating the shared OpenShift architecture pack plus separate HLD and LLD documents…', tone: '' });
       try {
         const payload = await fetchJson('/architect/diagram', {
           method: 'POST',
@@ -801,7 +886,7 @@
         h('div', { className: 'architect-console__hero-grid' }, [
           h('div', null, [
             h('span', { className: 'architect-console__eyebrow' }, 'OpenShift-native architect lane'),
-            h('h2', null, 'Create original OpenShift HLD and LLD packs with live-state grounding, research-link ingestion, and editable draw.io output.'),
+            h('h2', null, 'Create a shared OpenShift architecture pack with separate HLD and LLD outputs, live-state grounding, research-link ingestion, and editable draw.io output.'),
             h('p', null, 'This workspace is intentionally OpenShift-first. It understands multicluster fleets, GitOps delivery, disconnected environments, CNV, DR, security, and migration patterns—and it can pull in Red Hat or internal documentation before it generates the final architecture pack.'),
             h('div', { className: 'architect-console__metrics' }, [
               h('article', { className: 'architect-console__metric' }, [h('span', { className: 'architect-console__meta' }, 'Pattern library'), h('strong', null, `${catalog.templates?.length || 0} templates`)]),
@@ -851,7 +936,7 @@
               h('button', { className: 'agent-console__example', type: 'button', disabled: busy, onClick: loadLiveState }, busy ? 'Working…' : 'Load live state'),
               h('button', { className: 'agent-console__example', type: 'button', disabled: busy, onClick: runClarification }, busy ? 'Working…' : 'Clarify prompt'),
               h('button', { className: 'agent-console__example', type: 'button', disabled: busy, onClick: runAssessment }, busy ? 'Working…' : 'Run assessment'),
-              h('button', { className: 'agent-console__button', type: 'button', disabled: busy, onClick: generateDiagram }, busy ? 'Generating…' : 'Generate HLD / LLD')
+              h('button', { className: 'agent-console__button', type: 'button', disabled: busy, onClick: generateDiagram }, busy ? 'Generating…' : 'Generate architecture pack')
             ]),
             h('details', null, [
               h('summary', null, 'Runtime overrides'),
@@ -946,6 +1031,36 @@
             assessmentResult?.assessment ? h('div', null, [h('p', null, assessmentResult.assessment.summary || 'Architecture assessment ready.'), h('ul', null, (assessmentResult.assessment.assessment_dimensions || []).map((item) => h('li', { key: item.id }, `${item.label}: ${item.assessment}`)))]) : h('div', { className: 'architect-console__empty' }, 'Run the assessment lane to review architecture readiness by scope.')
           ])
         ]),
+        h('article', { className: 'architect-console__page-preview' }, [
+          h('div', { className: 'agent-console__queue-header' }, [
+            h('div', null, [
+              h('h3', null, 'Embedded draw.io preview'),
+              h('p', { className: 'architect-console__meta' }, viewerStatus)
+            ]),
+            h('div', { className: 'architect-console__artifact-actions' }, [
+              h('span', { className: 'architect-console__artifact-pill' }, 'Source: generated draw.io XML'),
+              h('span', { className: 'architect-console__artifact-pill' }, viewerLoaded ? 'Viewer rendered' : 'Viewer waiting / fallback active')
+            ])
+          ]),
+          diagramResult?.artifacts?.drawio_xml
+            ? h('div', { className: 'architect-console__viewer-shell' }, [
+                h('iframe', {
+                  ref: viewerFrameRef,
+                  className: 'architect-console__viewer-frame',
+                  src: DRAWIO_EMBED_URL,
+                  title: 'OpenShift architecture draw.io preview',
+                  loading: 'lazy',
+                  referrerPolicy: 'no-referrer',
+                })
+              ])
+            : h('div', { className: 'architect-console__empty' }, 'Generate a diagram to render the editable draw.io preview directly in the browser.'),
+          diagramResult?.artifacts?.drawio_xml
+            ? h('details', { className: 'architect-console__card' }, [
+                h('summary', null, 'Show draw.io XML'),
+                h('pre', { className: 'architect-console__json' }, diagramResult.artifacts.drawio_xml || '')
+              ])
+            : null
+        ]),
         h('div', { className: 'architect-console__diagram-shell' }, [
           h('aside', { className: 'architect-console__page-rail' }, diagramPagePreviews.length ? diagramPagePreviews.map((page, index) => h('button', {
             key: `${page.page_number}-${page.page_name}`,
@@ -963,7 +1078,10 @@
                 h('h3', null, activeDiagramPreview.page_name),
                 h('p', { className: 'architect-console__meta' }, activeDiagramPreview.summary || activeDiagramPreview.title || 'Selected architecture page preview.')
               ]),
-              h('span', { className: 'architect-console__badge architect-console__badge--ok' }, `${diagramPagePreviews.length} pages`)
+              h('div', { className: 'architect-console__artifact-actions' }, [
+                h('span', { className: 'architect-console__badge architect-console__badge--ok' }, `${diagramPagePreviews.length} pages`),
+                h('span', { className: 'architect-console__artifact-pill' }, 'SVG fallback / page rail preview')
+              ])
             ]),
             h('div', { className: 'architect-console__diagram' }, h('div', { dangerouslySetInnerHTML: { __html: activeDiagramPreview.svg } }))
           ] : h('div', { className: 'architect-console__empty' }, 'Generate a diagram to see the architecture preview here.'))
@@ -971,7 +1089,7 @@
       ]),
 
       h('section', { className: 'agent-console__panel', id: 'architect-documents' }, [
-        h('div', { className: 'agent-console__queue-header' }, [h('div', null, [h('h2', null, 'HLD, LLD, and assessment packs'), h('p', { className: 'architect-console__meta' }, 'Switch between document packs and export them as markdown, Word-compatible output, PDF, or PowerPoint.')]), h('div', { className: 'architect-console__tabs' }, [h('button', { type: 'button', className: `architect-console__tab ${activeDocument === 'hld' ? 'is-active' : ''}`, onClick: () => setActiveDocument('hld') }, 'HLD'), h('button', { type: 'button', className: `architect-console__tab ${activeDocument === 'lld' ? 'is-active' : ''}`, onClick: () => setActiveDocument('lld') }, 'LLD'), h('button', { type: 'button', className: `architect-console__tab ${activeDocument === 'assessment' ? 'is-active' : ''}`, onClick: () => setActiveDocument('assessment') }, 'Assessment')])]),
+        h('div', { className: 'agent-console__queue-header' }, [h('div', null, [h('h2', null, 'Architecture documents and assessment packs'), h('p', { className: 'architect-console__meta' }, 'Review the shared architecture pack context, then switch between the separate HLD, LLD, and assessment outputs for export as markdown, Word-compatible output, PDF, or PowerPoint.')]), h('div', { className: 'architect-console__tabs' }, [h('button', { type: 'button', className: `architect-console__tab ${activeDocument === 'hld' ? 'is-active' : ''}`, onClick: () => setActiveDocument('hld') }, 'HLD'), h('button', { type: 'button', className: `architect-console__tab ${activeDocument === 'lld' ? 'is-active' : ''}`, onClick: () => setActiveDocument('lld') }, 'LLD'), h('button', { type: 'button', className: `architect-console__tab ${activeDocument === 'assessment' ? 'is-active' : ''}`, onClick: () => setActiveDocument('assessment') }, 'Assessment')])]),
         h('div', { className: 'architect-console__document-grid' }, [
           h('article', { className: 'architect-console__document' }, [
             h('div', { className: 'agent-console__queue-header' }, [h('div', null, [h('h3', null, documentPack?.title || 'Document preview'), h('p', { className: 'architect-console__meta' }, documentPack?.summary || 'Generate a document pack to preview the sections here.')]), h('div', { className: 'architect-console__artifact-actions' }, [h('button', { className: 'agent-console__example', type: 'button', onClick: () => exportDocument('md') }, 'Markdown'), h('button', { className: 'agent-console__example', type: 'button', onClick: () => exportDocument('doc') }, 'Word'), h('button', { className: 'agent-console__example', type: 'button', onClick: () => exportDocument('pdf') }, 'PDF'), h('button', { className: 'agent-console__example', type: 'button', onClick: () => exportDocument('ppt') }, 'PPT')])]),

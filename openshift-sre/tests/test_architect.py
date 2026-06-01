@@ -53,6 +53,7 @@ def test_generate_architecture_diagram_returns_4_20_grounded_multi_page_pack():
     assert "OPENSHIFT 4.20+" in payload["artifacts"]["drawio_xml"]
     assert "Senior Red Hat OpenShift architect" in payload["artifacts"]["drawio_xml"]
     assert "Legend" in payload["artifacts"]["drawio_xml"]
+    assert payload["artifacts"]["drawio_xml"].count("Legend") == 3
     assert "Trust boundary" in payload["artifacts"]["drawio_xml"]
     assert "Management VLAN switch fabric" in payload["artifacts"]["drawio_xml"]
     assert (

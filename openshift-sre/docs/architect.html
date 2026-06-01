@@ -10,15 +10,15 @@
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
   </head>
-  <body dir="ltr">
+  <body dir="ltr" data-shell-page="architect">
     <div data-app-shell>
       <script type="application/json" data-app-shell-props>
         {
           "key": "architect",
-          "eyebrow": "OpenShift architecture design, HLD, LLD, and grounded diagram generation",
+          "eyebrow": "OpenShift architecture design, shared pack generation, and separate HLD / LLD outputs",
           "title": "Architect Workspace",
-          "description": "Design original OpenShift architectures with a native platform pattern library, live cluster-state grounding, RAG-backed knowledge, research-link ingestion, draw.io export, and document-ready HLD or LLD packs for platform, migration, DR, fleet, GitOps, virtualization, and air-gapped estates.",
-          "badges": ["OpenShift-native patterns", "draw.io export", "HLD + LLD", "pgvector knowledge base", "Research links", "Live cluster grounding"],
+          "description": "Design original OpenShift architectures with a native platform pattern library, live cluster-state grounding, RAG-backed knowledge, research-link ingestion, draw.io export, and a shared architecture pack that can be exported as separate HLD and LLD documents for platform, migration, DR, fleet, GitOps, virtualization, and air-gapped estates.",
+          "badges": ["OpenShift-native patterns", "draw.io export", "Shared architecture pack", "Separate HLD + LLD", "pgvector knowledge base", "Research links", "Live cluster grounding"],
           "actions": [
             { "label": "Generate architecture pack", "href": "#architect-launcher" },
             { "label": "Open platform console", "href": "platform-console.html" },
@@ -30,9 +30,9 @@
             { "label": "Agent console", "href": "console.html" }
           ],
           "stats": [
-            { "label": "Primary workflow", "value": "OpenShift HLD / LLD generation", "detail": "Create architecture packs from prompts, live cluster evidence, or a hybrid of both—without copying the AWS architect feature verbatim." },
+            { "label": "Primary workflow", "value": "Shared architecture pack + separate HLD and LLD", "detail": "Create one architecture pack from prompts, live cluster evidence, or a hybrid of both, then export distinct HLD and LLD documents without copying the AWS architect feature verbatim." },
             { "label": "Knowledge lane", "value": "Red Hat docs + internal design grounding", "detail": "Train the pgvector store from research links, uploaded files, and internal design artifacts before generating the final pack." },
-            { "label": "Artifact outputs", "value": "draw.io + SVG + PNG + HLD + LLD", "detail": "Produce editable diagram source plus document-ready design narratives, assessment notes, and export-friendly image formats." }
+            { "label": "Artifact outputs", "value": "draw.io + SVG + PNG + separate HLD / LLD", "detail": "Produce editable diagram source, a shared architecture pack, distinct HLD and LLD narratives, assessment notes, and export-friendly image formats." }
           ],
           "workspaceSignals": ["Prompt-guided or hybrid mode", "Live OpenShift state capture", "Research link ingestion", "File-based knowledge training", "Architecture clarification lane", "Quality scorecard"],
           "sectionNav": [
@@ -51,7 +51,7 @@
           ],
           "highlights": [
             { "title": "OpenShift-first pattern catalog", "description": "Templates cover multicluster fleet, GitOps delivery, security and governance, disconnected environments, CNV, DR, migration, and more." },
-            { "title": "Grounded design generation", "description": "Blend live cluster state with trained knowledge and research links so the generated HLD or LLD reflects the real platform, not a generic diagram farm." },
+            { "title": "Grounded design generation", "description": "Blend live cluster state with trained knowledge and research links so the shared architecture pack, HLD, and LLD reflect the real platform, not a generic diagram farm." },
             { "title": "Container-installed draw.io path", "description": "The stack now installs draw.io, xvfb, and related runtime dependencies inside the container so the architecture lane can export editable diagrams and images." }
           ],
           "featureGroups": [
@@ -61,7 +61,7 @@
               "description": "This page is built for platform architects, SRE leads, and delivery teams who need design packs that stay grounded in real cluster evidence, reusable platform patterns, and approved reference material.",
               "items": [
                 { "title": "Pattern-led architecture builder", "description": "Start from multicluster fleet, GitOps, disconnected, CNV, DR, migration, security, or custom patterns and adapt them to the exact target estate.", "meta": "Launcher", "href": "#architect-launcher" },
-                { "title": "Knowledge-grounded generation", "description": "Train the architect store from Red Hat docs or internal standards, then preview retrieved context before generating the HLD or LLD pack.", "meta": "Knowledge", "href": "#architect-knowledge" },
+                { "title": "Knowledge-grounded generation", "description": "Train the architect store from Red Hat docs or internal standards, then preview retrieved context before generating the shared architecture pack and the separate HLD / LLD outputs.", "meta": "Knowledge", "href": "#architect-knowledge" },
                 { "title": "Document and artifact export", "description": "Export draw.io, SVG, PNG, markdown, PDF, PowerPoint, and Word-compatible handoff content from the same result set.", "meta": "Delivery", "href": "#architect-artifacts" }
               ]
             }
@@ -76,11 +76,11 @@
         <article class="md-content__inner md-typeset">
           <section class="agent-shell__fallback">
             <h1>Architect Workspace</h1>
-            <p>Generate OpenShift HLD or LLD packs with draw.io output, live cluster grounding, and optional Red Hat or internal-document knowledge ingestion.</p>
+            <p>Generate a shared OpenShift architecture pack with a live embedded draw.io preview, then export separate HLD or LLD documents with live cluster grounding and optional Red Hat or internal-document knowledge ingestion.</p>
             <ul>
               <li>Pick a template or write a freeform OpenShift architecture brief.</li>
               <li>Optionally collect live OpenShift state, train the pgvector knowledge base from URLs or uploaded files, and ask for clarification questions before generation.</li>
-              <li>Generate the architecture pack and export draw.io, SVG, PNG, or document-friendly HLD/LLD content.</li>
+              <li>Generate the shared architecture pack, preview the editable draw.io artifact directly in the browser, and export draw.io, SVG, PNG, and separate document-ready HLD or LLD content.</li>
             </ul>
           </section>
           <div id="architect-root"></div>
