@@ -124,6 +124,7 @@ The new `Architect Workspace` adds an OpenShift-native design lane rather than a
 - pgvector-backed knowledge retrieval for internal standards, prior designs, and external references
 - research-link ingestion for Red Hat documentation or internal architecture sources
 - draw.io, SVG, and PNG artifact generation from inside the container runtime
+- enterprise-style multi-page composition that now includes dedicated hub / spoke cluster blocks, DMZ / firewall / bastion lanes, ACM / ACS / Quay / ODF placement bands, and rack / node / VLAN infrastructure topology views inspired by senior Red Hat architecture packs
 
 That means the architecture lane can build design packs from prompts alone, from live cluster state, or from a hybrid of prompt + live evidence + trained knowledge.
 

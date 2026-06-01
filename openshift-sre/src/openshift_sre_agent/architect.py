@@ -53,6 +53,115 @@ GROUP_STYLES = {
     "data": {"fill": "#FCE7F3", "stroke": "#DB2777"},
     "operations": {"fill": "#E2E8F0", "stroke": "#475569"},
 }
+GROUP_ICON_LABELS = {
+    "context": "CTX",
+    "fleet": "ACM",
+    "control-plane": "OCP",
+    "network": "NET",
+    "security": "SEC",
+    "delivery": "GIT",
+    "workload": "APP",
+    "data": "DATA",
+    "operations": "OPS",
+}
+GROUP_NODE_SHAPES = {
+    "context": "shape=cloud;",
+    "fleet": "shape=hexagon;perimeter=hexagonPerimeter2;",
+    "control-plane": "rounded=1;",
+    "network": "shape=parallelogram;perimeter=parallelogramPerimeter;",
+    "security": "shape=hexagon;perimeter=hexagonPerimeter2;",
+    "delivery": "shape=step;perimeter=stepPerimeter;",
+    "workload": "rounded=1;",
+    "data": "shape=cylinder3;boundedLbl=1;backgroundOutline=1;size=15;",
+    "operations": "shape=note;",
+}
+KUBERNETES_POD_ICON_STYLE = (
+    "sketch=0;html=1;dashed=0;whitespace=wrap;fillColor=#2875E2;strokeColor=#ffffff;"
+    "points=[[0.005,0.63,0],[0.1,0.2,0],[0.9,0.2,0],[0.5,0,0],[0.995,0.63,0],[0.72,0.99,0],[0.5,1,0],[0.28,0.99,0]];"
+    "verticalLabelPosition=bottom;align=center;verticalAlign=top;shape=mxgraph.kubernetes.icon;prIcon=pod"
+)
+DOCUMENT_PAGE_TARGETS = {
+    "hld": 50,
+    "lld": 100,
+    "assessment": 24,
+}
+REFERENCE_ARCHITECTURE_BASELINE = [
+    {
+        "title": "OpenShift Container Platform architecture",
+        "version": "4.20+",
+        "url": "https://docs.redhat.com/en/documentation/openshift_container_platform/4.20/html/architecture",
+        "focus": "Platform and application architecture, cluster boundaries, and supported topology language.",
+    },
+    {
+        "title": "OpenShift networking overview",
+        "version": "4.20+",
+        "url": "https://docs.redhat.com/en/documentation/openshift_container_platform/4.20/html/networking_overview",
+        "focus": "Networking model, service exposure, and cluster networking assumptions.",
+    },
+    {
+        "title": "OpenShift ingress and load balancing",
+        "version": "4.20+",
+        "url": "https://docs.redhat.com/en/documentation/openshift_container_platform/4.20/html/ingress_and_load_balancing",
+        "focus": "Routes, ingress, external exposure, and load-balancing patterns.",
+    },
+    {
+        "title": "OpenShift security and compliance",
+        "version": "4.20+",
+        "url": "https://docs.redhat.com/en/documentation/openshift_container_platform/4.20/html/security_and_compliance",
+        "focus": "Certificates, encryption, cluster hardening, and security controls.",
+    },
+    {
+        "title": "OpenShift storage",
+        "version": "4.20+",
+        "url": "https://docs.redhat.com/en/documentation/openshift_container_platform/4.20/html/storage",
+        "focus": "Persistent storage planning, back ends, and dynamic provisioning.",
+    },
+    {
+        "title": "OpenShift backup and restore",
+        "version": "4.20+",
+        "url": "https://docs.redhat.com/en/documentation/openshift_container_platform/4.20/html/backup_and_restore",
+        "focus": "Backup, restore, and disaster recovery decision points.",
+    },
+    {
+        "title": "OpenShift monitoring stack",
+        "version": "4.20+",
+        "url": "https://docs.redhat.com/en/documentation/openshift_container_platform/4.20/html/monitoring",
+        "focus": "Core and user workload monitoring, alerts, and troubleshooting.",
+    },
+    {
+        "title": "ACM governance",
+        "version": "2.14+",
+        "url": "https://docs.redhat.com/en/documentation/red_hat_advanced_cluster_management_for_kubernetes/2.14/html/governance",
+        "focus": "Policy-driven fleet governance, compliance, and security hardening across clusters.",
+    },
+    {
+        "title": "ACM business continuity",
+        "version": "2.14+",
+        "url": "https://docs.redhat.com/en/documentation/red_hat_advanced_cluster_management_for_kubernetes/2.14/html/business_continuity",
+        "focus": "Multicluster backup, VolSync, recovery, and business continuity patterns.",
+    },
+    {
+        "title": "OpenShift GitOps declarative cluster configuration",
+        "version": "1.18+",
+        "url": "https://docs.redhat.com/en/documentation/red_hat_openshift_gitops/1.18/html/declarative_cluster_configuration",
+        "focus": "Declarative cluster config, recursive sync, and application synchronization patterns.",
+    },
+    {
+        "title": "OpenShift GitOps multitenancy",
+        "version": "1.18+",
+        "url": "https://docs.redhat.com/en/documentation/red_hat_openshift_gitops/1.18/html/multitenancy",
+        "focus": "Argo CD tenancy boundaries, instance scoping, and multitenant GitOps choices.",
+    },
+]
+REPO_ARCHITECTURAL_PRIORITIES = [
+    "Model OpenShift 4.20+ estates with explicit management, workload, DC, and DR cluster roles rather than generic Kubernetes boxes.",
+    "Prefer supported Red Hat operators and platform-native capabilities such as ACM, GitOps, ODF, OADP, OpenShift Virtualization, OpenShift AI, logging, monitoring, and operator-driven lifecycle management.",
+    "Treat disconnected and air-gapped operations as first-class concerns: mirrored registries, controlled transfer paths, trust bundles, bastions, and supportable day-2 procedures.",
+    "Capture ingress, DNS, certificates, load balancing, firewall ports, and east-west connectivity as architecture content, not implementation afterthoughts.",
+    "Explain business continuity with backup, restore, replication, failover, relocate, and failback workflows across multicluster estates using ACM and related platform services when relevant.",
+    "Reflect the repository's deployment patterns across bare metal IPI and UPI, ROSA, ARO, IBM Z, multicluster management, DR, and migration use cases.",
+    "Generate editable draw.io output with multiple architecture views so document exports can mirror enterprise HLD and LLD review packs.",
+]
 ARCHITECT_ASSESSMENT_SCOPES = [
     {"id": "architecture-readiness", "label": "Architecture readiness", "description": "Balanced OpenShift architecture review across topology, security, operations, and resilience."},
     {"id": "security-governance", "label": "Security and governance", "description": "Review identity, policy, guardrails, and segmentation coverage."},
@@ -313,6 +422,9 @@ class PromptNormalization:
     normalized_prompt: str
     reasoning_summary: str
     confidence: str
+    version_baseline: str
+    architect_profile: str
+    source_highlights: list[str]
 
 
 @dataclass(slots=True)
@@ -346,6 +458,13 @@ def _normalize_pattern_id(pattern_id: str | None) -> str:
     return candidate if candidate in TEMPLATE_LOOKUP else "custom"
 
 
+def _reference_highlights(limit: int = 6) -> list[str]:
+    return [
+        f"{item['title']} ({item['version']}) — {item['focus']}"
+        for item in REFERENCE_ARCHITECTURE_BASELINE[:limit]
+    ]
+
+
 def _detect_pattern(prompt: str, openshift_state: dict[str, Any] | None = None) -> str:
     prompt_lower = f" {(prompt or '').lower()} "
     for pattern_id, tokens in PATTERN_RULES:
@@ -365,12 +484,28 @@ def _detect_pattern(prompt: str, openshift_state: dict[str, Any] | None = None) 
 
 def _normalize_prompt(pattern_id: str, prompt: str) -> PromptNormalization:
     template = TEMPLATE_LOOKUP[_normalize_pattern_id(pattern_id)]
-    normalized_prompt = f"{template['prompt']} Preserve the operator's original OpenShift goals and constraints: {prompt.strip()}".strip()
+    senior_architect_brief = (
+        "Act as a senior Red Hat OpenShift architect using official OpenShift Container Platform 4.20 and later guidance, "
+        "plus ACM 2.14+ and OpenShift GitOps 1.18+ practices where relevant. Favor supported OpenShift-native capabilities, "
+        "explicit cluster and tenancy boundaries, clear ingress and DNS design, certificate and trust-chain ownership, "
+        "operator lifecycle clarity, observability, backup and restore posture, and business continuity planning."
+    )
+    repository_context = " ".join(REPO_ARCHITECTURAL_PRIORITIES[:5])
+    output_expectations = (
+        "Produce a multi-page draw.io architecture pack with at least holistic, topology, security-and-operations, and "
+        "delivery-and-resilience views. Expand the HLD and LLD using enterprise document rhythm: background, objectives, AS-IS, TO-BE, "
+        "solution design views, components, sizing, network requirements, firewall ports, certificates, DNS, load balancing, DR/BCP, "
+        "migration, assumptions, decisions, and annexures."
+    )
+    normalized_prompt = (
+        f"{senior_architect_brief} {template['prompt']} {repository_context} {output_expectations} "
+        f"Preserve the operator's original OpenShift goals and constraints: {prompt.strip()}"
+    ).strip()
     confidence = "high" if pattern_id != "custom" else "medium"
     reasoning_summary = (
-        f"Detected the {template['label']} pattern from the prompt and/or live OpenShift signals."
+        f"Detected the {template['label']} pattern from the prompt and/or live OpenShift signals, then normalized it against a senior Red Hat OpenShift 4.20+ reference baseline."
         if pattern_id != "custom"
-        else "Using the custom OpenShift architecture pattern because the prompt does not strongly match a named template."
+        else "Using the custom OpenShift architecture pattern because the prompt does not strongly match a named template, while still applying the Red Hat OpenShift 4.20+ reference baseline."
     )
     return PromptNormalization(
         pattern_id=pattern_id,
@@ -378,6 +513,9 @@ def _normalize_prompt(pattern_id: str, prompt: str) -> PromptNormalization:
         normalized_prompt=normalized_prompt,
         reasoning_summary=reasoning_summary,
         confidence=confidence,
+        version_baseline="OpenShift Container Platform 4.20 and later; ACM 2.14 and later; OpenShift GitOps 1.18 and later.",
+        architect_profile="Senior Red Hat OpenShift architect",
+        source_highlights=_reference_highlights(),
     )
 
 
@@ -686,6 +824,884 @@ def _layout_nodes(nodes: list[DiagramNode]) -> tuple[dict[str, dict[str, float]]
     return positions, group_boxes, total_width, total_height
 
 
+def _zone(*, title: str, x: float, y: float, width: float, height: float, fill: str, stroke: str, subtitle: str = "", dashed: bool = False, radius: float = 18.0) -> dict[str, Any]:
+    return {
+        "title": title,
+        "subtitle": subtitle,
+        "x": x,
+        "y": y,
+        "width": width,
+        "height": height,
+        "fill": fill,
+        "stroke": stroke,
+        "dashed": dashed,
+        "radius": radius,
+    }
+
+
+def _layout_nodes_in_rect(
+    nodes: list[DiagramNode],
+    *,
+    x: float,
+    y: float,
+    width: float,
+    height: float,
+    columns: int = 1,
+    node_width: float = 210.0,
+    node_height: float = 82.0,
+) -> dict[str, dict[str, float]]:
+    positions: dict[str, dict[str, float]] = {}
+    if not nodes:
+        return positions
+    columns = max(1, columns)
+    horizontal_gap = max(16.0, (width - 32.0 - (columns * node_width)) / max(columns - 1, 1)) if columns > 1 else 0.0
+    vertical_gap = 18.0
+    current_x = x + 16.0
+    current_y = y + 42.0
+    column = 0
+    for node in nodes:
+        if current_y + node_height > y + height - 12.0 and column < columns - 1:
+            column += 1
+            current_x = x + 16.0 + (column * (node_width + horizontal_gap))
+            current_y = y + 42.0
+        positions[node.node_id] = {
+            "x": current_x,
+            "y": current_y,
+            "width": node_width,
+            "height": node_height,
+        }
+        current_y += node_height + vertical_gap
+    return positions
+
+
+def _node_matches(node: DiagramNode, *tokens: str) -> bool:
+    haystack = f"{node.label} {node.detail}".lower()
+    return any(token in haystack for token in tokens)
+
+
+def _ordered_subset(nodes: list[DiagramNode], predicate: Any) -> tuple[list[DiagramNode], list[DiagramNode]]:
+    selected: list[DiagramNode] = []
+    remaining: list[DiagramNode] = []
+    for node in nodes:
+        if predicate(node):
+            selected.append(node)
+        else:
+            remaining.append(node)
+    return selected, remaining
+
+
+def _layout_hub_spoke_page(nodes: list[DiagramNode]) -> tuple[dict[str, dict[str, float]], list[dict[str, Any]], float, float]:
+    total_width = 1560.0
+    total_height = 980.0
+    zones = [
+        _zone(title="Business context and external dependencies", subtitle="Drivers, ingress entry points, registry exchange, and upstream dependencies", x=60, y=70, width=1440, height=140, fill="#EFF6FF", stroke="#2563EB"),
+        _zone(title="Hub / management cluster block", subtitle="ACM, governance, policy, and shared control services", x=60, y=240, width=320, height=580, fill="#FEF2F2", stroke="#DC2626"),
+        _zone(title="Spoke / workload cluster blocks", subtitle="Managed OpenShift clusters, primary and DR roles, and site topology", x=410, y=240, width=650, height=580, fill="#F8FAFC", stroke="#475569", dashed=True),
+        _zone(title="Shared platform services", subtitle="GitOps, observability, security, storage, and day-2 shared services", x=1090, y=240, width=410, height=580, fill="#F5F3FF", stroke="#7C3AED"),
+    ]
+
+    remaining = list(nodes)
+    context_nodes, remaining = _ordered_subset(remaining, lambda node: node.group == "context" or _node_matches(node, "ingress", "route", "dns", "mirror", "registry", "internet"))
+    hub_nodes, remaining = _ordered_subset(remaining, lambda node: node.group == "fleet" or _node_matches(node, "acm", "hub", "governance", "policy"))
+    spoke_nodes, remaining = _ordered_subset(remaining, lambda node: node.group == "control-plane" or _node_matches(node, "cluster", "primary", "recovery", "managed", "workload cluster", "dr"))
+    shared_nodes = remaining
+
+    positions: dict[str, dict[str, float]] = {}
+    positions.update(_layout_nodes_in_rect(context_nodes or nodes[:2], x=60, y=70, width=1440, height=140, columns=max(1, min(4, len(context_nodes or nodes[:2]))), node_width=220.0, node_height=74.0))
+    positions.update(_layout_nodes_in_rect(hub_nodes or nodes[:2], x=60, y=240, width=320, height=580, columns=1, node_width=260.0, node_height=88.0))
+    positions.update(_layout_nodes_in_rect(spoke_nodes or nodes[:3], x=410, y=240, width=650, height=580, columns=2, node_width=270.0, node_height=88.0))
+    positions.update(_layout_nodes_in_rect(shared_nodes or nodes[:3], x=1090, y=240, width=410, height=580, columns=1, node_width=300.0, node_height=82.0))
+    return positions, zones, total_width, total_height
+
+
+def _layout_security_lanes_page(nodes: list[DiagramNode]) -> tuple[dict[str, dict[str, float]], list[dict[str, Any]], float, float]:
+    total_width = 1500.0
+    total_height = 980.0
+    zones = [
+        _zone(title="Internet / upstream services", subtitle="External users, public DNS, upstream registries, and provider dependencies", x=60, y=70, width=1380, height=120, fill="#FFF7ED", stroke="#EA580C"),
+        _zone(title="DMZ and edge ingress lane", subtitle="Public routes, load balancing, ingress controllers, and controlled exposure", x=60, y=220, width=1380, height=150, fill="#F8FAFC", stroke="#475569", dashed=True),
+        _zone(title="Firewall, bastion, and access lane", subtitle="Segmentation, bastion/jump access, identity, and trust-boundary controls", x=60, y=400, width=1380, height=170, fill="#FEF2F2", stroke="#DC2626"),
+        _zone(title="Cluster core and service plane", subtitle="Control plane, application, storage, and platform runtime inside the protected zone", x=60, y=600, width=1380, height=180, fill="#F0FDF4", stroke="#16A34A"),
+        _zone(title="Security operations and evidence", subtitle="Monitoring, logging, alerts, policy evidence, and incident response handoff", x=60, y=810, width=1380, height=110, fill="#EEF2FF", stroke="#4338CA"),
+    ]
+
+    remaining = list(nodes)
+    upstream_nodes, remaining = _ordered_subset(remaining, lambda node: node.group == "context" or _node_matches(node, "internet", "mirror", "registry", "source", "repo", "external"))
+    dmz_nodes, remaining = _ordered_subset(remaining, lambda node: node.group == "network" or _node_matches(node, "ingress", "route", "dns", "load balancer", "api"))
+    access_nodes, remaining = _ordered_subset(remaining, lambda node: node.group == "security" or _node_matches(node, "firewall", "bastion", "proxy", "identity", "oauth", "ldap", "policy", "acs"))
+    core_nodes, remaining = _ordered_subset(remaining, lambda node: node.group in {"fleet", "control-plane", "workload", "data"})
+    ops_nodes = remaining
+
+    positions: dict[str, dict[str, float]] = {}
+    positions.update(_layout_nodes_in_rect(upstream_nodes or nodes[:2], x=60, y=70, width=1380, height=120, columns=max(1, min(4, len(upstream_nodes or nodes[:2]))), node_width=220.0, node_height=68.0))
+    positions.update(_layout_nodes_in_rect(dmz_nodes or nodes[:2], x=60, y=220, width=1380, height=150, columns=max(1, min(4, len(dmz_nodes or nodes[:2]))), node_width=240.0, node_height=76.0))
+    positions.update(_layout_nodes_in_rect(access_nodes or nodes[:3], x=60, y=400, width=1380, height=170, columns=max(1, min(4, len(access_nodes or nodes[:3]))), node_width=250.0, node_height=84.0))
+    positions.update(_layout_nodes_in_rect(core_nodes or nodes[:4], x=60, y=600, width=1380, height=180, columns=max(1, min(4, len(core_nodes or nodes[:4]))), node_width=250.0, node_height=84.0))
+    positions.update(_layout_nodes_in_rect(ops_nodes or nodes[:2], x=60, y=810, width=1380, height=110, columns=max(1, min(4, len(ops_nodes or nodes[:2]))), node_width=240.0, node_height=68.0))
+    return positions, zones, total_width, total_height
+
+
+def _layout_service_bands_page(nodes: list[DiagramNode]) -> tuple[dict[str, dict[str, float]], list[dict[str, Any]], float, float]:
+    total_width = 1560.0
+    total_height = 980.0
+    zones = [
+        _zone(title="ACM / ACS / Quay placement band", subtitle="Hub services, governance plane, security stack, and mirrored registry placement", x=60, y=70, width=690, height=220, fill="#FEF2F2", stroke="#DC2626"),
+        _zone(title="GitOps / delivery placement band", subtitle="Argo CD, Tekton, pipelines, image promotion, and rollout controls", x=800, y=70, width=700, height=220, fill="#FFF7ED", stroke="#D97706"),
+        _zone(title="ODF / OADP / data protection band", subtitle="Storage services, snapshots, backup targets, and recovery controls", x=60, y=330, width=690, height=240, fill="#F5F3FF", stroke="#7C3AED"),
+        _zone(title="Observability / operations band", subtitle="Monitoring, logging, alerts, runbooks, and support visibility", x=800, y=330, width=700, height=240, fill="#EEF2FF", stroke="#4338CA"),
+        _zone(title="Cluster service placement block", subtitle="Core OpenShift services, cluster operators, and shared platform runtime placement", x=60, y=610, width=1440, height=280, fill="#F0FDF4", stroke="#16A34A"),
+    ]
+
+    remaining = list(nodes)
+    acm_nodes, remaining = _ordered_subset(remaining, lambda node: _node_matches(node, "acm", "acs", "quay", "hub", "governance"))
+    delivery_nodes, remaining = _ordered_subset(remaining, lambda node: node.group == "delivery" or _node_matches(node, "gitops", "argocd", "tekton", "pipeline", "promotion"))
+    data_nodes, remaining = _ordered_subset(remaining, lambda node: node.group == "data" or _node_matches(node, "odf", "oadp", "backup", "restore", "ceph", "snapshot", "storage"))
+    ops_nodes, remaining = _ordered_subset(remaining, lambda node: node.group == "operations" or _node_matches(node, "observability", "monitoring", "logging", "alert", "runbook"))
+    cluster_nodes = remaining
+
+    positions: dict[str, dict[str, float]] = {}
+    positions.update(_layout_nodes_in_rect(acm_nodes or nodes[:3], x=60, y=70, width=690, height=220, columns=max(1, min(2, len(acm_nodes or nodes[:3]))), node_width=300.0, node_height=84.0))
+    positions.update(_layout_nodes_in_rect(delivery_nodes or nodes[:3], x=800, y=70, width=700, height=220, columns=max(1, min(2, len(delivery_nodes or nodes[:3]))), node_width=310.0, node_height=84.0))
+    positions.update(_layout_nodes_in_rect(data_nodes or nodes[:3], x=60, y=330, width=690, height=240, columns=max(1, min(2, len(data_nodes or nodes[:3]))), node_width=300.0, node_height=84.0))
+    positions.update(_layout_nodes_in_rect(ops_nodes or nodes[:3], x=800, y=330, width=700, height=240, columns=max(1, min(2, len(ops_nodes or nodes[:3]))), node_width=310.0, node_height=84.0))
+    positions.update(_layout_nodes_in_rect(cluster_nodes or nodes[:4], x=60, y=610, width=1440, height=280, columns=max(1, min(4, len(cluster_nodes or nodes[:4]))), node_width=250.0, node_height=84.0))
+    return positions, zones, total_width, total_height
+
+
+def _layout_infra_topology_page(nodes: list[DiagramNode]) -> tuple[dict[str, dict[str, float]], list[dict[str, Any]], float, float]:
+    total_width = 1600.0
+    total_height = 1020.0
+    zones = [
+        _zone(title="User VLAN", subtitle="Application and east-west network presentation", x=60, y=70, width=1480, height=110, fill="#EFF6FF", stroke="#0284C7"),
+        _zone(title="Management VLAN", subtitle="API, provisioning, bastion, node management, and service administration", x=60, y=210, width=1480, height=110, fill="#ECFDF5", stroke="#16A34A"),
+        _zone(title="Rack and node topology", subtitle="Cluster and site blocks arranged like rack-aligned node lanes", x=60, y=350, width=1480, height=340, fill="#F8FAFC", stroke="#475569", dashed=True),
+        _zone(title="Platform services and infrastructure", subtitle="ODF, Quay, GitOps, monitoring, ACS, and supporting infra services", x=60, y=720, width=1480, height=240, fill="#F5F3FF", stroke="#7C3AED"),
+        _zone(title="Rack A", subtitle="Hub / infra", x=90, y=410, width=300, height=230, fill="#FFFFFF", stroke="#94A3B8", dashed=True, radius=14.0),
+        _zone(title="Rack B", subtitle="Primary cluster", x=430, y=410, width=300, height=230, fill="#FFFFFF", stroke="#94A3B8", dashed=True, radius=14.0),
+        _zone(title="Rack C", subtitle="Recovery cluster", x=770, y=410, width=300, height=230, fill="#FFFFFF", stroke="#94A3B8", dashed=True, radius=14.0),
+        _zone(title="Rack D", subtitle="Shared services", x=1110, y=410, width=300, height=230, fill="#FFFFFF", stroke="#94A3B8", dashed=True, radius=14.0),
+    ]
+
+    remaining = list(nodes)
+    user_vlan_nodes, remaining = _ordered_subset(remaining, lambda node: node.group == "network" or _node_matches(node, "ingress", "route", "dns", "load balancer", "user vlan"))
+    mgmt_nodes, remaining = _ordered_subset(remaining, lambda node: _node_matches(node, "bastion", "api", "management", "proxy", "firewall", "console", "hub") or node.group == "context")
+    rack_a_nodes, remaining = _ordered_subset(remaining, lambda node: _node_matches(node, "acm", "hub", "fleet", "quay"))
+    rack_b_nodes, remaining = _ordered_subset(remaining, lambda node: _node_matches(node, "primary", "prod", "cluster") or node.group == "control-plane")
+    rack_c_nodes, remaining = _ordered_subset(remaining, lambda node: _node_matches(node, "recovery", "dr", "backup", "oadp") or node.group == "data")
+    rack_d_nodes = remaining
+
+    positions: dict[str, dict[str, float]] = {}
+    positions.update(_layout_nodes_in_rect(user_vlan_nodes or nodes[:3], x=60, y=70, width=1480, height=110, columns=max(1, min(4, len(user_vlan_nodes or nodes[:3]))), node_width=240.0, node_height=68.0))
+    positions.update(_layout_nodes_in_rect(mgmt_nodes or nodes[:3], x=60, y=210, width=1480, height=110, columns=max(1, min(4, len(mgmt_nodes or nodes[:3]))), node_width=240.0, node_height=68.0))
+    positions.update(_layout_nodes_in_rect(rack_a_nodes or nodes[:2], x=90, y=410, width=300, height=230, columns=1, node_width=250.0, node_height=78.0))
+    positions.update(_layout_nodes_in_rect(rack_b_nodes or nodes[:2], x=430, y=410, width=300, height=230, columns=1, node_width=250.0, node_height=78.0))
+    positions.update(_layout_nodes_in_rect(rack_c_nodes or nodes[:2], x=770, y=410, width=300, height=230, columns=1, node_width=250.0, node_height=78.0))
+    positions.update(_layout_nodes_in_rect(rack_d_nodes or nodes[:3], x=1110, y=410, width=300, height=230, columns=1, node_width=250.0, node_height=78.0))
+    all_service_nodes = rack_a_nodes + rack_b_nodes + rack_c_nodes + rack_d_nodes
+    positions.update(_layout_nodes_in_rect(all_service_nodes[:6] or nodes[:4], x=60, y=720, width=1480, height=240, columns=max(1, min(4, len(all_service_nodes[:6] or nodes[:4]))), node_width=260.0, node_height=82.0))
+    return positions, zones, total_width, total_height
+
+
+def _layout_page(
+    *,
+    layout_mode: str,
+    nodes: list[DiagramNode],
+) -> tuple[dict[str, dict[str, float]], dict[str, dict[str, float]], list[dict[str, Any]], float, float]:
+    if layout_mode == "hub-spoke":
+        positions, zones, total_width, total_height = _layout_hub_spoke_page(nodes)
+        return positions, {}, zones, total_width, total_height
+    if layout_mode == "security-lanes":
+        positions, zones, total_width, total_height = _layout_security_lanes_page(nodes)
+        return positions, {}, zones, total_width, total_height
+    if layout_mode == "service-bands":
+        positions, zones, total_width, total_height = _layout_service_bands_page(nodes)
+        return positions, {}, zones, total_width, total_height
+    if layout_mode == "infra-topology":
+        positions, zones, total_width, total_height = _layout_infra_topology_page(nodes)
+        return positions, {}, zones, total_width, total_height
+    positions, group_boxes, total_width, total_height = _layout_nodes(nodes)
+    return positions, group_boxes, [], total_width, total_height
+
+
+def _filter_edges_for_nodes(edges: list[DiagramEdge], allowed_ids: set[str]) -> list[DiagramEdge]:
+    return [edge for edge in edges if edge.source in allowed_ids and edge.target in allowed_ids]
+
+
+def _diagram_page_specs(
+    *,
+    title: str,
+    planning: PromptNormalization,
+    nodes: list[DiagramNode],
+    edges: list[DiagramEdge],
+    openshift_state: dict[str, Any] | None,
+) -> list[dict[str, Any]]:
+    counts = (openshift_state or {}).get("resource_counts") or {}
+    summaries = {
+        "holistic": planning.reasoning_summary,
+        "topology": (
+            f"Site and topology view covering managed clusters={counts.get('managed_clusters', 0)}, ingress controllers={counts.get('ingress_controllers', 0)}, "
+            f"and workload/data placement assumptions."
+        ),
+        "security": "Security, governance, delivery, and observability responsibilities grouped for architecture review and control ownership.",
+        "recovery": (
+            f"Lifecycle, resilience, and recovery view covering backups={counts.get('backup_locations', 0)}, "
+            f"DR policies={counts.get('dr_policies', 0)}, and delivery/migration sequencing."
+        ),
+    }
+    page_definitions = [
+        {
+            "page_name": "Holistic OpenShift architecture",
+            "title": title,
+            "summary": summaries["holistic"],
+            "groups": GROUP_ORDER,
+            "layout_mode": "grouped",
+        },
+        {
+            "page_name": "Hub, spoke, and shared services topology",
+            "title": f"{planning.pattern_label} — hub and spoke topology",
+            "summary": "Dedicated hub / spoke cluster blocks with shared platform services, closely aligned to enterprise OpenShift fleet presentation patterns.",
+            "groups": ["context", "fleet", "control-plane", "delivery", "operations", "workload", "data", "network"],
+            "layout_mode": "hub-spoke",
+        },
+        {
+            "page_name": "DMZ, firewall, and bastion lanes",
+            "title": f"{planning.pattern_label} — perimeter and access lanes",
+            "summary": "DMZ, firewall, bastion, and protected-cluster lanes laid out like a Red Hat-ready security review page.",
+            "groups": ["context", "network", "security", "fleet", "control-plane", "workload", "data", "operations", "delivery"],
+            "layout_mode": "security-lanes",
+        },
+        {
+            "page_name": "ACM, ACS, Quay, ODF, and GitOps placement bands",
+            "title": f"{planning.pattern_label} — platform service placement",
+            "summary": "ACM / ACS / Quay / ODF / GitOps service placement bands for platform architecture review and operator ownership mapping.",
+            "groups": ["fleet", "security", "delivery", "data", "operations", "control-plane", "workload"],
+            "layout_mode": "service-bands",
+        },
+        {
+            "page_name": "Rack, node, VLAN, and infrastructure topology",
+            "title": f"{planning.pattern_label} — VLAN and rack topology",
+            "summary": summaries["topology"],
+            "groups": ["context", "network", "fleet", "control-plane", "workload", "data", "delivery", "operations"],
+            "layout_mode": "infra-topology",
+        },
+        {
+            "page_name": "Delivery, resilience, and recovery",
+            "title": f"{planning.pattern_label} — delivery and resilience",
+            "summary": summaries["recovery"],
+            "groups": ["fleet", "control-plane", "delivery", "workload", "data", "operations"],
+            "layout_mode": "grouped",
+        },
+    ]
+
+    pages: list[dict[str, Any]] = []
+    for index, definition in enumerate(page_definitions, start=1):
+        page_nodes = [node for node in nodes if node.group in definition["groups"]] or nodes
+        allowed_ids = {node.node_id for node in page_nodes}
+        page_edges = _filter_edges_for_nodes(edges, allowed_ids) or edges
+        positions, group_boxes, zones, total_width, total_height = _layout_page(layout_mode=str(definition.get("layout_mode", "grouped")), nodes=page_nodes)
+        pages.append(
+            {
+                "page_number": index,
+                "page_id": f"architect-page-{index}",
+                "page_name": definition["page_name"],
+                "title": definition["title"],
+                "summary": definition["summary"],
+                "layout_mode": definition.get("layout_mode", "grouped"),
+                "nodes": page_nodes,
+                "edges": page_edges,
+                "positions": positions,
+                "group_boxes": group_boxes,
+                "zones": zones,
+                "total_width": total_width,
+                "total_height": total_height,
+                "included_groups": [group for group in definition["groups"] if any(node.group == group for node in page_nodes)],
+            }
+        )
+    return pages
+
+
+def _section(title: str, body: list[str]) -> dict[str, Any]:
+    cleaned = [str(item).strip() for item in body if str(item or "").strip()]
+    return {"title": title, "body": cleaned}
+
+
+def _estimate_document_pages(sections: list[dict[str, Any]], document_type: str) -> int:
+    word_count = 0
+    for section in sections:
+        word_count += 120
+        for line in section.get("body", []):
+            word_count += len(str(line).split()) + 12
+    words_per_page = {
+        "hld": 180,
+        "lld": 160,
+        "assessment": 220,
+    }.get(document_type, 180)
+    return max(1, round(word_count / words_per_page))
+
+
+def _reference_sections() -> list[dict[str, Any]]:
+    return [
+        _section(
+            "Reference baseline and standards",
+            [
+                f"{item['title']} [{item['version']}] — {item['focus']} Source: {item['url']}"
+                for item in REFERENCE_ARCHITECTURE_BASELINE
+            ]
+            + [
+                "These references are treated as the default architecture baseline for OpenShift 4.20+ designs unless the operator brief explicitly requires a narrower or more opinionated standard.",
+                "Where the repository already contains stronger environment-specific guidance, the pack should reconcile official Red Hat patterns with those local deployment realities instead of replacing them.",
+            ],
+        )
+    ]
+
+
+def _repo_alignment_sections() -> list[dict[str, Any]]:
+    return [
+        _section(
+            "Repository-aligned architecture guardrails",
+            REPO_ARCHITECTURAL_PRIORITIES,
+        )
+    ]
+
+
+def _foundational_outline_sections(
+    *,
+    document_type: str,
+    title: str,
+    planning: PromptNormalization,
+    nodes: list[DiagramNode],
+    edges: list[DiagramEdge],
+    prompt: str,
+    openshift_state: dict[str, Any] | None,
+    knowledge_context: dict[str, Any] | None,
+) -> list[dict[str, Any]]:
+    counts = (openshift_state or {}).get("resource_counts") or {}
+    grouped: dict[str, list[DiagramNode]] = {}
+    for node in nodes:
+        grouped.setdefault(node.group, []).append(node)
+    knowledge_items = list((knowledge_context or {}).get("items") or [])
+    flow_lines = [f"{edge.source} -> {edge.target}{f' ({edge.label})' if edge.label else ''}" for edge in edges]
+
+    sections = [
+        _section(
+            "Background",
+            [
+                f"This {document_type.upper()} describes {title} using the {planning.pattern_label} pattern and a senior Red Hat OpenShift 4.20+ architecture baseline.",
+                "The document assumes enterprise review expectations: supported services, clear ownership boundaries, explicit operational controls, and architecture language aligned to Red Hat platform constructs.",
+                f"Operator brief preserved for design intent: {prompt.strip() or 'Prompt-free generation based on live OpenShift platform state and trained architecture knowledge.'}",
+            ],
+        ),
+        _section(
+            "Objective",
+            [
+                "Define an implementation-aligned OpenShift reference architecture that supports platform, security, networking, operations, recovery, and delivery review in a single structured package.",
+                "Provide enough detail for architecture boards, operations teams, and delivery teams to understand why the design exists, what it depends on, and how it will be operated safely.",
+                "Preserve Red Hat supported-pattern language for OpenShift 4.20 and later while aligning the output with the repository's multi-cluster, air-gapped, ACM, GitOps, DR, and migration capabilities.",
+            ],
+        ),
+        _section(
+            "AS-IS environment and constraints",
+            [
+                f"Live OpenShift state included: {'yes' if openshift_state else 'no'}.",
+                f"Observed platform indicators: managed clusters={counts.get('managed_clusters', 0)}, degraded operators={counts.get('degraded_operators', 0)}, ingress controllers={counts.get('ingress_controllers', 0)}, PVCs={counts.get('persistent_volume_claims', 0)}, DR policies={counts.get('dr_policies', 0)}, Argo CD instances={counts.get('argocd_instances', 0)}.",
+                "AS-IS review should identify topology already in place, unsupported dependencies, control-plane risks, unsupported ingress assumptions, and any mismatch between business continuity expectations and the current platform posture.",
+                "When live state is unavailable, the AS-IS baseline should be treated as hypothesis-driven and must be validated before build approval or cutover planning.",
+            ],
+        ),
+        _section(
+            "TO-BE target state",
+            [
+                f"The TO-BE state uses the {planning.pattern_label} pattern to create a supported, OpenShift-native end state with explicit cluster, security, networking, delivery, data, and operations domains.",
+                "Target-state language should favor supported Red Hat operators, OpenShift-native primitives, and explicit lifecycle ownership instead of bespoke or opaque infrastructure assumptions.",
+                "The TO-BE design should be reviewable as an enterprise architecture pack, meaning that every major boundary has a purpose, dependency chain, control objective, and operational support model.",
+            ],
+        ),
+        _section(
+            "Solution design view",
+            [
+                "The diagram pack is intentionally multi-page so architecture stakeholders can review the same design from multiple lenses without overloading a single sheet.",
+                "Required design views include holistic architecture, site and topology, security and operations, and delivery and resilience. Additional views may be added when the prompt introduces migration, virtualization, edge, or AI specialization.",
+                f"Relationship summary: {'; '.join(flow_lines[:12]) if flow_lines else 'Architecture relationships are inferred from the selected OpenShift pattern and live platform posture.'}",
+            ],
+        ),
+        _section(
+            "Solution components",
+            [
+                f"{GROUP_LABELS.get(group, group.title())}: {'; '.join(f'{node.label} — {node.detail}' for node in group_nodes)}"
+                for group, group_nodes in grouped.items()
+            ],
+        ),
+        _section(
+            "Sizing and capacity provisioning",
+            [
+                "Capacity planning should distinguish control-plane stability, infrastructure workloads, user workloads, storage growth, and observability retention expectations instead of using one undifferentiated node pool narrative.",
+                "Where the design includes AI, CNV, ODF, or multicluster management, capacity assumptions must identify which features drive CPU, memory, storage, and network consumption and how they scale over time.",
+                "Sizing decisions should also call out maintenance windows, disruption budgets, spare capacity, and recovery-time headroom so the target estate remains supportable during node failure, upgrades, and DR events.",
+            ],
+        ),
+        _section(
+            "Network requirements",
+            [
+                "Document cluster networks, service networks, ingress or egress boundaries, DNS dependencies, east-west paths, and any cross-site or cross-cluster networking assumptions required for ACM, DR, or GitOps.",
+                "Treat ingress exposure, private API reachability, proxy paths, service discovery, and firewall policy as part of the target design rather than operational follow-up work.",
+                "If the design spans sites, clouds, or air-gapped segments, define the controlled transfer path, route ownership, and failure-domain implications explicitly.",
+            ],
+        ),
+        _section(
+            "Ports to be opened",
+            [
+                "Firewall guidance must identify API, machine-config, ingress, storage, backup, DR, GitOps, monitoring, and any platform-operator ports that cross trust boundaries.",
+                "Port decisions should align to Red Hat supported service exposure models and the repository's own documented ACM, DR, ODF, Submariner, registry, and platform-service communication patterns.",
+                "The final implementation handoff should map every cross-boundary port to a named use case, source and destination context, security owner, and test method.",
+            ],
+        ),
+        _section(
+            "Certificates and trust",
+            [
+                "Certificate ownership, renewal paths, trust-bundle propagation, ingress certificates, internal service trust, and mirrored-registry trust must be explicit for OpenShift 4.20+ production designs.",
+                "Security posture should describe which components terminate TLS, which certificates are platform-managed, which are externally managed, and what evidence proves the trust chain remains valid after change.",
+                "Disconnected and hybrid designs must also explain offline CA distribution, mirror registry trust, and support-bundle validation paths.",
+            ],
+        ),
+        _section(
+            "DNS and load balancing",
+            [
+                "DNS design should include API, wildcard application routes, internal service-discovery dependencies, and any global or site-aware load-balancing behavior required by the target topology.",
+                "Load-balancing language should specify ownership for VIPs, DNS records, health checks, and cutover or failover behavior during maintenance and incident conditions.",
+                "Where external appliances or cloud-native load balancers are used, the design should state why they are needed and how they align with supported OpenShift ingress and route patterns.",
+            ],
+        ),
+        _section(
+            "Security, governance, and compliance posture",
+            [
+                "Security architecture should cover identity and access, namespace or tenancy boundaries, SCC or admission policy posture, ACS or runtime security integration, certificate handling, and audit evidence paths.",
+                "Fleet or multicluster estates should treat ACM governance as a control plane for policy, placement, and compliance evidence rather than as a generic management box.",
+                "Compliance intent should be traceable from control objective to enforcement method to evidence collection and operational ownership.",
+            ],
+        ),
+        _section(
+            "Observability and operations",
+            [
+                "Operations coverage must explain monitoring, user workload monitoring, alert routing, logging, support handoff, and runbook use for both steady-state and degraded-state operations.",
+                "Architecture readiness improves when dashboards, alerts, log retention, and troubleshooting entry points are designed alongside the platform rather than retrofitted later.",
+                "Day-2 language should include patching, upgrades, certificate rotation, backup validation, and platform health review routines.",
+            ],
+        ),
+        _section(
+            "Disaster recovery and business continuity approach",
+            [
+                "Business continuity should differentiate backup and restore, replication, relocate, failover, and failback semantics so stakeholders can distinguish recovery tooling from orchestration intent.",
+                "Where ACM, VolSync, ODF, OADP, or related controls are present, the pack should describe cluster roles, metadata paths, replication boundaries, and validation evidence after recovery events.",
+                "RTO, RPO, warm-standby or active-active assumptions, and application protection scoping should be named directly to avoid ambiguous DR promises.",
+            ],
+        ),
+        _section(
+            "Migration and implementation approach",
+            [
+                "Migration language should use waves, readiness gates, rollback safety, and hypercare ownership when the platform is modernizing from legacy clusters, VMs, or partially managed estates.",
+                "Implementation sequencing should identify day-0 prerequisites, day-1 install activities, and day-2 operator enablement with explicit ownership and dependency handoffs.",
+                "If the design is greenfield, this section still needs to describe implementation order, acceptance criteria, and how architecture decisions will be validated before production sign-off.",
+            ],
+        ),
+        _section(
+            "Architectural decisions",
+            [
+                f"Decision 1: Use the {planning.pattern_label} pattern as the design spine so stakeholders review one coherent OpenShift story instead of disconnected diagrams and notes.",
+                "Decision 2: Prefer supported Red Hat platform capabilities and operators over bespoke services unless the brief states a justified exception with lifecycle ownership.",
+                "Decision 3: Make cluster boundaries, ingress, DNS, certificates, backup, observability, and security evidence first-class architecture content rather than implementation footnotes.",
+            ],
+        ),
+        _section(
+            "Assumptions and considerations",
+            [
+                planning.reasoning_summary,
+                planning.version_baseline,
+                "The resulting pack should be reviewed against site-specific standards, subscription choices, external integration dependencies, and supportability constraints before build approval.",
+                "Any operator-specific or cloud-specific deviations from supported Red Hat patterns should be recorded explicitly with owner, rationale, and rollback implications.",
+            ],
+        ),
+    ]
+
+    if knowledge_items:
+        sections.append(
+            _section(
+                "Grounding references and trained knowledge",
+                [
+                    f"{item.get('title', 'Knowledge source')} ({item.get('source_type', 'knowledge')}) — {item.get('excerpt', '')}"
+                    for item in knowledge_items[:10]
+                ],
+            )
+        )
+
+    return sections
+
+
+def _booster_sections(
+    *,
+    document_type: str,
+    grouped: dict[str, list[DiagramNode]],
+    nodes: list[DiagramNode],
+    edges: list[DiagramEdge],
+    iteration: int,
+) -> list[dict[str, Any]]:
+    group_summaries = [
+        f"{GROUP_LABELS.get(group, group.title())}: {'; '.join(node.label for node in group_nodes)}"
+        for group, group_nodes in grouped.items()
+        if group_nodes
+    ]
+    component_names = ", ".join(node.label for node in nodes[:14]) or "core OpenShift platform services"
+    interface_names = "; ".join(f"{edge.source}->{edge.target}" for edge in edges[:14]) or "pattern-derived relationships"
+    return [
+        _section(
+            f"Implementation wave and rollout plan {iteration}",
+            [
+                f"Wave objective {iteration}: transform the target architecture into a reviewable, sequence-safe execution plan covering {component_names}.",
+                "Pre-wave conditions: validate infrastructure readiness, DNS and certificate dependencies, networking paths, mirrored content availability, access delegation, and change approvals.",
+                "Wave execution should stage platform foundations first, shared services next, workload onboarding after control validation, and resilience controls only after the steady-state path is proven.",
+                "Each wave should define explicit entry criteria, non-negotiable health checks, rollback boundaries, and service-owner approvals before the next stage begins.",
+                f"Domain emphasis for this wave: {' | '.join(group_summaries[:8])}.",
+                "Where multi-cluster coordination exists, promotion between clusters or sites must be synchronized with GitOps, policy, and DR validation rather than treated as independent workstreams.",
+                "Wave completion evidence must include health status, alert posture, certificate state, ingress validation, backup coverage, and stakeholder sign-off records.",
+            ],
+        ),
+        _section(
+            f"Operations, SRE, and support model {iteration}",
+            [
+                "Operational design must specify which team owns platform health, which team owns workload onboarding, and which team holds authority during incident, change, and recovery events.",
+                "Routine operating procedures should include monitoring review, alert tuning, logging validation, backup success review, certificate lifecycle checks, patch planning, and subscription or entitlement validation.",
+                "Supportability depends on traceable dashboards, actionable alerts, evidence-friendly logs, and first-response runbooks for the highest-risk domains in the estate.",
+                f"Primary interaction map for support reviews: {interface_names}.",
+                "For air-gapped, regulated, or multicluster environments, support runbooks should also define controlled transfer, evidence handling, and escalation boundaries between site, platform, security, and vendor support teams.",
+                "SRE operating language should distinguish transient degradation from true platform risk, and should document when to fail over, when to relocate, and when to restore from backup instead.",
+                "After every major change or recovery test, the support model must capture lessons learned, updated thresholds, and the exact evidence used to prove service restoration.",
+            ],
+        ),
+        _section(
+            f"Security and compliance evidence pack {iteration}",
+            [
+                "Security evidence should align identity, privilege, certificates, network segmentation, policy enforcement, runtime findings, and audit event generation to named control objectives.",
+                "Governance evidence for multicluster estates should identify which policies are inherited, which are cluster-specific, how waivers are approved, and how drift is detected and remediated.",
+                "Compliance conversations are strongest when the pack explains not only what control exists, but where it is enforced, who reviews it, and what artifact proves continued compliance.",
+                f"This evidence round focuses on the following domains: {' | '.join(group_summaries[:8])}.",
+                "For delivery lanes, the evidence pack should include GitOps tenancy, promotion gates, secret handling, signed or validated content paths, and rollback authorization boundaries.",
+                "For resilience lanes, the evidence pack should include backup immutability or protection assumptions, restore validation, DR exercises, and post-event attestation requirements.",
+                "Risk acceptance items, open gaps, and temporary exceptions must be visible in the architecture pack so downstream implementation teams do not inherit hidden assumptions.",
+            ],
+        ),
+    ] + (
+        [
+            _section(
+                f"Low-level deployment matrix {iteration}",
+                [
+                    f"Low-level deployment matrix {iteration} maps component placement, namespace boundaries, operator dependencies, ingress exposure, secrets, certificates, and supporting infrastructure for {component_names}.",
+                    "Each component row should capture environment scope, cluster scope, namespace or project placement, required operators, storage dependencies, network policy assumptions, and monitoring hooks.",
+                    "The matrix should also track deployment order, rollback dependency, configuration source of truth, and whether the component is managed by GitOps, imperative automation, or operator reconciliation.",
+                    "Integration dependencies should explicitly record DNS names, routes, service accounts, certificates, firewall paths, storage classes, and recovery responsibilities.",
+                    "The implementation team should be able to walk this matrix during build, upgrade, and recovery without needing to reinterpret the HLD narrative.",
+                    "Every matrix entry should end with validation evidence, expected healthy signal, and an escalation pointer for support operations.",
+                ],
+            ),
+            _section(
+                f"Validation, rollback, and change control {iteration}",
+                [
+                    "Rollback design must identify the last-known-good state, protected data boundary, authorization path, and the exact signals that tell the team rollback is safer than continuing the change.",
+                    "Validation should cover happy path, degraded path, restart path, certificate path, backup state, monitoring signal, and application reachability across every major architecture boundary.",
+                    "Change control artifacts should reference maintenance window prerequisites, stakeholder approvals, health checks before and after change, and post-change evidence retention requirements.",
+                    f"This validation round reviews {len(nodes)} components and {len(edges)} primary relationships in the architecture pack.",
+                    "Where GitOps or multicluster promotion exists, change control should validate sync health, drift reconciliation, policy compliance, and impact on dependent clusters or recovery targets.",
+                    "Where recovery services exist, the rollback conversation must explicitly distinguish restore, failover, relocate, and failback so actions remain deterministic during incident response.",
+                ],
+            ),
+        ]
+        if document_type == "lld"
+        else []
+    )
+
+
+def _domain_lines(group: str, group_nodes: list[DiagramNode], document_type: str) -> list[str]:
+    domain_title = GROUP_LABELS.get(group, group.title())
+    lines = [
+        f"{domain_title} scope: this domain contains {len(group_nodes)} primary component(s) and establishes the responsibility boundary for the {document_type.upper()} pack.",
+        f"Architecture intent: keep the {domain_title.lower()} lane explicit so ownership, sequencing, and support boundaries are reviewable by platform, security, network, and application teams.",
+    ]
+    for node in group_nodes:
+        lines.extend(
+            [
+                f"Component: {node.label}. Purpose: {node.detail}",
+                f"Design expectation for {node.label}: define placement, dependencies, scaling boundaries, security controls, and operational ownership before implementation sign-off.",
+                f"Operational note for {node.label}: capture health indicators, failure symptoms, and the first-response workflow for this component within the target operating model.",
+            ]
+        )
+        if document_type == "lld":
+            lines.extend(
+                [
+                    f"Implementation detail for {node.label}: record namespace or cluster placement, resource assumptions, required operators, DNS or ingress needs, and lifecycle dependencies.",
+                    f"Validation detail for {node.label}: include deployment checks, rollback conditions, security verification, and observability signals that indicate readiness or degradation.",
+                ]
+            )
+    return lines
+
+
+def _component_appendix_sections(nodes: list[DiagramNode], document_type: str) -> list[dict[str, Any]]:
+    sections: list[dict[str, Any]] = []
+    for node in nodes:
+        sections.append(
+            _section(
+                f"Component specification — {node.label}",
+                [
+                    f"Role: {node.label} operates in the {GROUP_LABELS.get(node.group, node.group.title())} domain.",
+                    f"Purpose: {node.detail}",
+                    "Placement and topology: document the exact site, cluster, namespace, or host placement expected for this component and identify any anti-affinity or failure-domain expectations.",
+                    "Dependencies: identify upstream identity, DNS, registry, storage, logging, monitoring, certificate, and network controls that must be in place before this component is activated.",
+                    "Security controls: define access control, secrets handling, certificate ownership, segmentation expectations, audit requirements, and hardening responsibilities.",
+                    "Performance and scaling: define expected throughput, concurrency, storage, CPU, memory, and horizontal or vertical growth guardrails.",
+                    "Operations and support: capture routine maintenance, upgrade sequencing, backup expectations, health checks, SLO ownership, and evidence capture requirements.",
+                    "Failure handling: describe degraded mode, restart or failover behavior, rollback approach, and the escalation path when this component becomes unavailable.",
+                    "Observability: list the metrics, events, logs, alerts, and dashboards that will prove this component is healthy and supportable.",
+                    "Implementation checkpoints: include prerequisite validation, configuration completion criteria, and production readiness checks for stakeholder sign-off.",
+                ]
+                + (
+                    [
+                        "Low-level implementation notes: include deployment order, resource manifests or operator CRs, namespace conventions, integration endpoints, and any site-specific overrides.",
+                        "Day-2 change model: describe patching, certificate renewal, capacity review, routine runbook execution, and validation after change windows.",
+                    ]
+                    if document_type == "lld"
+                    else []
+                ),
+            )
+        )
+        if document_type == "lld":
+            sections.append(
+                _section(
+                    f"Verification and rollback — {node.label}",
+                    [
+                        f"Pre-deployment checks for {node.label}: confirm infrastructure readiness, DNS and certificate prerequisites, firewall paths, storage preparation, and access delegation.",
+                        f"Deployment verification for {node.label}: verify the control objective, happy path, degraded path, monitoring signal, and support handoff evidence.",
+                        f"Security verification for {node.label}: validate least privilege, segmentation, secret handling, compliance evidence, and audit event generation.",
+                        f"Rollback checkpoints for {node.label}: define the last-known-good state, data protection measure, rollback trigger, stakeholder approvals, and service validation after recovery.",
+                        f"Operational readiness for {node.label}: confirm dashboards, alerts, ownership matrix, runbook links, and spare capacity assumptions for steady state and incident scenarios.",
+                    ],
+                )
+            )
+    return sections
+
+
+def _interface_appendix_sections(edges: list[DiagramEdge], document_type: str) -> list[dict[str, Any]]:
+    sections: list[dict[str, Any]] = []
+    for index, edge in enumerate(edges, start=1):
+        sections.append(
+            _section(
+                f"Interface and dependency matrix {index}",
+                [
+                    f"Flow: {edge.source} -> {edge.target}{f' ({edge.label})' if edge.label else ''}.",
+                    "Purpose of the interface: explain what is exchanged across this boundary, why the dependency exists, and who owns each side of the relationship.",
+                    "Connectivity and policy: identify DNS, VIP, route, load-balancing, proxy, firewall, certificate, network-policy, or service-mesh assumptions for this dependency.",
+                    "Security expectation: describe authentication, authorization, encryption, trust anchors, and audit requirements associated with this interface.",
+                    "Failure behavior: define timeout, retry, fallback, backlog, or failover behavior if the relationship degrades or becomes unavailable.",
+                ]
+                + (
+                    [
+                        "Low-level mapping: record endpoint names, namespace or cluster source and destination, expected port exposure, secret usage, and deployment sequencing dependencies.",
+                        "Validation steps: test normal operation, degraded operation, recovery, and rollback across this interface before production sign-off.",
+                    ]
+                    if document_type == "lld"
+                    else []
+                ),
+            )
+        )
+    return sections
+
+
+def _padding_sections(
+    *,
+    document_type: str,
+    grouped: dict[str, list[DiagramNode]],
+    nodes: list[DiagramNode],
+    edges: list[DiagramEdge],
+) -> list[dict[str, Any]]:
+    sections: list[dict[str, Any]] = []
+    for group in GROUP_ORDER:
+        group_nodes = grouped.get(group) or []
+        if not group_nodes:
+            continue
+        sections.append(
+            _section(
+                f"Appendix — {GROUP_LABELS.get(group, group.title())} implementation checklist",
+                [
+                    f"Checklist objective: turn the {GROUP_LABELS.get(group, group.title()).lower()} domain into an executable workstream with explicit prerequisites, validations, and ownership boundaries.",
+                    "Prerequisites: infrastructure readiness, network reachability, DNS, time sync, certificates, access delegation, observability hooks, and approved change records.",
+                    "Configuration checkpoints: cluster or namespace placement, operator availability, quota or policy alignment, secrets preparation, storage availability, and ingress exposure rules.",
+                    "Security checkpoints: identity, privilege, audit, segmentation, certificate trust, secret rotation, and evidence retention expectations must be captured before go-live.",
+                    "Operational checkpoints: dashboards, alerts, runbooks, backup coverage, maintenance windows, and handoff readiness are validated before production use.",
+                    f"Components in this checklist: {'; '.join(node.label for node in group_nodes)}.",
+                ]
+                + (
+                    [
+                        "Detailed execution notes: record manifest locations, operator CRs, parameter sources, rollback criteria, and validation scripts or commands used by the delivery team.",
+                        "Post-change validation: record smoke tests, platform health checks, security evidence collection, and stakeholder sign-off requirements for the domain.",
+                    ]
+                    if document_type == "lld"
+                    else []
+                ),
+            )
+        )
+    sections.extend(_component_appendix_sections(nodes, document_type))
+    sections.extend(_interface_appendix_sections(edges, document_type))
+    return sections
+
+
+def _node_icon_profile(node: DiagramNode) -> dict[str, str | float]:
+    text = f"{node.label} {node.detail}".lower()
+    if any(token in text for token in ["acm", "hub cluster", "fleet", "managed cluster", "multicluster"]):
+        return {
+            "kind": "acm",
+            "accent": "#FF3333",
+            "drawio_style": "rounded=1;whiteSpace=wrap;html=1;fillColor=#FF3333;strokeColor=#FFFFFF;fontStyle=1;fontColor=#ffffff;align=center;verticalAlign=middle;arcSize=20;",
+            "drawio_value": "ACM",
+            "width": 34.0,
+            "height": 20.0,
+        }
+    if any(token in text for token in ["firewall", "policy", "rbac", "scc", "acs", "oauth", "ldap", "security", "governance", "segmentation"]):
+        return {
+            "kind": "firewall",
+            "accent": "#DA4026",
+            "drawio_style": "sketch=0;pointerEvents=1;shadow=0;dashed=0;html=1;strokeColor=none;labelPosition=center;verticalLabelPosition=bottom;verticalAlign=top;outlineConnect=0;align=center;shape=mxgraph.office.concepts.firewall;fillColor=#DA4026;",
+            "drawio_value": "",
+            "width": 28.0,
+            "height": 24.0,
+        }
+    if any(token in text for token in ["switch", "ingress", "route", "dns", "load balancer", "network", "submariner"]):
+        return {
+            "kind": "switch",
+            "accent": "#6881B3",
+            "drawio_style": "fontColor=#0066CC;verticalAlign=top;verticalLabelPosition=bottom;labelPosition=center;align=center;html=1;outlineConnect=0;fillColor=#CCCCCC;strokeColor=#6881B3;gradientColor=none;gradientDirection=north;strokeWidth=2;shape=mxgraph.networks.switch;",
+            "drawio_value": "",
+            "width": 34.0,
+            "height": 16.0,
+        }
+    if any(token in text for token in ["virtual machine", "kubevirt", "cnv", "hyperconverged", "vm workload"]):
+        return {
+            "kind": "vm",
+            "accent": "#4495D1",
+            "drawio_style": "shadow=0;dashed=0;html=1;strokeColor=none;fillColor=#4495D1;labelPosition=center;verticalLabelPosition=bottom;verticalAlign=top;align=center;outlineConnect=0;shape=mxgraph.veeam.2d.virtual_machine;",
+            "drawio_value": "",
+            "width": 26.0,
+            "height": 26.0,
+        }
+    if any(token in text for token in ["storage", "odf", "oadp", "snapshot", "backup", "restore", "disk", "volume", "ceph", "rook", "persistent"]):
+        return {
+            "kind": "disk",
+            "accent": "#7C3AED",
+            "drawio_style": "image;aspect=fixed;html=1;points=[];align=center;fontSize=12;image=img/lib/azure2/other/Disk_Pool.svg;",
+            "drawio_value": "",
+            "width": 28.0,
+            "height": 26.0,
+        }
+    if any(token in text for token in ["bare metal", "server", "worker", "master node", "control plane node", "bootstrap"]):
+        return {
+            "kind": "server",
+            "accent": "#005F4B",
+            "drawio_style": "image;aspect=fixed;perimeter=ellipsePerimeter;html=1;align=center;fontSize=12;verticalAlign=top;fontColor=#364149;shadow=0;dashed=0;image=img/lib/cumulus/server_bare_metal.svg;",
+            "drawio_value": "",
+            "width": 30.0,
+            "height": 22.0,
+        }
+    if any(token in text for token in ["gitops", "tekton", "quay", "application", "workload", "monitoring", "logging", "runbook", "observability", "pod"]):
+        return {
+            "kind": "pod",
+            "accent": "#2875E2",
+            "drawio_style": KUBERNETES_POD_ICON_STYLE,
+            "drawio_value": "",
+            "width": 28.0,
+            "height": 18.0,
+        }
+    if node.group == "control-plane":
+        return {
+            "kind": "openshift",
+            "accent": "#EE0000",
+            "drawio_style": "image;sketch=0;aspect=fixed;html=1;points=[];align=center;fontSize=12;image=img/lib/mscae/OpenShift.svg;",
+            "drawio_value": "",
+            "width": 26.0,
+            "height": 26.0,
+        }
+    if node.group == "data":
+        return {
+            "kind": "disk",
+            "accent": "#7C3AED",
+            "drawio_style": "image;aspect=fixed;html=1;points=[];align=center;fontSize=12;image=img/lib/azure2/other/Disk_Pool.svg;",
+            "drawio_value": "",
+            "width": 28.0,
+            "height": 26.0,
+        }
+    if node.group in {"delivery", "workload", "operations"}:
+        return {
+            "kind": "pod",
+            "accent": "#2875E2",
+            "drawio_style": KUBERNETES_POD_ICON_STYLE,
+            "drawio_value": "",
+            "width": 28.0,
+            "height": 18.0,
+        }
+    return {
+        "kind": "generic",
+        "accent": str(GROUP_STYLES.get(node.group, {"stroke": "#475569"})["stroke"]),
+        "drawio_style": "ellipse;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#475569;strokeWidth=2;",
+        "drawio_value": "",
+        "width": 22.0,
+        "height": 22.0,
+    }
+
+
+def _svg_icon_markup(kind: str, accent: str, x: float, y: float) -> str:
+    if kind == "openshift":
+        return (
+            f'<circle cx="{x + 13}" cy="{y + 13}" r="10" fill="none" stroke="{accent}" stroke-width="3"/>'
+            f'<circle cx="{x + 13}" cy="{y + 13}" r="4.5" fill="none" stroke="{accent}" stroke-width="2"/>'
+        )
+    if kind == "acm":
+        return (
+            f'<rect x="{x}" y="{y + 4}" width="28" height="18" rx="6" fill="{accent}" stroke="#FFFFFF" stroke-width="1.5"/>'
+            f'<text x="{x + 14}" y="{y + 17}" font-size="9" font-weight="700" text-anchor="middle" fill="#FFFFFF">ACM</text>'
+        )
+    if kind == "switch":
+        ports = ''.join(f'<circle cx="{x + 7 + (offset * 5)}" cy="{y + 16}" r="1.2" fill="#FFFFFF"/>' for offset in range(4))
+        return (
+            f'<rect x="{x}" y="{y + 8}" width="30" height="12" rx="3" fill="#D1D5DB" stroke="{accent}" stroke-width="2"/>'
+            f'{ports}'
+        )
+    if kind == "firewall":
+        bricks = []
+        for row in range(2):
+            for column in range(3):
+                brick_x = x + 2 + (column * 8) + (4 if row else 0)
+                brick_y = y + 4 + (row * 8)
+                bricks.append(f'<rect x="{brick_x}" y="{brick_y}" width="7" height="6" rx="1" fill="{accent}"/>')
+        return ''.join(bricks)
+    if kind == "vm":
+        return (
+            f'<rect x="{x + 2}" y="{y + 3}" width="24" height="16" rx="2" fill="#E0F2FE" stroke="{accent}" stroke-width="2"/>'
+            f'<rect x="{x + 10}" y="{y + 20}" width="8" height="2.5" rx="1" fill="{accent}"/>'
+        )
+    if kind == "disk":
+        return (
+            f'<ellipse cx="{x + 14}" cy="{y + 8}" rx="10" ry="4" fill="#F5F3FF" stroke="{accent}" stroke-width="2"/>'
+            f'<rect x="{x + 4}" y="{y + 8}" width="20" height="11" fill="#F5F3FF" stroke="{accent}" stroke-width="2"/>'
+            f'<ellipse cx="{x + 14}" cy="{y + 19}" rx="10" ry="4" fill="#F5F3FF" stroke="{accent}" stroke-width="2"/>'
+        )
+    if kind == "server":
+        bays = ''.join(f'<rect x="{x + 6}" y="{y + 6 + (slot * 5)}" width="16" height="2.5" rx="1" fill="#FFFFFF"/>' for slot in range(3))
+        return (
+            f'<rect x="{x + 2}" y="{y + 2}" width="24" height="22" rx="3" fill="#ECFDF5" stroke="{accent}" stroke-width="2"/>'
+            f'{bays}'
+        )
+    if kind == "pod":
+        return (
+            f'<path d="M {x + 14} {y + 1} L {x + 25} {y + 7} L {x + 22} {y + 19} L {x + 14} {y + 25} L {x + 6} {y + 19} L {x + 3} {y + 7} Z" fill="#DBEAFE" stroke="{accent}" stroke-width="2"/>'
+            f'<circle cx="{x + 14}" cy="{y + 13}" r="3" fill="{accent}"/>'
+        )
+    return f'<circle cx="{x + 14}" cy="{y + 14}" r="9" fill="#FFFFFF" stroke="{accent}" stroke-width="2"/>'
+
+
 def _wrap_text(value: str, max_chars: int = 26) -> list[str]:
     words = str(value or "").split()
     if not words:
@@ -703,20 +1719,48 @@ def _wrap_text(value: str, max_chars: int = 26) -> list[str]:
     return lines[:4]
 
 
-def _render_svg(title: str, summary: str, nodes: list[DiagramNode], edges: list[DiagramEdge], positions: dict[str, dict[str, float]], group_boxes: dict[str, dict[str, float]], total_width: float, total_height: float) -> str:
+def _render_svg(
+    title: str,
+    summary: str,
+    nodes: list[DiagramNode],
+    edges: list[DiagramEdge],
+    positions: dict[str, dict[str, float]],
+    group_boxes: dict[str, dict[str, float]],
+    zones: list[dict[str, Any]],
+    total_width: float,
+    total_height: float,
+) -> str:
     parts = [
         f'<svg xmlns="http://www.w3.org/2000/svg" width="{int(total_width)}" height="{int(total_height)}" viewBox="0 0 {int(total_width)} {int(total_height)}">',
         '<rect width="100%" height="100%" fill="#F8FAFC"/>',
         f'<text x="48" y="36" font-size="24" font-weight="700" fill="#0F172A">{escape(title)}</text>',
         f'<text x="48" y="56" font-size="12" fill="#475569">{escape(summary)}</text>',
     ]
+    for zone in zones:
+        dashed = ' stroke-dasharray="10 8"' if zone.get("dashed") else ""
+        parts.append(
+            f'<rect x="{zone["x"]}" y="{zone["y"]}" width="{zone["width"]}" height="{zone["height"]}" rx="{zone.get("radius", 18)}" fill="{zone["fill"]}" fill-opacity="0.55" stroke="{zone["stroke"]}" stroke-width="2"{dashed}/>'
+        )
+        parts.append(
+            f'<text x="{zone["x"] + 14}" y="{zone["y"] + 24}" font-size="14" font-weight="700" fill="#0F172A">{escape(zone["title"])}</text>'
+        )
+        if zone.get("subtitle"):
+            parts.append(
+                f'<text x="{zone["x"] + 14}" y="{zone["y"] + 42}" font-size="11" fill="#475569">{escape(str(zone["subtitle"]))}</text>'
+            )
     for group, box in group_boxes.items():
         style = GROUP_STYLES[group]
         parts.append(
             f'<rect x="{box["x"]}" y="{box["y"]}" width="{box["width"]}" height="{box["height"]}" rx="18" fill="{style["fill"]}" fill-opacity="0.55" stroke="{style["stroke"]}" stroke-width="2"/>'
         )
         parts.append(
-            f'<text x="{box["x"] + 16}" y="{box["y"] + 26}" font-size="14" font-weight="700" fill="#0F172A">{escape(GROUP_LABELS.get(group, group.title()))}</text>'
+            f'<rect x="{box["x"] + 16}" y="{box["y"] + 10}" width="42" height="18" rx="9" fill="{style["stroke"]}"/>'
+        )
+        parts.append(
+            f'<text x="{box["x"] + 37}" y="{box["y"] + 23}" font-size="10" font-weight="700" text-anchor="middle" fill="#FFFFFF">{escape(GROUP_ICON_LABELS.get(group, group[:3].upper()))}</text>'
+        )
+        parts.append(
+            f'<text x="{box["x"] + 66}" y="{box["y"] + 24}" font-size="14" font-weight="700" fill="#0F172A">{escape(GROUP_LABELS.get(group, group.title()))}</text>'
         )
 
     for edge in edges:
@@ -738,19 +1782,29 @@ def _render_svg(title: str, summary: str, nodes: list[DiagramNode], edges: list[
     for node in nodes:
         position = positions[node.node_id]
         style = GROUP_STYLES.get(node.group, {"fill": "#FFFFFF", "stroke": "#94A3B8"})
+        icon_profile = _node_icon_profile(node)
         parts.append(
             f'<rect x="{position["x"]}" y="{position["y"]}" width="{position["width"]}" height="{position["height"]}" rx="14" fill="#FFFFFF" stroke="{style["stroke"]}" stroke-width="2"/>'
         )
+        parts.append(_svg_icon_markup(str(icon_profile["kind"]), str(icon_profile["accent"]), position["x"] + 10, position["y"] + 8))
         title_lines = _wrap_text(node.label, 24)
         for index, line in enumerate(title_lines):
             parts.append(
-                f'<text x="{position["x"] + 12}" y="{position["y"] + 24 + (index * 15)}" font-size="13" font-weight="700" fill="#0F172A">{escape(line)}</text>'
+                f'<text x="{position["x"] + 50}" y="{position["y"] + 24 + (index * 15)}" font-size="13" font-weight="700" fill="#0F172A">{escape(line)}</text>'
             )
         detail_lines = _wrap_text(node.detail, 30)
         for index, line in enumerate(detail_lines[:2]):
             parts.append(
-                f'<text x="{position["x"] + 12}" y="{position["y"] + 52 + (index * 13)}" font-size="11" fill="#475569">{escape(line)}</text>'
+                f'<text x="{position["x"] + 50}" y="{position["y"] + 52 + (index * 13)}" font-size="11" fill="#475569">{escape(line)}</text>'
             )
+    legend_y = total_height - 36
+    legend_x = 48
+    present_groups = [group for group in GROUP_ORDER if group in group_boxes] or [group for group in GROUP_ORDER if any(node.group == group for node in nodes)]
+    for group in present_groups:
+        style = GROUP_STYLES[group]
+        parts.append(f'<rect x="{legend_x}" y="{legend_y}" width="14" height="14" rx="4" fill="{style["fill"]}" stroke="{style["stroke"]}" stroke-width="1.5"/>')
+        parts.append(f'<text x="{legend_x + 22}" y="{legend_y + 11}" font-size="11" fill="#334155">{escape(GROUP_LABELS.get(group, group.title()))}</text>')
+        legend_x += 148
     parts.append('</svg>')
     return ''.join(parts)
 
@@ -759,45 +1813,117 @@ def _drawio_text(value: str) -> str:
     return escape(value).replace("\n", "&#xa;")
 
 
-def _build_drawio_xml(title: str, nodes: list[DiagramNode], edges: list[DiagramEdge], positions: dict[str, dict[str, float]], group_boxes: dict[str, dict[str, float]], total_width: float, total_height: float) -> str:
+def _build_drawio_xml(title: str, diagram_pages: list[dict[str, Any]]) -> str:
     mxfile = ET.Element("mxfile", host="app.diagrams.net", modified=datetime.now(timezone.utc).isoformat(), agent="openshift-sre-architect", version="24.7.17")
-    diagram = ET.SubElement(mxfile, "diagram", id="openshift-architect", name=title)
-    graph_model = ET.SubElement(diagram, "mxGraphModel", dx="1200", dy="700", grid="1", gridSize="10", guides="1", tooltips="1", connect="1", arrows="1", fold="1", page="1", pageScale="1", pageWidth=str(int(total_width)), pageHeight=str(int(total_height)), math="0", shadow="0")
-    root = ET.SubElement(graph_model, "root")
-    ET.SubElement(root, "mxCell", id="0")
-    ET.SubElement(root, "mxCell", id="1", parent="0")
+    for page in diagram_pages:
+        diagram = ET.SubElement(mxfile, "diagram", id=str(page["page_id"]), name=str(page["page_name"] or title))
+        graph_model = ET.SubElement(
+            diagram,
+            "mxGraphModel",
+            dx="1200",
+            dy="700",
+            grid="1",
+            gridSize="10",
+            guides="1",
+            tooltips="1",
+            connect="1",
+            arrows="1",
+            fold="1",
+            page="1",
+            pageScale="1",
+            pageWidth=str(int(page["total_width"])),
+            pageHeight=str(int(page["total_height"])),
+            math="0",
+            shadow="0",
+        )
+        root = ET.SubElement(graph_model, "root")
+        ET.SubElement(root, "mxCell", id="0")
+        ET.SubElement(root, "mxCell", id="1", parent="0")
 
-    cell_counter = 2
-    group_ids: dict[str, str] = {}
-    node_ids: dict[str, str] = {}
-
-    for group, box in group_boxes.items():
-        style = GROUP_STYLES[group]
-        group_id = str(cell_counter)
+        cell_counter = 2
+        title_cell = ET.SubElement(root, "mxCell", id=str(cell_counter), value=_drawio_text(page["title"]), style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=20;fontStyle=1;", vertex="1", parent="1")
+        ET.SubElement(title_cell, "mxGeometry", x="40", y="12", width=str(max(600, int(page["total_width"]) - 80)), height="26", **{"as": "geometry"})
         cell_counter += 1
-        group_ids[group] = group_id
-        group_cell = ET.SubElement(root, "mxCell", id=group_id, value=_drawio_text(GROUP_LABELS.get(group, group.title())), style=f"rounded=1;whiteSpace=wrap;html=1;fillColor={style['fill']};strokeColor={style['stroke']};fontStyle=1;fontSize=14;align=left;verticalAlign=top;spacingTop=8;spacingLeft=12;", vertex="1", parent="1")
-        ET.SubElement(group_cell, "mxGeometry", x=str(box["x"]), y=str(box["y"]), width=str(box["width"]), height=str(box["height"]), as_="geometry")
-
-    for node in nodes:
-        position = positions[node.node_id]
-        cell_id = str(cell_counter)
+        summary_cell = ET.SubElement(root, "mxCell", id=str(cell_counter), value=_drawio_text(page["summary"]), style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=11;fontColor=#475569;", vertex="1", parent="1")
+        ET.SubElement(summary_cell, "mxGeometry", x="40", y="36", width=str(max(600, int(page["total_width"]) - 80)), height="20", **{"as": "geometry"})
         cell_counter += 1
-        node_ids[node.node_id] = cell_id
-        style = GROUP_STYLES.get(node.group, {"stroke": "#94A3B8"})
-        value = _drawio_text(f"{node.label}\n{node.detail}")
-        node_cell = ET.SubElement(root, "mxCell", id=cell_id, value=value, style=f"rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor={style['stroke']};fontSize=12;fontStyle=1;spacing=8;", vertex="1", parent="1")
-        ET.SubElement(node_cell, "mxGeometry", x=str(position["x"]), y=str(position["y"]), width=str(position["width"]), height=str(position["height"]), as_="geometry")
 
-    for edge in edges:
-        source_id = node_ids.get(edge.source)
-        target_id = node_ids.get(edge.target)
-        if not source_id or not target_id:
-            continue
-        edge_id = str(cell_counter)
-        cell_counter += 1
-        edge_cell = ET.SubElement(root, "mxCell", id=edge_id, value=_drawio_text(edge.label), style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#64748B;fontSize=11;endArrow=block;endFill=1;", edge="1", parent="1", source=source_id, target=target_id)
-        ET.SubElement(edge_cell, "mxGeometry", relative="1", as_="geometry")
+        for zone in page.get("zones", []):
+            zone_value = zone["title"] if not zone.get("subtitle") else f"{zone['title']}\n{zone['subtitle']}"
+            zone_cell = ET.SubElement(
+                root,
+                "mxCell",
+                id=str(cell_counter),
+                value=_drawio_text(zone_value),
+                style=(
+                    f"rounded=1;whiteSpace=wrap;html=1;fillColor={zone['fill']};fillOpacity=55;strokeColor={zone['stroke']};"
+                    f"strokeWidth=2;fontStyle=1;fontSize=13;align=left;verticalAlign=top;spacingTop=8;spacingLeft=12;"
+                    + ("dashed=1;dashPattern=12 12;" if zone.get("dashed") else "")
+                ),
+                vertex="1",
+                parent="1",
+            )
+            ET.SubElement(
+                zone_cell,
+                "mxGeometry",
+                x=str(zone["x"]),
+                y=str(zone["y"]),
+                width=str(zone["width"]),
+                height=str(zone["height"]),
+                **{"as": "geometry"},
+            )
+            cell_counter += 1
+
+        node_ids: dict[str, str] = {}
+        for group, box in page["group_boxes"].items():
+            style = GROUP_STYLES[group]
+            group_id = str(cell_counter)
+            cell_counter += 1
+            group_value = _drawio_text(f"{GROUP_ICON_LABELS.get(group, group[:3].upper())} • {GROUP_LABELS.get(group, group.title())}")
+            group_cell = ET.SubElement(root, "mxCell", id=group_id, value=group_value, style=f"rounded=1;whiteSpace=wrap;html=1;fillColor={style['fill']};strokeColor={style['stroke']};fontStyle=1;fontSize=14;align=left;verticalAlign=top;spacingTop=8;spacingLeft=12;", vertex="1", parent="1")
+            ET.SubElement(group_cell, "mxGeometry", x=str(box["x"]), y=str(box["y"]), width=str(box["width"]), height=str(box["height"]), **{"as": "geometry"})
+
+        for node in page["nodes"]:
+            position = page["positions"][node.node_id]
+            cell_id = str(cell_counter)
+            cell_counter += 1
+            node_ids[node.node_id] = cell_id
+            style = GROUP_STYLES.get(node.group, {"stroke": "#94A3B8"})
+            shape = GROUP_NODE_SHAPES.get(node.group, "rounded=1;")
+            icon_profile = _node_icon_profile(node)
+            value = _drawio_text(f"{node.label}\n{node.detail}")
+            node_cell = ET.SubElement(root, "mxCell", id=cell_id, value=value, style=f"{shape}whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor={style['stroke']};fontSize=12;fontStyle=1;spacing=8;spacingLeft=48;", vertex="1", parent="1")
+            ET.SubElement(node_cell, "mxGeometry", x=str(position["x"]), y=str(position["y"]), width=str(position["width"]), height=str(position["height"]), **{"as": "geometry"})
+            icon_id = str(cell_counter)
+            cell_counter += 1
+            icon_cell = ET.SubElement(
+                root,
+                "mxCell",
+                id=icon_id,
+                value=_drawio_text(str(icon_profile["drawio_value"])),
+                style=str(icon_profile["drawio_style"]),
+                vertex="1",
+                parent="1",
+            )
+            ET.SubElement(
+                icon_cell,
+                "mxGeometry",
+                x=str(position["x"] + 10),
+                y=str(position["y"] + 10),
+                width=str(icon_profile["width"]),
+                height=str(icon_profile["height"]),
+                **{"as": "geometry"},
+            )
+
+        for edge in page["edges"]:
+            source_id = node_ids.get(edge.source)
+            target_id = node_ids.get(edge.target)
+            if not source_id or not target_id:
+                continue
+            edge_id = str(cell_counter)
+            cell_counter += 1
+            edge_cell = ET.SubElement(root, "mxCell", id=edge_id, value=_drawio_text(edge.label), style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#64748B;fontSize=11;endArrow=block;endFill=1;", edge="1", parent="1", source=source_id, target=target_id)
+            ET.SubElement(edge_cell, "mxGeometry", relative="1", **{"as": "geometry"})
 
     return ET.tostring(mxfile, encoding="unicode")
 
@@ -880,20 +2006,16 @@ def _assessment_dimensions(nodes: list[DiagramNode], prompt: str, openshift_stat
 
 
 def _document_sections(document_type: str, title: str, planning: PromptNormalization, nodes: list[DiagramNode], edges: list[DiagramEdge], prompt: str, openshift_state: dict[str, Any] | None, knowledge_context: dict[str, Any] | None, assessment_scope_id: str = "architecture-readiness") -> dict[str, Any]:
-    counts = (openshift_state or {}).get("resource_counts") or {}
     grouped: dict[str, list[DiagramNode]] = {}
     for node in nodes:
         grouped.setdefault(node.group, []).append(node)
-    flow_lines = [f"{edge.source} -> {edge.target}{f' ({edge.label})' if edge.label else ''}" for edge in edges]
-    knowledge_items = list((knowledge_context or {}).get("items") or [])
-
     assumptions = [
         planning.reasoning_summary,
         f"Prompt preserved: {prompt.strip() or 'Prompt-free architecture generation based on live OpenShift state.'}",
         f"Live OpenShift state included: {'yes' if openshift_state else 'no'}.",
-        f"RAG grounding used: {'yes' if knowledge_items else 'no'}.",
+        f"RAG grounding used: {'yes' if (knowledge_context or {}).get('items') else 'no'}.",
+        planning.version_baseline,
     ]
-
     decision_rows = [
         {
             "title": "Architecture pattern",
@@ -907,8 +2029,13 @@ def _document_sections(document_type: str, title: str, planning: PromptNormaliza
             "rationale": "OpenShift handoff quality improves when control-plane, workload, and governance boundaries are explicit instead of implied.",
             "consequences": "Operators and engineering teams can map architecture review findings directly to platform owners and implementation workstreams.",
         },
+        {
+            "title": "Reference baseline",
+            "decision": "Ground the pack on Red Hat OpenShift 4.20+ documentation and the repository's own multicluster and DR patterns.",
+            "rationale": "This keeps the output aligned to supported platform language while preserving local deployment realities and enterprise handoff expectations.",
+            "consequences": "Reviewers receive a senior-architect narrative instead of a generic Kubernetes diagram and a thin implementation note set.",
+        },
     ]
-
     state_views = [
         {
             "title": "Steady-state",
@@ -935,71 +2062,41 @@ def _document_sections(document_type: str, title: str, planning: PromptNormaliza
             ],
         },
     ]
-
     dimensions = _assessment_dimensions(nodes, prompt, openshift_state)
     selected_dimensions = dimensions if assessment_scope_id == "architecture-readiness" else [item for item in dimensions if item["id"] == assessment_scope_id]
-
-    sections = [
-        {
-            "title": "Executive summary",
-            "body": [
-                f"This {document_type.upper()} pack describes the {title} design using the {planning.pattern_label} OpenShift architecture pattern.",
-                f"Live state highlights: degraded operators={counts.get('degraded_operators', 0)}, managed clusters={counts.get('managed_clusters', 0)}, PVCs={counts.get('persistent_volume_claims', 0)}, DR policies={counts.get('dr_policies', 0)}.",
-            ],
-        },
-        {
-            "title": "Assumptions and constraints",
-            "body": assumptions,
-        },
-        {
-            "title": "Domain decomposition",
-            "body": [
-                f"{GROUP_LABELS.get(group, group.title())}: " + "; ".join(f"{node.label} — {node.detail}" for node in group_nodes)
-                for group, group_nodes in grouped.items()
-            ],
-        },
-        {
-            "title": "Flow summary",
-            "body": flow_lines or ["The architecture uses implicit relationships derived from the selected pattern."],
-        },
-        {
-            "title": "Architectural decisions",
-            "body": [f"{row['title']}: {row['decision']} Rationale: {row['rationale']} Consequence: {row['consequences']}" for row in decision_rows],
-        },
-        {
-            "title": "System-state views",
-            "body": [f"{view['title']}: {view['summary']} {' '.join(view['bullets'])}" for view in state_views],
-        },
-    ]
-
-    if knowledge_items:
-        sections.append(
-            {
-                "title": "Grounding references",
-                "body": [
-                    f"{item.get('title', 'Knowledge source')} ({item.get('source_type', 'knowledge')}) — {item.get('excerpt', '')}"
-                    for item in knowledge_items[:6]
-                ],
-            }
-        )
+    sections = _foundational_outline_sections(
+        document_type=document_type,
+        title=title,
+        planning=planning,
+        nodes=nodes,
+        edges=edges,
+        prompt=prompt,
+        openshift_state=openshift_state,
+        knowledge_context=knowledge_context,
+    )
+    sections.extend(_reference_sections())
+    sections.extend(_repo_alignment_sections())
+    for group in GROUP_ORDER:
+        group_nodes = grouped.get(group) or []
+        if group_nodes:
+            sections.append(_section(f"Domain design — {GROUP_LABELS.get(group, group.title())}", _domain_lines(group, group_nodes, document_type)))
 
     if document_type == "assessment":
-        sections.append(
-            {
-                "title": "Assessment findings",
-                "body": [f"{item['label']}: {item['assessment']} Actions: {'; '.join(item['actions'])}" for item in selected_dimensions],
-            }
-        )
-    elif document_type == "lld":
-        sections.append(
-            {
-                "title": "Implementation detail",
-                "body": [
-                    f"Component: {node.label}. Detail: {node.detail}. Recommended owner: {GROUP_LABELS.get(node.group, node.group.title())}."
-                    for node in nodes
-                ],
-            }
-        )
+        sections.append(_section("Assessment findings", [f"{item['label']}: {item['assessment']} Actions: {'; '.join(item['actions'])}" for item in selected_dimensions]))
+    else:
+        sections.extend(_padding_sections(document_type=document_type, grouped=grouped, nodes=nodes, edges=edges))
+
+    target_pages = DOCUMENT_PAGE_TARGETS.get(document_type, 24)
+    estimated_pages = _estimate_document_pages(sections, document_type)
+    iteration = 1
+    while document_type in {"hld", "lld"} and estimated_pages < target_pages and iteration <= 24:
+        sections.extend(_booster_sections(document_type=document_type, grouped=grouped, nodes=nodes, edges=edges, iteration=iteration))
+        estimated_pages = _estimate_document_pages(sections, document_type)
+        iteration += 1
+
+    if document_type == "assessment" and estimated_pages < target_pages:
+        sections.extend(_booster_sections(document_type="hld", grouped=grouped, nodes=nodes, edges=edges, iteration=1)[:2])
+        estimated_pages = _estimate_document_pages(sections, document_type)
 
     return {
         "document_type": document_type,
@@ -1010,6 +2107,11 @@ def _document_sections(document_type: str, title: str, planning: PromptNormaliza
         "decision_rows": decision_rows,
         "state_views": state_views,
         "assessment_dimensions": selected_dimensions,
+        "target_page_count": target_pages,
+        "estimated_page_count": estimated_pages,
+        "page_target_met": estimated_pages >= target_pages,
+        "architect_profile": planning.architect_profile,
+        "version_baseline": planning.version_baseline,
     }
 
 
@@ -1020,11 +2122,28 @@ def generate_architecture_diagram(*, prompt: str, openshift_state: dict[str, Any
             raise RuntimeError(getattr(probe, "detail", "The selected model is unavailable for this architect run."))
 
     planning, nodes, edges, live_summaries = _build_nodes_and_edges(prompt, openshift_state)
-    positions, group_boxes, total_width, total_height = _layout_nodes(nodes)
     title = f"{planning.pattern_label} architecture"
     summary = live_summaries[0] if live_summaries else planning.reasoning_summary
-    drawio_xml = _build_drawio_xml(title, nodes, edges, positions, group_boxes, total_width, total_height)
-    svg_preview = _render_svg(title, summary, nodes, edges, positions, group_boxes, total_width, total_height)
+    diagram_pages = _diagram_page_specs(
+        title=title,
+        planning=planning,
+        nodes=nodes,
+        edges=edges,
+        openshift_state=openshift_state,
+    )
+    first_page = diagram_pages[0]
+    drawio_xml = _build_drawio_xml(title, diagram_pages)
+    svg_preview = _render_svg(
+        first_page["title"],
+        first_page["summary"],
+        first_page["nodes"],
+        first_page["edges"],
+        first_page["positions"],
+        first_page["group_boxes"],
+        first_page.get("zones", []),
+        first_page["total_width"],
+        first_page["total_height"],
+    )
     svg_bytes = _export_with_drawio(drawio_xml, "svg")
     png_bytes = _export_with_drawio(drawio_xml, "png")
     if png_bytes is None:
@@ -1035,12 +2154,12 @@ def generate_architecture_diagram(*, prompt: str, openshift_state: dict[str, Any
         "lld": _document_sections("lld", title, planning, nodes, edges, prompt, openshift_state, knowledge_context, assessment_scope_id=assessment_scope_id),
         "assessment": _document_sections("assessment", title, planning, nodes, edges, prompt, openshift_state, knowledge_context, assessment_scope_id=assessment_scope_id),
     }
-    score = min(100, 58 + (len(nodes) * 3) + (6 if openshift_state else 0) + (4 if knowledge_context and knowledge_context.get("used") else 0))
+    score = min(100, 60 + (len(nodes) * 3) + (len(diagram_pages) * 2) + (6 if openshift_state else 0) + (4 if knowledge_context and knowledge_context.get("used") else 0))
     quality_scorecard = {
         "overall_score": score,
         "max_score": 100,
         "quality_band": "Solid" if score >= 75 else ("Developing" if score >= 60 else "Needs work"),
-        "summary": "OpenShift architecture quality review based on domain coverage, live evidence, and design clarity.",
+        "summary": "OpenShift architecture quality review based on domain coverage, Red Hat 4.20+ reference alignment, live evidence, and document completeness.",
         "top_gaps": [
             item["question"]
             for item in suggest_architecture_clarifications(prompt=prompt, openshift_state=openshift_state).get("questions", [])[:4]
@@ -1062,14 +2181,16 @@ def generate_architecture_diagram(*, prompt: str, openshift_state: dict[str, Any
             "quality_scorecard": quality_scorecard,
             "diagram_pages": [
                 {
-                    "page_number": 1,
-                    "page_name": "Holistic OpenShift architecture",
-                    "title": title,
-                    "summary": documents["hld"]["summary"],
-                    "included_groups": [group for group in GROUP_ORDER if group in group_boxes],
-                    "node_count": len(nodes),
-                    "edge_count": len(edges),
+                    "page_number": page["page_number"],
+                    "page_name": page["page_name"],
+                    "layout_mode": page["layout_mode"],
+                    "title": page["title"],
+                    "summary": page["summary"],
+                    "included_groups": page["included_groups"],
+                    "node_count": len(page["nodes"]),
+                    "edge_count": len(page["edges"]),
                 }
+                for page in diagram_pages
             ],
         },
         "artifacts": {
@@ -1077,6 +2198,7 @@ def generate_architecture_diagram(*, prompt: str, openshift_state: dict[str, Any
             "svg_preview": svg_preview,
             "svg": svg_bytes.decode("utf-8", errors="ignore") if svg_bytes else svg_preview,
             "png_base64": base64.b64encode(png_bytes).decode("ascii") if png_bytes else None,
+            "preview_page_name": first_page["page_name"],
             "filenames": {
                 "drawio": f"{_slugify(title)}.drawio",
                 "svg": f"{_slugify(title)}.svg",
