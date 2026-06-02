@@ -7,7 +7,8 @@
   const { createElement: h, useEffect, useMemo, useRef, useState } = window.React;
   const llmRuntime = window.OpenShiftSreLlmRuntime || {};
   const DRAWIO_EMBED_ORIGIN = 'https://embed.diagrams.net';
-  const DRAWIO_EMBED_URL = `${DRAWIO_EMBED_ORIGIN}/?embed=1&ui=min&spin=Loading+native+draw.io+preview...&proto=json&saveAndExit=0&noSaveBtn=1&noExitBtn=1&modified=0&libraries=0`;
+  const DRAWIO_EMBED_URL = `${DRAWIO_EMBED_ORIGIN}/?embed=1&ui=min&spin=Loading+native+draw.io+preview...&proto=json&configure=1&saveAndExit=0&noSaveBtn=1&noExitBtn=1&modified=0&libraries=1`;
+  const DRAWIO_VIEWER_CONFIG_VERSION = 'openshift-sre-redhat-offline-2026-06-03';
   const safeJson = (value) => {
     if (!value) return null;
     try {
@@ -97,6 +98,76 @@
     .replace(/^-+|-+$/g, '') || fallback;
   const escapeHtmlValue = (value) => String(value || '').replace(/[<&>]/g, (char) => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;' }[char]));
   const diagramFilename = (pageName, extension) => `${slugify(pageName || `diagram-page-${extension}`)}.${extension}`;
+  const resourceText = (value) => ({ main: String(value || '') });
+  const resolveDrawioLibraryUrl = (value) => {
+    const raw = String(value || '').trim();
+    if (!raw) {
+      return '';
+    }
+    if (/^https?:\/\//i.test(raw)) {
+      return raw;
+    }
+    return new URL(raw, window.location.origin).toString();
+  };
+  const buildRedHatDrawioOfflineLibraries = (catalog) => {
+    const assets = catalog?.official_red_hat_drawio || {};
+    const fallbackGuidePath = String(assets.offline_bundle_guide_path || '/guide/assets/redhat-drawio').replace(/\/$/, '');
+    const sourceLibraries = Array.isArray(assets.offline_libraries) ? assets.offline_libraries : [];
+    return sourceLibraries
+      .map((item) => {
+        const label = String(item?.label || item?.library || item?.id || '').trim();
+        const file = String(item?.file || '').trim();
+        const url = resolveDrawioLibraryUrl(item?.guide_url || (file ? `${fallbackGuidePath}/${file}` : ''));
+        if (!label || !url) {
+          return null;
+        }
+        return {
+          id: String(item?.id || `rh-${slugify(label, 'library')}`),
+          label,
+          url,
+          category: String(item?.category || 'icons'),
+          library: String(item?.library || label),
+          file,
+          preloadByDefault: item?.preload_by_default !== false,
+        };
+      })
+      .filter(Boolean);
+  };
+  const buildRedHatDrawioViewerConfig = (catalog) => {
+    const offlineLibraries = buildRedHatDrawioOfflineLibraries(catalog);
+    const defaultLibraries = offlineLibraries.filter((item) => item.preloadByDefault);
+    const groupedEntries = new Map();
+    defaultLibraries.forEach((item) => {
+      const sectionTitle = item.category === 'templates' ? 'Red Hat Templates' : 'Red Hat Icon Libraries';
+      const sectionEntries = groupedEntries.get(sectionTitle) || [];
+      sectionEntries.push({
+        id: item.id,
+        preview: '',
+        title: resourceText(item.label),
+        desc: resourceText(`Official Red Hat ${item.category === 'templates' ? 'template' : 'icon'} library preloaded for the architect workspace.`),
+        libs: [{
+          title: resourceText(item.label),
+          url: item.url,
+          tags: `red hat ${item.category} ${slugify(item.label, 'library').replace(/-/g, ' ')}`,
+          prefetch: true,
+        }],
+      });
+      groupedEntries.set(sectionTitle, sectionEntries);
+    });
+    return {
+      version: DRAWIO_VIEWER_CONFIG_VERSION,
+      override: true,
+      expandLibraries: true,
+      sidebarTitles: true,
+      appendCustomLibraries: false,
+      defaultLibraries: defaultLibraries.map((item) => item.id).join(';'),
+      defaultCustomLibraries: defaultLibraries.map((item) => `U${encodeURIComponent(item.url)}`),
+      libraries: Array.from(groupedEntries.entries()).map(([sectionTitle, entries]) => ({
+        title: resourceText(sectionTitle),
+        entries,
+      })),
+    };
+  };
 
   async function buildReferenceDiagramPayload(files, { preserveExact = false } = {}) {
     const selectedFiles = Array.from(files || []).slice(0, 4);
@@ -358,6 +429,7 @@
     const viewerFrameRef = useRef(null);
     const viewerInitializedRef = useRef(false);
     const latestDrawioXmlRef = useRef('');
+    const latestCatalogRef = useRef({ templates: [], supported_assessment_scopes: [] });
     const [catalog, setCatalog] = useState({ templates: [], supported_assessment_scopes: [] });
     const [knowledgeStatus, setKnowledgeStatus] = useState(null);
     const [knowledgeSources, setKnowledgeSources] = useState([]);
@@ -405,6 +477,7 @@
     const [viewerStatus, setViewerStatus] = useState('Generate a diagram to render the editable draw.io preview directly in the browser.');
 
     const selectedTemplate = useMemo(() => (catalog.templates || []).find((item) => item.id === templateId) || (catalog.templates || [])[0] || null, [catalog.templates, templateId]);
+    const redHatViewerLibraries = useMemo(() => buildRedHatDrawioOfflineLibraries(catalog), [catalog]);
     const suggestedModels = useMemo(() => (llmRuntime.getSuggestedModels ? llmRuntime.getSuggestedModels(providerCatalog, providerId, modelCatalog) : []), [providerCatalog, providerId, modelCatalog]);
     const documentPack = useMemo(() => diagramResult?.documents?.[activeDocument] || assessmentResult?.assessment || null, [diagramResult, assessmentResult, activeDocument]);
     const diagramPagePreviews = useMemo(() => {
@@ -560,6 +633,10 @@
     }, [providerCatalog, providerId]);
 
     useEffect(() => {
+      latestCatalogRef.current = catalog;
+    }, [catalog]);
+
+    useEffect(() => {
       if (!selectedTemplate || suggestedTemplateApplied) return;
       setPrompt((current) => current || selectedTemplate.prompt || '');
     }, [selectedTemplate, suggestedTemplateApplied]);
@@ -567,6 +644,24 @@
     useEffect(() => {
       setActiveDiagramPage(0);
     }, [diagramResult]);
+
+    const configureEmbeddedViewer = () => {
+      const targetWindow = viewerFrameRef.current?.contentWindow;
+      if (!targetWindow) {
+        return false;
+      }
+      const config = buildRedHatDrawioViewerConfig(latestCatalogRef.current);
+      const configuredLibraryCount = buildRedHatDrawioOfflineLibraries(latestCatalogRef.current)
+        .filter((item) => item.preloadByDefault)
+        .length;
+      setViewerStatus(
+        configuredLibraryCount
+          ? `Loading embedded draw.io with ${configuredLibraryCount} preloaded official Red Hat libraries…`
+          : 'Loading embedded draw.io preview…'
+      );
+      targetWindow.postMessage(JSON.stringify({ action: 'configure', config }), DRAWIO_EMBED_ORIGIN);
+      return true;
+    };
 
     const loadEmbeddedViewer = (drawioXml) => {
       const targetWindow = viewerFrameRef.current?.contentWindow;
@@ -609,6 +704,13 @@
           return;
         }
 
+        if (payload.event === 'configure') {
+          viewerInitializedRef.current = false;
+          setViewerLoaded(false);
+          configureEmbeddedViewer();
+          return;
+        }
+
         if (payload.event === 'init' || payload.event === 'ready') {
           viewerInitializedRef.current = true;
           if (!latestDrawioXmlRef.current) {
@@ -621,7 +723,14 @@
 
         if (payload.event === 'load') {
           setViewerLoaded(true);
-          setViewerStatus('Editable draw.io preview rendered successfully from the generated architecture pack.');
+          const configuredLibraryCount = buildRedHatDrawioOfflineLibraries(latestCatalogRef.current)
+            .filter((item) => item.preloadByDefault)
+            .length;
+          setViewerStatus(
+            configuredLibraryCount
+              ? `Editable draw.io preview rendered successfully from the generated architecture pack with ${configuredLibraryCount} official Red Hat libraries preloaded.`
+              : 'Editable draw.io preview rendered successfully from the generated architecture pack.'
+          );
           return;
         }
 
@@ -1089,7 +1198,8 @@
             ]),
             h('div', { className: 'architect-console__artifact-actions' }, [
               h('span', { className: 'architect-console__artifact-pill' }, 'Source: generated draw.io XML'),
-              h('span', { className: 'architect-console__artifact-pill' }, viewerLoaded ? 'Viewer rendered' : 'Viewer waiting / fallback active')
+                h('span', { className: 'architect-console__artifact-pill' }, redHatViewerLibraries.length ? `${redHatViewerLibraries.length} Red Hat libraries queued` : 'Viewer library preload pending'),
+                h('span', { className: 'architect-console__artifact-pill' }, viewerLoaded ? 'Viewer rendered' : 'Viewer waiting / fallback active')
             ])
           ]),
           diagramResult?.artifacts?.drawio_xml

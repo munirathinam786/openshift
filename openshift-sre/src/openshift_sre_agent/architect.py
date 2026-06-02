@@ -83,6 +83,132 @@ KUBERNETES_POD_ICON_STYLE = (
     "points=[[0.005,0.63,0],[0.1,0.2,0],[0.9,0.2,0],[0.5,0,0],[0.995,0.63,0],[0.72,0.99,0],[0.5,1,0],[0.28,0.99,0]];"
     "verticalLabelPosition=bottom;align=center;verticalAlign=top;shape=mxgraph.kubernetes.icon;prIcon=pod"
 )
+RED_HAT_PORTFOLIO_TOOL_URL = "https://www.redhat.com/architect/portfolio/tool/index.html"
+RED_HAT_DRAWIO_ASSETS = {
+    "source_url": RED_HAT_PORTFOLIO_TOOL_URL,
+    "offline_bundle_repo_path": "docs/assets/redhat-drawio",
+    "offline_bundle_container_path": "/app/redhat-drawio",
+    "offline_bundle_guide_path": "/guide/assets/redhat-drawio",
+    "offline_libraries": [
+        {
+            "id": "rh-application-icons",
+            "label": "Application Icons",
+            "library": "Application Icons",
+            "category": "icons",
+            "file": "application-icons.mxlibrary",
+            "origin": "https://www.redhat.com/architect/portfolio/tool/Libraries/Application%20Icons",
+            "repo_path": "docs/assets/redhat-drawio/application-icons.mxlibrary",
+            "container_path": "/app/redhat-drawio/application-icons.mxlibrary",
+            "guide_url": "/guide/assets/redhat-drawio/application-icons.mxlibrary",
+            "preload_by_default": True,
+        },
+        {
+            "id": "rh-application-services-icons",
+            "label": "Application Services Icons",
+            "library": "Application Services Icons",
+            "category": "icons",
+            "file": "application-services-icons.mxlibrary",
+            "origin": "https://www.redhat.com/architect/portfolio/tool/Libraries/Application%20Services%20Icons",
+            "repo_path": "docs/assets/redhat-drawio/application-services-icons.mxlibrary",
+            "container_path": "/app/redhat-drawio/application-services-icons.mxlibrary",
+            "guide_url": "/guide/assets/redhat-drawio/application-services-icons.mxlibrary",
+            "preload_by_default": True,
+        },
+        {
+            "id": "rh-infrastructure-icons",
+            "label": "Infrastructure Icons",
+            "library": "Infrastructure Icons",
+            "category": "icons",
+            "file": "infrastructure-icons.mxlibrary",
+            "origin": "https://www.redhat.com/architect/portfolio/tool/Libraries/Infrastructure%20Icons",
+            "repo_path": "docs/assets/redhat-drawio/infrastructure-icons.mxlibrary",
+            "container_path": "/app/redhat-drawio/infrastructure-icons.mxlibrary",
+            "guide_url": "/guide/assets/redhat-drawio/infrastructure-icons.mxlibrary",
+            "preload_by_default": True,
+        },
+        {
+            "id": "rh-service-icons",
+            "label": "Service Icons",
+            "library": "Service Icons",
+            "category": "icons",
+            "file": "service-icons.mxlibrary",
+            "origin": "https://www.redhat.com/architect/portfolio/tool/Libraries/Service%20Icons",
+            "repo_path": "docs/assets/redhat-drawio/service-icons.mxlibrary",
+            "container_path": "/app/redhat-drawio/service-icons.mxlibrary",
+            "guide_url": "/guide/assets/redhat-drawio/service-icons.mxlibrary",
+            "preload_by_default": True,
+        },
+        {
+            "id": "rh-detail-diagrams",
+            "label": "Detail Diagrams",
+            "library": "Detail Diagrams",
+            "category": "templates",
+            "file": "detail-diagrams.mxlibrary",
+            "origin": "https://www.redhat.com/architect/portfolio/tool/Libraries/Detail%20Diagrams",
+            "repo_path": "docs/assets/redhat-drawio/detail-diagrams.mxlibrary",
+            "container_path": "/app/redhat-drawio/detail-diagrams.mxlibrary",
+            "guide_url": "/guide/assets/redhat-drawio/detail-diagrams.mxlibrary",
+            "preload_by_default": True,
+        },
+        {
+            "id": "rh-logical-diagrams",
+            "label": "Logical Diagrams",
+            "library": "Logical Diagrams",
+            "category": "templates",
+            "file": "logical-diagrams.mxlibrary",
+            "origin": "https://www.redhat.com/architect/portfolio/tool/Libraries/Logical%20Diagrams",
+            "repo_path": "docs/assets/redhat-drawio/logical-diagrams.mxlibrary",
+            "container_path": "/app/redhat-drawio/logical-diagrams.mxlibrary",
+            "guide_url": "/guide/assets/redhat-drawio/logical-diagrams.mxlibrary",
+            "preload_by_default": True,
+        },
+        {
+            "id": "rh-schematic-diagrams",
+            "label": "Schematic Diagrams",
+            "library": "Schematic Diagrams",
+            "category": "templates",
+            "file": "schematic-diagrams.mxlibrary",
+            "origin": "https://www.redhat.com/architect/portfolio/tool/Libraries/Schematic%20Diagrams",
+            "repo_path": "docs/assets/redhat-drawio/schematic-diagrams.mxlibrary",
+            "container_path": "/app/redhat-drawio/schematic-diagrams.mxlibrary",
+            "guide_url": "/guide/assets/redhat-drawio/schematic-diagrams.mxlibrary",
+            "preload_by_default": True,
+        },
+    ],
+    "template_families": [
+        {"id": "detail-diagram", "label": "Detail Diagram", "library": "Detail Diagrams", "offline_library_id": "rh-detail-diagrams", "file": "detail-diagrams.mxlibrary", "starter_canvases": ["Detailed - Kit of Parts", "Detailed - Starting Canvas"]},
+        {"id": "logical-diagram", "label": "Logical Diagram", "library": "Logical Diagrams", "offline_library_id": "rh-logical-diagrams", "file": "logical-diagrams.mxlibrary", "starter_canvases": ["Logical - Kit of Parts", "Logical - Starting Canvas"]},
+        {"id": "schematic-diagram", "label": "Schematic Diagram", "library": "Schematic Diagrams", "offline_library_id": "rh-schematic-diagrams", "file": "schematic-diagrams.mxlibrary", "starter_canvases": ["Schematic - Kit of Parts", "Schematic - Starting Canvas"]},
+        {
+            "id": "all-diagrams",
+            "label": "All Diagrams",
+            "library": "Red Hat Templates",
+            "offline_library_ids": ["rh-detail-diagrams", "rh-logical-diagrams", "rh-schematic-diagrams"],
+            "starter_canvases": [
+                "Detailed - Kit of Parts",
+                "Detailed - Starting Canvas",
+                "Logical - Kit of Parts",
+                "Logical - Starting Canvas",
+                "Schematic - Kit of Parts",
+                "Schematic - Starting Canvas",
+            ],
+        },
+    ],
+    "icon_libraries": [
+        {"id": "application-icons", "label": "Application Icons", "library": "Application Icons", "offline_library_id": "rh-application-icons", "file": "application-icons.mxlibrary"},
+        {"id": "application-services-icons", "label": "Application Services Icons", "library": "Application Services Icons", "offline_library_id": "rh-application-services-icons", "file": "application-services-icons.mxlibrary"},
+        {"id": "infrastructure-icons", "label": "Infrastructure Icons", "library": "Infrastructure Icons", "offline_library_id": "rh-infrastructure-icons", "file": "infrastructure-icons.mxlibrary"},
+        {"id": "service-icons", "label": "Service Icons", "library": "Service Icons", "offline_library_id": "rh-service-icons", "file": "service-icons.mxlibrary"},
+    ],
+}
+RH_NIC_DRAWIO_STYLE = "rounded=1;whiteSpace=wrap;html=1;fillColor=#ECFDF5;strokeColor=#005F4B;strokeWidth=2;fontSize=8;fontStyle=1;fontColor=#005F4B;align=center;verticalAlign=middle;arcSize=18;"
+RH_ACM_DRAWIO_STYLE = "rounded=1;whiteSpace=wrap;html=1;fillColor=#FF3333;strokeColor=#FFFFFF;fontStyle=1;fontColor=#ffffff;align=center;verticalAlign=middle;arcSize=20;"
+RH_FIREWALL_DRAWIO_STYLE = "rounded=1;whiteSpace=wrap;html=1;fillColor=#FEE2E2;strokeColor=#DA4026;strokeWidth=2;fontSize=9;fontStyle=1;fontColor=#991B1B;align=center;verticalAlign=middle;arcSize=12;"
+RH_SWITCH_DRAWIO_STYLE = "rounded=1;whiteSpace=wrap;html=1;fillColor=#E0F2FE;strokeColor=#6881B3;strokeWidth=2;fontSize=8;fontStyle=1;fontColor=#1D4ED8;align=center;verticalAlign=middle;arcSize=10;"
+RH_VM_DRAWIO_STYLE = "rounded=1;whiteSpace=wrap;html=1;fillColor=#E0F2FE;strokeColor=#4495D1;strokeWidth=2;fontSize=8;fontStyle=1;fontColor=#1D4ED8;align=center;verticalAlign=middle;arcSize=10;"
+RH_STORAGE_DRAWIO_STYLE = "shape=cylinder3;boundedLbl=1;backgroundOutline=1;size=15;whiteSpace=wrap;html=1;fillColor=#F5F3FF;strokeColor=#7C3AED;strokeWidth=2;fontSize=8;fontStyle=1;fontColor=#6D28D9;align=center;verticalAlign=middle;"
+RH_SERVER_DRAWIO_STYLE = "rounded=1;whiteSpace=wrap;html=1;fillColor=#F8FAFC;strokeColor=#005F4B;strokeWidth=2;fontSize=8;fontStyle=1;fontColor=#14532D;align=center;verticalAlign=middle;arcSize=8;"
+RH_OPENSHIFT_DRAWIO_STYLE = "image;sketch=0;aspect=fixed;html=1;points=[];align=center;fontSize=12;image=img/lib/mscae/OpenShift.svg;"
 DOCUMENT_PAGE_TARGETS = {
     "hld": 50,
     "lld": 100,
@@ -865,6 +991,10 @@ def get_architect_assessment_scopes() -> list[dict[str, str]]:
     return ARCHITECT_ASSESSMENT_SCOPES
 
 
+def get_official_red_hat_drawio_assets() -> dict[str, Any]:
+    return copy.deepcopy(RED_HAT_DRAWIO_ASSETS)
+
+
 def _slugify(value: str, fallback: str = "node") -> str:
     normalized = re.sub(r"[^a-z0-9]+", "_", str(value or "").strip().lower()).strip("_")
     return normalized or fallback
@@ -877,6 +1007,29 @@ def _pattern_label(pattern_id: str) -> str:
 def _normalize_pattern_id(pattern_id: str | None) -> str:
     candidate = str(pattern_id or "custom").strip()
     return candidate if candidate in TEMPLATE_LOOKUP else "custom"
+
+
+def _red_hat_template_for_layout(layout_mode: str) -> dict[str, Any]:
+    template_id = "detail-diagram"
+    if layout_mode in {"grouped", "explanation", "reference-guided-holistic", "reference-exact"}:
+        template_id = "logical-diagram"
+    elif layout_mode in {"infra-topology", "onprem-holistic", "security-lanes"}:
+        template_id = "schematic-diagram"
+    for item in RED_HAT_DRAWIO_ASSETS["template_families"]:
+        if item["id"] == template_id:
+            return copy.deepcopy(item)
+    return copy.deepcopy(RED_HAT_DRAWIO_ASSETS["template_families"][0])
+
+
+def _red_hat_icon_library_for_node(node: DiagramNode) -> dict[str, str]:
+    label = "Application Icons"
+    if node.group in {"context", "network", "security", "data", "fleet", "control-plane"}:
+        label = "Infrastructure Icons"
+    elif node.group in {"delivery", "operations"}:
+        label = "Application Services Icons"
+    if any(token in f"{node.label} {node.detail}".lower() for token in ["service", "api", "broker", "gateway", "mesh", "registry"]):
+        label = "Service Icons"
+    return {"label": label}
 
 
 def _reference_highlights(limit: int = 6) -> list[str]:
@@ -1986,7 +2139,8 @@ def _diagram_page_specs(
         page_nodes = [node for node in nodes if node.group in definition["groups"]] or nodes
         allowed_ids = {node.node_id for node in page_nodes}
         page_edges = _filter_edges_for_nodes(edges, allowed_ids) or edges
-        positions, group_boxes, zones, total_width, total_height = _layout_page(layout_mode=str(definition.get("layout_mode", "grouped")), nodes=page_nodes)
+        layout_mode = str(definition.get("layout_mode", "grouped"))
+        positions, group_boxes, zones, total_width, total_height = _layout_page(layout_mode=layout_mode, nodes=page_nodes)
         pages.append(
             {
                 "page_number": index,
@@ -1994,7 +2148,8 @@ def _diagram_page_specs(
                 "page_name": definition["page_name"],
                 "title": definition["title"],
                 "summary": definition["summary"],
-                "layout_mode": definition.get("layout_mode", "grouped"),
+                "layout_mode": layout_mode,
+                "red_hat_template": _red_hat_template_for_layout(layout_mode),
                 "nodes": page_nodes,
                 "edges": page_edges,
                 "positions": positions,
@@ -3221,8 +3376,8 @@ def _node_icon_profile(node: DiagramNode) -> dict[str, str | float]:
         return {
             "kind": "nic",
             "accent": "#005F4B",
-            "drawio_style": "sketch=0;pointerEvents=1;shadow=0;dashed=0;html=1;strokeColor=none;fillColor=#005F4B;labelPosition=center;verticalLabelPosition=bottom;verticalAlign=top;align=center;outlineConnect=0;shape=mxgraph.veeam2.network_card;",
-            "drawio_value": "",
+            "drawio_style": RH_NIC_DRAWIO_STYLE,
+            "drawio_value": "NIC",
             "width": 28.0,
             "height": 20.0,
         }
@@ -3230,7 +3385,7 @@ def _node_icon_profile(node: DiagramNode) -> dict[str, str | float]:
         return {
             "kind": "acm",
             "accent": "#FF3333",
-            "drawio_style": "rounded=1;whiteSpace=wrap;html=1;fillColor=#FF3333;strokeColor=#FFFFFF;fontStyle=1;fontColor=#ffffff;align=center;verticalAlign=middle;arcSize=20;",
+            "drawio_style": RH_ACM_DRAWIO_STYLE,
             "drawio_value": "ACM",
             "width": 34.0,
             "height": 20.0,
@@ -3239,8 +3394,8 @@ def _node_icon_profile(node: DiagramNode) -> dict[str, str | float]:
         return {
             "kind": "firewall",
             "accent": "#DA4026",
-            "drawio_style": "sketch=0;pointerEvents=1;shadow=0;dashed=0;html=1;strokeColor=none;labelPosition=center;verticalLabelPosition=bottom;verticalAlign=top;outlineConnect=0;align=center;shape=mxgraph.office.concepts.firewall;fillColor=#DA4026;",
-            "drawio_value": "",
+            "drawio_style": RH_FIREWALL_DRAWIO_STYLE,
+            "drawio_value": "FW",
             "width": 28.0,
             "height": 24.0,
         }
@@ -3248,8 +3403,8 @@ def _node_icon_profile(node: DiagramNode) -> dict[str, str | float]:
         return {
             "kind": "switch",
             "accent": "#6881B3",
-            "drawio_style": "fontColor=#0066CC;verticalAlign=top;verticalLabelPosition=bottom;labelPosition=center;align=center;html=1;outlineConnect=0;fillColor=#CCCCCC;strokeColor=#6881B3;gradientColor=none;gradientDirection=north;strokeWidth=2;shape=mxgraph.networks.switch;",
-            "drawio_value": "",
+            "drawio_style": RH_SWITCH_DRAWIO_STYLE,
+            "drawio_value": "NET",
             "width": 34.0,
             "height": 16.0,
         }
@@ -3257,8 +3412,8 @@ def _node_icon_profile(node: DiagramNode) -> dict[str, str | float]:
         return {
             "kind": "vm",
             "accent": "#4495D1",
-            "drawio_style": "shadow=0;dashed=0;html=1;strokeColor=none;fillColor=#4495D1;labelPosition=center;verticalLabelPosition=bottom;verticalAlign=top;align=center;outlineConnect=0;shape=mxgraph.veeam.2d.virtual_machine;",
-            "drawio_value": "",
+            "drawio_style": RH_VM_DRAWIO_STYLE,
+            "drawio_value": "VM",
             "width": 26.0,
             "height": 26.0,
         }
@@ -3266,8 +3421,8 @@ def _node_icon_profile(node: DiagramNode) -> dict[str, str | float]:
         return {
             "kind": "disk",
             "accent": "#7C3AED",
-            "drawio_style": "image;aspect=fixed;html=1;points=[];align=center;fontSize=12;image=img/lib/azure2/other/Disk_Pool.svg;",
-            "drawio_value": "",
+            "drawio_style": RH_STORAGE_DRAWIO_STYLE,
+            "drawio_value": "DATA",
             "width": 28.0,
             "height": 26.0,
         }
@@ -3275,8 +3430,8 @@ def _node_icon_profile(node: DiagramNode) -> dict[str, str | float]:
         return {
             "kind": "server",
             "accent": "#005F4B",
-            "drawio_style": "image;aspect=fixed;perimeter=ellipsePerimeter;html=1;align=center;fontSize=12;verticalAlign=top;fontColor=#364149;shadow=0;dashed=0;image=img/lib/cumulus/server_bare_metal.svg;",
-            "drawio_value": "",
+            "drawio_style": RH_SERVER_DRAWIO_STYLE,
+            "drawio_value": "BM",
             "width": 30.0,
             "height": 22.0,
         }
@@ -3293,7 +3448,7 @@ def _node_icon_profile(node: DiagramNode) -> dict[str, str | float]:
         return {
             "kind": "openshift",
             "accent": "#EE0000",
-            "drawio_style": "image;sketch=0;aspect=fixed;html=1;points=[];align=center;fontSize=12;image=img/lib/mscae/OpenShift.svg;",
+            "drawio_style": RH_OPENSHIFT_DRAWIO_STYLE,
             "drawio_value": "",
             "width": 26.0,
             "height": 26.0,
@@ -3302,8 +3457,8 @@ def _node_icon_profile(node: DiagramNode) -> dict[str, str | float]:
         return {
             "kind": "disk",
             "accent": "#7C3AED",
-            "drawio_style": "image;aspect=fixed;html=1;points=[];align=center;fontSize=12;image=img/lib/azure2/other/Disk_Pool.svg;",
-            "drawio_value": "",
+            "drawio_style": RH_STORAGE_DRAWIO_STYLE,
+            "drawio_value": "DATA",
             "width": 28.0,
             "height": 26.0,
         }
@@ -3549,7 +3704,7 @@ def _append_drawio_page_frame(root: ET.Element, *, page: dict[str, Any], cell_co
     meta_id = str(cell_counter)
     cell_counter += 1
     meta_value = _drawio_text(
-        f"Page {page['page_number']} / {page_total}\n{page['page_name']}\nSenior Red Hat OpenShift architect"
+        f"Page {page['page_number']} / {page_total}\n{page['page_name']}\nTemplate: {page.get('red_hat_template', {}).get('label', 'Logical Diagram')}\nSenior Red Hat OpenShift architect"
     )
     meta_cell = ET.SubElement(
         root,
@@ -3578,7 +3733,7 @@ def _append_drawio_security_overlays(root: ET.Element, *, page: dict[str, Any], 
         for offset in range(3):
             firewall_id = str(cell_counter)
             cell_counter += 1
-            firewall_cell = ET.SubElement(root, "mxCell", id=firewall_id, value="", style="sketch=0;pointerEvents=1;shadow=0;dashed=0;html=1;strokeColor=none;labelPosition=center;verticalLabelPosition=bottom;verticalAlign=top;outlineConnect=0;align=center;shape=mxgraph.office.concepts.firewall;fillColor=#DA4026;", vertex="1", parent="1")
+            firewall_cell = ET.SubElement(root, "mxCell", id=firewall_id, value=_drawio_text("FW"), style=RH_FIREWALL_DRAWIO_STYLE, vertex="1", parent="1")
             ET.SubElement(firewall_cell, "mxGeometry", x=str(access_zone["x"] + 210 + (offset * 310)), y=str(access_zone["y"] + 18), width="38", height="34", **{"as": "geometry"})
         trust_id = str(cell_counter)
         cell_counter += 1
@@ -3617,7 +3772,7 @@ def _append_drawio_rack_overlays(root: ET.Element, *, page: dict[str, Any], cell
         for slot in range(3):
             server_id = str(cell_counter)
             cell_counter += 1
-            server_cell = ET.SubElement(root, "mxCell", id=server_id, value="", style="image;aspect=fixed;perimeter=ellipsePerimeter;html=1;align=center;fontSize=12;verticalAlign=top;fontColor=#364149;shadow=0;dashed=0;image=img/lib/cumulus/server_bare_metal.svg;", vertex="1", parent="1")
+            server_cell = ET.SubElement(root, "mxCell", id=server_id, value=_drawio_text("BM"), style=RH_SERVER_DRAWIO_STYLE, vertex="1", parent="1")
             ET.SubElement(server_cell, "mxGeometry", x=str(rack_zone["x"] + 36 + (slot * ((rack_zone["width"] - 120) / 2))), y=str(rack_zone["y"] + rack_zone["height"] - 44), width="78", height="18", **{"as": "geometry"})
 
     vlan_zones = [zone for zone in page.get("zones", []) if str(zone.get("title", "")).endswith("VLAN")]
@@ -3626,7 +3781,7 @@ def _append_drawio_rack_overlays(root: ET.Element, *, page: dict[str, Any], cell
         switch_label = "User VLAN switch fabric" if "User" in str(vlan_zone.get("title", "")) else "Management VLAN switch fabric"
         switch_id = str(cell_counter)
         cell_counter += 1
-        switch_cell = ET.SubElement(root, "mxCell", id=switch_id, value="", style="fontColor=#0066CC;verticalAlign=top;verticalLabelPosition=bottom;labelPosition=center;align=center;html=1;outlineConnect=0;fillColor=#CCCCCC;strokeColor=#6881B3;gradientColor=none;gradientDirection=north;strokeWidth=2;shape=mxgraph.networks.switch;", vertex="1", parent="1")
+        switch_cell = ET.SubElement(root, "mxCell", id=switch_id, value=_drawio_text("NET"), style=RH_SWITCH_DRAWIO_STYLE, vertex="1", parent="1")
         ET.SubElement(switch_cell, "mxGeometry", x=str(vlan_zone["x"] + 22), y=str(vlan_zone["y"] + 18), width="160", height="24", **{"as": "geometry"})
         switch_text_id = str(cell_counter)
         cell_counter += 1
@@ -3681,7 +3836,7 @@ def _append_drawio_legend(root: ET.Element, *, page: dict[str, Any], cell_counte
         elif marker == "firewall":
             marker_id = str(cell_counter)
             cell_counter += 1
-            marker_cell = ET.SubElement(root, "mxCell", id=marker_id, value="", style="sketch=0;pointerEvents=1;shadow=0;dashed=0;html=1;strokeColor=none;labelPosition=center;verticalLabelPosition=bottom;verticalAlign=top;outlineConnect=0;align=center;shape=mxgraph.office.concepts.firewall;fillColor=#DA4026;", vertex="1", parent="1")
+            marker_cell = ET.SubElement(root, "mxCell", id=marker_id, value=_drawio_text("FW"), style=RH_FIREWALL_DRAWIO_STYLE, vertex="1", parent="1")
             ET.SubElement(marker_cell, "mxGeometry", x=str(legend_x + 15), y=str(current_y - 2), width="24", height="22", **{"as": "geometry"})
         else:
             marker_id = str(cell_counter)

@@ -309,6 +309,11 @@ def test_architect_templates_endpoint(client):
     assert resp.status_code == 200
     data = resp.json()
     assert data["default_template_id"] == "custom"
+    assert data["official_red_hat_drawio"]["offline_bundle_container_path"] == "/app/redhat-drawio"
+    assert data["official_red_hat_drawio"]["offline_bundle_repo_path"] == "docs/assets/redhat-drawio"
+    assert any(item["guide_url"] == "/guide/assets/redhat-drawio/logical-diagrams.mxlibrary" for item in data["official_red_hat_drawio"]["offline_libraries"])
+    assert any(item["preload_by_default"] is True for item in data["official_red_hat_drawio"]["offline_libraries"])
+    assert any(item["label"] == "Logical Diagram" for item in data["official_red_hat_drawio"]["template_families"])
     assert any(item["id"] == "onprem-baremetal" for item in data["templates"])
     assert any(item["id"] == "multicluster-fleet" for item in data["templates"])
     assert any(item["id"] == "hld" for item in data["supported_document_types"])

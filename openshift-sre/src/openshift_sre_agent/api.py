@@ -27,6 +27,7 @@ from .architect import (
     generate_architecture_diagram,
     get_architect_assessment_scopes,
     get_architect_diagram_templates,
+    get_official_red_hat_drawio_assets,
     suggest_architecture_clarifications,
 )
 from .architect_rag import ArchitectRagStore
@@ -1873,6 +1874,7 @@ def architect_openshift_state(request: ArchitectOpenShiftStateRequest) -> dict:
 def architect_templates() -> dict:
     return {
         "templates": get_architect_diagram_templates(),
+        "official_red_hat_drawio": get_official_red_hat_drawio_assets(),
         "default_template_id": "custom",
         "supported_document_types": [
             {"id": "hld", "label": "High-Level Design", "description": "Executive-ready OpenShift architecture summary with topology, decisions, and operating model."},

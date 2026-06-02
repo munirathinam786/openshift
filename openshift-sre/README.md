@@ -128,6 +128,8 @@ The new `Architect Workspace` adds an OpenShift-native design lane rather than a
 - pgvector-backed knowledge retrieval for internal standards, prior designs, and external references
 - research-link ingestion for Red Hat documentation or internal architecture sources
 - draw.io, SVG, and PNG artifact generation from inside the container runtime
+- vendored offline Red Hat Architecture Center draw.io libraries under `docs/assets/redhat-drawio/`, baked into the image at `/app/redhat-drawio` and publishable from the container docs at `/guide/assets/redhat-drawio/`
+- automatic preload of the vendored Red Hat draw.io libraries inside the embedded diagrams.net editor, so architects land in an offline-ready Red Hat palette without manual library import
 - enterprise-style multi-page composition that now includes dedicated hub / spoke cluster blocks, DMZ / firewall / bastion lanes, ACM / ACS / Quay / ODF placement bands, and rack / node / VLAN infrastructure topology views inspired by senior Red Hat architecture packs
 - pattern-specific diagram shaping so the generated draw.io output carries source-specific lanes such as external-auth deployment paths and bootstrap access, cloud-native source-to-registry-to-promotion flows, telco supplementary 5G services, and event-driven automation task/result feedback chains
 

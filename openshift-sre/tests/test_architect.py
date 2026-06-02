@@ -1,4 +1,4 @@
-from openshift_sre_agent.architect import generate_architecture_diagram, get_architect_diagram_templates
+from openshift_sre_agent.architect import generate_architecture_diagram, get_architect_diagram_templates, get_official_red_hat_drawio_assets
 
 
 def test_architect_template_catalog_includes_cloud_and_platform_variants():
@@ -23,6 +23,19 @@ def test_architect_template_catalog_includes_portfolio_derived_openshift_skills(
     assert "openshift-ai-self-service" in template_ids
     assert "openshift-virtualization-portworx" in template_ids
     assert "openshift-virtualization-trilio" in template_ids
+
+
+def test_official_red_hat_drawio_assets_include_offline_bundle_paths():
+    assets = get_official_red_hat_drawio_assets()
+
+    assert assets["source_url"] == "https://www.redhat.com/architect/portfolio/tool/index.html"
+    assert assets["offline_bundle_repo_path"] == "docs/assets/redhat-drawio"
+    assert assets["offline_bundle_container_path"] == "/app/redhat-drawio"
+    assert assets["offline_bundle_guide_path"] == "/guide/assets/redhat-drawio"
+    assert any(item["guide_url"] == "/guide/assets/redhat-drawio/application-icons.mxlibrary" for item in assets["offline_libraries"])
+    assert any(item["id"] == "rh-logical-diagrams" and item["preload_by_default"] is True for item in assets["offline_libraries"])
+    assert any(item["label"] == "Schematic Diagram" for item in assets["template_families"])
+    assert any(item["label"] == "Infrastructure Icons" for item in assets["icon_libraries"])
 
 
 def test_generate_architecture_diagram_returns_4_20_grounded_multi_page_pack():
@@ -118,7 +131,7 @@ def test_generate_onprem_baremetal_architecture_includes_reference_style_prompt_
     assert "Management VLAN switch fabric" in payload["artifacts"]["drawio_xml"]
     assert "User VLAN switch fabric" in payload["artifacts"]["drawio_xml"]
     assert "ODF / Rook-Ceph data path" in payload["artifacts"]["drawio_xml"]
-    assert "shape=mxgraph.veeam2.network_card" in payload["artifacts"]["drawio_xml"]
+    assert "fillColor=#ECFDF5;strokeColor=#005F4B" in payload["artifacts"]["drawio_xml"]
     assert all("png_base64" in page for page in payload["artifacts"]["page_previews"])
 
 

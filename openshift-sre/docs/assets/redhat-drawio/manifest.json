@@ -1,0 +1,41 @@
+{
+  "source_url": "https://www.redhat.com/architect/portfolio/tool/index.html",
+  "downloaded_at": "2026-06-03",
+  "libraries": [
+    {
+      "file": "application-icons.mxlibrary",
+      "label": "Application Icons",
+      "origin": "https://www.redhat.com/architect/portfolio/tool/Libraries/Application%20Icons"
+    },
+    {
+      "file": "application-services-icons.mxlibrary",
+      "label": "Application Services Icons",
+      "origin": "https://www.redhat.com/architect/portfolio/tool/Libraries/Application%20Services%20Icons"
+    },
+    {
+      "file": "infrastructure-icons.mxlibrary",
+      "label": "Infrastructure Icons",
+      "origin": "https://www.redhat.com/architect/portfolio/tool/Libraries/Infrastructure%20Icons"
+    },
+    {
+      "file": "service-icons.mxlibrary",
+      "label": "Service Icons",
+      "origin": "https://www.redhat.com/architect/portfolio/tool/Libraries/Service%20Icons"
+    },
+    {
+      "file": "detail-diagrams.mxlibrary",
+      "label": "Detail Diagrams",
+      "origin": "https://www.redhat.com/architect/portfolio/tool/Libraries/Detail%20Diagrams"
+    },
+    {
+      "file": "logical-diagrams.mxlibrary",
+      "label": "Logical Diagrams",
+      "origin": "https://www.redhat.com/architect/portfolio/tool/Libraries/Logical%20Diagrams"
+    },
+    {
+      "file": "schematic-diagrams.mxlibrary",
+      "label": "Schematic Diagrams",
+      "origin": "https://www.redhat.com/architect/portfolio/tool/Libraries/Schematic%20Diagrams"
+    }
+  ]
+}

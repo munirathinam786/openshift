@@ -102,6 +102,7 @@ This project intentionally starts with a conservative posture.
 ## Container model
 
 The included `Containerfile` packages the API so it can run consistently in Podman.
+It now also bakes the Red Hat Architecture Center draw.io offline libraries into the image at `/app/redhat-drawio`, sourced from `docs/assets/redhat-drawio/` in the repo.
 The service listens on port `8000`.
 
 The default container entrypoints in this repo are:
@@ -113,6 +114,8 @@ On macOS, the container should use `http://host.containers.internal:11434` to re
 The architect knowledge-training flow now retries the equivalent host aliases (`host.containers.internal`, `host.docker.internal`, and `localhost` where appropriate) and uses a short connection timeout so an unreachable alias fails fast instead of hanging the embeddings request.
 If you want cluster and CLI access inside the container, mount `~/.kube` read-only into `/root/.kube`.
 If the container cannot validate your enterprise or self-signed cluster trust chain, use `OPENSHIFT_VERIFY_SSL=false` temporarily or provide a trusted kubeconfig and CA chain.
+If you want to import the official Red Hat draw.io libraries offline from inside the container, use the vendored `.mxlibrary` files in `/app/redhat-drawio` or the built-docs copies under `/guide/assets/redhat-drawio/`.
+The Architect Workspace now also preloads those vendored Red Hat libraries automatically inside the embedded diagrams.net editor, so the offline bundle is available by default without a manual import step.
 
 ## Historical metrics database
 

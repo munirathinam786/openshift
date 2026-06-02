@@ -58,6 +58,7 @@ Responsibilities:
 - detect the intended OpenShift design pattern from the operator prompt and any live cluster-state hints
 - normalize prompts against a senior-architect baseline grounded in OpenShift 4.20+, ACM 2.14+, and OpenShift GitOps 1.18+
 - generate multi-page draw.io architecture packs, page previews, and matching HLD / LLD / assessment document structures
+- expose stable metadata for the vendored Red Hat offline draw.io bundle so the browser workspace can preload official icon and template libraries from `/guide/assets/redhat-drawio/`
 - shape diagrams differently for platform-specific and portfolio-derived patterns instead of reusing a single generic topology
 - add pattern-specific appendix and matrix content so the LLD captures operationally relevant ownership, access, and recovery detail
 
@@ -107,6 +108,8 @@ This layer is responsible for turning backend payloads into:
 - historical analytics
 - executive-style dashboard summaries
 - review-export presets and safe preview states when APIs are unavailable
+
+For the Architect Workspace specifically, `docs/assets/javascripts/architect-console.js` now uses the supported diagrams.net embed protocol with `configure=1`, responds to the iframe `configure` event, and preloads the vendored Red Hat `.mxlibrary` files as offline custom libraries before loading the generated draw.io XML. That keeps the embedded editor aligned with the same Red Hat templates and icon sets that are bundled into the container image.
 
 ### `safety.py`
 
