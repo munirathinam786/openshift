@@ -55,6 +55,7 @@ This repository keeps **Podman as the default container workflow**.
 - use the generated MkDocs site and live API at `http://127.0.0.1:8000/`
 
 For container runs on macOS with Podman, `http://host.containers.internal:11434` is the normal Ollama base URL from inside the container.
+The architect knowledge-training path now also falls back between `host.containers.internal`, `host.docker.internal`, and `localhost` when the runtime context does not match the configured URL, and it uses a short connect timeout with a longer read timeout so dead host aliases fail fast without cutting off slower embedding responses.
 
 The compose stack now mounts `~/.kube` read-only so the container can reuse your local OpenShift access context.
 

@@ -36,6 +36,8 @@ MAX_TRAINING_FILE_BYTES = 10 * 1024 * 1024
 MAX_URL_DOWNLOAD_BYTES = 10 * 1024 * 1024
 DEFAULT_CHUNK_SIZE = 1200
 DEFAULT_CHUNK_OVERLAP = 180
+OLLAMA_CONNECT_TIMEOUT_SECONDS = 5.0
+OLLAMA_READ_TIMEOUT_SECONDS = 120.0
 SUPPORTED_TEXT_EXTENSIONS = {".txt", ".md", ".markdown", ".json", ".yaml", ".yml", ".csv", ".log", ".py", ".js", ".ts", ".tsx", ".jsx", ".html", ".htm", ".xml", ".svg", ".drawio"}
 
 
@@ -279,51 +281,132 @@ class ArchitectRagStore:
     def _vector_value(self, embedding: list[float]) -> Any:
         return "[" + ",".join(f"{float(value):.12g}" for value in embedding) + "]"
 
-    def _embed_texts(self, texts: list[str]) -> list[list[float]]:
-        base_url = self.settings.ollama_base_url.rstrip("/")
-        payload = {"model": self.settings.architect_embedding_model, "input": texts}
-        try:
-            response = httpx.post(f"{base_url}/api/embed", json=payload, timeout=60.0)
-            response.raise_for_status()
-        except httpx.HTTPStatusError as error:
-            message = self._ollama_error_message(error.response)
-            if error.response.status_code == 404:
-                if self._is_missing_embedding_model_error(message):
-                    raise RuntimeError(self._missing_embedding_model_message()) from error
-                return self._embed_texts_legacy(texts)
-            raise RuntimeError(message or f"Ollama embeddings request failed with status {error.response.status_code}.") from error
-        except httpx.HTTPError as error:
-            raise RuntimeError(f"Unable to reach Ollama for embeddings at {base_url}: {error}") from error
-        data = response.json()
-        embeddings = data.get("embeddings") or []
-        if not embeddings and isinstance(data.get("embedding"), list):
-            embeddings = [data["embedding"]]
-        if len(embeddings) != len(texts):
-            raise RuntimeError(f"Ollama returned {len(embeddings)} embedding vector(s) for {len(texts)} text chunk(s).")
-        return [[float(value) for value in embedding] for embedding in embeddings]
+    def _running_in_container(self) -> bool:
+        return Path("/.dockerenv").exists() or Path("/run/.containerenv").exists()
 
-    def _embed_texts_legacy(self, texts: list[str]) -> list[list[float]]:
-        embeddings: list[list[float]] = []
-        base_url = self.settings.ollama_base_url.rstrip("/")
-        for text in texts:
+    def _ollama_timeout(self) -> httpx.Timeout:
+        return httpx.Timeout(
+            connect=OLLAMA_CONNECT_TIMEOUT_SECONDS,
+            read=OLLAMA_READ_TIMEOUT_SECONDS,
+            write=30.0,
+            pool=5.0,
+        )
+
+    def _ollama_base_url_candidates(self) -> list[str]:
+        configured_base_url = self.settings.ollama_base_url.rstrip("/")
+        parsed = urlparse(configured_base_url)
+        host = (parsed.hostname or "").strip().lower()
+        running_in_container = self._running_in_container()
+        candidate_hosts = [host] if host else []
+
+        if running_in_container and host in {"localhost", "127.0.0.1"}:
+            candidate_hosts.extend(["host.containers.internal", "host.docker.internal"])
+        elif not running_in_container and host in {"host.containers.internal", "host.docker.internal"}:
+            candidate_hosts.extend(["localhost", "127.0.0.1"])
+        elif host == "host.containers.internal":
+            candidate_hosts.append("host.docker.internal")
+        elif host == "host.docker.internal":
+            candidate_hosts.append("host.containers.internal")
+
+        candidates: list[str] = []
+        seen: set[str] = set()
+        for candidate_host in candidate_hosts:
+            if not candidate_host:
+                continue
+            netloc = candidate_host
+            if parsed.port is not None:
+                netloc = f"{candidate_host}:{parsed.port}"
+            candidate = parsed._replace(netloc=netloc).geturl().rstrip("/")
+            if candidate not in seen:
+                seen.add(candidate)
+                candidates.append(candidate)
+
+        if configured_base_url not in seen:
+            candidates.insert(0, configured_base_url)
+        return candidates
+
+    def _ollama_connectivity_error(self, errors: list[tuple[str, Exception]]) -> str:
+        if not errors:
+            return f"Unable to reach Ollama for embeddings at {self.settings.ollama_base_url.rstrip('/')}"
+        attempted = ", ".join(base_url for base_url, _ in errors)
+        last_base_url, last_error = errors[-1]
+        return (
+            f"Unable to reach Ollama for embeddings. Tried {attempted}. "
+            f"Last failure from {last_base_url}: {last_error}"
+        )
+
+    def _embed_texts(self, texts: list[str]) -> list[list[float]]:
+        payload = {"model": self.settings.architect_embedding_model, "input": texts}
+        connectivity_errors: list[tuple[str, Exception]] = []
+        last_runtime_error: RuntimeError | None = None
+
+        for base_url in self._ollama_base_url_candidates():
             try:
-                response = httpx.post(f"{base_url}/api/embeddings", json={"model": self.settings.architect_embedding_model, "prompt": text}, timeout=60.0)
+                response = httpx.post(f"{base_url}/api/embed", json=payload, timeout=self._ollama_timeout())
                 response.raise_for_status()
             except httpx.HTTPStatusError as error:
                 message = self._ollama_error_message(error.response)
                 if error.response.status_code == 404:
                     if self._is_missing_embedding_model_error(message):
-                        raise RuntimeError(self._missing_embedding_model_message()) from error
-                    raise RuntimeError(self._unsupported_embedding_api_message()) from error
+                        raise RuntimeError(self._missing_embedding_model_message(base_url)) from error
+                    try:
+                        return self._embed_texts_legacy(texts, candidate_urls=[base_url])
+                    except RuntimeError as legacy_error:
+                        last_runtime_error = legacy_error
+                        continue
+                raise RuntimeError(message or f"Ollama embeddings request failed with status {error.response.status_code}.") from error
+            except httpx.HTTPError as error:
+                connectivity_errors.append((base_url, error))
+                continue
+
+            data = response.json()
+            embeddings = data.get("embeddings") or []
+            if not embeddings and isinstance(data.get("embedding"), list):
+                embeddings = [data["embedding"]]
+            if len(embeddings) != len(texts):
+                raise RuntimeError(f"Ollama returned {len(embeddings)} embedding vector(s) for {len(texts)} text chunk(s).")
+            return [[float(value) for value in embedding] for embedding in embeddings]
+
+        if last_runtime_error is not None:
+            raise last_runtime_error
+        raise RuntimeError(self._ollama_connectivity_error(connectivity_errors))
+
+    def _embed_texts_legacy(self, texts: list[str], candidate_urls: list[str] | None = None) -> list[list[float]]:
+        embeddings: list[list[float]] = []
+        connectivity_errors: list[tuple[str, Exception]] = []
+        last_runtime_error: RuntimeError | None = None
+
+        for base_url in candidate_urls or self._ollama_base_url_candidates():
+            embeddings.clear()
+            try:
+                for text in texts:
+                    response = httpx.post(
+                        f"{base_url}/api/embeddings",
+                        json={"model": self.settings.architect_embedding_model, "prompt": text},
+                        timeout=self._ollama_timeout(),
+                    )
+                    response.raise_for_status()
+                    data = response.json()
+                    embedding = data.get("embedding")
+                    if not isinstance(embedding, list):
+                        raise RuntimeError("Ollama legacy embeddings endpoint did not return an embedding vector.")
+                    embeddings.append([float(value) for value in embedding])
+                return list(embeddings)
+            except httpx.HTTPStatusError as error:
+                message = self._ollama_error_message(error.response)
+                if error.response.status_code == 404:
+                    if self._is_missing_embedding_model_error(message):
+                        raise RuntimeError(self._missing_embedding_model_message(base_url)) from error
+                    last_runtime_error = RuntimeError(self._unsupported_embedding_api_message(base_url))
+                    continue
                 raise RuntimeError(message or f"Ollama legacy embeddings request failed with status {error.response.status_code}.") from error
             except httpx.HTTPError as error:
-                raise RuntimeError(f"Unable to reach Ollama for embeddings at {base_url}: {error}") from error
-            data = response.json()
-            embedding = data.get("embedding")
-            if not isinstance(embedding, list):
-                raise RuntimeError("Ollama legacy embeddings endpoint did not return an embedding vector.")
-            embeddings.append([float(value) for value in embedding])
-        return embeddings
+                connectivity_errors.append((base_url, error))
+                continue
+
+        if last_runtime_error is not None:
+            raise last_runtime_error
+        raise RuntimeError(self._ollama_connectivity_error(connectivity_errors))
 
     def _ollama_error_message(self, response: httpx.Response | None) -> str:
         if response is None:
@@ -346,16 +429,18 @@ class ArchitectRagStore:
         model_name = self.settings.architect_embedding_model.strip().lower()
         return bool(normalized and model_name and model_name in normalized and "not found" in normalized and "pull" in normalized)
 
-    def _missing_embedding_model_message(self) -> str:
+    def _missing_embedding_model_message(self, base_url: str | None = None) -> str:
+        resolved_base_url = (base_url or self.settings.ollama_base_url).rstrip("/")
         return (
             f'Architect embedding model "{self.settings.architect_embedding_model}" is not available in Ollama at '
-            f'{self.settings.ollama_base_url.rstrip("/")}. Pull it first on the host with '
+            f'{resolved_base_url}. Pull it first on the host with '
             f'`ollama pull {self.settings.architect_embedding_model}` and retry the knowledge training or preview request.'
         )
 
-    def _unsupported_embedding_api_message(self) -> str:
+    def _unsupported_embedding_api_message(self, base_url: str | None = None) -> str:
+        resolved_base_url = (base_url or self.settings.ollama_base_url).rstrip("/")
         return (
-            f"The configured Ollama server at {self.settings.ollama_base_url.rstrip('/')} did not expose a supported "
+            f"The configured Ollama server at {resolved_base_url} did not expose a supported "
             "embeddings API. Ensure the URL points to a running Ollama instance and supports either /api/embed or /api/embeddings."
         )
 

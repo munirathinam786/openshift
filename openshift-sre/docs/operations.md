@@ -110,6 +110,7 @@ The default container entrypoints in this repo are:
 - `bash ./scripts/podman-dev-refresh.sh`
 
 On macOS, the container should use `http://host.containers.internal:11434` to reach Ollama running on the host.
+The architect knowledge-training flow now retries the equivalent host aliases (`host.containers.internal`, `host.docker.internal`, and `localhost` where appropriate) and uses a short connection timeout so an unreachable alias fails fast instead of hanging the embeddings request.
 If you want cluster and CLI access inside the container, mount `~/.kube` read-only into `/root/.kube`.
 If the container cannot validate your enterprise or self-signed cluster trust chain, use `OPENSHIFT_VERIFY_SSL=false` temporarily or provide a trusted kubeconfig and CA chain.
 
