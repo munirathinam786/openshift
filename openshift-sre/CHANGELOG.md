@@ -56,6 +56,12 @@
 ### Documentation
 - Expanded source walkthroughs in `docs/code-runtime.md` and `docs/api-reference.md` to explain the new operator pages, shell features, exports, and APIs
 - Refreshed service coverage and generated site artifacts to match the latest authored source
+- Documented the architect engine in `README.md` and `docs/architecture.md`, including Red Hat portfolio-derived pattern coverage, pattern-specific diagram shaping, and nested architect page aliases
+
+### Architecture Workspace
+- Red Hat portfolio-derived OpenShift architect patterns for external authentication, SAP clean core on ROSA, cloud sovereignty, cloud-native applications, telco 5G, event-driven automation, MaaS, AI self-service, and Portworx / Trilio virtualization
+- Portfolio-aligned diagram shaping for external-auth deployment paths and bootstrap access, cloud-native source/build/promotion lanes, telco supplementary services, and event-driven automation task/result feedback chains
+- Additional architect page redirect aliases for `/openshift-sre/architect.html` and `/terraform-iac/openshift-sre/architect.html`
 
 ### Operations
 - Prometheus-compatible `/metrics` endpoint

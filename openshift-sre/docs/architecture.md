@@ -49,6 +49,31 @@ It spans multiple OpenShift domains:
 - platform lifecycle: machine config pools, machine sets, OLM subscriptions, ClusterServiceVersions, builds, image streams
 - security posture: SCCs, network policies, route exposure, and related platform signals
 
+### `architect.py`
+
+Contains the OpenShift architecture generator used by the browser-based Architect Workspace.
+
+Responsibilities:
+
+- detect the intended OpenShift design pattern from the operator prompt and any live cluster-state hints
+- normalize prompts against a senior-architect baseline grounded in OpenShift 4.20+, ACM 2.14+, and OpenShift GitOps 1.18+
+- generate multi-page draw.io architecture packs, page previews, and matching HLD / LLD / assessment document structures
+- shape diagrams differently for platform-specific and portfolio-derived patterns instead of reusing a single generic topology
+- add pattern-specific appendix and matrix content so the LLD captures operationally relevant ownership, access, and recovery detail
+
+The architect engine now covers both repository-native platform patterns and Red Hat Architecture Center-inspired patterns.
+
+Examples include:
+
+- ROSA, ARO, OpenStack, IBM Z / LinuxONE, disconnected, GitOps, DR, virtualization, and migration factory patterns
+- external authentication with separate ROSA HCP, ARO HCP, and self-managed enablement paths
+- SAP clean core on ROSA
+- cloud sovereignty and digital-sovereignty control planes
+- cloud-native application delivery and promotion lanes
+- telco 5G core and supplementary CNF services
+- event-driven automation with broker, task-store, and execution-results feedback chains
+- Model as a Service and AI self-service platform-engineering flows
+
 ### `persistence.py`
 
 Adds the historical storage layer.
@@ -111,9 +136,16 @@ Exposes the agent through FastAPI with the following endpoints:
 - `GET /history/tools/{tool_name}`
 - `GET /history/metrics/{metric_key}`
 - `GET /ollama/utilization` — local Ollama process/model snapshot
+- architect endpoints for template lookup, prompt clarification, knowledge training/search, state collection, assessment, and multi-page diagram generation
 - queue, watchlist, investigation, comparison, export, and admin retention endpoints
 
 The API mounts the generated MkDocs site at `/guide` so the documentation and browser console are served from the same container.
+
+It also provides multiple redirect aliases for the architect page so the same workspace can be reached when the app is mounted directly or under a nested documentation path:
+
+- `/architect.html`
+- `/openshift-sre/architect.html`
+- `/terraform-iac/openshift-sre/architect.html`
 
 ### `cli.py`
 

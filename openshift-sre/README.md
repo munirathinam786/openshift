@@ -119,6 +119,7 @@ Those pages continue to use the live FastAPI endpoints and the shared React oper
 The new `Architect Workspace` adds an OpenShift-native design lane rather than a straight port of the AWS architect feature. It includes:
 
 - a platform-pattern catalog for OpenShift fleet, GitOps, disconnected, security, CNV, DR, and migration designs
+- portfolio-derived OpenShift patterns grounded in Red Hat Architecture Center material, including external authentication, SAP clean core on ROSA, cloud sovereignty, cloud-native application delivery, telco 5G, event-driven automation, Model as a Service, AI self-service, and virtualization partner patterns
 - live cluster-state grounding through the existing OpenShift toolkit
 - a shared architecture pack plus separate `HLD`, `LLD`, and assessment document packs generated from the same design run
 - a senior-architect skill set for preparing a shared architecture pack plus distinct `HLD` and `LLD` outputs with explicit background, objectives, AS-IS, TO-BE, topology, component, network, security, DR, migration, validation, and appendix structure
@@ -127,6 +128,7 @@ The new `Architect Workspace` adds an OpenShift-native design lane rather than a
 - research-link ingestion for Red Hat documentation or internal architecture sources
 - draw.io, SVG, and PNG artifact generation from inside the container runtime
 - enterprise-style multi-page composition that now includes dedicated hub / spoke cluster blocks, DMZ / firewall / bastion lanes, ACM / ACS / Quay / ODF placement bands, and rack / node / VLAN infrastructure topology views inspired by senior Red Hat architecture packs
+- pattern-specific diagram shaping so the generated draw.io output carries source-specific lanes such as external-auth deployment paths and bootstrap access, cloud-native source-to-registry-to-promotion flows, telco supplementary 5G services, and event-driven automation task/result feedback chains
 
 That means the architecture lane can build design packs from prompts alone, from live cluster state, or from a hybrid of prompt + live evidence + trained knowledge.
 
@@ -191,5 +193,11 @@ The architect workspace adds these design-oriented API groups as well:
 - `POST /architect/knowledge/train-files`
 - `POST /architect/knowledge/search`
 - `POST /architect/knowledge/clear`
+
+The browser entrypoint for the architect workspace is also reachable through multiple redirect aliases so the page works consistently when this app is served standalone or nested under a higher-level Terraform IaC site path:
+
+- `/architect.html`
+- `/openshift-sre/architect.html`
+- `/terraform-iac/openshift-sre/architect.html`
 
 That keeps the generated `site/` output aligned with the documented source under `docs/` and refreshes the app image in one pass.

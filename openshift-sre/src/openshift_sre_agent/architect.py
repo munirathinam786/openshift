@@ -229,6 +229,375 @@ ARCHITECT_DIAGRAM_TEMPLATES = [
         ],
     },
     {
+        "id": "rosa-aws",
+        "label": "ROSA on AWS",
+        "category": "Cloud",
+        "description": "ROSA with STS, customer VPC ownership, AWS endpoints, Route 53, and ALB-backed ingress patterns.",
+        "prompt": "Create an enterprise ROSA architecture on AWS with STS, a customer-owned multi-AZ VPC, public and private subnet strategy, AWS VPC endpoints, Route 53, OCM-managed control plane integration, ALB-backed ingress, observability, backup, and DR controls.",
+        "mode": "hybrid",
+        "skills": ["ROSA", "AWS", "STS", "Route 53", "VPC endpoints", "ALB", "HLD", "LLD"],
+        "default_nodes": [
+            {"node_id": "rosa_business_context", "label": "AWS application and compliance context", "group": "context", "detail": "Business drivers, account boundaries, tenancy, and compliance posture for the ROSA estate."},
+            {"node_id": "rosa_ocm", "label": "ROSA service and OCM", "group": "fleet", "detail": "Red Hat managed control-plane service integration, cluster lifecycle, and STS-linked service ownership."},
+            {"node_id": "rosa_vpc", "label": "Customer-owned ROSA VPC", "group": "network", "detail": "Multi-AZ VPC, public and private subnets, ingress and egress, security groups, and route control."},
+            {"node_id": "rosa_cluster", "label": "ROSA worker and platform services", "group": "control-plane", "detail": "ROSA cluster services, worker nodes, operators, and namespace runtime inside the customer AWS account."},
+            {"node_id": "rosa_aws_services", "label": "AWS platform dependencies", "group": "delivery", "detail": "STS, EC2, ELB, ECR, CloudWatch, Route 53, and VPC endpoint-backed service access for private workers."},
+            {"node_id": "rosa_security", "label": "AWS security and governance controls", "group": "security", "detail": "IAM, SCP or account guardrails, identity, certificate, and audit expectations for ROSA in AWS."},
+            {"node_id": "rosa_apps", "label": "Application workloads and ingress", "group": "workload", "detail": "Routes, ALB-backed application ingress, and workload namespace exposure patterns."},
+            {"node_id": "rosa_data", "label": "Storage, backup, and DR", "group": "data", "detail": "Persistent storage, snapshots, OADP or backup integration, and cross-region or cross-cluster recovery posture."},
+            {"node_id": "rosa_ops", "label": "Observability and operations", "group": "operations", "detail": "CloudWatch, cluster monitoring, alerting, runbooks, and support handoff between platform and cloud teams."},
+        ],
+        "default_edges": [
+            {"source": "rosa_business_context", "target": "rosa_ocm", "label": "service ownership"},
+            {"source": "rosa_ocm", "target": "rosa_cluster", "label": "managed control plane"},
+            {"source": "rosa_vpc", "target": "rosa_cluster", "label": "network placement"},
+            {"source": "rosa_aws_services", "target": "rosa_cluster", "label": "endpoint-backed dependencies"},
+            {"source": "rosa_security", "target": "rosa_cluster", "label": "identity / guardrails"},
+            {"source": "rosa_cluster", "target": "rosa_apps", "label": "workload runtime"},
+            {"source": "rosa_cluster", "target": "rosa_data", "label": "persistent data"},
+            {"source": "rosa_cluster", "target": "rosa_ops", "label": "telemetry / operations"},
+        ],
+    },
+    {
+        "id": "aro-azure",
+        "label": "ARO on Azure",
+        "category": "Cloud",
+        "description": "Azure Red Hat OpenShift with hub-spoke networking, Entra identity, RBAC, private API choices, and Azure-native platform dependencies.",
+        "prompt": "Create an enterprise Azure Red Hat OpenShift architecture with hub-spoke or landing-zone-aware Azure networking, private or public API and ingress decisions, Microsoft Entra identity, Azure RBAC, storage and backup posture, monitoring, DNS, and recovery controls.",
+        "mode": "hybrid",
+        "skills": ["ARO", "Azure", "Entra ID", "Azure RBAC", "Private Link", "Route design", "HLD", "LLD"],
+        "default_nodes": [
+            {"node_id": "aro_business_context", "label": "Azure platform context", "group": "context", "detail": "Subscription, landing-zone, resource-group, tenancy, and compliance posture for ARO."},
+            {"node_id": "aro_identity", "label": "Microsoft Entra and service identity", "group": "security", "detail": "Entra integration, service principal or managed identity choices, RBAC, and secret-handling boundaries."},
+            {"node_id": "aro_network", "label": "Azure virtual network topology", "group": "network", "detail": "VNet, subnets, private or public API, ingress exposure, egress control, DNS, and peering assumptions."},
+            {"node_id": "aro_cluster", "label": "ARO cluster services", "group": "control-plane", "detail": "ARO control-plane and worker profile, cluster operators, and workload namespaces on Azure."},
+            {"node_id": "aro_platform", "label": "Azure platform dependencies", "group": "delivery", "detail": "Azure DNS, storage, monitoring, registry, Key Vault, and deployment automation integrations."},
+            {"node_id": "aro_apps", "label": "Application and platform workloads", "group": "workload", "detail": "Tenant namespaces, routes, ingress exposure, and shared platform services running on ARO."},
+            {"node_id": "aro_data", "label": "Azure storage and recovery", "group": "data", "detail": "Managed disks, snapshots, backup flows, and application recovery posture for ARO workloads."},
+            {"node_id": "aro_ops", "label": "Azure operations and observability", "group": "operations", "detail": "Azure Monitor, cluster telemetry, alerts, runbooks, and support responsibilities."},
+        ],
+        "default_edges": [
+            {"source": "aro_business_context", "target": "aro_network", "label": "landing zone alignment"},
+            {"source": "aro_identity", "target": "aro_cluster", "label": "identity / RBAC"},
+            {"source": "aro_network", "target": "aro_cluster", "label": "API / ingress / egress"},
+            {"source": "aro_platform", "target": "aro_cluster", "label": "azure services"},
+            {"source": "aro_cluster", "target": "aro_apps", "label": "workload runtime"},
+            {"source": "aro_cluster", "target": "aro_data", "label": "persistent data"},
+            {"source": "aro_cluster", "target": "aro_ops", "label": "telemetry / operations"},
+        ],
+    },
+    {
+        "id": "openshift-openstack",
+        "label": "OpenShift on OpenStack",
+        "category": "Cloud",
+        "description": "OpenShift on RHOSP or OpenStack with Neutron, Octavia, Cinder, API and ingress VIPs, and tenant/provider network detail.",
+        "prompt": "Create an enterprise OpenShift on OpenStack architecture with control-plane and worker placement, API and ingress VIP ownership, Neutron networks, Octavia or external load-balancing, Cinder-backed storage, DNS, identity, observability, and backup or recovery planning.",
+        "mode": "hybrid",
+        "skills": ["OpenStack", "RHOSP", "Neutron", "Octavia", "Cinder", "VIPs", "HLD", "LLD"],
+        "default_nodes": [
+            {"node_id": "osp_context", "label": "OpenStack tenant and platform context", "group": "context", "detail": "Project, region, availability-zone, and governance posture around the OpenShift deployment."},
+            {"node_id": "osp_network", "label": "Neutron networks and VIP model", "group": "network", "detail": "Tenant and provider networks, routers, floating IPs, API VIP, ingress VIP, and east-west connectivity assumptions."},
+            {"node_id": "osp_lb", "label": "Octavia or external load balancing", "group": "network", "detail": "Load-balancer ownership for API and application ingress, health checks, and failure-domain placement."},
+            {"node_id": "osp_cluster", "label": "OpenShift cluster on OpenStack", "group": "control-plane", "detail": "Control-plane, compute, machine API, cluster operators, and workload namespaces on RHOSP or OpenStack."},
+            {"node_id": "osp_storage", "label": "Cinder and storage services", "group": "data", "detail": "Block storage, image and volume integration, snapshots, and protection posture for persistent workloads."},
+            {"node_id": "osp_identity", "label": "Identity and security controls", "group": "security", "detail": "OpenStack identity, cloud credentials, certificates, policy, and trust-boundary controls for OpenShift operations."},
+            {"node_id": "osp_delivery", "label": "Registry, CI/CD, and day-2 delivery", "group": "delivery", "detail": "Image sources, mirror paths, GitOps or CI/CD integration, and platform update flows."},
+            {"node_id": "osp_ops", "label": "Operations and monitoring", "group": "operations", "detail": "OpenShift telemetry, OpenStack platform dependencies, alerting, logging, and support workflows."},
+        ],
+        "default_edges": [
+            {"source": "osp_context", "target": "osp_network", "label": "tenant topology"},
+            {"source": "osp_network", "target": "osp_lb", "label": "vip exposure"},
+            {"source": "osp_lb", "target": "osp_cluster", "label": "api / ingress access"},
+            {"source": "osp_storage", "target": "osp_cluster", "label": "persistent volumes"},
+            {"source": "osp_identity", "target": "osp_cluster", "label": "cloud creds / policy"},
+            {"source": "osp_delivery", "target": "osp_cluster", "label": "delivery / mirror path"},
+            {"source": "osp_cluster", "target": "osp_ops", "label": "telemetry / operations"},
+        ],
+    },
+    {
+        "id": "ibm-z-linuxone",
+        "label": "OpenShift on IBM Z / LinuxONE",
+        "category": "Platform",
+        "description": "s390x and z/VM or LinuxONE deployments with agent-based install, bastion orchestration, storage, and mirrored-content considerations.",
+        "prompt": "Create an enterprise OpenShift on IBM Z or LinuxONE architecture with s390x cluster roles, bastion-driven agent-based install flows, z/VM or LPAR hosting assumptions, mirrored registry paths, storage and networking, observability, and DR posture.",
+        "mode": "hybrid",
+        "skills": ["IBM Z", "LinuxONE", "s390x", "z/VM", "Agent-based install", "Disconnected", "HLD", "LLD"],
+        "default_nodes": [
+            {"node_id": "ibmz_context", "label": "IBM Z / LinuxONE platform context", "group": "context", "detail": "s390x estate goals, hosting model, tenancy, compliance, and mirrored-content constraints."},
+            {"node_id": "ibmz_bastion", "label": "Bastion and install orchestration", "group": "delivery", "detail": "Agent-based install assets, bastion workflows, mirrored release sources, and operational handoff scripts."},
+            {"node_id": "ibmz_hypervisor", "label": "z/VM or LPAR hosting layer", "group": "network", "detail": "z/VM guests or LPAR topology, interface mapping, VIPs, and site networking dependencies."},
+            {"node_id": "ibmz_cluster", "label": "OpenShift s390x cluster", "group": "control-plane", "detail": "Control-plane, worker, machine, and operator placement for IBM Z or LinuxONE OpenShift clusters."},
+            {"node_id": "ibmz_storage", "label": "IBM Z storage and protection", "group": "data", "detail": "Persistent storage, snapshot or backup posture, and DR integration for s390x workloads."},
+            {"node_id": "ibmz_security", "label": "Identity and governance controls", "group": "security", "detail": "Access control, audit, certificate, and operational governance for IBM Z OpenShift estates."},
+            {"node_id": "ibmz_workloads", "label": "Application workloads and shared services", "group": "workload", "detail": "Business and platform workloads consuming the IBM Z OpenShift runtime."},
+            {"node_id": "ibmz_ops", "label": "Observability and operations", "group": "operations", "detail": "Monitoring, logging, backup validation, and platform support handoff for IBM Z."},
+        ],
+        "default_edges": [
+            {"source": "ibmz_context", "target": "ibmz_bastion", "label": "install and mirror constraints"},
+            {"source": "ibmz_bastion", "target": "ibmz_cluster", "label": "agent-based install"},
+            {"source": "ibmz_hypervisor", "target": "ibmz_cluster", "label": "guest / host placement"},
+            {"source": "ibmz_storage", "target": "ibmz_cluster", "label": "persistent data"},
+            {"source": "ibmz_security", "target": "ibmz_cluster", "label": "identity / governance"},
+            {"source": "ibmz_cluster", "target": "ibmz_workloads", "label": "workload runtime"},
+            {"source": "ibmz_cluster", "target": "ibmz_ops", "label": "telemetry / operations"},
+        ],
+    },
+    {
+        "id": "openshift-external-auth",
+        "label": "OpenShift external authentication",
+        "category": "Security",
+        "description": "Kubernetes-native OpenShift authentication using external OIDC providers such as Red Hat Build of Keycloak across ROSA HCP, ARO HCP, and self-managed OpenShift.",
+        "prompt": "Create an OpenShift external authentication architecture using an external OIDC identity provider, covering token issuance, RBAC mapping, CLI and web-console access, and the deployment-path differences between ROSA HCP, ARO HCP, and self-managed OpenShift 4.20+.",
+        "mode": "hybrid",
+        "skills": ["OIDC", "Keycloak", "External authentication", "ROSA HCP", "ARO HCP", "RBAC", "HLD", "LLD"],
+        "default_nodes": [
+            {"node_id": "extauth_user_entry", "label": "CLI and web-console access", "group": "context", "detail": "Platform engineers and cluster users accessing OpenShift with externally issued credentials."},
+            {"node_id": "extauth_paths", "label": "ROSA HCP, ARO HCP, and self-managed paths", "group": "context", "detail": "Supported deployment-path differences: ROSA HCP enables external auth at cluster creation, ARO HCP requires external authentication, and self-managed OpenShift 4.20+ uses the Authentication custom resource."},
+            {"node_id": "extauth_idp", "label": "External OIDC provider", "group": "security", "detail": "Red Hat Build of Keycloak or another standards-compliant identity provider issuing tokens and claims."},
+            {"node_id": "extauth_cluster", "label": "OpenShift external auth plane", "group": "control-plane", "detail": "OpenShift configured to trust externally issued tokens instead of relying solely on the built-in OAuth server path, with Authentication custom-resource or managed-service integration differences by deployment path."},
+            {"node_id": "extauth_rbac", "label": "RBAC and identity mapping", "group": "security", "detail": "Group, claim, and role mapping that turns external identities into controlled OpenShift authorization outcomes."},
+            {"node_id": "extauth_bootstrap", "label": "Bootstrap access and admin credentials", "group": "operations", "detail": "ROSA HCP uses break-glass credentials, ARO HCP uses a short-lived admin kubeconfig, and self-managed OpenShift requires pre-staged RBAC plus certificate-based admin access during enablement."},
+            {"node_id": "extauth_ops", "label": "Audit and access operations", "group": "operations", "detail": "Audit evidence, token troubleshooting, break-glass access, and operational validation for external-auth flows."},
+        ],
+        "default_edges": [
+            {"source": "extauth_user_entry", "target": "extauth_idp", "label": "authenticate"},
+            {"source": "extauth_paths", "target": "extauth_cluster", "label": "deployment path"},
+            {"source": "extauth_idp", "target": "extauth_cluster", "label": "OIDC token / claims"},
+            {"source": "extauth_rbac", "target": "extauth_cluster", "label": "authorization mapping"},
+            {"source": "extauth_bootstrap", "target": "extauth_rbac", "label": "bootstrap admin / bind roles"},
+            {"source": "extauth_cluster", "target": "extauth_ops", "label": "audit / support"},
+        ],
+    },
+    {
+        "id": "openshift-sap-clean-core-rosa",
+        "label": "SAP clean core on ROSA",
+        "category": "Industry",
+        "description": "ROSA-based SAP modernization pattern keeping custom code outside the SAP core with API-first integration and DevOps delivery.",
+        "prompt": "Create a ROSA-based SAP clean-core architecture that keeps SAP custom code and extensions outside the SAP backend, uses API-first integration, supports DevOps delivery, and maps SAP, non-SAP, and integration workloads onto ROSA and Red Hat Application Foundations.",
+        "mode": "hybrid",
+        "skills": ["SAP", "ROSA", "Application Foundations", "API-first", "Modernization", "HLD", "LLD"],
+        "default_nodes": [
+            {"node_id": "sap_business", "label": "SAP modernization context", "group": "context", "detail": "S/4HANA transition, clean-core goals, and governance for SAP custom-code extraction."},
+            {"node_id": "sap_systems", "label": "SAP core systems", "group": "context", "detail": "SAP ECC or S/4HANA systems that remain authoritative for core ERP processing."},
+            {"node_id": "sap_rosa", "label": "ROSA extension platform", "group": "control-plane", "detail": "ROSA-hosted OpenShift runtime for SAP extensions, custom services, and cloud-native delivery lanes."},
+            {"node_id": "sap_integration", "label": "API-first integration layer", "group": "delivery", "detail": "Application Foundations, Camel, messaging, and reusable APIs connecting SAP and non-SAP workloads."},
+            {"node_id": "sap_apps", "label": "Custom apps and extensions", "group": "workload", "detail": "New applications, sidecar services, and custom logic removed from the SAP core and delivered through CI/CD."},
+            {"node_id": "sap_ops", "label": "Platform and integration operations", "group": "operations", "detail": "Support, observability, API governance, and lifecycle management across SAP-connected services."},
+        ],
+        "default_edges": [
+            {"source": "sap_business", "target": "sap_systems", "label": "clean-core policy"},
+            {"source": "sap_systems", "target": "sap_integration", "label": "SAP APIs / events"},
+            {"source": "sap_integration", "target": "sap_rosa", "label": "platform services"},
+            {"source": "sap_rosa", "target": "sap_apps", "label": "runtime"},
+            {"source": "sap_apps", "target": "sap_ops", "label": "telemetry / support"},
+        ],
+    },
+    {
+        "id": "openshift-cloud-sovereignty",
+        "label": "OpenShift cloud sovereignty",
+        "category": "Platform",
+        "description": "Sovereign cloud pattern with management/workload separation, digital sovereignty controls, zero trust, and verifiable operations.",
+        "prompt": "Create a cloud-sovereignty architecture on OpenShift with separated management and managed clusters, explicit sovereignty boundaries, policy and governance controls, OpenShift Platform Plus services, zero-trust measures, and workload plus virtualization support.",
+        "mode": "hybrid",
+        "skills": ["Sovereign cloud", "Digital sovereignty", "Platform Plus", "Zero Trust", "ACM", "GitOps", "HLD", "LLD"],
+        "default_nodes": [
+            {"node_id": "sovereign_context", "label": "Sovereignty requirements and boundaries", "group": "context", "detail": "Data, operational, assurance, and technical sovereignty constraints that shape the platform."},
+            {"node_id": "sovereign_mgmt", "label": "Management sovereignty cluster", "group": "fleet", "detail": "Platform Plus management services such as ACM, ACS, ODF, and governance applied from a separated control layer."},
+            {"node_id": "sovereign_workloads", "label": "Managed workload clusters", "group": "control-plane", "detail": "Managed OpenShift clusters running sovereign application and virtualization workloads under policy control."},
+            {"node_id": "sovereign_zero_trust", "label": "Zero trust and workload identity controls", "group": "security", "detail": "Workload Identity Manager, Trustee, sandboxing, and attestation-aligned controls for sovereign operations."},
+            {"node_id": "sovereign_delivery", "label": "GitOps and automation plane", "group": "delivery", "detail": "GitOps and Ansible-driven lifecycle automation for consistent sovereign deployment and change control."},
+            {"node_id": "sovereign_data", "label": "Sovereign data and storage services", "group": "data", "detail": "ODF-backed storage, encryption boundaries, auditability, and data locality controls."},
+            {"node_id": "sovereign_ops", "label": "Observability, audit, and cost control", "group": "operations", "detail": "Audit, observability, chargeback, and evidence collection supporting sovereign operations."},
+        ],
+        "default_edges": [
+            {"source": "sovereign_context", "target": "sovereign_mgmt", "label": "control requirements"},
+            {"source": "sovereign_mgmt", "target": "sovereign_workloads", "label": "govern / operate"},
+            {"source": "sovereign_zero_trust", "target": "sovereign_workloads", "label": "attest / isolate"},
+            {"source": "sovereign_delivery", "target": "sovereign_workloads", "label": "declared change"},
+            {"source": "sovereign_workloads", "target": "sovereign_data", "label": "data locality"},
+            {"source": "sovereign_workloads", "target": "sovereign_ops", "label": "audit / telemetry"},
+        ],
+    },
+    {
+        "id": "openshift-cloud-native-apps",
+        "label": "OpenShift cloud-native application platform",
+        "category": "Application",
+        "description": "Cloud-native application development and promotion on OpenShift with local/remote containers, Quay, CI/CD, and dev-test-prod promotion lanes.",
+        "prompt": "Create a cloud-native application platform architecture on OpenShift covering developer workstations, local and remote container development, CI/CD, source-to-image or pipeline builds, Quay-based image promotion, and consistent deployment across development, test, and production clusters.",
+        "mode": "hybrid",
+        "skills": ["Cloud-native apps", "Quay", "CI/CD", "S2I", "DevOps", "Application Foundations", "HLD", "LLD"],
+        "default_nodes": [
+            {"node_id": "cna_developer", "label": "Developer toolchain", "group": "context", "detail": "Local and remote container workflows using Podman, Git, Maven, runtimes, and IDE tooling."},
+            {"node_id": "cna_source", "label": "Git source and trigger path", "group": "context", "detail": "Git repositories, hooks, plugins, and uploads that initiate centralized build and promotion workflows."},
+            {"node_id": "cna_ci", "label": "CI/CD and build services", "group": "delivery", "detail": "Source-to-image, pipeline, test, and release controls turning code into trusted images."},
+            {"node_id": "cna_transient", "label": "Transient build registry", "group": "delivery", "detail": "Short-lived build-image holding area where dev-tagged images land before Quay promotion and downstream testing."},
+            {"node_id": "cna_quay", "label": "Enterprise image registry", "group": "delivery", "detail": "Red Hat Quay or equivalent registry handling dev, test, and prod image promotion and scanning."},
+            {"node_id": "cna_platform", "label": "OpenShift application platform", "group": "control-plane", "detail": "Target OpenShift clusters hosting cloud-native apps and shared runtimes across environments."},
+            {"node_id": "cna_envs", "label": "Dev, test, and prod promotion lanes", "group": "workload", "detail": "Environment-specific registries, GitOps sync targets, and promotion checkpoints across development, test, and production."},
+            {"node_id": "cna_apps", "label": "Microservices and runtime workloads", "group": "workload", "detail": "Microservices, APIs, integration services, and runtime frameworks deployed through the platform."},
+            {"node_id": "cna_ops", "label": "Promotion and operations feedback", "group": "operations", "detail": "Observability, release telemetry, rollback visibility, and environment promotion evidence."},
+        ],
+        "default_edges": [
+            {"source": "cna_developer", "target": "cna_source", "label": "code / container flow"},
+            {"source": "cna_source", "target": "cna_ci", "label": "commit / trigger"},
+            {"source": "cna_ci", "target": "cna_transient", "label": "build dev image"},
+            {"source": "cna_transient", "target": "cna_quay", "label": "promote / replicate"},
+            {"source": "cna_quay", "target": "cna_envs", "label": "dev / test / prod tags"},
+            {"source": "cna_envs", "target": "cna_platform", "label": "GitOps / deploy"},
+            {"source": "cna_platform", "target": "cna_apps", "label": "deploy runtime"},
+            {"source": "cna_apps", "target": "cna_ops", "label": "signals / release evidence"},
+        ],
+    },
+    {
+        "id": "openshift-telco-5g",
+        "label": "OpenShift telco 5G core",
+        "category": "Industry",
+        "description": "On-premise 5G core architecture using CNFs, OpenShift, ACM, automation, service mesh, storage, and messaging services.",
+        "prompt": "Create an on-premise telco 5G architecture on OpenShift that models cloud-native network functions, control-plane and user-plane components, management and orchestration, OpenShift Service Mesh, Red Hat AMQ, ACM, Ansible Automation Platform, and persistent storage for CNF workloads.",
+        "mode": "hybrid",
+        "skills": ["Telco", "5G", "CNF", "Service Mesh", "AMQ", "ACM", "ODF", "HLD", "LLD"],
+        "default_nodes": [
+            {"node_id": "telco_edge", "label": "RAN and subscriber edge", "group": "context", "detail": "End devices, radio access, and external telecom interfaces driving 5G traffic into the platform."},
+            {"node_id": "telco_external", "label": "External services and network infrastructure", "group": "network", "detail": "External networks, datacenter services, identity, and telecom-facing services that interact with the 5G core platform."},
+            {"node_id": "telco_cnf", "label": "5G CNF workload domain", "group": "workload", "detail": "CNFs such as UPF, AMF, SMF, PCF, AUSF, UDM, NRF, NSSF, and NEF running on OpenShift."},
+            {"node_id": "telco_supplementary", "label": "Supplementary 5G services", "group": "workload", "detail": "Supplementary and exposure functions such as NRF, NSSF, NEF, and application-facing service components supporting the 5G core."},
+            {"node_id": "telco_platform", "label": "OpenShift telco platform", "group": "control-plane", "detail": "OpenShift clusters providing scheduling, resilience, upgrades, and lifecycle for 5G core services."},
+            {"node_id": "telco_mesh", "label": "Service mesh and data streaming", "group": "network", "detail": "OpenShift Service Mesh and Red Hat AMQ enabling service discovery, exposure, control, and telemetry flow."},
+            {"node_id": "telco_mgmt", "label": "Telco management and orchestration", "group": "fleet", "detail": "ACM, AAP, and EMS/CNFM style orchestration for provisioning, scale, policy, and update control."},
+            {"node_id": "telco_data", "label": "Persistent storage services", "group": "data", "detail": "ODF-backed storage and state services supporting CNF and operational data needs."},
+            {"node_id": "telco_ops", "label": "Telco observability and operations", "group": "operations", "detail": "Operational telemetry, assurance, incident response, and lifecycle evidence for 5G services."},
+        ],
+        "default_edges": [
+            {"source": "telco_edge", "target": "telco_cnf", "label": "subscriber traffic"},
+            {"source": "telco_external", "target": "telco_platform", "label": "external network services"},
+            {"source": "telco_platform", "target": "telco_cnf", "label": "CNF runtime"},
+            {"source": "telco_platform", "target": "telco_supplementary", "label": "supplementary runtime"},
+            {"source": "telco_mesh", "target": "telco_cnf", "label": "service discovery / messaging"},
+            {"source": "telco_mesh", "target": "telco_supplementary", "label": "SBA / exposure flow"},
+            {"source": "telco_mgmt", "target": "telco_platform", "label": "policy / lifecycle"},
+            {"source": "telco_cnf", "target": "telco_data", "label": "state / persistence"},
+            {"source": "telco_cnf", "target": "telco_ops", "label": "telemetry / assurance"},
+        ],
+    },
+    {
+        "id": "openshift-event-driven-automation",
+        "label": "OpenShift event-driven automation",
+        "category": "Automation",
+        "description": "Event-driven automation pattern combining event sources, message brokers, decision services, automation execution, and ticketing or task workflows.",
+        "prompt": "Create an event-driven automation architecture on OpenShift with event sources, Red Hat AMQ, decision and aggregation services, task or ticket workflows, Ansible Automation Platform execution, and results-feedback loops for operational response.",
+        "mode": "hybrid",
+        "skills": ["Event-driven automation", "Ansible", "AMQ", "Automation", "Broker", "Incident response", "HLD", "LLD"],
+        "default_nodes": [
+            {"node_id": "eda_sources", "label": "Event sources", "group": "context", "detail": "Monitoring, security, or infrastructure systems emitting actionable events into the automation fabric."},
+            {"node_id": "eda_broker", "label": "Message broker and event bus", "group": "delivery", "detail": "AMQ-based messaging and event-routing backbone for scalable event ingestion and fan-out."},
+            {"node_id": "eda_logic", "label": "Decision and automation services", "group": "workload", "detail": "System-event, decision-management, automation, and aggregation services that translate events into approved remediation actions."},
+            {"node_id": "eda_tasks", "label": "Task and ticket workflow store", "group": "data", "detail": "Task-service and task-store workflow handling used to create, update, and track operational work items alongside automation actions."},
+            {"node_id": "eda_platform", "label": "OpenShift automation runtime", "group": "control-plane", "detail": "OpenShift platform hosting the microservices and integration components driving event response."},
+            {"node_id": "eda_ansible", "label": "Automation execution plane", "group": "fleet", "detail": "Ansible Automation Platform receiving jobs and executing remediation across managed infrastructure."},
+            {"node_id": "eda_results", "label": "Execution and results stores", "group": "operations", "detail": "Execution status, automation results services, and broker-fed feedback loops that close the event-response chain."},
+            {"node_id": "eda_ops", "label": "Results, audit, and operations", "group": "operations", "detail": "Execution status, result processing, ticket updates, and audit evidence for automated response."},
+        ],
+        "default_edges": [
+            {"source": "eda_sources", "target": "eda_broker", "label": "publish event"},
+            {"source": "eda_broker", "target": "eda_logic", "label": "route / queue"},
+            {"source": "eda_platform", "target": "eda_logic", "label": "host services"},
+            {"source": "eda_logic", "target": "eda_tasks", "label": "create task / ticket"},
+            {"source": "eda_logic", "target": "eda_ansible", "label": "dispatch job"},
+            {"source": "eda_ansible", "target": "eda_results", "label": "results / status"},
+            {"source": "eda_results", "target": "eda_ops", "label": "audit / feedback"},
+        ],
+    },
+    {
+        "id": "openshift-model-as-a-service",
+        "label": "OpenShift model as a service",
+        "category": "AI",
+        "description": "Enterprise model platform on OpenShift AI with API gateway, SSO, inference servers, governance, and multi-model service consumption.",
+        "prompt": "Create a Model-as-a-Service architecture on OpenShift using OpenShift AI, API gateway, SSO, vLLM or equivalent inference servers, multi-model service exposure, governance, usage monitoring, and chargeback controls for enterprise AI consumption.",
+        "mode": "hybrid",
+        "skills": ["OpenShift AI", "MaaS", "3scale", "vLLM", "SSO", "Chargeback", "HLD", "LLD"],
+        "default_nodes": [
+            {"node_id": "maas_consumers", "label": "AI application consumers", "group": "context", "detail": "Internal development teams and AI applications consuming centrally operated model APIs."},
+            {"node_id": "maas_gateway", "label": "API gateway and access control", "group": "security", "detail": "3scale-style API governance, rate control, authentication, and service exposure for model endpoints."},
+            {"node_id": "maas_identity", "label": "SSO and identity services", "group": "security", "detail": "Unified identity, zero-trust access, and tenant-aware policy for model consumers."},
+            {"node_id": "maas_platform", "label": "OpenShift AI service platform", "group": "control-plane", "detail": "OpenShift AI based platform hosting inference services and model-management workflows."},
+            {"node_id": "maas_models", "label": "Inference servers and model catalog", "group": "workload", "detail": "vLLM and related inference services exposing multiple models for enterprise use cases."},
+            {"node_id": "maas_ops", "label": "Governance, usage, and chargeback", "group": "operations", "detail": "Usage tracking, cost visibility, regression testing, version control, and enterprise AI governance."},
+        ],
+        "default_edges": [
+            {"source": "maas_consumers", "target": "maas_gateway", "label": "invoke model API"},
+            {"source": "maas_identity", "target": "maas_gateway", "label": "authenticate / authorize"},
+            {"source": "maas_gateway", "target": "maas_platform", "label": "route request"},
+            {"source": "maas_platform", "target": "maas_models", "label": "serve inference"},
+            {"source": "maas_models", "target": "maas_ops", "label": "usage / governance"},
+        ],
+    },
+    {
+        "id": "openshift-ai-self-service",
+        "label": "OpenShift AI self-service platform",
+        "category": "AI",
+        "description": "Platform-engineering pattern for giving data scientists self-service model training and serving paths through OpenShift AI and Red Hat Developer Hub.",
+        "prompt": "Create a self-service AI platform architecture on OpenShift where Red Hat Developer Hub and OpenShift AI provide golden paths for data scientists, model training, model serving, and platform-guardrailed self-service workflows.",
+        "mode": "hybrid",
+        "skills": ["OpenShift AI", "Developer Hub", "Self-service", "Platform engineering", "Model training", "Model serving", "HLD", "LLD"],
+        "default_nodes": [
+            {"node_id": "aiss_personas", "label": "Data scientist and developer personas", "group": "context", "detail": "Users who need safe self-service access to AI workspaces, training, and model-serving capabilities."},
+            {"node_id": "aiss_portal", "label": "Developer Hub self-service portal", "group": "delivery", "detail": "Developer Hub catalog, templates, and workflows exposing governed golden paths for AI work."},
+            {"node_id": "aiss_platform", "label": "OpenShift AI platform services", "group": "control-plane", "detail": "The AI platform substrate providing notebooks, pipelines, model serving, and workspace lifecycle controls."},
+            {"node_id": "aiss_training", "label": "Training and experimentation workspaces", "group": "workload", "detail": "Model training, experimentation, notebooks, and pipeline execution aligned to platform guardrails."},
+            {"node_id": "aiss_serving", "label": "Serving and promotion workflows", "group": "workload", "detail": "Promotion of approved models into serving lanes with repeatable deployment and access control."},
+            {"node_id": "aiss_guardrails", "label": "Platform guardrails and quotas", "group": "security", "detail": "Self-service policy, quotas, approvals, and environment standards enforced by platform engineering."},
+            {"node_id": "aiss_ops", "label": "AI platform operations", "group": "operations", "detail": "Usage tracking, support, operational evidence, and golden-path lifecycle management."},
+        ],
+        "default_edges": [
+            {"source": "aiss_personas", "target": "aiss_portal", "label": "self-service request"},
+            {"source": "aiss_portal", "target": "aiss_platform", "label": "provision workflow"},
+            {"source": "aiss_platform", "target": "aiss_training", "label": "training path"},
+            {"source": "aiss_training", "target": "aiss_serving", "label": "promote model"},
+            {"source": "aiss_guardrails", "target": "aiss_platform", "label": "policy / quota"},
+            {"source": "aiss_serving", "target": "aiss_ops", "label": "support / telemetry"},
+        ],
+    },
+    {
+        "id": "openshift-virtualization-portworx",
+        "label": "OpenShift Virtualization with Portworx",
+        "category": "Virtualization",
+        "description": "OpenShift Virtualization pattern emphasizing Portworx-backed VM data integrity, protection, and resilience.",
+        "prompt": "Create an OpenShift Virtualization architecture that uses Portworx for VM data integrity, storage mobility, business continuity, and resilient virtual machine lifecycle operations.",
+        "mode": "hybrid",
+        "skills": ["OpenShift Virtualization", "Portworx", "VM resilience", "Business continuity", "HLD", "LLD"],
+        "default_nodes": [
+            {"node_id": "pxvirt_platform", "label": "OpenShift Virtualization platform", "group": "control-plane", "detail": "OpenShift Virtualization services hosting legacy and modernized VM workloads."},
+            {"node_id": "pxvirt_vms", "label": "Virtual machine workloads", "group": "workload", "detail": "VM-based applications operating alongside containerized services on OpenShift."},
+            {"node_id": "pxvirt_storage", "label": "Portworx data services", "group": "data", "detail": "Portworx-backed storage, protection, and business-continuity services for VM workloads."},
+            {"node_id": "pxvirt_ops", "label": "Resilience and VM operations", "group": "operations", "detail": "Capacity, protection, restore, and operational health for VM estates."},
+        ],
+        "default_edges": [
+            {"source": "pxvirt_platform", "target": "pxvirt_vms", "label": "virtualization runtime"},
+            {"source": "pxvirt_vms", "target": "pxvirt_storage", "label": "persistent data"},
+            {"source": "pxvirt_storage", "target": "pxvirt_ops", "label": "resilience status"},
+        ],
+    },
+    {
+        "id": "openshift-virtualization-trilio",
+        "label": "OpenShift Virtualization with Trilio",
+        "category": "Virtualization",
+        "description": "OpenShift Virtualization pattern emphasizing backup, recovery, upgrade, migration, and SLA-focused reporting with Trilio.",
+        "prompt": "Create an OpenShift Virtualization architecture that uses Trilio to back up, recover, upgrade, and migrate virtualized workloads while providing resilience evidence and SLA-focused reporting.",
+        "mode": "hybrid",
+        "skills": ["OpenShift Virtualization", "Trilio", "Backup", "Recovery", "Migration", "HLD", "LLD"],
+        "default_nodes": [
+            {"node_id": "trilio_platform", "label": "OpenShift Virtualization platform", "group": "control-plane", "detail": "OpenShift Virtualization substrate operating virtualized workloads."},
+            {"node_id": "trilio_workloads", "label": "Protected VM workloads", "group": "workload", "detail": "Virtual machines requiring controlled backup, upgrade, and migration workflows."},
+            {"node_id": "trilio_backup", "label": "Trilio protection services", "group": "data", "detail": "Backup, recovery, migration, and upgrade orchestration for VM resilience."},
+            {"node_id": "trilio_ops", "label": "SLA and resilience reporting", "group": "operations", "detail": "Operational evidence, reporting, and recovery validation for virtualized services."},
+        ],
+        "default_edges": [
+            {"source": "trilio_platform", "target": "trilio_workloads", "label": "host VMs"},
+            {"source": "trilio_workloads", "target": "trilio_backup", "label": "protect / recover"},
+            {"source": "trilio_backup", "target": "trilio_ops", "label": "evidence / SLA"},
+        ],
+    },
+    {
         "id": "multicluster-fleet",
         "label": "ACM multicluster fleet",
         "category": "Platform",
@@ -408,6 +777,20 @@ ARCHITECT_DIAGRAM_TEMPLATES = [
 TEMPLATE_LOOKUP = {item["id"]: item for item in ARCHITECT_DIAGRAM_TEMPLATES}
 PATTERN_RULES = [
     ("onprem-baremetal", ["on-prem", "on prem", "bare metal", "baremetal", "management vlan", "user vlan", "bond0", "eth0", "eth1", "console port", "bmc", "idrac", "rook", "ceph", "rack"]),
+    ("openshift-external-auth", ["external auth", "external authentication", "oidc", "keycloak", "external credentials", "rosa hcp", "aro hcp"]),
+    ("openshift-sap-clean-core-rosa", ["sap", "s/4hana", "clean core", "sap core", "sap netweaver", "api-first", "keeping the sap core clean"]),
+    ("openshift-cloud-sovereignty", ["sovereignty", "sovereign cloud", "digital sovereignty", "workload identity manager", "trustee", "confidential computing", "zero trust"]),
+    ("openshift-cloud-native-apps", ["cloud native application", "cloud-native application", "quay", "source-to-image", "devimage", "testimage", "production image", "open container initiative"]),
+    ("openshift-telco-5g", ["telco", "5g", "cnf", "ran", "upf", "amf", "smf", "nrf", "nssf", "nef", "ausf", "udm"]),
+    ("openshift-event-driven-automation", ["event driven automation", "event-driven automation", "ansible rulebook", "event source", "automation topic", "task service"]),
+    ("openshift-ai-self-service", ["data scientist", "self-service ai", "developer hub", "model training", "model serving", "platform engineering"]),
+    ("openshift-model-as-a-service", ["model as a service", "maas", "vllm", "3scale", "openshift ai", "model api", "inference server"]),
+    ("openshift-virtualization-portworx", ["portworx", "portworx virtualization", "vm resilience", "data integrity", "business continuity"]),
+    ("openshift-virtualization-trilio", ["trilio", "sla-based resilience", "backup recover upgrade migrate", "trilio virt"]),
+    ("rosa-aws", ["rosa", "openshift service on aws", "sts", "ocm", "route 53", "route53", "vpc endpoint", "aws load balancer controller", "customer-owned vpc"]),
+    ("aro-azure", ["aro", "azure red hat openshift", "microsoft entra", "entra id", "azure rbac", "private link", "azure monitor", "service principal"]),
+    ("openshift-openstack", ["openstack", "rhosp", "red hat openstack", "neutron", "octavia", "cinder", "floating ip", "api vip", "ingress vip"]),
+    ("ibm-z-linuxone", ["ibm z", "linuxone", "z/vm", "zvm", "s390x", "dasd", "linux one", "agent-based install", "zhcp"]),
     ("airgapped-disconnected", ["airgap", "air-gap", "disconnected", "mirror registry", "offline"]),
     ("multicluster-fleet", ["multicluster", "fleet", "acm", "managed cluster", "hub"]),
     ("gitops-delivery", ["gitops", "argocd", "argo cd", "tekton", "pipeline", "cicd", "ci/cd"]),
@@ -539,6 +922,75 @@ def _normalize_prompt(pattern_id: str, prompt: str) -> PromptNormalization:
         output_expectations += (
             " The holistic page must read like an on-prem architecture review board drawing with paired firewalls, user and management VLAN switch fabrics, "
             "console or BMC access, Bond0 and ETH uplinks, rack-aligned control-plane and worker nodes, and explicit ODF / Rook-Ceph storage lanes."
+        )
+    if pattern_id == "rosa-aws":
+        output_expectations += (
+            " The pack must treat ROSA as a first-class AWS architecture pattern with STS, OCM-managed control plane, customer-owned VPCs, Route 53, "
+            "AWS service endpoints, ALB-backed ingress, cloud-account guardrails, and cross-account or cross-region recovery considerations."
+        )
+    if pattern_id == "aro-azure":
+        output_expectations += (
+            " The pack must treat ARO as a first-class Azure pattern with landing-zone-aware networking, Entra identity, Azure RBAC, private or public API exposure, "
+            "Azure Monitor, storage and registry integrations, and explicit platform-operations ownership."
+        )
+    if pattern_id == "openshift-openstack":
+        output_expectations += (
+            " The pack must explain OpenShift on OpenStack with Neutron network boundaries, API and ingress VIP ownership, Octavia or external load balancers, "
+            "Cinder-backed storage, tenant and provider network assumptions, and day-2 operations across both OpenShift and OpenStack layers."
+        )
+    if pattern_id == "ibm-z-linuxone":
+        output_expectations += (
+            " The pack must explain IBM Z or LinuxONE-specific platform assumptions such as s390x topology, z/VM or LPAR hosting, mirrored-content handling, "
+            "agent-based installation, bastion orchestration, storage and network dependencies, and supportable operations for mainframe-aligned estates."
+        )
+    if pattern_id == "openshift-external-auth":
+        output_expectations += (
+            " The pack must treat OpenShift external authentication as a first-class security pattern with OIDC token issuance, Red Hat Build of Keycloak or equivalent provider modeling, "
+            "RBAC mapping, CLI and web-console access flows, and clear deployment-path differences for ROSA HCP, ARO HCP, and self-managed OpenShift 4.20+. "
+            "Show ROSA HCP break-glass bootstrap, ARO HCP short-lived admin kubeconfig bootstrap, and self-managed Authentication custom-resource plus optional CA-trust steps as distinct implementation lanes."
+        )
+    if pattern_id == "openshift-sap-clean-core-rosa":
+        output_expectations += (
+            " The pack must treat SAP clean-core modernization on ROSA as a first-class industry pattern with SAP extensions outside the SAP backend, API-first integration, "
+            "Application Foundations services, and explicit separation of SAP core, custom applications, and DevOps delivery lanes."
+        )
+    if pattern_id == "openshift-cloud-sovereignty":
+        output_expectations += (
+            " The pack must model sovereign-cloud operations with separated management and managed clusters, digital-sovereignty control objectives, OpenShift Platform Plus services, "
+            "zero-trust and confidential-computing aligned controls, and verifiable governance, audit, and data-locality behavior."
+        )
+    if pattern_id == "openshift-cloud-native-apps":
+        output_expectations += (
+            " The pack must explain cloud-native application development with local and remote containers, CI/CD, source-to-image or pipeline build paths, Quay image promotion, "
+            "and consistent dev-test-prod deployment workflows on OpenShift. Include transient build-registry handling, central Quay promotion, and explicit environment lanes for development, test, and production."
+        )
+    if pattern_id == "openshift-telco-5g":
+        output_expectations += (
+            " The pack must explain telco 5G as a CNF-based OpenShift pattern with user-plane and control-plane functions, OpenShift Service Mesh, AMQ, ACM, Ansible automation, "
+            "persistent storage, and management-orchestration boundaries suitable for on-prem or edge deployment review. Distinguish external network infrastructure, supplementary services, and EMS/CNFM-style management functions."
+        )
+    if pattern_id == "openshift-event-driven-automation":
+        output_expectations += (
+            " The pack must show event-driven automation end to end: event sources, broker, aggregation or decision logic, task services, automation dispatch, Ansible execution, "
+            "results processing, audit evidence, and incident or compliance response ownership. Include task-store, execution-store, and broker-fed feedback loops so the data flow mirrors the portfolio pattern."
+        )
+    if pattern_id == "openshift-model-as-a-service":
+        output_expectations += (
+            " The pack must model Model as a Service on OpenShift AI with API gateway, SSO, inference servers such as vLLM, multiple model options, governance, usage monitoring, "
+            "chargeback, and enterprise-safe AI service consumption."
+        )
+    if pattern_id == "openshift-ai-self-service":
+        output_expectations += (
+            " The pack must show self-service AI platform engineering with Developer Hub golden paths, OpenShift AI training and serving lanes, persona-aware workflows, quotas, "
+            "approvals, and day-2 support for data-scientist self-service at scale."
+        )
+    if pattern_id == "openshift-virtualization-portworx":
+        output_expectations += (
+            " The pack must explain OpenShift Virtualization with Portworx using VM data-integrity, resilience, and business-continuity language rather than generic virtualization prose."
+        )
+    if pattern_id == "openshift-virtualization-trilio":
+        output_expectations += (
+            " The pack must explain OpenShift Virtualization with Trilio using backup, recovery, upgrade, migration, reporting, and SLA-oriented resilience controls as explicit architecture elements."
         )
     normalized_prompt = (
         f"{senior_architect_brief} {template['prompt']} {repository_context} {output_expectations} "
@@ -687,6 +1139,198 @@ def suggest_architecture_clarifications(*, prompt: str, openshift_state: dict[st
                     placeholder="Example: bastion in staging zone plus removable-media approval flow and offline bundle scan.",
                 )
             )
+    if pattern_id == "rosa-aws":
+        if not any(token in prompt_lower for token in ["private", "public", "api", "ingress"]):
+            questions.append(
+                ClarificationQuestion(
+                    question_id="rosa_exposure_model",
+                    title="ROSA exposure model",
+                    question="Should the ROSA design show private-only, public, or mixed API and application ingress exposure?",
+                    rationale="ROSA network layout, Route 53 use, and ALB or ingress expectations depend heavily on the intended exposure model.",
+                    placeholder="Example: private API, public app ingress through ALB, Route 53 hosted zone for *.apps and API aliases.",
+                )
+            )
+        if not any(token in prompt_lower for token in ["sts", "ocm", "endpoint", "route 53", "route53"]):
+            questions.append(
+                ClarificationQuestion(
+                    question_id="rosa_service_dependencies",
+                    title="ROSA service dependencies",
+                    question="Which ROSA-specific AWS dependencies should be explicit: STS, OCM, VPC endpoints, Route 53, or AWS Load Balancer Controller?",
+                    rationale="A ROSA design is much stronger when the AWS service dependencies used by private workers and cluster operations are named directly.",
+                    placeholder="Example: STS auto mode, EC2/ECR/ELB/CloudWatch endpoints, Route 53 hosted zone, ALB controller for app ingress.",
+                )
+            )
+    if pattern_id == "aro-azure":
+        if not any(token in prompt_lower for token in ["entra", "service principal", "managed identity", "rbac"]):
+            questions.append(
+                ClarificationQuestion(
+                    question_id="aro_identity_model",
+                    title="ARO identity model",
+                    question="Should the ARO design show Microsoft Entra with service principal, managed identity, or another access model?",
+                    rationale="Identity and RBAC choices materially change the architecture and the day-2 operating model for ARO.",
+                    placeholder="Example: Entra-backed user SSO plus managed identity or service principal for cluster deployment automation.",
+                )
+            )
+        if not any(token in prompt_lower for token in ["private", "public", "egress", "peering", "hub-spoke"]):
+            questions.append(
+                ClarificationQuestion(
+                    question_id="aro_network_shape",
+                    title="ARO network shape",
+                    question="What Azure network pattern should I show for ARO: hub-spoke, flat VNet, private cluster, controlled egress, or mixed exposure?",
+                    rationale="The VNet and exposure pattern determine how ARO is presented in the holistic, topology, and security pages.",
+                    placeholder="Example: hub-spoke VNet with private API, outbound egress via Azure Firewall, app ingress through public DNS and load balancing.",
+                )
+            )
+    if pattern_id == "openshift-openstack":
+        if not any(token in prompt_lower for token in ["octavia", "f5", "load balancer", "vip"]):
+            questions.append(
+                ClarificationQuestion(
+                    question_id="openstack_vip_model",
+                    title="API and ingress VIP model",
+                    question="Should I show Octavia, external load balancers, or another VIP ownership model for the API and ingress endpoints?",
+                    rationale="OpenShift on OpenStack diagrams often rise or fall on whether API and ingress VIP ownership is explicit and supportable.",
+                    placeholder="Example: Octavia-managed API and ingress VIPs with floating IP exposure for ingress only.",
+                )
+            )
+        if not any(token in prompt_lower for token in ["tenant", "provider", "neutron", "floating ip", "router"]):
+            questions.append(
+                ClarificationQuestion(
+                    question_id="openstack_network_model",
+                    title="Tenant and provider networks",
+                    question="What Neutron network model should the design show: tenant networks only, provider networks, floating IPs, or hybrid routing?",
+                    rationale="The network model is central to OpenShift on OpenStack architecture quality and cannot stay implicit.",
+                    placeholder="Example: tenant networks for cluster east-west, provider network for ingress VIPs, floating IPs for selected routes only.",
+                )
+            )
+    if pattern_id == "ibm-z-linuxone":
+        if not any(token in prompt_lower for token in ["z/vm", "lpar", "linuxone", "hmc"]):
+            questions.append(
+                ClarificationQuestion(
+                    question_id="ibmz_hosting_model",
+                    title="IBM Z hosting model",
+                    question="Should the IBM Z design assume z/VM guests, LPARs, LinuxONE, or a mixed hosting model?",
+                    rationale="The IBM Z hosting model changes installation, network, storage, and support expectations substantially.",
+                    placeholder="Example: z/VM guest-based s390x cluster on LinuxONE Emperor with bastion-managed install assets.",
+                )
+            )
+        if not any(token in prompt_lower for token in ["mirror", "bastion", "air-gap", "disconnected", "registry"]):
+            questions.append(
+                ClarificationQuestion(
+                    question_id="ibmz_content_path",
+                    title="Mirrored content and bastion path",
+                    question="What mirrored-registry or bastion path should I show for IBM Z cluster installation and day-2 operations?",
+                    rationale="IBM Z and LinuxONE designs are much more realistic when the image, mirror, and bastion path is captured explicitly.",
+                    placeholder="Example: mirrored release content on bastion-hosted registry with disconnected transfer approvals and agent-based install assets.",
+                )
+            )
+    if pattern_id == "openshift-external-auth":
+        if not any(token in prompt_lower for token in ["rosa hcp", "aro hcp", "self-managed", "self managed"]):
+            questions.append(
+                ClarificationQuestion(
+                    question_id="external_auth_path",
+                    title="Supported deployment path",
+                    question="Which external-auth deployment path should the architecture emphasize: ROSA HCP, ARO HCP, self-managed OpenShift, or a comparison across all three?",
+                    rationale="External-auth configuration and operational ownership differ noticeably across ROSA HCP, ARO HCP, and self-managed OpenShift.",
+                    placeholder="Example: primary design for ROSA HCP plus comparison notes for ARO HCP and self-managed OpenShift 4.20+.",
+                )
+            )
+        if not any(token in prompt_lower for token in ["keycloak", "oidc provider", "entra", "okta", "idp"]):
+            questions.append(
+                ClarificationQuestion(
+                    question_id="external_auth_idp",
+                    title="Identity provider model",
+                    question="Which external identity provider should the architecture use as the reference implementation?",
+                    rationale="The trust flow, claims model, and operational guidance are stronger when the reference identity provider is explicit.",
+                    placeholder="Example: Red Hat Build of Keycloak as reference OIDC provider with group claims mapped to OpenShift RBAC.",
+                )
+            )
+    if pattern_id == "openshift-sap-clean-core-rosa":
+        if not any(token in prompt_lower for token in ["s/4hana", "ecc", "sap btp", "sap system"]):
+            questions.append(
+                ClarificationQuestion(
+                    question_id="sap_system_scope",
+                    title="SAP estate scope",
+                    question="Which SAP systems and modernization targets should the ROSA clean-core design cover?",
+                    rationale="The architecture is much more actionable when the SAP landscape and integration scope are explicit.",
+                    placeholder="Example: SAP S/4HANA plus SAP BTP integrations, with custom extensions moved to ROSA-hosted microservices.",
+                )
+            )
+    if pattern_id == "openshift-cloud-sovereignty":
+        if not any(token in prompt_lower for token in ["management cluster", "managed cluster", "hub", "spoke", "platform plus"]):
+            questions.append(
+                ClarificationQuestion(
+                    question_id="sovereignty_cluster_split",
+                    title="Management versus workload separation",
+                    question="How should the sovereignty architecture separate management clusters from managed workload clusters?",
+                    rationale="Sovereign-cloud quality depends heavily on whether control services are isolated from workload platforms.",
+                    placeholder="Example: one management cluster for ACM, ACS, ODF, and GitOps governing two sovereign workload clusters.",
+                )
+            )
+    if pattern_id == "openshift-cloud-native-apps":
+        if not any(token in prompt_lower for token in ["quay", "dev", "test", "prod", "promotion", "s2i", "source-to-image"]):
+            questions.append(
+                ClarificationQuestion(
+                    question_id="cloud_native_promotion",
+                    title="Image promotion model",
+                    question="What build and promotion path should the cloud-native platform show from developer workstation to dev, test, and production?",
+                    rationale="The Red Hat cloud-native application pattern is strongest when image promotion and registry flow are explicit rather than assumed.",
+                    placeholder="Example: developer -> CI build -> transient registry -> Quay -> dev/test/prod cluster registries with Argo CD sync.",
+                )
+            )
+    if pattern_id == "openshift-telco-5g":
+        if not any(token in prompt_lower for token in ["upf", "amf", "smf", "pcf", "network slice", "cnf"]):
+            questions.append(
+                ClarificationQuestion(
+                    question_id="telco_function_scope",
+                    title="5G function scope",
+                    question="Which 5G control-plane, user-plane, and supplementary functions should the OpenShift telco design emphasize?",
+                    rationale="Telco architecture quality improves dramatically when the targeted 5G functions and management boundaries are explicit.",
+                    placeholder="Example: UPF, AMF, SMF, PCF, AUSF, UDM, NRF, and NSSF with service-mesh-based service exposure.",
+                )
+            )
+    if pattern_id == "openshift-event-driven-automation":
+        if not any(token in prompt_lower for token in ["event source", "broker", "ticket", "ansible", "rulebook"]):
+            questions.append(
+                ClarificationQuestion(
+                    question_id="eda_sources_actions",
+                    title="Event sources and remediation actions",
+                    question="Which event sources and automation outcomes should the event-driven architecture handle?",
+                    rationale="The automation chain becomes much more useful when the triggering systems and expected remediation actions are concrete.",
+                    placeholder="Example: SIEM alerts and monitoring anomalies trigger Ansible remediation plus ServiceNow ticket creation and execution-status feedback.",
+                )
+            )
+    if pattern_id == "openshift-model-as-a-service":
+        if not any(token in prompt_lower for token in ["3scale", "gateway", "vllm", "chargeback", "model catalog"]):
+            questions.append(
+                ClarificationQuestion(
+                    question_id="maas_service_contract",
+                    title="Model service contract",
+                    question="What API gateway, identity, model-catalog, and chargeback expectations should the MaaS platform expose?",
+                    rationale="MaaS designs need explicit service-governance details to feel enterprise-ready rather than just GPU hosting diagrams.",
+                    placeholder="Example: 3scale gateway, SSO-backed access, curated model catalog, usage metering by team, and regression-tested model versions.",
+                )
+            )
+    if pattern_id == "openshift-ai-self-service":
+        if not any(token in prompt_lower for token in ["developer hub", "golden path", "persona", "training", "serving", "quota"]):
+            questions.append(
+                ClarificationQuestion(
+                    question_id="ai_self_service_golden_paths",
+                    title="AI self-service golden paths",
+                    question="Which personas and golden paths should the self-service AI platform expose for training, experimentation, and model serving?",
+                    rationale="Developer Hub and OpenShift AI patterns work best when the self-service journeys and guardrails are named directly.",
+                    placeholder="Example: data scientists request notebook workspaces, training pipelines, and model-serving projects through Developer Hub templates with quota guardrails.",
+                )
+            )
+    if pattern_id in {"openshift-virtualization-portworx", "openshift-virtualization-trilio"} and not any(token in prompt_lower for token in ["backup", "recovery", "migration", "snapshot", "business continuity", "sla"]):
+        questions.append(
+            ClarificationQuestion(
+                question_id="virt_resilience_scope",
+                title="Virtualization resilience scope",
+                question="Should the virtualization pattern emphasize backup, DR, migration, snapshotting, or day-2 VM operations most strongly?",
+                rationale="Partner-aligned virtualization patterns are most valuable when the targeted resilience or migration outcomes are explicit.",
+                placeholder="Example: prioritize VM backup and recovery with quarterly restore testing, or prioritize migration and upgrade safety for legacy estates.",
+            )
+        )
     if pattern_id in {"multicluster-fleet", "backup-dr", "migration-factory"} and not any(token in prompt_lower for token in ["hub", "spoke", "primary", "secondary", "prod", "dr", "fleet"]):
         questions.append(
             ClarificationQuestion(
@@ -1369,6 +2013,13 @@ def _section(title: str, body: list[str]) -> dict[str, Any]:
     return {"title": title, "body": cleaned}
 
 
+def _markdown_table(headers: list[str], rows: list[list[str]]) -> str:
+    header_row = "| " + " | ".join(headers) + " |"
+    divider_row = "| " + " | ".join(["---"] * len(headers)) + " |"
+    body_rows = ["| " + " | ".join(str(cell) for cell in row) + " |" for row in rows]
+    return "\n".join([header_row, divider_row, *body_rows])
+
+
 def _estimate_document_pages(sections: list[dict[str, Any]], document_type: str) -> int:
     word_count = 0
     for section in sections:
@@ -1753,6 +2404,776 @@ def _interface_appendix_sections(edges: list[DiagramEdge], document_type: str) -
                 ),
             )
         )
+    return sections
+
+
+def _platform_appendix_sections(
+    *,
+    planning: PromptNormalization,
+    document_type: str,
+    openshift_state: dict[str, Any] | None,
+) -> list[dict[str, Any]]:
+    counts = (openshift_state or {}).get("resource_counts") or {}
+    sections: list[dict[str, Any]] = []
+
+    if planning.pattern_id == "rosa-aws":
+        sections.extend(
+            [
+                _section(
+                    "ROSA appendix — AWS account, tenancy, and service ownership",
+                    [
+                        "Define which AWS account or accounts own the ROSA VPC, worker-node networking, Route 53 zones, logging targets, and IAM guardrails around the cluster estate, while making it explicit that the hosted control plane for ROSA with HCP is operated in a Red Hat-owned AWS account.",
+                        "Record whether the deployment uses a single workload account, shared-services and workload split, or a broader landing-zone pattern with delegated ownership for DNS, security, and observability.",
+                        "Capture OCM and ROSA service ownership boundaries so support teams can distinguish Red Hat managed control-plane responsibility from customer-owned AWS infrastructure responsibility, including worker nodes, private subnets, optional private connectivity, and custom DNS changes.",
+                        "Document the AWS regions, availability-zone spread, tagging standards, cost allocation model, and account guardrails required for the ROSA environment to remain supportable.",
+                        "List the AWS teams or platform owners responsible for networking, IAM, Route 53, VPC endpoint policy, load-balancer governance, firewall prerequisites, and audit evidence retention.",
+                    ]
+                    + (
+                        [
+                            "Implementation matrix detail: map each account, VPC, subnet family, hosted zone, and shared-service integration to owner, deployment sequence, validation evidence, and rollback boundary.",
+                            "Low-level ownership detail: identify which changes are performed through Terraform, ROSA CLI, AWS console or APIs, and GitOps-driven cluster configuration after provisioning.",
+                        ]
+                        if document_type == "lld"
+                        else []
+                    ),
+                ),
+                _section(
+                    "ROSA appendix — AWS endpoints, Route 53, and ingress implementation",
+                    [
+                        "Describe the AWS interface and gateway endpoints required by private ROSA workers, such as STS, EC2, ELB, ECR, CloudWatch, and S3, and explain which routes, subnet tiers, and policies make those services reachable.",
+                        "Document Route 53 and custom-DNS ownership for API and wildcard application records, including cases where a wildcard CNAME maps customer application domains to the OpenShift canonical router hostname.",
+                        "Specify the ingress model for the cluster: private-only, public, or mixed exposure, while noting that ROSA deploys load balancers for the default ingress controller and customers request or manage additional ingress controllers and service load balancers as needed.",
+                        f"Live posture indicators: ingress controllers={counts.get('ingress_controllers', 0)}, managed clusters={counts.get('managed_clusters', 0)}, backup locations={counts.get('backup_locations', 0)}.",
+                        "Capture PrivateLink, TLS, certificate, WAF, DNS, and failover behavior for API and application exposure so the architecture pack can support CAB and security review without extra interpretation.",
+                    ]
+                    + (
+                        [
+                            "Implementation matrix detail: list every endpoint service, route-table dependency, security group path, hosted-zone record, ALB or NLB dependency, and health-check verification required for production readiness.",
+                            "Validation detail: include endpoint reachability tests from private workers, API and route DNS resolution, certificate trust verification, and controlled rollback if public exposure must be withdrawn.",
+                        ]
+                        if document_type == "lld"
+                        else []
+                    ),
+                ),
+                _section(
+                    "ROSA appendix — AWS endpoint inventory table",
+                    [
+                        "Use this endpoint inventory during design review to prove private-worker reachability, hosted-control-plane connectivity, endpoint ownership, and the exact AWS services that must remain reachable for ROSA operations.",
+                        _markdown_table(
+                            ["AWS service", "Endpoint type", "Primary use", "Expected path", "Owner", "Validation"],
+                            [
+                                ["Hosted control plane via AWS PrivateLink", "PrivateLink", "Connect customer workers to the Red Hat-managed control plane", "Customer private subnets -> PrivateLink endpoint", "Red Hat managed service + customer networking", "API access succeeds and worker/control-plane communication is healthy"],
+                                ["STS", "Interface", "Token exchange for ROSA STS roles", "Worker subnets -> VPC endpoint", "Cloud platform IAM", "Assume-role call succeeds from private worker path"],
+                                ["EC2", "Interface", "Node lifecycle and infrastructure metadata", "Worker subnets -> VPC endpoint", "Cloud platform networking", "Cluster machine operations succeed without internet egress"],
+                                ["Elastic Load Balancing", "Interface", "API and ingress load balancer lifecycle", "Worker or service subnets -> VPC endpoint", "Cloud platform networking", "Ingress services reconcile and health checks pass"],
+                                ["ECR API / DKR", "Interface", "Image metadata and image pull path", "Worker subnets -> VPC endpoints", "Registry platform team", "Pod image pulls succeed from approved registries"],
+                                ["S3", "Gateway or interface", "Registry/object access, backups, and mirrored content", "Route tables -> S3 path", "Storage or backup owner", "Backup and artifact sync complete without public internet"],
+                                ["CloudWatch / Logs", "Interface", "Metrics, logs, and diagnostic export", "Worker subnets -> VPC endpoint", "Observability team", "Platform logs and metrics are visible in target workspace"],
+                            ]
+                            + (
+                                [
+                                    ["OIDC provider", "IAM trust endpoint", "Allow cluster Operators to assume AWS roles with web identity", "Operator pod -> OIDC provider -> STS", "Cloud IAM + OpenShift platform", "Operator role assumption succeeds and trust policy matches expected subjects"],
+                                    ["Route 53", "Control-plane API", "Hosted zone and alias record updates", "Automation or platform admin path", "DNS team", "API and wildcard alias changes are auditable and resolvable"],
+                                    ["OCM / ROSA service", "SaaS control plane", "Managed service coordination", "Approved egress or proxy path", "OpenShift platform SRE", "Cluster lifecycle actions complete through managed-service path"],
+                                ]
+                                if document_type == "lld"
+                                else []
+                            ),
+                        ),
+                    ]
+                    + (
+                        [
+                            "LLD note: if an endpoint is intentionally omitted, the matrix should state the compensating route, proxy, or approved egress pattern so the design remains supportable.",
+                        ]
+                        if document_type == "lld"
+                        else []
+                    ),
+                ),
+                _section(
+                    "ROSA appendix — Route 53 and ingress ownership matrix",
+                    [
+                        "Use this ownership matrix to remove ambiguity between AWS DNS administrators, cloud network teams, and OpenShift SREs when API or application exposure changes are requested.",
+                        _markdown_table(
+                            ["Asset / decision", "Implementation pattern", "Primary owner", "Supporting owner", "Evidence / check"],
+                            [
+                                ["API FQDN", "Private or public record aligned to ROSA cluster posture", "DNS team", "OpenShift SRE", "API hostname resolves and cluster admin access is verified"],
+                                ["Wildcard apps zone", "Alias, delegated zone, or wildcard CNAME to canonical router hostname", "DNS team", "Application platform team", "Wildcard DNS resolves to approved ingress target"],
+                                ["Ingress exposure model", "Private-only, public, or mixed", "OpenShift SRE", "Security architecture", "Exposure matches approved threat model and CAB record"],
+                                ["Default router load balancer", "ROSA-managed default ingress load balancer", "Red Hat managed service", "Cloud platform networking", "Default routes are reachable through approved load balancer path"],
+                                ["Additional ingress / service load balancers", "Customer-requested secondary ingress or service LB", "Cloud platform networking", "OpenShift SRE", "Additional exposure path is explicitly approved and monitored"],
+                                ["TLS certificate ownership", "ACM, external PKI, or enterprise certificate workflow", "Security / PKI team", "OpenShift SRE", "Certificate chain and renewal path are documented"],
+                            ]
+                            + (
+                                [
+                                    ["Failover DNS action", "Weighted / failover record or documented manual cutover", "DNS team", "DR owner", "Failover test evidence captured"],
+                                    ["WAF or edge policy", "CloudFront/WAF or upstream edge control", "Security architecture", "Cloud network team", "Rule set, logs, and rollback plan validated"],
+                                ]
+                                if document_type == "lld"
+                                else []
+                            ),
+                        ),
+                    ],
+                ),
+                _section(
+                    "ROSA appendix — account, VPC, and subnet ownership table",
+                    [
+                        "Use this table to prove where every ROSA dependency lives and which team is authorized to change it during build, incident response, and recovery activities.",
+                        _markdown_table(
+                            ["Scope", "Representative assets", "Recommended boundary", "Owner", "Change path"],
+                            [
+                                ["Red Hat service account boundary", "Hosted control plane, etcd, Red Hat-operated service components", "Out-of-scope for customer VPC management but in-scope for responsibility mapping", "Red Hat managed service", "Support case, cluster history, and managed service notifications"],
+                                ["Shared services account", "Central DNS, security tooling, observability sinks", "Separate shared-services account where enterprise standards require it", "Cloud platform team", "Terraform plus approved cloud change workflow"],
+                                ["ROSA landing-zone account", "Cluster VPC, worker networking, STS roles, OIDC provider, load balancers", "Dedicated workload or platform account", "OpenShift platform + cloud networking", "Terraform / ROSA automation"],
+                                ["Private worker subnets", "Worker nodes, internal load balancers, endpoint reachability", "Dedicated private subnets per AZ because workers run in customer-owned private subnets", "Cloud networking", "Subnet IaC with CAB approval"],
+                                ["Service or ingress subnets", "Public or shared ingress load balancers where used", "Controlled ingress tier", "Cloud networking", "Cloud network change procedure"],
+                                ["Route 53 hosted zones", "API and wildcard application records", "Central DNS governance boundary", "DNS team", "DNS automation or approved manual change"],
+                            ]
+                            + (
+                                [
+                                    ["Backup / artifact account", "S3 backup targets, log archive, mirrored content", "Segregated recovery boundary", "Backup or storage owner", "Protected storage workflow with restore evidence"],
+                                ]
+                                if document_type == "lld"
+                                else []
+                            ),
+                        ),
+                    ],
+                ),
+            ]
+        )
+
+    if planning.pattern_id == "aro-azure":
+        sections.extend(
+            [
+                _section(
+                    "ARO appendix — Azure landing zone, subscription, and resource placement",
+                    [
+                        "Describe the Azure landing-zone assumptions for ARO, including subscription placement, resource-group ownership, hub-spoke or flat-network model, and the governance controls applied around the cluster estate.",
+                        "Document where ARO networking, identity objects, DNS zones, registry dependencies, monitoring integrations, and backup targets live within the Azure subscription and management-group hierarchy.",
+                        "Clarify whether the design assumes public, private, or mixed API and ingress exposure and how that aligns with Azure Firewall, Private Link, peering, or route-control expectations.",
+                        "Capture the deployment and day-2 ownership split between Azure platform engineering, OpenShift operations, security, and application teams.",
+                        "List naming, tagging, region, availability-zone, and resource-placement standards needed for policy compliance and operational consistency.",
+                    ]
+                    + (
+                        [
+                            "Implementation matrix detail: map subscriptions, resource groups, VNets, subnets, route tables, DNS zones, and monitoring workspaces to owner, lifecycle tool, and validation evidence.",
+                            "Low-level deployment detail: identify which artifacts are provisioned by Terraform, which require Azure role assignment workflows, and which are cluster-native follow-up tasks handled by GitOps or operators.",
+                        ]
+                        if document_type == "lld"
+                        else []
+                    ),
+                ),
+                _section(
+                    "ARO appendix — RBAC, Entra identity, and VNet design",
+                    [
+                        "Explain the Microsoft Entra, service principal, or managed-identity model used by ARO and show how Azure RBAC responsibilities are delegated across deployment, operations, and support workflows.",
+                        "Describe the VNet design, subnet allocations, API and ingress exposure, DNS dependencies, egress controls, and peering or firewall paths needed for ARO to function under enterprise network governance.",
+                        f"Live posture indicators: ingress controllers={counts.get('ingress_controllers', 0)}, managed clusters={counts.get('managed_clusters', 0)}, Argo CD instances={counts.get('argocd_instances', 0)}.",
+                        "Document how certificates, Key Vault or secret-management paths, outbound allow rules, monitoring agents, and Azure-native support integrations are handled in the target architecture.",
+                        "Ensure the appendix distinguishes Azure control-plane responsibilities from cluster-native OpenShift RBAC, SCC, and namespace governance responsibilities.",
+                    ]
+                    + (
+                        [
+                            "Implementation matrix detail: enumerate RBAC roles, principal scopes, VNet peerings, route controls, DNS zones, private endpoints, and diagnostic settings with owner and verification steps.",
+                            "Validation detail: test Entra sign-in, Azure RBAC access, API reachability, route resolution, monitoring signal flow, and rollback steps for public or private exposure changes.",
+                        ]
+                        if document_type == "lld"
+                        else []
+                    ),
+                ),
+                _section(
+                    "ARO appendix — Azure RBAC role matrix",
+                    [
+                        "This role matrix aligns to the ARO Landing Zone Accelerator design areas: Microsoft Entra backed access, custom Azure RBAC roles, and least-privilege separation between landing-zone ownership, SRE, SecOps, and application teams.",
+                        _markdown_table(
+                            ["Role / identity", "Azure scope", "OpenShift scope", "Core responsibilities", "Control expectation"],
+                            [
+                                ["Landing zone owner", "ARO subscription and required resource groups", "None by default", "Approve resource placement, policy exceptions, tagging, and lifecycle ownership", "PIM-eligible elevated access with audited change windows"],
+                                ["Platform SRE", "ARO resource group, networking dependencies, diagnostics", "cluster-admin or delegated admin groups", "Operate cluster, troubleshoot incidents, validate upgrades", "Entra group mapped to Azure RBAC and OpenShift bindings"],
+                                ["SecOps", "Read / monitor across subscription plus security tooling scopes", "Read-only or security-focused OpenShift roles", "Investigate findings, review diagnostics, validate security posture", "Least-privilege read plus approved emergency elevation path"],
+                                ["Application team", "Only deployment-adjacent Azure resources such as ACR, Key Vault, CI resources", "Project-scoped roles", "Deploy and support workloads without cluster-wide administration", "No standing subscription-owner or cluster-admin access"],
+                                ["Cluster service principal / managed identity", "Required deployment and cluster resource scopes", "Not user-facing", "Provision and operate ARO-managed Azure resources", "Custom role with only required permissions"],
+                            ]
+                            + (
+                                [
+                                    ["DNS / connectivity operator", "Connectivity subscription DNS zones, Private DNS links, firewall policy", "None", "Manage shared DNS, Private Link, and route dependencies for the ARO spoke", "Cross-subscription rights explicitly approved and tested"],
+                                ]
+                                if document_type == "lld"
+                                else []
+                            ),
+                        ),
+                    ]
+                    + (
+                        [
+                            "LLD note: the final implementation should map each Azure RBAC assignment to the corresponding Microsoft Entra group and, where applicable, the OpenShift role binding used inside the cluster.",
+                        ]
+                        if document_type == "lld"
+                        else []
+                    ),
+                ),
+                _section(
+                    "ARO appendix — landing zone resource placement table",
+                    [
+                        "This placement table reflects the accelerator scope: the ARO application landing zone is in scope, while shared platform-foundation services such as connectivity, identity, and governance are assumed to already exist.",
+                        _markdown_table(
+                            ["Landing-zone layer", "Typical Azure scope", "Representative resources", "Why it lives here", "Owner"],
+                            [
+                                ["Management group hierarchy", "Corp / Online / platform-aligned parent groups", "Azure Policy, RBAC inheritance, compliance guardrails", "Apply governance above the subscription", "Central cloud governance"],
+                                ["Connectivity subscription", "Platform landing zone", "Hub VNet or Virtual WAN, DNS resolvers, Azure Firewall, Private DNS zones", "Shared connectivity and name resolution for spokes", "Network platform team"],
+                                ["Management subscription", "Platform landing zone", "Log Analytics, monitoring, security tooling, update / automation services", "Centralize monitoring and management services", "Operations platform team"],
+                                ["ARO landing-zone subscription", "Application landing zone", "ARO cluster, spoke VNet, primary and worker subnets, route tables, cluster RGs", "Host the ARO workload platform itself", "ARO platform owner"],
+                                ["Shared application services", "Application or shared platform subscription", "ACR, Key Vault, Cosmos DB, shared build agents", "Support workloads while preserving governance boundaries", "App platform or shared services owner"],
+                            ]
+                            + (
+                                [
+                                    ["Internet edge", "Central or shared edge subscription", "Azure Front Door and WAF where internet publication is required", "Publish private-cluster applications without bypassing landing-zone controls", "Edge networking / security"],
+                                    ["Arc / monitoring integration", "Management or approved app subscription", "Azure Arc-enabled Kubernetes, dashboards, alerting integrations", "Provide central monitoring consistent with secure baseline guidance", "Operations platform team"],
+                                ]
+                                if document_type == "lld"
+                                else []
+                            ),
+                        ),
+                    ],
+                ),
+                _section(
+                    "ARO appendix — VNet, subnet, and peering matrix",
+                    [
+                        "This network matrix uses the ARO accelerator guidance for hub-and-spoke style connectivity, centralized DNS, private endpoints, and private-cluster-friendly ingress publication.",
+                        _markdown_table(
+                            ["Network element", "Placement", "Minimum expectation", "Traffic / dependency", "Validation"],
+                            [
+                                ["Hub or connectivity VNet", "Connectivity subscription", "Central DNS, firewall, and shared routing services", "Spoke peering and DNS forwarding", "ARO spoke resolves private and public names through approved resolvers"],
+                                ["ARO primary subnet", "ARO landing-zone subscription", "Minimum /27; no customer NSG attached", "Control-plane/master placement", "Cluster deploys with supported subnet settings"],
+                                ["ARO worker subnet", "ARO landing-zone subscription", "Minimum /27; no customer NSG attached", "Workers and internal load balancers", "Ingress and pod traffic function without subnet-policy conflict"],
+                                ["Private endpoint subnet / service access", "ARO or shared application VNet", "Planned address space for Key Vault, Storage, SQL, Cosmos DB, etc.", "Pod-to-PaaS connectivity over Private Link", "Private DNS records resolve and data path stays private"],
+                                ["Hub-spoke peering", "Connectivity <-> ARO spoke", "Bidirectional peering or Virtual WAN equivalent", "DNS, management, and egress path", "Routes and firewall policy produce no asymmetric routing"],
+                                ["Ingress publication", "Front Door or firewall path to ARO ingress", "Front Door + WAF for web apps, DNAT/firewall for non-web where required", "Application user access to private cluster ingress", "Public entry reaches internal load balancer and TLS is valid"],
+                            ]
+                            + (
+                                [
+                                    ["Private DNS zones", "Connectivity subscription", "Central zone ownership with cross-subscription links", "Name resolution for private endpoints and ARO dependencies", "Zone links and records are auditable and effective"],
+                                    ["Egress control", "Hub firewall or NVA", "UDR plus ARO egress-lockdown-aligned configuration", "Controlled outbound internet access", "Ingress return path avoids asymmetric routing issues"],
+                                ]
+                                if document_type == "lld"
+                                else []
+                            ),
+                        ),
+                    ],
+                ),
+            ]
+        )
+
+    if planning.pattern_id == "openshift-openstack":
+        sections.extend(
+            [
+                _section(
+                    "OpenStack appendix — VIP, API, ingress, and Neutron network matrix",
+                    [
+                        "Define the API VIP and ingress VIP ownership model, including whether Octavia, external load balancers, or site-managed virtual IP workflows provide service exposure for the cluster.",
+                        "Document the Neutron network design: tenant networks, provider networks, floating IP exposure, routers, DHCP behavior, and any routed or non-routed assumptions used by the OpenShift estate.",
+                        "Capture the DNS, certificate, health-check, and floating-IP dependencies required for API and ingress endpoints to remain reachable during steady state and change windows.",
+                        f"Live posture indicators: ingress controllers={counts.get('ingress_controllers', 0)}, managed clusters={counts.get('managed_clusters', 0)}, PVCs={counts.get('persistent_volume_claims', 0)}.",
+                        "Make the boundary between OpenStack networking ownership and OpenShift ingress ownership explicit so implementation and support teams do not inherit ambiguous responsibilities.",
+                    ]
+                    + (
+                        [
+                            "Implementation matrix detail: list Neutron networks, subnets, routers, provider-network uplinks, floating IP allocations, VIP endpoints, load-balancer pools, and validation checkpoints for each exposure path.",
+                            "Validation detail: include API VIP failover checks, ingress route reachability, Octavia or external load-balancer health checks, DNS resolution, and rollback criteria if endpoint exposure fails.",
+                        ]
+                        if document_type == "lld"
+                        else []
+                    ),
+                ),
+                _section(
+                    "OpenStack appendix — Cinder, storage, and implementation matrix",
+                    [
+                        "Describe the Cinder-backed storage model, storage classes, snapshot expectations, image dependencies, and persistent-volume assumptions used by OpenShift on OpenStack.",
+                        "Clarify where block storage, image repositories, backup targets, and recovery metadata live, and who owns those services across the OpenStack and OpenShift operating boundary.",
+                        "Document how storage performance tiers, availability zones, volume attachment limits, and backup or restore procedures shape workload placement and recovery design.",
+                        "Record the implementation order for image, network, load-balancer, compute, and storage dependencies so the OpenStack platform and the OpenShift cluster are activated in a deterministic sequence.",
+                        "Include operational expectations for volume expansion, snapshot restore, node replacement, and degraded-state investigation when Cinder or network services impact workload health.",
+                    ]
+                    + (
+                        [
+                            "Implementation matrix detail: capture per-service owner, project, resource type, API endpoint, storage dependency, and acceptance test for the OpenStack-backed deployment stack.",
+                            "Low-level recovery detail: define the exact restore, rollback, or rebuild steps when volumes, VIPs, or tenant-network routes fail during maintenance or incident response.",
+                        ]
+                        if document_type == "lld"
+                        else []
+                    ),
+                ),
+                _section(
+                    "OpenStack appendix — VIP matrix",
+                    [
+                        "Use this VIP matrix during network review to pin down which endpoint is delivered by Octavia, which is provided by external appliances, and who owns failover validation.",
+                        _markdown_table(
+                            ["VIP / endpoint", "Typical function", "Delivery model", "Owner", "Validation"],
+                            [
+                                ["API VIP", "Cluster API endpoint", "Octavia or external load balancer", "OpenStack network team", "API health checks and admin login succeed"],
+                                ["Ingress VIP", "Wildcard application route entry", "Octavia or external load balancer", "OpenStack network team + OpenShift SRE", "Routes resolve and application traffic passes"],
+                                ["Machine / provisioning path", "Bootstrap and node lifecycle services where applicable", "Site-defined VIP or routed service", "Platform engineering", "Provisioning traffic and node join succeed"],
+                                ["Egress / NAT path", "Outbound package, mirror, or update access", "Router or dedicated egress service", "OpenStack network team", "Approved destinations reachable with logging"],
+                            ]
+                            + (
+                                [
+                                    ["DR / failover VIP", "Cross-site cutover endpoint where used", "Manual or automated failover pattern", "DR owner", "Documented cutover and rollback evidence"],
+                                ]
+                                if document_type == "lld"
+                                else []
+                            ),
+                        ),
+                    ],
+                ),
+                _section(
+                    "OpenStack appendix — Neutron network mapping table",
+                    [
+                        "Use this table to show how OpenShift control, workload, and exposure paths map to Neutron constructs so the design can be reviewed by both OpenStack and OpenShift teams without translation loss.",
+                        _markdown_table(
+                            ["Neutron construct", "OpenShift use", "Example placement", "Owner", "Evidence"],
+                            [
+                                ["Tenant network", "Node east-west and cluster-internal connectivity", "Control-plane and worker interfaces", "OpenStack platform team", "Nodes communicate and SDN overlay is healthy"],
+                                ["Provider network", "External or routed north-south connectivity", "Ingress or API exposure path", "OpenStack network team", "North-south traffic reaches intended VIPs"],
+                                ["Router", "Connect tenant and external networks", "ARO? no—OpenStack cluster north-south path", "OpenStack network team", "Expected routes and SNAT / DNAT behavior verified"],
+                                ["Floating IP pool", "Public exposure where approved", "API or application endpoint mapping", "OpenStack network team", "Assigned addresses resolve and health checks pass"],
+                                ["Security groups / ACLs", "Restrict node and service exposure", "API, ingress, storage, monitoring flows", "Security + OpenStack network team", "Rules align with approved port matrix"],
+                            ]
+                            + (
+                                [
+                                    ["DNS integration", "API and application name resolution", "Internal DNS or delegated enterprise DNS", "DNS owner", "Names resolve during steady state and failover"],
+                                ]
+                                if document_type == "lld"
+                                else []
+                            ),
+                        ),
+                    ],
+                ),
+                _section(
+                    "OpenStack appendix — Cinder storage dependency matrix",
+                    [
+                        "Use this storage matrix to show which OpenShift capabilities depend on Cinder-backed persistence and where restore, expansion, and incident workflows must be rehearsed.",
+                        _markdown_table(
+                            ["Capability", "Storage dependency", "Why it matters", "Owner", "Recovery / validation"],
+                            [
+                                ["Image registry", "Persistent volume on Cinder-backed storage class", "Sustains image availability and rollout continuity", "OpenShift platform SRE", "Push/pull test and restore validation"],
+                                ["Monitoring / logging persistence", "PVCs on approved storage class", "Retains operational evidence and troubleshooting data", "Observability team", "Retention and failover checks pass"],
+                                ["ODF / application PVs", "Block volumes for data services or ODF nodes where used", "Supports workload data and resilience patterns", "Storage platform owner", "Volume attach, failover, and expansion verified"],
+                                ["Snapshot / backup path", "Cinder snapshots or backup-integrated storage path", "Supports restore and DR objectives", "Backup / DR owner", "Snapshot restore runbook succeeds"],
+                            ]
+                            + (
+                                [
+                                    ["Node replacement workflow", "Reattach or rebuild with preserved volume assumptions", "Maintains service continuity during host loss", "OpenShift platform SRE + OpenStack compute", "Documented rebuild and data-integrity evidence"],
+                                ]
+                                if document_type == "lld"
+                                else []
+                            ),
+                        ),
+                    ],
+                ),
+            ]
+        )
+
+    if planning.pattern_id == "ibm-z-linuxone":
+        sections.extend(
+            [
+                _section(
+                    "IBM Z appendix — bastion, z/VM, and hosting topology",
+                    [
+                        "Explain the IBM Z or LinuxONE hosting model, including z/VM guests, LPARs, or mixed estate assumptions, and identify how those choices affect control-plane, worker, and management-node placement.",
+                        "Describe the bastion responsibilities for agent-based install assets, mirrored release content, ignition or configuration delivery, and operational handoff into day-2 support.",
+                        "Document network interfaces, static network mappings, VIP or route assumptions, console access, and break-glass paths required for s390x cluster installation and recovery.",
+                        f"Live posture indicators: managed clusters={counts.get('managed_clusters', 0)}, PVCs={counts.get('persistent_volume_claims', 0)}, backup locations={counts.get('backup_locations', 0)}.",
+                        "Clarify which activities belong to the IBM Z platform team, which belong to the OpenShift operations team, and which require coordinated change windows or site support.",
+                    ]
+                    + (
+                        [
+                            "Implementation matrix detail: capture bastion host dependencies, z/VM or LPAR inventory, network assignments, mirrored release sources, and agent-based install artifacts with owner and evidence for each step.",
+                            "Runbook detail: list the exact preflight, install, validation, and rollback actions required for cluster creation, node replacement, and hosted-content refresh in the IBM Z estate.",
+                        ]
+                        if document_type == "lld"
+                        else []
+                    ),
+                ),
+                _section(
+                    "IBM Z appendix — storage, mirrored content, and install-runbook",
+                    [
+                        "Describe the storage and protection model for IBM Z workloads, including persistent storage, snapshot or backup behavior, mirrored registry or content sources, and the dependency chain for disconnected or controlled environments.",
+                        "Document how release images, operator catalogs, application images, trust bundles, and support bundles enter the environment and which bastion or mirror path controls that movement.",
+                        "Clarify the install-runbook phases for the platform: asset generation, bastion staging, guest or LPAR preparation, cluster bring-up, validation, and support handoff into day-2 operations.",
+                        "Include evidence expectations for install success, mirrored-content validity, certificate trust, storage readiness, and the exact restore or redeploy path if the installation must be repeated.",
+                        "Separate platform prerequisites from cluster-native follow-up work so implementation teams know when they are waiting on IBM Z infrastructure versus OpenShift operator configuration.",
+                    ]
+                    + (
+                        [
+                            "Implementation matrix detail: map storage back ends, mirrored registries, bastion-host workflows, install-config and agent-config artifacts, and validation commands to owner and acceptance criteria.",
+                            "Low-level runbook detail: include preflight checks, content-sync verification, install execution, failure triage checkpoints, and recovery steps for a failed or partial cluster bring-up.",
+                        ]
+                        if document_type == "lld"
+                        else []
+                    ),
+                ),
+                _section(
+                    "IBM Z appendix — bastion workflow matrix",
+                    [
+                        "Use this workflow matrix to show how the bastion controls install assets, mirrored content, validation, and break-glass recovery in a disciplined IBM Z delivery flow.",
+                        _markdown_table(
+                            ["Workflow step", "Bastion responsibility", "Input / output", "Primary owner", "Validation"],
+                            [
+                                ["Asset preparation", "Stage install-config, agent-config, SSH material, and trust bundles", "Approved install artifacts", "OpenShift platform engineer", "Files and secrets match approved release set"],
+                                ["Content synchronization", "Mirror release images, operator catalogs, and application images", "Mirrored registry content", "Registry / platform owner", "Digest parity and signature checks pass"],
+                                ["Host reachability", "Validate network path to z/VM guests or LPARs", "Confirmed access path", "IBM Z platform team", "Connectivity and console checks succeed"],
+                                ["Install execution", "Launch or coordinate agent-based install workflow", "Cluster bootstrap and join events", "OpenShift platform engineer", "Install progresses through expected milestones"],
+                                ["Support handoff", "Publish logs, runbook notes, and acceptance evidence", "Operational handoff package", "SRE lead", "Hypercare checklist complete"],
+                            ]
+                            + (
+                                [
+                                    ["Break-glass recovery", "Provide controlled access to artifacts and diagnostics during failure triage", "Recovery evidence package", "Platform lead", "Emergency access is audited and revoked afterward"],
+                                ]
+                                if document_type == "lld"
+                                else []
+                            ),
+                        ),
+                    ],
+                ),
+                _section(
+                    "IBM Z appendix — z/VM guest and LPAR inventory table",
+                    [
+                        "Use this inventory to show which IBM Z hosting model is selected for each OpenShift role and to keep network, storage, and lifecycle dependencies explicit.",
+                        _markdown_table(
+                            ["Hosting element", "Representative role", "Key dependencies", "Owner", "Operational note"],
+                            [
+                                ["LPAR or LinuxONE partition", "Shared hosting boundary for cluster estate", "Network, storage, HMC / platform governance", "IBM Z platform team", "Capacity and maintenance windows are coordinated"],
+                                ["z/VM guest — control plane", "Master / control-plane node hosting", "vCPU, memory, network mapping, mirrored content path", "IBM Z platform team + OpenShift SRE", "Protect latency-sensitive control services"],
+                                ["z/VM guest — worker", "Application or infra workload hosting", "Persistent storage, route reachability, scaling headroom", "OpenShift SRE", "Track workload isolation and capacity growth"],
+                                ["Bastion host", "Install staging and operations pivot point", "Mirrors, SSH, diagnostics, trust bundles", "Platform engineering", "Treat as controlled admin tier"],
+                            ]
+                            + (
+                                [
+                                    ["Auxiliary mirror / registry host", "Disconnected content distribution where split from bastion", "Storage, certificates, sync automation", "Registry owner", "Digest and freshness checks documented"],
+                                ]
+                                if document_type == "lld"
+                                else []
+                            ),
+                        ),
+                    ],
+                ),
+                _section(
+                    "IBM Z appendix — install-runbook step matrix",
+                    [
+                        "Use this runbook matrix to convert the architecture into a deterministic IBM Z implementation sequence with named evidence at every gate.",
+                        _markdown_table(
+                            ["Phase", "Key action", "Success signal", "Rollback / retry point", "Owner"],
+                            [
+                                ["Preflight", "Validate hosting inventory, network paths, mirrored content, and certificates", "All prerequisites signed off", "Stop before install assets are consumed", "Platform lead"],
+                                ["Staging", "Prepare bastion, agent artifacts, and target guests / partitions", "Install media and targets are ready", "Re-stage artifacts and targets", "Platform engineering"],
+                                ["Cluster bring-up", "Run agent-based install and monitor bootstrap/control-plane formation", "Bootstrap completes and nodes join", "Abort and clean failed partial install", "OpenShift SRE"],
+                                ["Post-install validation", "Verify API, ingress, operators, storage, and observability", "Cluster is healthy and supportable", "Rollback to known-good install stage", "OpenShift SRE + operations"],
+                                ["Handover", "Publish runbook results, support contacts, and hypercare plan", "Support model accepted", "Return to validation stage if gaps remain", "SRE lead"],
+                            ]
+                            + (
+                                [
+                                    ["Recovery", "Execute failed-install triage or rebuild sequence", "Cluster or host restored to approved state", "Re-enter staging or preflight as appropriate", "Joint IBM Z / OpenShift response team"],
+                                ]
+                                if document_type == "lld"
+                                else []
+                            ),
+                        ),
+                    ],
+                ),
+            ]
+        )
+
+    if planning.pattern_id == "openshift-external-auth":
+        sections.extend(
+            [
+                _section(
+                    "External authentication appendix — deployment path and token-flow model",
+                    [
+                        "Model the design around external OIDC token issuance, OpenShift token validation, RBAC mapping, and user journeys for both CLI and web-console access.",
+                        "Explicitly distinguish the configuration and support model for ROSA HCP, ARO HCP, and self-managed OpenShift 4.20+, because the deployment mechanics and managed-service boundaries differ.",
+                        "Use Red Hat Build of Keycloak as the reference IdP unless the operator specifies another standards-compliant OIDC provider, and record the claims and group attributes that drive authorization inside OpenShift.",
+                    ]
+                    + (
+                        [
+                            "LLD detail: capture issuer URL, client definitions, redirect URIs, claim mappings, group-to-role bindings, and token troubleshooting checkpoints for each supported access path.",
+                        ]
+                        if document_type == "lld"
+                        else []
+                    ),
+                ),
+                _section(
+                    "External authentication appendix — RBAC and access workflow matrix",
+                    [
+                        _markdown_table(
+                            ["Flow / decision", "Reference implementation", "Primary owner", "Supporting owner", "Validation"],
+                            [
+                                ["OIDC provider", "Red Hat Build of Keycloak or standards-compliant IdP", "Identity team", "OpenShift SRE", "External token issuance succeeds with expected claims"],
+                                ["CLI access", "Externally obtained token used with `oc`", "Platform engineering", "Identity team", "CLI login works and scopes map to expected RBAC"],
+                                ["Web-console access", "Browser redirect to external IdP", "Platform engineering", "Identity team", "Console login succeeds and user lands in correct tenancy"],
+                                ["RBAC mapping", "Group or claim-based authorization", "OpenShift SRE", "Security architecture", "Roles and project access align to approved model"],
+                            ],
+                        )
+                    ],
+                ),
+            ]
+        )
+
+    if planning.pattern_id == "openshift-sap-clean-core-rosa":
+        sections.extend(
+            [
+                _section(
+                    "SAP clean core appendix — ROSA and integration operating model",
+                    [
+                        "Keep SAP core processes in SAP systems while placing custom applications, extensions, and API-mediated integration logic onto ROSA as the cloud-native extension platform.",
+                        "Show Application Foundations or integration services as the reusable bridge between SAP, non-SAP systems, and the new platform-hosted services so the design remains clean-core instead of point-to-point sprawl.",
+                        "Describe DevOps, CI/CD, and API lifecycle ownership explicitly because the clean-core promise depends as much on operating model as on topology.",
+                    ]
+                    + (
+                        [
+                            "LLD detail: identify SAP-adjacent APIs, integration components, runtime namespaces, deployment order, and rollback boundaries for custom extensions during upgrade windows.",
+                        ]
+                        if document_type == "lld"
+                        else []
+                    ),
+                ),
+                _section(
+                    "SAP clean core appendix — API-first integration matrix",
+                    [
+                        _markdown_table(
+                            ["Domain", "Placement", "Key technology", "Why it exists", "Validation"],
+                            [
+                                ["SAP core", "SAP ECC / S/4HANA estate", "SAP-native services", "Retain authoritative business processing inside SAP", "Core business flows remain unchanged"],
+                                ["Extension services", "ROSA", "OpenShift workloads", "Move custom code and innovation outside SAP core", "Extension release does not require SAP backend change"],
+                                ["Integration layer", "ROSA shared services", "Application Foundations / Camel / APIs", "Connect SAP and non-SAP services through reusable APIs", "Integration contracts and error handling are observable"],
+                                ["Delivery lane", "CI/CD and GitOps", "Pipelines and promotion controls", "Modernize delivery without polluting the SAP core", "Promotion evidence is captured across environments"],
+                            ],
+                        )
+                    ],
+                ),
+            ]
+        )
+
+    if planning.pattern_id == "openshift-cloud-sovereignty":
+        sections.extend(
+            [
+                _section(
+                    "Cloud sovereignty appendix — sovereignty control plane and workload separation",
+                    [
+                        "Separate management services from workload clusters so governance, security, data, and lifecycle controls remain independent from tenant or mission workloads.",
+                        "Explain how the architecture supports the four sovereignty pillars: technical sovereignty, operational sovereignty, assurance sovereignty, and data sovereignty.",
+                        "Show OpenShift Platform Plus services, GitOps, automation, and zero-trust aligned controls as the mechanism for preserving sovereign operations instead of treating sovereignty as a policy-only statement.",
+                    ],
+                ),
+                _section(
+                    "Cloud sovereignty appendix — digital sovereignty control matrix",
+                    [
+                        _markdown_table(
+                            ["Sovereignty pillar", "Representative control", "Platform expression", "Owner", "Evidence"],
+                            [
+                                ["Technical sovereignty", "Platform under approved operational control", "Separated management cluster and governed workload clusters", "Platform architecture", "Cluster-role boundaries are explicit"],
+                                ["Operational sovereignty", "Controlled lifecycle and change", "GitOps plus automation with review gates", "Platform operations", "Every change has an auditable source of truth"],
+                                ["Assurance sovereignty", "Provable posture and attestation", "Zero-trust, trustee, sandboxing, and audit", "Security architecture", "Controls and attestations are reviewable"],
+                                ["Data sovereignty", "Locality and controlled data handling", "ODF-backed storage and explicit data boundaries", "Data platform owner", "Data path and location constraints are verifiable"],
+                            ],
+                        )
+                    ],
+                ),
+            ]
+        )
+
+    if planning.pattern_id == "openshift-cloud-native-apps":
+        sections.extend(
+            [
+                _section(
+                    "Cloud-native apps appendix — developer workflow and image promotion",
+                    [
+                        "Describe both local-container and remote-container development paths so developer experience, build triggers, and early validation are visible in the architecture rather than hidden in process notes.",
+                        "Treat Quay or the enterprise registry as the control point for image promotion through development, test, and production rather than as a passive image bucket.",
+                        "Show how CI/CD, source-to-image or pipeline builds, and GitOps-driven deployment keep application delivery consistent across environments.",
+                    ],
+                ),
+                _section(
+                    "Cloud-native apps appendix — dev, test, and prod promotion matrix",
+                    [
+                        _markdown_table(
+                            ["Stage", "Primary activity", "Artifact state", "Platform control", "Validation"],
+                            [
+                                ["Developer workstation", "Code, local containers, unit validation", "Source branch and local image", "Developer tooling and standards", "Local build and developer tests succeed"],
+                                ["CI build", "Build, test, and scan", "Dev-tagged image", "CI/CD pipeline", "Build output is signed or approved for promotion"],
+                                ["Test promotion", "Sync into shared test environment", "Test-tagged image", "Quay plus GitOps", "Functional and policy tests pass"],
+                                ["Production promotion", "Controlled rollout", "Prod-tagged image", "Quay plus GitOps and change control", "Release evidence and rollback point are recorded"],
+                            ],
+                        )
+                    ],
+                ),
+            ]
+        )
+
+    if planning.pattern_id == "openshift-telco-5g":
+        sections.extend(
+            [
+                _section(
+                    "Telco 5G appendix — CNF and platform service topology",
+                    [
+                        "Model 5G Core as a set of cloud-native network functions running on OpenShift, and clearly separate control-plane, user-plane, supplementary, and management functions.",
+                        "Show Service Mesh, messaging, persistent storage, ACM, and automation as platform services enabling CNF lifecycle, service discovery, policy, and operational assurance.",
+                        "Record any EMS/CNFM, vendor-specific orchestration, or operator-based management boundaries so the architecture remains realistic for multi-vendor telco estates.",
+                    ],
+                ),
+                _section(
+                    "Telco 5G appendix — 5G function matrix",
+                    [
+                        _markdown_table(
+                            ["Function domain", "Representative functions", "Platform dependency", "Why it matters", "Validation"],
+                            [
+                                ["User plane", "UPF", "OpenShift runtime and network performance", "Carries subscriber traffic and packet processing", "Traffic flow and latency objectives are met"],
+                                ["Control plane", "AMF, SMF, PCF", "OpenShift resilience and service exposure", "Establishes and manages sessions and policy", "Session lifecycle behaves correctly"],
+                                ["Supplementary services", "NRF, NSSF, NEF", "Service discovery and policy integration", "Enables selection, slicing, and exposure", "Function discovery and policy interactions succeed"],
+                                ["Management", "EMS/CNFM, ACM, AAP", "Governance and lifecycle automation", "Controls provisioning, scale, and updates", "Management actions are observable and repeatable"],
+                            ],
+                        )
+                    ],
+                ),
+            ]
+        )
+
+    if planning.pattern_id == "openshift-event-driven-automation":
+        sections.extend(
+            [
+                _section(
+                    "Event-driven automation appendix — event broker to automation chain",
+                    [
+                        "Describe the flow from event source to broker, through decision logic and task creation, into automation execution, and finally back into status and evidence services.",
+                        "Keep ticketing or task-store interactions explicit because operational adoption depends on human and machine workflows being visible in the same design.",
+                        "Show OpenShift as the application runtime for the event services while Ansible remains the execution plane acting on managed infrastructure or application targets.",
+                    ],
+                ),
+                _section(
+                    "Event-driven automation appendix — event-response matrix",
+                    [
+                        _markdown_table(
+                            ["Stage", "Representative service", "Primary output", "Owner", "Validation"],
+                            [
+                                ["Event ingestion", "Event source and broker", "Queued event", "Operations or SecOps", "Event reaches broker with expected metadata"],
+                                ["Decision logic", "Aggregator / decision service", "Chosen response path", "Automation engineering", "Rule evaluation maps event to approved action"],
+                                ["Task creation", "Task or ticket service", "Trackable work item", "Service management", "Ticket or task is created and updated"],
+                                ["Automation execution", "Ansible Automation Platform", "Executed remediation", "Automation team", "Job completes with status and evidence"],
+                                ["Results processing", "Automation results service", "Closed-loop feedback", "Operations", "Execution result returns to the workflow chain"],
+                            ],
+                        )
+                    ],
+                ),
+            ]
+        )
+
+    if planning.pattern_id == "openshift-model-as-a-service":
+        sections.extend(
+            [
+                _section(
+                    "MaaS appendix — OpenShift AI service stack and governance",
+                    [
+                        "Treat enterprise IT as the provider of AI services, not just GPU infrastructure, with a governed model catalog, access policy, versioning, and usage visibility.",
+                        "Model API gateway, SSO, OpenShift AI, and inference-server layers separately so access control, routing, and inference operations remain independently reviewable.",
+                        "Record how usage monitoring, regression testing, and chargeback make the service sustainable at scale across multiple internal consumers and model choices.",
+                    ],
+                ),
+                _section(
+                    "MaaS appendix — model service catalog matrix",
+                    [
+                        _markdown_table(
+                            ["Layer", "Representative technology", "Primary role", "Owner", "Validation"],
+                            [
+                                ["Access gateway", "3scale or equivalent", "Govern API consumption and access policy", "Platform API owner", "Consumers reach approved model APIs only through gateway path"],
+                                ["Identity", "SSO / Keycloak", "Authenticate tenants and teams", "Identity team", "Access policy and tenancy behave as designed"],
+                                ["AI platform", "OpenShift AI", "Host enterprise AI workflows and inference services", "AI platform team", "Platform remains healthy under expected demand"],
+                                ["Inference", "vLLM and model-serving services", "Serve curated models", "AI service owner", "Inference responses and performance meet target"],
+                                ["Governance", "Usage and chargeback plane", "Track cost, usage, and policy", "FinOps / platform governance", "Usage is attributable by team or service"],
+                            ],
+                        )
+                    ],
+                ),
+            ]
+        )
+
+    if planning.pattern_id == "openshift-ai-self-service":
+        sections.extend(
+            [
+                _section(
+                    "AI self-service appendix — platform engineering workflow",
+                    [
+                        "Model self-service around Developer Hub golden paths that provision governed OpenShift AI capabilities for data scientists without bypassing platform standards.",
+                        "Separate training, experimentation, and serving stages so the architecture can show where quotas, approval gates, and operational ownership change.",
+                        "Make the platform-engineering contract visible: what users can self-serve, what remains centrally operated, and what evidence proves the workflow is safe and repeatable.",
+                    ],
+                ),
+                _section(
+                    "AI self-service appendix — persona and golden-path matrix",
+                    [
+                        _markdown_table(
+                            ["Persona", "Golden path", "Platform guardrail", "Primary owner", "Validation"],
+                            [
+                                ["Data scientist", "Request notebook or training workspace", "Quota, approved template, and identity policy", "Platform engineering", "Workspace provisions through approved template"],
+                                ["ML engineer", "Promote trained model to serving lane", "Promotion approval and serving standard", "AI platform owner", "Model moves to serving with traceable evidence"],
+                                ["Application team", "Consume served model endpoint", "Access policy and API contract", "Service owner", "Consumer access stays within approved limits"],
+                                ["Platform operator", "Maintain templates and quotas", "Central guardrail ownership", "Platform operations", "Golden paths remain supportable after change"],
+                            ],
+                        )
+                    ],
+                ),
+            ]
+        )
+
+    if planning.pattern_id == "openshift-virtualization-portworx":
+        sections.extend(
+            [
+                _section(
+                    "Portworx virtualization appendix — resilience and data integrity model",
+                    [
+                        "Frame Portworx as the data-protection and continuity layer for OpenShift Virtualization workloads, not just as generic storage.",
+                        "Document how VM data integrity, failover readiness, and day-2 operational workflows are validated for Portworx-backed virtualized services.",
+                    ],
+                ),
+                _section(
+                    "Portworx virtualization appendix — resilience matrix",
+                    [
+                        _markdown_table(
+                            ["Focus area", "Representative capability", "Owner", "Why it matters", "Validation"],
+                            [
+                                ["VM persistence", "Portworx-backed storage", "Storage platform owner", "Protects VM data and mobility", "VM restart and storage continuity succeed"],
+                                ["Business continuity", "Replication or DR workflow", "DR owner", "Maintains service resilience", "Recovery test evidence is captured"],
+                                ["Operations", "Capacity and health monitoring", "Virtualization SRE", "Keeps VM estate supportable", "Thresholds and alerts are actionable"],
+                            ],
+                        )
+                    ],
+                ),
+            ]
+        )
+
+    if planning.pattern_id == "openshift-virtualization-trilio":
+        sections.extend(
+            [
+                _section(
+                    "Trilio virtualization appendix — backup, recovery, and migration model",
+                    [
+                        "Frame Trilio as the protection plane for OpenShift Virtualization workloads, covering backup, recovery, upgrade, and migration workflows with explicit evidence requirements.",
+                        "Treat SLA reporting and resilience evidence as architecture outputs so the pattern remains reviewable by operations and governance stakeholders.",
+                    ],
+                ),
+                _section(
+                    "Trilio virtualization appendix — protection workflow matrix",
+                    [
+                        _markdown_table(
+                            ["Lifecycle stage", "Representative action", "Primary owner", "Evidence", "Validation"],
+                            [
+                                ["Backup", "Capture protected VM state", "Backup owner", "Protected recovery point exists", "Backup completes on schedule"],
+                                ["Recovery", "Restore VM service", "Virtualization SRE", "Recovery event evidence", "Restored VM is healthy"],
+                                ["Upgrade / migration", "Move or upgrade protected workload", "Platform engineering", "Upgrade or migration record", "Service resumes within target window"],
+                                ["Reporting", "Publish SLA or resilience posture", "Operations governance", "Operational report", "Report aligns with executed tests"],
+                            ],
+                        )
+                    ],
+                ),
+            ]
+        )
+
     return sections
 
 
@@ -2774,6 +4195,7 @@ def _document_sections(document_type: str, title: str, planning: PromptNormaliza
         sections.append(_section("Assessment findings", [f"{item['label']}: {item['assessment']} Actions: {'; '.join(item['actions'])}" for item in selected_dimensions]))
     else:
         sections.extend(_padding_sections(document_type=document_type, grouped=grouped, nodes=nodes, edges=edges))
+        sections.extend(_platform_appendix_sections(planning=planning, document_type=document_type, openshift_state=openshift_state))
 
     target_pages = DOCUMENT_PAGE_TARGETS.get(document_type, 24)
     estimated_pages = _estimate_document_pages(sections, document_type)

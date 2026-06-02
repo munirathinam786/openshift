@@ -1627,6 +1627,10 @@ def platform_console_page():
 @app.api_route("/architect.html", methods=["GET", "HEAD"], include_in_schema=False, response_model=None)
 @app.api_route("/architect/", methods=["GET", "HEAD"], include_in_schema=False, response_model=None)
 @app.api_route("/docs/architect.html", methods=["GET", "HEAD"], include_in_schema=False, response_model=None)
+@app.api_route("/openshift-sre/architect.html", methods=["GET", "HEAD"], include_in_schema=False, response_model=None)
+@app.api_route("/openshift-sre/architect/", methods=["GET", "HEAD"], include_in_schema=False, response_model=None)
+@app.api_route("/terraform-iac/openshift-sre/architect.html", methods=["GET", "HEAD"], include_in_schema=False, response_model=None)
+@app.api_route("/terraform-iac/openshift-sre/architect/", methods=["GET", "HEAD"], include_in_schema=False, response_model=None)
 def architect_page():
     return _redirect_site_page("/guide/architect.html")
 
