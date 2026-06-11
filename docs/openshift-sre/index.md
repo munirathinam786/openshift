@@ -32,6 +32,7 @@ The OpenShift SRE application is configured to serve on port `8000`.
 ## Open the console
 
 - [Launch the Agent Console](http://localhost:8000/docs/console.html)
+- [Launch OpenShift Builder](http://localhost:8000/docs/openshift-builder.html)
 - [Launch the Troubleshooting Console](http://localhost:8000/docs/troubleshooting.html)
 - [Launch the Security Console](http://localhost:8000/docs/security-console.html)
 - [Open the SRE home page](http://localhost:8000/docs/)

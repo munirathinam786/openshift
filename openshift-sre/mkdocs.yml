@@ -8,6 +8,7 @@ copyright: >-
 nav:
   - Home: index.md
   - Architect Workspace: architect.html
+  - OpenShift Builder: openshift-builder.html
   - LLM Utilization: llm-utilization.html
   - Security Console: security-console.html
   - Platform Console: platform-console.html

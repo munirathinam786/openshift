@@ -2,630 +2,630 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
          <loc>https://example.com/terraform-iac/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/architecture/terraform-multi-cluster-overview/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/aws-rosa/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/aws-rosa/architecture/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/aws-rosa/code-reference/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/aws-rosa/pipeline/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/azure-aro/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/azure-aro/architecture/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/azure-aro/code-reference/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/azure-aro/pipeline/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/clusters/terraform-agent-builder-packages/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/clusters/terraform-agent-builder/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/clusters/terraform-dr-secondary/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/clusters/terraform-mgmt-dc/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/clusters/terraform-mgmt-dr/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/clusters/terraform-ocp-baremetal/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/clusters/terraform-upi-baremetal/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/code/documentation-tooling/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/code/terraform-code-walkthrough/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/code/ipi-method/agent-builder/azure-pipelines-agent-builder-day2/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/code/ipi-method/agent-builder/azure-pipelines-agent-builder/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/code/ipi-method/agent-builder/main-walkthrough/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/code/ipi-method/agent-builder/main/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/code/ipi-method/agent-builder/modules-walkthrough/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/code/ipi-method/agent-builder/outputs-walkthrough/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/code/ipi-method/agent-builder/outputs/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/code/ipi-method/agent-builder/providers-explained/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/code/ipi-method/agent-builder/tfvars-walkthrough/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/code/ipi-method/agent-builder/tfvars/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/code/ipi-method/agent-builder/variables-walkthrough/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/code/ipi-method/agent-builder/variables/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/code/ipi-method/agent-builder/versions-walkthrough/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/code/ipi-method/agent-builder/versions/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/code/ipi-method/agent-builder-dr/main/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/code/ipi-method/agent-builder-dr/outputs/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/code/ipi-method/agent-builder-dr/tfvars/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/code/ipi-method/agent-builder-dr/variables/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/code/ipi-method/agent-builder-dr/versions/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/code/ipi-method/mgmt-dc/acm-dr-tfvars/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/code/ipi-method/mgmt-dc/acm-import-tfvars/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/code/ipi-method/mgmt-dc/day2-tfvars/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/code/ipi-method/mgmt-dc/main/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/code/ipi-method/mgmt-dc/outputs/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/code/ipi-method/mgmt-dc/tfvars/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/code/ipi-method/mgmt-dc/variables/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/code/ipi-method/mgmt-dc/versions/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/code/ipi-method/mgmt-dr/acm-dr-tfvars/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/code/ipi-method/mgmt-dr/acm-import-tfvars/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/code/ipi-method/mgmt-dr/day2-tfvars/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/code/ipi-method/mgmt-dr/main/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/code/ipi-method/mgmt-dr/outputs/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/code/ipi-method/mgmt-dr/tfvars/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/code/ipi-method/mgmt-dr/variables/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/code/ipi-method/mgmt-dr/versions/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/code/ipi-method/openshiftbaremetal/ceph-migration-tfvars/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/code/ipi-method/openshiftbaremetal/day2-tfvars/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/code/ipi-method/openshiftbaremetal/main/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/code/ipi-method/openshiftbaremetal/mtc-tfvars/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/code/ipi-method/openshiftbaremetal/openshift-virtualization-tfvars/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/code/ipi-method/openshiftbaremetal/outputs/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/code/ipi-method/openshiftbaremetal/tfvars/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/code/ipi-method/openshiftbaremetal/variables/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/code/ipi-method/openshiftbaremetal/versions/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/code/ipi-method/openshiftbaremetal/vm-migration-tfvars/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/code/ipi-method/openshiftbaremetal-dr/ceph-migration-tfvars/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/code/ipi-method/openshiftbaremetal-dr/day2-tfvars/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/code/ipi-method/openshiftbaremetal-dr/main/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/code/ipi-method/openshiftbaremetal-dr/mtc-tfvars/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/code/ipi-method/openshiftbaremetal-dr/openshift-virtualization-tfvars/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/code/ipi-method/openshiftbaremetal-dr/outputs/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/code/ipi-method/openshiftbaremetal-dr/tfvars/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/code/ipi-method/openshiftbaremetal-dr/variables/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/code/ipi-method/openshiftbaremetal-dr/versions/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/code/ipi-method/openshiftbaremetal-dr/vm-migration-tfvars/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/code/ipi-method/pipeline/azure-pipelines-acm-dr/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/code/ipi-method/pipeline/azure-pipelines-acm-import/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/code/ipi-method/pipeline/azure-pipelines-ceph-migration/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/code/ipi-method/pipeline/azure-pipelines-cnv/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/code/ipi-method/pipeline/azure-pipelines-day2/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/code/ipi-method/pipeline/azure-pipelines-mtc/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/code/ipi-method/pipeline/azure-pipelines-vm-migration/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/code/ipi-method/pipeline/azure-pipelines/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/code/upi-method/azure-pipelines-acm-dr/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/code/upi-method/azure-pipelines-acm-import/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/code/upi-method/azure-pipelines-ceph-migration/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/code/upi-method/azure-pipelines-cnv/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/code/upi-method/azure-pipelines-day2-upi/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/code/upi-method/azure-pipelines-mtc/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/code/upi-method/azure-pipelines-upi/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/code/upi-method/azure-pipelines-vm-migration/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/code/upi-method/ceph-migration-tfvars/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/code/upi-method/day2-tfvars/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/code/upi-method/main/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/code/upi-method/mtc-tfvars/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/code/upi-method/openshift-virtualization-tfvars/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/code/upi-method/outputs/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/code/upi-method/tfvars/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/code/upi-method/variables/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/code/upi-method/versions/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/code/upi-method/vm-migration-tfvars/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/code/upi-method/agent-builder/azure-pipelines-agent-builder-day2/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/code/upi-method/agent-builder/azure-pipelines-agent-builder/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/code/upi-method/agent-builder/main/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/code/upi-method/agent-builder/outputs/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/code/upi-method/agent-builder/tfvars/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/code/upi-method/agent-builder/variables/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/code/upi-method/agent-builder/versions/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/code/upi-method/agent-builder-dr/main/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/code/upi-method/agent-builder-dr/outputs/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/code/upi-method/agent-builder-dr/tfvars/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/code/upi-method/agent-builder-dr/variables/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/code/upi-method/agent-builder-dr/versions/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/code/upi-method/mgmt-dc/acm-dr-tfvars/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/code/upi-method/mgmt-dc/acm-import-tfvars/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/code/upi-method/mgmt-dc/day2-tfvars/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/code/upi-method/mgmt-dc/main/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/code/upi-method/mgmt-dc/outputs/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/code/upi-method/mgmt-dc/tfvars/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/code/upi-method/mgmt-dc/variables/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/code/upi-method/mgmt-dc/versions/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/code/upi-method/mgmt-dr/acm-dr-tfvars/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/code/upi-method/mgmt-dr/acm-import-tfvars/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/code/upi-method/mgmt-dr/day2-tfvars/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/code/upi-method/mgmt-dr/main/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/code/upi-method/mgmt-dr/outputs/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/code/upi-method/mgmt-dr/tfvars/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/code/upi-method/mgmt-dr/variables/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/code/upi-method/mgmt-dr/versions/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/code/upi-method/openshiftbaremetal-dr/ceph-migration-tfvars/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/code/upi-method/openshiftbaremetal-dr/day2-tfvars/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/code/upi-method/openshiftbaremetal-dr/main/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/code/upi-method/openshiftbaremetal-dr/mtc-tfvars/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/code/upi-method/openshiftbaremetal-dr/openshift-virtualization-tfvars/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/code/upi-method/openshiftbaremetal-dr/outputs/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/code/upi-method/openshiftbaremetal-dr/tfvars/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/code/upi-method/openshiftbaremetal-dr/variables/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/code/upi-method/openshiftbaremetal-dr/versions/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/code/upi-method/openshiftbaremetal-dr/vm-migration-tfvars/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/diagrams/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/ibm-z/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/ibm-z/architecture/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/ibm-z/code-reference/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/ibm-z/pipeline/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/openshift-sre/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/openshift-sre/console/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/pipeline/terraform-acm-dr-pipeline/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/pipeline/terraform-acm-import-pipeline/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/pipeline/terraform-ado-pipeline-day2/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/pipeline/terraform-ado-pipeline/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/pipeline/terraform-agent-builder-pipeline-day2/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/pipeline/terraform-agent-builder-pipeline/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/pipeline/terraform-ceph-migration-pipeline/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/pipeline/terraform-cnv-pipeline/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/pipeline/terraform-mtc-pipeline/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/pipeline/terraform-upi-ado-pipeline-day2/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/pipeline/terraform-upi-ado-pipeline/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
     <url>
          <loc>https://example.com/terraform-iac/pipeline/terraform-vm-migration-pipeline/</loc>
-         <lastmod>2026-05-20</lastmod>
+         <lastmod>2026-06-11</lastmod>
     </url>
 </urlset>

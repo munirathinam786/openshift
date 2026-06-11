@@ -211,6 +211,117 @@ def test_architect_page_redirects_to_guide(client):
     assert resp.headers["location"] == "/guide/architect.html"
 
 
+def test_openshift_builder_page_redirects_to_guide(client):
+    resp = client.get("/openshift-builder.html", follow_redirects=False)
+
+    assert resp.status_code in (302, 307)
+    assert resp.headers["location"] == "/guide/openshift-builder.html"
+
+
+def test_openshift_builder_catalog_discovers_configured_pipeline(monkeypatch, tmp_path):
+    from openshift_sre_agent import openshift_builder
+
+    pipeline = tmp_path / "azure-pipelines-day2.yml"
+    pipeline.write_text(
+        "trigger: none\n"
+        "stages:\n"
+        "  - stage: deploy_gitops\n"
+        "    jobs:\n"
+        "      - job: terraform\n"
+        "        steps:\n"
+        "          - script: terraform -chdir=upi-method/openshiftbaremetal plan\n"
+        "            displayName: Terraform plan\n",
+        encoding="utf-8",
+    )
+    monkeypatch.setenv("OPENSHIFT_BUILDER_SOURCE_PATHS", str(tmp_path))
+
+    catalog = openshift_builder.discover_builder_catalog()
+
+    discovered = {item["id"]: item for item in catalog["pipelines"]}
+    assert "azure-pipelines-day2" in discovered
+    assert discovered["azure-pipelines-day2"]["stage_names"] == ["deploy_gitops"]
+
+
+def test_openshift_builder_design_plan_endpoint_persists_history(client, api_mocks):
+    api_module = api_mocks["module"]
+    api_module.discover_builder_catalog = MagicMock(return_value={
+        "pipelines": [{"id": "azure-pipelines-day2", "title": "Day2", "relative_path": "azure-pipelines-day2.yml"}],
+        "templates": [],
+        "variables": [],
+        "counts": {"pipeline_count": 1, "template_count": 0, "variable_file_count": 0},
+    })
+    api_module.plan_builder_implementation = MagicMock(return_value={
+        "provider": "ollama",
+        "model_name": "gpt-oss:20b",
+        "design_loaded": True,
+        "selected_pipeline_ids": [],
+        "recommended_pipeline_ids": ["azure-pipelines-day2"],
+        "missing_requirements": [],
+        "reasoning_summary": "Matched GitOps day-2 requirements.",
+        "recommendation_source": "heuristic",
+    })
+
+    resp = client.post(
+        "/builder/design/plan",
+        json={
+            "prompt": "Implement the GitOps day-2 design.",
+            "include_live_openshift_state": False,
+            "design_snapshot": {"planning": {"pattern_id": "gitops-delivery", "pattern_label": "GitOps delivery"}, "diagram": {"nodes": [], "edges": []}},
+            "selected_pipeline_ids": [],
+        },
+    )
+
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["recommended_pipeline_ids"] == ["azure-pipelines-day2"]
+    assert data["run_id"] == 42
+    assert data["history_persisted"] is True
+    recorded = api_mocks["history_store"].record_chat.call_args.kwargs
+    assert recorded["cluster_scope"] == api_module.BASE_SETTINGS.cluster_scope
+    assert "openshift-builder" in recorded["tags"]
+    assert "builder-plan" in recorded["tags"]
+
+
+def test_openshift_builder_implement_requires_confirmation_for_generated_gaps(client, api_mocks):
+    api_module = api_mocks["module"]
+    api_module.discover_builder_catalog = MagicMock(return_value={
+        "pipelines": [],
+        "templates": [],
+        "variables": [],
+        "counts": {"pipeline_count": 0, "template_count": 0, "variable_file_count": 0},
+    })
+    api_module.implement_builder_plan = MagicMock(return_value={
+        "implemented": False,
+        "confirmation_required": True,
+        "provider": "ollama",
+        "model_name": "gpt-oss:20b",
+        "selected_pipeline_ids": [],
+        "unknown_selected_pipeline_ids": [],
+        "selected_pipelines": [],
+        "recommended_pipeline_ids": [],
+        "missing_requirements": ["openshift-gitops-day2"],
+        "generation_preview": [{"path": "/pipelines/generated/openshift/openshift-gitops-day2.yml", "kind": "pipeline", "language": "yaml", "content": "trigger: none"}],
+        "message": "Some required OpenShift delivery pipelines are not present in the catalog.",
+    })
+
+    resp = client.post(
+        "/builder/implement",
+        json={
+            "prompt": "Create a missing GitOps pipeline if needed.",
+            "selected_pipeline_ids": [],
+            "confirm_generate_missing": False,
+            "push_to_ado": False,
+        },
+    )
+
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["confirmation_required"] is True
+    assert data["missing_requirements"] == ["openshift-gitops-day2"]
+    assert data["generation_preview"][0]["path"].endswith("openshift-gitops-day2.yml")
+    assert data["run_id"] == 42
+
+
 def test_root_redirects_to_legacy_docs_when_available(client):
     resp = client.get("/", follow_redirects=False)
 

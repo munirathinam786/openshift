@@ -851,6 +851,11 @@
         setActiveDocument('hld');
         setActiveDiagramPage(0);
         setLiveState(payload.openshift_state || liveState);
+        try {
+          window.localStorage.setItem('openshift-sre-architect-latest', JSON.stringify({ diagramPayload: payload, savedAt: new Date().toISOString() }));
+        } catch {
+          // Browser storage can be disabled in locked-down environments; Builder still accepts manual prompts.
+        }
         setStatus({
           message: referenceDiagrams.length
             ? (preserveReferenceExact

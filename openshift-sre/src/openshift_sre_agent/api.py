@@ -31,6 +31,16 @@ from .architect import (
     suggest_architecture_clarifications,
 )
 from .architect_rag import ArchitectRagStore
+from .openshift_builder import (
+    discover_ado_pipeline_catalog,
+    discover_builder_catalog,
+    get_builder_history_tags,
+    implement_builder_plan,
+    merge_builder_catalogs,
+    parse_ado_config,
+    plan_builder_implementation,
+    validate_ado_connection,
+)
 from .config import LLM_PROVIDER_METADATA, Settings, get_llm_provider_defaults, normalize_llm_provider
 from .logging_config import setup_logging
 from .middleware import (
@@ -281,6 +291,29 @@ class ArchitectKnowledgeClearRequest(BaseModel):
     runtime: RuntimeConfig | None = None
 
 
+class OpenShiftBuilderAdoConfigRequest(BaseModel):
+    organization_url: str = Field(min_length=8, max_length=512)
+    project: str = Field(min_length=1, max_length=255)
+    repository: str | None = Field(default=None, max_length=255)
+    branch: str = Field(default="develop", min_length=1, max_length=255)
+    pat: str = Field(min_length=1, max_length=512)
+    target_directory: str = Field(default="/pipelines/generated/openshift", min_length=1, max_length=512)
+
+
+class OpenShiftBuilderPlanRequest(BaseModel):
+    prompt: str = Field(default="", max_length=4000)
+    runtime: RuntimeConfig | None = None
+    design_snapshot: dict[str, Any] | None = None
+    selected_pipeline_ids: list[str] = Field(default_factory=list, max_length=50)
+    ado: OpenShiftBuilderAdoConfigRequest | None = None
+
+
+class OpenShiftBuilderImplementRequest(OpenShiftBuilderPlanRequest):
+    ado: OpenShiftBuilderAdoConfigRequest | None = None
+    push_to_ado: bool = False
+    confirm_generate_missing: bool = False
+
+
 class FinopsQueueCreateRequest(BaseModel):
     opportunity_key: str = Field(min_length=1, max_length=255)
     title: str = Field(min_length=1, max_length=255)
@@ -411,6 +444,79 @@ def _runtime_from_form_json(value: str | None) -> RuntimeConfig | None:
 
 def _architect_rag_store(settings: Settings | None = None) -> ArchitectRagStore:
     return ArchitectRagStore(settings or BASE_SETTINGS)
+
+
+def _get_builder_ui_defaults() -> dict[str, Any]:
+    """Return non-secret OpenShift Builder defaults that are safe to expose to the UI."""
+
+    return {
+        "cluster_scope": BASE_SETTINGS.cluster_scope,
+        "openshift_cluster": BASE_SETTINGS.openshift_cluster,
+        "source_paths": BASE_SETTINGS.openshift_builder_source_paths,
+        "ado": {
+            "organization_url": BASE_SETTINGS.openshift_builder_ado_org_url,
+            "project": BASE_SETTINGS.openshift_builder_ado_project,
+            "repository": BASE_SETTINGS.openshift_builder_ado_repo,
+            "branch": BASE_SETTINGS.openshift_builder_ado_branch,
+            "target_directory": BASE_SETTINGS.openshift_builder_ado_target_directory,
+        },
+    }
+
+
+def _persist_builder_run(
+    *,
+    action: str,
+    prompt: str,
+    settings: Settings,
+    response_payload: dict[str, Any],
+    selected_pipeline_ids: list[str],
+    design_snapshot: dict[str, Any] | None,
+    ado_config: OpenShiftBuilderAdoConfigRequest | None = None,
+) -> int | None:
+    """Persist OpenShift Builder planning and implementation flows into shared history."""
+
+    design_pattern = None
+    if isinstance(design_snapshot, dict):
+        planning = design_snapshot.get("planning")
+        if isinstance(planning, dict):
+            design_pattern = planning.get("pattern_id") or planning.get("pattern_label")
+
+    steps = [
+        {
+            "step": 1,
+            "thought": f"Persist the OpenShift Builder {action} workflow output.",
+            "tool_call": {"name": f"openshift_builder.{action}", "arguments": {"selected_pipeline_ids": selected_pipeline_ids}},
+            "tool_result": {
+                "selected_pipeline_ids": selected_pipeline_ids,
+                "recommended_pipeline_ids": response_payload.get("recommended_pipeline_ids") or [],
+                "missing_requirements": response_payload.get("missing_requirements") or [],
+                "design_loaded": bool(design_snapshot),
+                "design_pattern": design_pattern,
+                "ado": {
+                    "organization_url": ado_config.organization_url,
+                    "project": ado_config.project,
+                    "repository": ado_config.repository,
+                    "branch": ado_config.branch,
+                    "target_directory": ado_config.target_directory,
+                } if ado_config else None,
+                "response": response_payload,
+            },
+            "tool_error": None,
+            "final_answer": "",
+        }
+    ]
+    answer = str(response_payload.get("message") or response_payload.get("reasoning_summary") or f"OpenShift Builder {action} completed.")
+    tags = list(dict.fromkeys([*get_builder_history_tags(), f"builder-{action}"]))
+    return HISTORY_STORE.record_chat(
+        prompt=prompt or f"OpenShift Builder {action}",
+        answer=answer,
+        steps=steps,
+        model_name=response_payload.get("model_name") or settings.effective_model_name,
+        cluster_scope=settings.cluster_scope,
+        duration_ms=0,
+        token_usage={"prompt_tokens": 0, "completion_tokens": 0, "total_tokens": 0},
+        tags=tags,
+    )
 
 
 def _runtime_requires_ollama(runtime: RuntimeConfig | None) -> bool:
@@ -1636,6 +1742,13 @@ def architect_page():
     return _redirect_site_page("/guide/architect.html")
 
 
+@app.api_route("/openshift-builder.html", methods=["GET", "HEAD"], include_in_schema=False, response_model=None)
+@app.api_route("/openshift-builder/", methods=["GET", "HEAD"], include_in_schema=False, response_model=None)
+@app.api_route("/docs/openshift-builder.html", methods=["GET", "HEAD"], include_in_schema=False, response_model=None)
+def openshift_builder_page():
+    return _redirect_site_page("/guide/openshift-builder.html")
+
+
 @app.api_route("/posture-radar.html", methods=["GET", "HEAD"], include_in_schema=False, response_model=None)
 @app.api_route("/docs/posture-radar.html", methods=["GET", "HEAD"], include_in_schema=False, response_model=None)
 def posture_radar_page():
@@ -2152,6 +2265,136 @@ def architect_diagram(request: ArchitectDiagramRequest) -> dict:
         "research_training": research_training,
         **diagram_payload,
     }
+
+
+@app.get("/builder/catalog")
+def openshift_builder_catalog() -> dict:
+    """Return the discovered OpenShift pipeline, template, and variable inventory for OpenShift Builder."""
+
+    if _shutting_down:
+        raise HTTPException(status_code=503, detail="Server is shutting down.")
+    payload = discover_builder_catalog()
+    payload["defaults"] = _get_builder_ui_defaults()
+    return payload
+
+
+@app.post("/builder/ado/auth")
+def openshift_builder_ado_auth(request: OpenShiftBuilderAdoConfigRequest) -> dict:
+    """Validate Azure DevOps credentials and enumerate repositories plus pipelines for OpenShift Builder."""
+
+    if _shutting_down:
+        raise HTTPException(status_code=503, detail="Server is shutting down.")
+
+    try:
+        ado_config = parse_ado_config(request.model_dump())
+        payload = validate_ado_connection(ado_config)
+        pipeline_catalog = discover_ado_pipeline_catalog(ado_config)
+        return {
+            **payload,
+            "catalog": pipeline_catalog,
+            "pipeline_count": pipeline_catalog.get("counts", {}).get("pipeline_count", 0),
+        }
+    except ValueError as error:
+        raise HTTPException(status_code=400, detail=str(error)) from error
+    except httpx.HTTPStatusError as error:
+        raise HTTPException(status_code=502, detail=f"Azure DevOps authentication failed: {error}") from error
+    except httpx.HTTPError as error:
+        raise HTTPException(status_code=502, detail=f"Unable to reach Azure DevOps: {error}") from error
+
+
+@app.post("/builder/ado/pipelines")
+def openshift_builder_ado_pipelines(request: OpenShiftBuilderAdoConfigRequest) -> dict:
+    """Return Azure DevOps pipeline YAML catalog entries for OpenShift Builder."""
+
+    if _shutting_down:
+        raise HTTPException(status_code=503, detail="Server is shutting down.")
+
+    try:
+        return discover_ado_pipeline_catalog(parse_ado_config(request.model_dump()))
+    except ValueError as error:
+        raise HTTPException(status_code=400, detail=str(error)) from error
+    except httpx.HTTPStatusError as error:
+        raise HTTPException(status_code=502, detail=f"Azure DevOps pipeline discovery failed: {error}") from error
+    except httpx.HTTPError as error:
+        raise HTTPException(status_code=502, detail=f"Unable to reach Azure DevOps: {error}") from error
+
+
+@app.post("/builder/design/plan")
+def openshift_builder_design_plan(request: OpenShiftBuilderPlanRequest) -> dict:
+    """Recommend OpenShift delivery pipelines for the current Architect design and Builder selection."""
+
+    if _shutting_down:
+        raise HTTPException(status_code=503, detail="Server is shutting down.")
+    if request.prompt and detect_prompt_injection(request.prompt):
+        raise HTTPException(status_code=400, detail="Prompt rejected: potential injection detected.")
+
+    settings = _runtime_settings(request.runtime)
+    try:
+        catalog = discover_builder_catalog()
+        ado_config = parse_ado_config(request.ado.model_dump()) if request.ado else None
+        if ado_config:
+            catalog = merge_builder_catalogs(catalog, discover_ado_pipeline_catalog(ado_config))
+        response_payload = plan_builder_implementation(
+            catalog=catalog,
+            design_snapshot=request.design_snapshot,
+            prompt=request.prompt,
+            selected_pipeline_ids=request.selected_pipeline_ids,
+            settings=settings,
+        )
+        run_id = _persist_builder_run(
+            action="plan",
+            prompt=request.prompt,
+            settings=settings,
+            response_payload=response_payload,
+            selected_pipeline_ids=request.selected_pipeline_ids,
+            design_snapshot=request.design_snapshot,
+        )
+        return {**response_payload, "run_id": run_id, "history_persisted": run_id is not None}
+    except ValueError as error:
+        raise HTTPException(status_code=400, detail=str(error)) from error
+
+
+@app.post("/builder/implement")
+def openshift_builder_implement(request: OpenShiftBuilderImplementRequest) -> dict:
+    """Implement selected OpenShift delivery pipelines and optionally push them into Azure DevOps."""
+
+    if _shutting_down:
+        raise HTTPException(status_code=503, detail="Server is shutting down.")
+    if request.prompt and detect_prompt_injection(request.prompt):
+        raise HTTPException(status_code=400, detail="Prompt rejected: potential injection detected.")
+
+    settings = _runtime_settings(request.runtime)
+    ado_config = parse_ado_config(request.ado.model_dump()) if request.ado else None
+    try:
+        catalog = discover_builder_catalog()
+        if ado_config:
+            catalog = merge_builder_catalogs(catalog, discover_ado_pipeline_catalog(ado_config))
+        response_payload = implement_builder_plan(
+            catalog=catalog,
+            design_snapshot=request.design_snapshot,
+            prompt=request.prompt,
+            selected_pipeline_ids=request.selected_pipeline_ids,
+            settings=settings,
+            ado_config=ado_config,
+            push_to_ado=request.push_to_ado,
+            confirm_generate_missing=request.confirm_generate_missing,
+        )
+        run_id = _persist_builder_run(
+            action="implement",
+            prompt=request.prompt,
+            settings=settings,
+            response_payload=response_payload,
+            selected_pipeline_ids=request.selected_pipeline_ids,
+            design_snapshot=request.design_snapshot,
+            ado_config=request.ado,
+        )
+        return {**response_payload, "run_id": run_id, "history_persisted": run_id is not None}
+    except ValueError as error:
+        raise HTTPException(status_code=400, detail=str(error)) from error
+    except httpx.HTTPStatusError as error:
+        raise HTTPException(status_code=502, detail=f"Azure DevOps push failed: {error}") from error
+    except httpx.HTTPError as error:
+        raise HTTPException(status_code=502, detail=f"Unable to reach Azure DevOps: {error}") from error
 
 
 @app.post("/chat/stream")

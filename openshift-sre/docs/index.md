@@ -24,6 +24,8 @@ If you want a dedicated scenario-driven troubleshooting experience, open [`Troub
 
 If you want a dedicated audit and platform-security workspace with compliance profiles plus OpenShift security-control selection, open [`Security Console`](security-console.html). It includes the same connection and credentials controls as the main console, so you can choose the Ollama endpoint/model and pass request-scoped cluster runtime overrides without leaving the security workflow.
 
+If you want to turn an Architect design into reusable or newly generated OpenShift delivery pipelines, open [`OpenShift Builder`](openshift-builder.html). It is listed in the shared console shell alongside Architect, Platform, Security, FinOps, History, and the other operator workspaces.
+
 If you want to inspect the **currently loaded Ollama model** and its live VRAM/context/runtime visibility, open [`LLM Utilization`](llm-utilization.html). The historical dashboard also links to this page and shows a compact live summary.
 
 If you want a dedicated planned-operations workspace for **upgrade preflight scoring**, **SLO / error-budget posture**, **operator upgrade blast-radius mapping**, and **alert-to-runbook correlation**, use the Platform Console lane inside the SRE UI. It complements troubleshooting and security by focusing on structured pre-change reviews and owner-ready handoffs.

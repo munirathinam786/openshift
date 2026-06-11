@@ -4,7 +4,7 @@ This page covers the platform service toolkit, HTTP API, and CLI entry points.
 
 It now also covers the historical persistence layer that stores prompt runs and extracted metrics for the browser dashboard.
 
-It also now covers the OpenShift architect modules that generate a shared draw.io-backed architecture pack plus separate HLD and LLD document packs.
+It also now covers the OpenShift architect modules that generate a shared draw.io-backed architecture pack plus separate HLD and LLD document packs, and the OpenShift Builder module that turns those designs into delivery-ready pipeline assets.
 
 ## `src/openshift_sre_agent/persistence.py`
 
@@ -46,6 +46,7 @@ This module is the FastAPI entry point.
 - health and root routing: `/`, `/health`
 - main agent execution: `/chat`
 - architect workspace: `/architect/templates`, `/architect/openshift-state`, `/architect/clarify`, `/architect/assessment`, `/architect/diagram`, and `/architect/knowledge*`
+- OpenShift Builder workspace: `/builder/catalog`, `/builder/design/plan`, `/builder/ado/auth`, `/builder/ado/pipelines`, and `/builder/implement`
 - historical analytics: `/history/overview`, `/history/runs/{run_id}`, `/history/tools/{tool_name}`, `/history/metrics/{metric_key}`
 - persisted FinOps workflow: `/finops/queue`, `/finops/queue/{item_id}`
 
@@ -84,6 +85,25 @@ It uses `pgvector` plus Ollama embeddings to support:
 - retrieving OpenShift-grounded context that can guide the next HLD or LLD generation run
 
 The architect workspace uses it to pull in Red Hat documentation, internal standards, prior design packs, and other approved sources before generating the final diagram and document bundle.
+
+## `src/openshift_sre_agent/openshift_builder.py`
+
+This module powers the `OpenShift Builder` workspace. It is intentionally paired with the Architect Workspace: Architect creates the design pack, while Builder selects or generates the delivery assets needed to implement that design.
+
+Its responsibilities are:
+
+- discover OpenShift delivery catalog entries from local source roots, including IPI, UPI, ACM, DR, CNV, MTC, Ceph/ODF migration, ARO, ROSA, IBM Z, and day-2 pipeline wrappers
+- parse Azure Pipeline YAML, templates, and variable files into a shared catalog shape used by the browser workspace
+- validate Azure DevOps organization, project, repository, branch, and target-directory settings without persisting the PAT
+- fetch Azure DevOps YAML-backed pipeline definitions and merge them with local catalog entries
+- recommend matching pipeline IDs from Architect design snapshots, operator prompts, and selected delivery patterns
+- package selected YAML content for implementation review
+- report missing requirements first, then generate missing pipeline YAML only after explicit confirmation
+- optionally push selected and generated files to Azure DevOps using the authenticated repository context
+
+Builder-generated YAML is plan-first: it uses placeholders for service connections, state backends, credentials, and environment-specific values rather than embedding secrets or assuming a live deployment target.
+
+The module also returns stable history tags such as `openshift-builder`, `openshift-delivery`, and `ado-pipelines` so planning and implementation runs can be found in the shared history views.
 
 ## `src/openshift_sre_agent/tools.py`
 

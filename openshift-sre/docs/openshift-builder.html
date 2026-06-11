@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>OpenShift Builder – OpenShift SRE Local Agent</title>
+    <link rel="stylesheet" href="assets/stylesheets/agent-console.css">
+    <link rel="stylesheet" href="assets/stylesheets/finops-console.css">
+    <link rel="stylesheet" href="assets/stylesheets/architect-console.css">
+  </head>
+  <body dir="ltr" data-shell-page="openshift-builder">
+    <div data-app-shell>
+      <script type="application/json" data-app-shell-props>
+        {
+          "key": "openshift-builder",
+          "eyebrow": "OpenShift delivery cockpit",
+          "title": "OpenShift Builder",
+          "description": "Select reusable OpenShift delivery pipelines, authenticate with Azure DevOps, load the latest Architect design, and implement the design with catalog-backed or newly generated pipeline code when gaps exist.",
+          "badges": ["Architect-aware", "ADO authentication", "Pipeline generation", "OpenShift-native"],
+          "actions": [
+            { "label": "Open Architect", "href": "architect.html" },
+            { "label": "Open platform console", "href": "platform-console.html" },
+            { "label": "Open history", "href": "history.html" }
+          ],
+          "secondaryActions": [
+            { "label": "API reference", "href": "api-reference/" },
+            { "label": "Service coverage", "href": "service-coverage/" }
+          ],
+          "stats": [
+            { "label": "Pipeline source", "value": "OpenShift catalog", "detail": "Discovers IPI, UPI, ACM, DR, CNV, migration, ARO, ROSA, IBM Z, and day-2 YAML wrappers from the repository and configured source paths." },
+            { "label": "Design handoff", "value": "Architect-aware", "detail": "Loads the most recent OpenShift Architect design snapshot so Builder can recommend matching delivery pipelines." },
+            { "label": "Gap handling", "value": "Generate on confirmation", "detail": "When the catalog lacks a required pipeline, Builder reports the gap and waits for explicit approval before generating new YAML." }
+          ],
+          "workspaceSignals": ["Pipeline inventory discovery", "Azure DevOps validation", "Architect-to-builder handoff", "Missing-pipeline generation"],
+          "sectionNav": [
+            { "label": "Pipeline catalog", "href": "#builder-catalog" },
+            { "label": "Architect handoff", "href": "#builder-architect" },
+            { "label": "Azure DevOps", "href": "#builder-ado" },
+            { "label": "Implementation output", "href": "#builder-output" }
+          ],
+          "shortcuts": [
+            { "label": "Load latest Architect design", "href": "#builder-architect" },
+            { "label": "Validate Azure DevOps access", "href": "#builder-ado" },
+            { "label": "Implement selected pipelines", "href": "#builder-output" }
+          ],
+          "highlights": [
+            { "title": "Catalog-first delivery", "description": "Builder starts with discovered OpenShift pipeline inventory so operators reuse proven delivery wrappers before generating anything new." },
+            { "title": "Architect-guided pipeline matching", "description": "The latest OpenShift Architect design can be loaded directly into Builder to recommend the right IPI, UPI, ACM, DR, CNV, MTC, ARO, ROSA, IBM Z, or day-2 wrappers." },
+            { "title": "Explicit generation gate", "description": "If a required delivery pipeline is missing, Builder reports the gap first and only generates pipeline code after confirmation." }
+          ],
+          "featureGroups": [
+            {
+              "kicker": "Implementation lane",
+              "title": "From OpenShift architecture to delivery-ready pipelines",
+              "description": "OpenShift Builder bridges architecture intent, reusable Terraform/OpenShift wrappers, and Azure DevOps repository implementation so platform teams can move from design into delivery without tool-hopping.",
+              "items": [
+                { "title": "Reusable pipeline inventory", "description": "Inspect discovered wrapper pipelines, templates, and variable packs before choosing what to implement.", "meta": "Catalog", "href": "#builder-catalog" },
+                { "title": "ADO repository handoff", "description": "Authenticate with Azure DevOps, validate the target project and repository, and optionally push selected or generated files.", "meta": "Delivery", "href": "#builder-ado" },
+                { "title": "Missing-pipeline generation", "description": "Generate new YAML and variables only when the catalog cannot satisfy the Architect design and you explicitly approve creation.", "meta": "Safeguard", "href": "#builder-output" }
+              ]
+            }
+          ],
+          "notice": "OpenShift Builder is the delivery workspace for turning Architect output into repo-ready OpenShift pipeline assets. Generated content stays plan-first and uses placeholders for secrets/service connections."
+        }
+      </script>
+    </div>
+    <main class="md-main">
+      <div class="md-content" data-md-component="content">
+        <article class="md-content__inner md-typeset">
+          <section class="agent-shell__fallback">
+            <h1>OpenShift Builder</h1>
+            <p>Implement OpenShift designs by selecting catalog pipelines, validating Azure DevOps access, and generating missing pipeline code only when needed.</p>
+          </section>
+
+          <div class="agent-console" data-openshift-builder>
+            <section class="finops-workspace-hero agent-console__panel agent-console__panel--full">
+              <div class="finops-workspace-hero__copy">
+                <p class="finops-workspace-hero__kicker">OpenShift Builder command deck</p>
+                <h2>Plan, validate, and package OpenShift implementation from one workspace</h2>
+                <p class="agent-console__meta">Load the latest Architect design, match it to reusable OpenShift delivery catalog entries, and push only after explicit Azure DevOps validation.</p>
+              </div>
+              <div class="finops-workspace-hero__stats">
+                <article class="finops-workspace-hero__stat"><span>Current lane</span><strong data-builder-hero-lane>Catalog implementation</strong></article>
+                <article class="finops-workspace-hero__stat"><span>Catalog pipelines</span><strong data-builder-hero-pipelines>0</strong></article>
+                <article class="finops-workspace-hero__stat"><span>Architect handoff</span><strong data-builder-hero-design>Not loaded</strong></article>
+              </div>
+            </section>
+
+            <section class="agent-console__panel finops-panel finops-panel--launcher" id="builder-catalog">
+              <h2>Pipeline catalog</h2>
+              <p class="agent-console__meta">Choose one or more OpenShift delivery pipelines from the discovered inventory.</p>
+              <div class="agent-console__grid">
+                <div><label class="agent-console__label" for="builder-llm-provider">LLM provider</label><select id="builder-llm-provider" class="agent-console__input" data-builder-llm-provider><option value="ollama">Local Ollama</option></select></div>
+                <div data-builder-ollama-field><label class="agent-console__label" for="builder-ollama-base-url">Ollama base URL</label><input id="builder-ollama-base-url" class="agent-console__input" data-builder-ollama-base-url type="url" placeholder="http://host.containers.internal:11434"></div>
+                <div data-builder-ollama-field><label class="agent-console__label" for="builder-model-name">Model name</label><input id="builder-model-name" class="agent-console__input" data-builder-model-name type="text" placeholder="gpt-oss:20b"></div>
+                <div data-builder-external-field hidden><label class="agent-console__label" for="builder-external-model-name">External model name</label><input id="builder-external-model-name" class="agent-console__input" data-builder-external-model-name type="text" placeholder="gpt-4.1-mini"></div>
+                <div data-builder-external-field hidden><label class="agent-console__label" for="builder-external-base-url">Provider base URL</label><input id="builder-external-base-url" class="agent-console__input" data-builder-external-base-url type="url" placeholder="https://api.openai.com/v1"></div>
+                <div data-builder-external-field hidden><label class="agent-console__label" for="builder-external-api-key">Provider API key</label><input id="builder-external-api-key" class="agent-console__input" data-builder-external-api-key type="password" placeholder="Required for external providers"></div>
+                <div data-builder-external-field hidden><label class="agent-console__label" for="builder-external-organization">Organization / tenant</label><input id="builder-external-organization" class="agent-console__input" data-builder-external-organization type="text" placeholder="Optional provider org or tenant hint"></div>
+                <div data-builder-external-field hidden><label class="agent-console__label" for="builder-external-api-version">Provider API version</label><input id="builder-external-api-version" class="agent-console__input" data-builder-external-api-version type="text" placeholder="Optional API version"></div>
+                <div><label class="agent-console__label" for="builder-cluster-scope">Cluster scope</label><input id="builder-cluster-scope" class="agent-console__input" data-builder-cluster-scope type="text" placeholder="local-cluster"></div>
+              </div>
+              <p class="agent-console__meta" data-builder-provider-note>OpenShift Builder can use the same local Ollama runtime or external providers supported by the Architect workspace.</p>
+              <div class="agent-console__actions"><button class="agent-console__button" type="button" data-builder-refresh-catalog>Refresh catalog</button></div>
+              <label class="agent-console__label" for="builder-pipeline-select">Available pipelines</label>
+              <select id="builder-pipeline-select" class="agent-console__textarea" data-builder-pipeline-select multiple size="10"></select>
+              <div class="agent-console__history-summary" data-builder-catalog-summary><p class="agent-console__meta">Catalog details will appear here after the first refresh.</p></div>
+            </section>
+
+            <section class="agent-console__panel finops-panel finops-panel--launcher" id="builder-architect">
+              <h2>Architect design handoff</h2>
+              <p class="agent-console__meta">Load the most recent OpenShift Architect diagram so Builder can recommend which delivery pipelines match the design intent.</p>
+              <div class="agent-console__actions"><button class="agent-console__button" type="button" data-builder-load-architect>Load latest Architect design</button><a class="agent-console__example" href="architect.html">Open Architect</a></div>
+              <section class="agent-console__module-section">
+                <div class="agent-console__module-header"><div><h3>Principal OpenShift Architect prompt</h3><p class="agent-console__meta">Select a delivery pattern. The selection fills the Builder prompt and shows the skill set used for the handoff.</p></div></div>
+                <label class="agent-console__label" for="builder-prompt-template">Prompt template</label>
+                <select id="builder-prompt-template" class="agent-console__input finops-op-select" data-builder-prompt-template></select>
+                <div class="agent-console__module-badge-row" data-builder-skill-chips></div>
+                <p class="agent-console__meta" data-builder-prompt-description>Choose a Principal OpenShift Architect template to populate the implementation prompt.</p>
+              </section>
+              <label class="agent-console__label" for="builder-prompt">Optional builder prompt</label>
+              <textarea id="builder-prompt" class="agent-console__textarea" data-builder-prompt placeholder="Implement the latest OpenShift design using catalog pipeline wrappers first. If a required pipeline is missing, report it first and wait for confirmation before generating new YAML."></textarea>
+              <div class="agent-console__actions"><button class="agent-console__button" type="button" data-builder-analyze>Analyze design and recommend pipelines</button></div>
+              <div class="agent-console__history-summary" data-builder-design-summary><p class="agent-console__meta">No Architect design loaded yet.</p></div>
+              <div class="agent-console__history-runs" data-builder-plan-output><p class="agent-console__meta">Pipeline recommendations will appear here after analysis.</p></div>
+            </section>
+
+            <section class="agent-console__panel finops-panel" id="builder-ado">
+              <h2>Azure DevOps authentication</h2>
+              <p class="agent-console__meta">Validate the target Azure DevOps project and repository before pushing selected or generated pipeline files.</p>
+              <div class="agent-console__grid">
+                <div><label class="agent-console__label" for="builder-ado-org-url">Organization URL</label><input id="builder-ado-org-url" class="agent-console__input" data-builder-ado-org-url type="url" placeholder="https://dev.azure.com/your-org"></div>
+                <div><label class="agent-console__label" for="builder-ado-project">Project</label><input id="builder-ado-project" class="agent-console__input" data-builder-ado-project type="text" placeholder="OpenShift-Platform"></div>
+                <div><label class="agent-console__label" for="builder-ado-repo">Repository</label><input id="builder-ado-repo" class="agent-console__input" data-builder-ado-repo type="text" placeholder="openshift-platform-repo"></div>
+                <div><label class="agent-console__label" for="builder-ado-branch">Branch</label><input id="builder-ado-branch" class="agent-console__input" data-builder-ado-branch type="text" value="develop" placeholder="develop"></div>
+                <div><label class="agent-console__label" for="builder-ado-target-directory">Target directory</label><input id="builder-ado-target-directory" class="agent-console__input" data-builder-ado-target-directory type="text" value="/pipelines/generated/openshift" placeholder="/pipelines/generated/openshift"></div>
+                <div><label class="agent-console__label" for="builder-ado-pat">PAT</label><input id="builder-ado-pat" class="agent-console__input" data-builder-ado-pat type="password" placeholder="Azure DevOps personal access token"></div>
+              </div>
+              <div class="agent-console__actions"><button class="agent-console__button" type="button" data-builder-authenticate>Authenticate with ADO</button><label class="agent-console__meta"><input type="checkbox" data-builder-push-to-ado> Push selected/generated files into the authenticated repository</label></div>
+              <div class="agent-console__history-summary" data-builder-ado-summary><p class="agent-console__meta">No Azure DevOps validation has been performed yet.</p></div>
+            </section>
+
+            <section class="agent-console__panel finops-panel finops-panel--results" id="builder-output">
+              <div class="agent-console__history-topbar">
+                <div><h2>Implementation output</h2><p class="agent-console__meta">Implement the selected pipeline set, review missing-pipeline warnings, and confirm generation only when Builder cannot find the required wrapper in the catalog.</p></div>
+                <div class="agent-console__actions"><button class="agent-console__button" type="button" data-builder-implement>Implement selected pipelines</button><button class="agent-console__example" type="button" data-builder-confirm hidden>Generate missing pipeline(s)</button></div>
+              </div>
+              <div class="agent-console__status" data-builder-status></div>
+              <div class="agent-console__history-summary" data-builder-implementation-summary><p class="agent-console__meta">Implementation details will appear here after the first run.</p></div>
+              <div class="agent-console__history-run-detail" data-builder-implementation-output><p class="agent-console__meta">Selected pipeline content, generated YAML, and Azure DevOps push details will appear here.</p></div>
+            </section>
+          </div>
+        </article>
+      </div>
+    </main>
+    <footer class="agent-console__footer"><span>Author: Sathishkumar Munirathinam / </span><a href="mailto:Sathishkumar.munirathinam@kyndryl.com">Sathishkumar.munirathinam@kyndryl.com</a></footer>
+    <script src="assets/javascripts/app-shell.js"></script>
+    <script src="assets/javascripts/llm-provider-runtime.js"></script>
+    <script src="assets/javascripts/openshift-builder.js"></script>
+  </body>
+</html>

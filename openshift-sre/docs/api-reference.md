@@ -16,6 +16,11 @@ The FastAPI application serves two roles:
 | `GET` | `/llm/providers` | Provider catalog used by the browser consoles to render provider choices and auth fields |
 | `GET` | `/ollama/utilization` | Live Ollama model/utilization snapshot for the LLM Utilization page and dashboard summary |
 | `GET` | `/runtime/observability` | Container and database telemetry used by the main Agent Console observability panel |
+| `GET` | `/builder/catalog` | Discover local OpenShift pipeline, template, and variable YAML inventory for OpenShift Builder |
+| `POST` | `/builder/design/plan` | Recommend matching catalog pipelines for the current OpenShift Architect design snapshot and prompt |
+| `POST` | `/builder/ado/auth` | Validate Azure DevOps organization/project/repository settings and return YAML-backed pipeline inventory using an operator-supplied PAT |
+| `POST` | `/builder/ado/pipelines` | Fetch Azure DevOps pipeline definitions and YAML content as OpenShift Builder catalog entries |
+| `POST` | `/builder/implement` | Package selected catalog pipelines, generate missing YAML when confirmed, and optionally push to Azure DevOps |
 | `POST` | `/chat` | Run a prompt through the agent with optional per-request runtime overrides |
 | `POST` | `/security/audit` | Run a batched security audit for Security Console profiles such as SOX and HIPAA |
 | `GET` | `/history/overview` | Summary payload for the historical dashboard |
@@ -46,6 +51,18 @@ The FastAPI application serves two roles:
 | `GET` | `/prompts/templates` | List available prompt templates |
 | `GET` | `/metrics` | Prometheus-compatible metrics |
 | `POST` | `/admin/retention` | Enforce data retention policy |
+
+## OpenShift Builder API
+
+The OpenShift Builder workspace uses the `/builder/*` API group to turn Architect output into delivery-ready OpenShift pipeline assets:
+
+- `GET /builder/catalog` scans configured source roots for Azure Pipeline YAML, templates, and variable files across IPI, UPI, ACM, DR, migration, virtualization, ARO, ROSA, IBM Z, and SRE folders.
+- `POST /builder/ado/auth` validates Azure DevOps organization, project, repository, branch, target directory, and PAT values without storing the PAT, then returns a `catalog` payload containing YAML-backed Azure Pipelines when Azure DevOps exposes a YAML path for the pipeline definition.
+- `POST /builder/ado/pipelines` performs only the Azure DevOps pipeline discovery step and returns the same catalog shape used by `/builder/catalog`.
+- `POST /builder/design/plan` compares the latest OpenShift Architect design snapshot and operator prompt with the discovered catalog and returns recommended pipeline IDs plus missing requirements. When ADO context is supplied, the server merges local catalog entries with the ADO pipeline catalog so selected ADO pipeline IDs can be planned.
+- `POST /builder/implement` packages selected catalog YAML, optionally generates missing implementation files after confirmation, and can push the resulting payload to Azure DevOps. Generated YAML is plan-first and uses placeholders for service connections, state backends, and credentials.
+
+Non-secret defaults are read from `OPENSHIFT_BUILDER_SOURCE_PATHS`, `OPENSHIFT_BUILDER_ADO_ORG_URL`, `OPENSHIFT_BUILDER_ADO_PROJECT`, `OPENSHIFT_BUILDER_ADO_REPO`, `OPENSHIFT_BUILDER_ADO_BRANCH`, and `OPENSHIFT_BUILDER_ADO_TARGET_DIRECTORY` when present.
 
 ## `POST /chat`
 

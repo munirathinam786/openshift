@@ -207,6 +207,12 @@ class Settings:
     architect_vector_db_password: str | None = None
     architect_embedding_model: str = "nomic-embed-text"
     architect_rag_top_k: int = 5
+    openshift_builder_source_paths: str | None = None
+    openshift_builder_ado_org_url: str | None = None
+    openshift_builder_ado_project: str | None = None
+    openshift_builder_ado_repo: str | None = None
+    openshift_builder_ado_branch: str = "develop"
+    openshift_builder_ado_target_directory: str = "/pipelines/generated/openshift"
     openshift_cluster: str = "local-cluster"
     openshift_namespace: str = "openshift-monitoring"
     openshift_projects: str | None = None
@@ -375,6 +381,12 @@ class Settings:
             architect_vector_db_password=architect_vector_db_password,
             architect_embedding_model=getenv("ARCHITECT_EMBEDDING_MODEL", "nomic-embed-text"),
             architect_rag_top_k=int(getenv("ARCHITECT_RAG_TOP_K", "5")),
+            openshift_builder_source_paths=getenv("OPENSHIFT_BUILDER_SOURCE_PATHS") or None,
+            openshift_builder_ado_org_url=getenv("OPENSHIFT_BUILDER_ADO_ORG_URL") or None,
+            openshift_builder_ado_project=getenv("OPENSHIFT_BUILDER_ADO_PROJECT") or None,
+            openshift_builder_ado_repo=getenv("OPENSHIFT_BUILDER_ADO_REPO") or None,
+            openshift_builder_ado_branch=getenv("OPENSHIFT_BUILDER_ADO_BRANCH", "develop"),
+            openshift_builder_ado_target_directory=getenv("OPENSHIFT_BUILDER_ADO_TARGET_DIRECTORY", "/pipelines/generated/openshift"),
             openshift_cluster=openshift_cluster,
             openshift_namespace=openshift_namespace,
             openshift_projects=openshift_projects,
@@ -427,6 +439,12 @@ class Settings:
         architect_vector_db_password: str | None = None,
         architect_embedding_model: str | None = None,
         architect_rag_top_k: int | None = None,
+        openshift_builder_source_paths: str | None = None,
+        openshift_builder_ado_org_url: str | None = None,
+        openshift_builder_ado_project: str | None = None,
+        openshift_builder_ado_repo: str | None = None,
+        openshift_builder_ado_branch: str | None = None,
+        openshift_builder_ado_target_directory: str | None = None,
         openshift_cluster: str | None = None,
         openshift_namespace: str | None = None,
         openshift_projects: str | None = None,
@@ -518,6 +536,32 @@ class Settings:
                 architect_embedding_model if architect_embedding_model not in (None, "") else self.architect_embedding_model
             ),
             architect_rag_top_k=architect_rag_top_k or self.architect_rag_top_k,
+            openshift_builder_source_paths=(
+                openshift_builder_source_paths
+                if openshift_builder_source_paths not in (None, "")
+                else self.openshift_builder_source_paths
+            ),
+            openshift_builder_ado_org_url=(
+                openshift_builder_ado_org_url
+                if openshift_builder_ado_org_url not in (None, "")
+                else self.openshift_builder_ado_org_url
+            ),
+            openshift_builder_ado_project=(
+                openshift_builder_ado_project
+                if openshift_builder_ado_project not in (None, "")
+                else self.openshift_builder_ado_project
+            ),
+            openshift_builder_ado_repo=(
+                openshift_builder_ado_repo
+                if openshift_builder_ado_repo not in (None, "")
+                else self.openshift_builder_ado_repo
+            ),
+            openshift_builder_ado_branch=openshift_builder_ado_branch or self.openshift_builder_ado_branch,
+            openshift_builder_ado_target_directory=(
+                openshift_builder_ado_target_directory
+                if openshift_builder_ado_target_directory not in (None, "")
+                else self.openshift_builder_ado_target_directory
+            ),
             openshift_cluster=resolved_cluster,
             openshift_namespace=resolved_namespace,
             openshift_projects=resolved_projects,

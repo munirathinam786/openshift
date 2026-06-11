@@ -18,6 +18,7 @@
           "actions": [
             { "label": "Open docs home", "href": "/docs-home/" },
             { "label": "Open FinOps console", "href": "finops-console.html" },
+            { "label": "OpenShift Builder", "href": "openshift-builder.html" },
             { "label": "Open Platform console", "href": "platform-console.html" },
             { "label": "Open troubleshooting", "href": "troubleshooting.html" },
             { "label": "Open history", "href": "history.html" }
@@ -30,9 +31,9 @@
           "stats": [
             { "label": "Primary workflow", "value": "Agent-driven investigations", "detail": "Switch between cluster posture reviews, GitOps and Tekton checks, logging and backup posture, fleet governance, ACS checks, platform lifecycle and DR reviews, and guided troubleshooting." },
             { "label": "Safety model", "value": "Read-only by default", "detail": "OpenShift mutations remain policy-gated." },
-            { "label": "Connected views", "value": "8 operator pages", "detail": "Console, platform, security, troubleshooting, history, utilization, drilldown, and FinOps stay linked." }
+            { "label": "Connected views", "value": "9 operator pages", "detail": "Console, Builder, platform, security, troubleshooting, history, utilization, drilldown, and FinOps stay linked." }
           ],
-          "workspaceSignals": ["Prompt drafts persisted locally", "Answer export and copy workflow", "Response report exports", "Scenario-led troubleshooting handoff", "FinOps queue integration", "Platform operations lane"],
+          "workspaceSignals": ["Prompt drafts persisted locally", "Answer export and copy workflow", "Response report exports", "Scenario-led troubleshooting handoff", "OpenShift Builder handoff", "Platform operations lane"],
           "sectionNav": [
             { "label": "Run surface", "href": "#console-run" },
             { "label": "Response hub", "href": "#console-response" },
@@ -51,7 +52,7 @@
             { "title": "Guided modules", "description": "Start with structured workflows instead of a blank prompt every time." },
             { "title": "Embedded LLM controls", "description": "Choose the LLM provider, Ollama base URL, and model directly in the main run surface before every investigation." },
             { "title": "Response-aware layout", "description": "Root causes, next actions, tables, and traces each land in dedicated sections." },
-            { "title": "Workspace continuity", "description": "Move between live operations, history, utilization, and drilldowns without losing context." }
+              { "title": "Workspace continuity", "description": "Move between live operations, Builder, history, utilization, and drilldowns without losing context." }
           ],
           "featureGroups": [
             {
@@ -92,6 +93,7 @@
               <li>Responses include both the final answer and the returned reasoning trace.</li>
             </ul>
             <p><a href="/docs-home/">Open the Terraform IaC docs home</a> to launch the broader documentation set from the same application.</p>
+            <p><a href="openshift-builder.html">Open OpenShift Builder</a> to turn Architect output into selected or generated OpenShift delivery pipelines.</p>
             <p><a href="platform-console.html">Open the dedicated Platform Console</a> for lifecycle readiness, DR posture, migration reviews, and OpenShift Virtualization / CNV checks.</p>
             <p><a href="history.html">Open the dedicated historical dashboard</a> for charts, run health summaries, and recent persisted runs.</p>
             <p><strong>Tip:</strong> when running in Podman on macOS, <code>http://host.containers.internal:11434</code> is usually the right Ollama URL if Ollama is running on your Mac.</p>
@@ -139,6 +141,24 @@
                     <p>FinOps workflows have moved to a dedicated React-powered console with a dropdown of all FinOps operations, workflow visualizations, and an approval queue.</p>
                     <div class="agent-console__actions">
                       <a class="agent-console__button" href="finops-console.html">Open FinOps Console</a>
+                    </div>
+                  </article>
+
+                  <article class="agent-console__module-card agent-console__module-card--finops">
+                    <div class="agent-console__module-badge-row">
+                      <span class="agent-console__history-badge">OpenShift Builder</span>
+                      <span class="agent-console__history-badge">Architect handoff</span>
+                      <span class="agent-console__history-badge agent-console__history-badge--ok">Dedicated page</span>
+                    </div>
+                    <h4>OpenShift Builder</h4>
+                    <p>Turn the latest Architect design into selected or generated OpenShift delivery pipelines, validate Azure DevOps access, and package implementation-ready YAML.</p>
+                    <ul>
+                      <li>catalog-first IPI, UPI, ACM, DR, CNV, MTC, ARO, ROSA, IBM Z, and day-2 pipeline selection</li>
+                      <li>Architect design snapshot handoff</li>
+                      <li>confirmation-gated missing pipeline generation</li>
+                    </ul>
+                    <div class="agent-console__actions">
+                      <a class="agent-console__button" href="openshift-builder.html">Open OpenShift Builder</a>
                     </div>
                   </article>
 
