@@ -242,6 +242,111 @@ def test_openshift_builder_catalog_discovers_configured_pipeline(monkeypatch, tm
     assert discovered["azure-pipelines-day2"]["stage_names"] == ["deploy_gitops"]
 
 
+def test_openshift_builder_catalog_uses_unique_ids_for_method_roots(monkeypatch, tmp_path):
+    from openshift_sre_agent import openshift_builder
+
+    ipi_root = tmp_path / "ipi-method"
+    upi_root = tmp_path / "upi-method"
+    ipi_root.mkdir()
+    upi_root.mkdir()
+    for root, stage_name in ((ipi_root, "deploy_ipi"), (upi_root, "deploy_upi")):
+        (root / "azure-pipelines.yml").write_text(
+            "trigger: none\n"
+            "stages:\n"
+            f"  - stage: {stage_name}\n"
+            "    jobs:\n"
+            "      - job: terraform\n",
+            encoding="utf-8",
+        )
+    monkeypatch.setenv("OPENSHIFT_BUILDER_SOURCE_PATHS", f"{ipi_root},{upi_root}")
+
+    catalog = openshift_builder.discover_builder_catalog()
+
+    discovered = {
+        item["id"]: item
+        for item in catalog["pipelines"]
+        if item["source_root"] in {str(ipi_root), str(upi_root)}
+    }
+    assert "ipi-method-azure-pipelines" in discovered
+    assert "upi-method-azure-pipelines" in discovered
+    assert discovered["ipi-method-azure-pipelines"]["stage_names"] == ["deploy_ipi"]
+    assert discovered["upi-method-azure-pipelines"]["stage_names"] == ["deploy_upi"]
+
+
+def test_ado_repository_matching_tolerates_project_style_names():
+    from openshift_sre_agent.openshift_builder import _repository_matches
+
+    assert _repository_matches(
+        "Terraform IaC for OpenShift Multi Cluster AirGapped",
+        "Terraform-IaC-for-OpenShift-Multi-Cluster-AirGapped",
+        None,
+    )
+
+
+def test_ado_pipeline_discovery_falls_back_to_build_definitions():
+    from openshift_sre_agent.openshift_builder import BuilderAdoConfig, discover_ado_pipeline_catalog
+
+    class FakeAdoClient:
+        def __init__(self, *args, **kwargs):
+            pass
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc, traceback):
+            return False
+
+        def get(self, url, params=None):
+            request = httpx.Request("GET", url)
+            if url.endswith("/_apis/pipelines"):
+                return httpx.Response(200, json={"value": []}, request=request)
+            if url.endswith("/_apis/build/definitions"):
+                return httpx.Response(200, json={"value": [{"id": 42, "name": "IPI Day 1"}]}, request=request)
+            if url.endswith("/_apis/build/definitions/42"):
+                return httpx.Response(
+                    200,
+                    json={
+                        "id": 42,
+                        "name": "IPI Day 1",
+                        "repository": {"id": "repo-id", "name": "Terraform-IaC-for-OpenShift-Multi-Cluster-AirGapped"},
+                        "process": {"type": 2, "yamlFilename": "/ipi-method/azure-pipelines.yml"},
+                    },
+                    request=request,
+                )
+            if "/_apis/git/repositories/repo-id/items" in url:
+                return httpx.Response(
+                    200,
+                    json={"content": "trigger: none\nstages:\n  - stage: DC_Primary\n    jobs:\n      - job: terraform\n"},
+                    request=request,
+                    headers={"content-type": "application/json"},
+                )
+            raise AssertionError(f"Unexpected Azure DevOps URL: {url} params={params}")
+
+    config = BuilderAdoConfig(
+        organization_url="https://dev.azure.com/Kyndryl-India",
+        project="Terraform IaC for OpenShift Multi Cluster AirGapped",
+        repository="Terraform IaC for OpenShift Multi Cluster AirGapped",
+        branch="develop",
+        pat="token",
+        target_directory="/pipelines/generated/openshift",
+    )
+
+    with patch("openshift_sre_agent.openshift_builder.httpx.Client", FakeAdoClient):
+        catalog = discover_ado_pipeline_catalog(config)
+
+    assert catalog["counts"]["pipeline_count"] == 1
+    assert catalog["ado"]["discovery_methods"] == {
+        "pipelines_api_count": 0,
+        "build_definition_count": 1,
+        "total_catalog_count": 1,
+        "warnings": [],
+    }
+    pipeline = catalog["pipelines"][0]
+    assert pipeline["id"] == "ado-build-42-ipi-day-1"
+    assert pipeline["relative_path"] == "ipi-method/azure-pipelines.yml"
+    assert pipeline["stage_names"] == ["DC_Primary"]
+
+
 def test_openshift_builder_design_plan_endpoint_persists_history(client, api_mocks):
     api_module = api_mocks["module"]
     api_module.discover_builder_catalog = MagicMock(return_value={

@@ -57,10 +57,12 @@ The FastAPI application serves two roles:
 The OpenShift Builder workspace uses the `/builder/*` API group to turn Architect output into delivery-ready OpenShift pipeline assets:
 
 - `GET /builder/catalog` scans configured source roots for Azure Pipeline YAML, templates, and variable files across IPI, UPI, ACM, DR, migration, virtualization, ARO, ROSA, IBM Z, and SRE folders.
-- `POST /builder/ado/auth` validates Azure DevOps organization, project, repository, branch, target directory, and PAT values without storing the PAT, then returns a `catalog` payload containing YAML-backed Azure Pipelines when Azure DevOps exposes a YAML path for the pipeline definition.
-- `POST /builder/ado/pipelines` performs only the Azure DevOps pipeline discovery step and returns the same catalog shape used by `/builder/catalog`.
+- `POST /builder/ado/auth` validates Azure DevOps organization, project, repository, branch, target directory, and PAT values without storing the PAT, then returns a `catalog` payload containing Azure Pipelines from both the newer Pipelines API and the classic/build definitions API. YAML-backed definitions include their YAML content when Azure DevOps exposes a YAML path.
+- `POST /builder/ado/pipelines` performs only the Azure DevOps pipeline discovery step and returns the same catalog shape used by `/builder/catalog`, including build-definition fallback entries when the Pipelines API is empty.
 - `POST /builder/design/plan` compares the latest OpenShift Architect design snapshot and operator prompt with the discovered catalog and returns recommended pipeline IDs plus missing requirements. When ADO context is supplied, the server merges local catalog entries with the ADO pipeline catalog so selected ADO pipeline IDs can be planned.
 - `POST /builder/implement` packages selected catalog YAML, optionally generates missing implementation files after confirmation, and can push the resulting payload to Azure DevOps. Generated YAML is plan-first and uses placeholders for service connections, state backends, and credentials.
+
+The Azure DevOps organization field accepts either the org root, such as `https://dev.azure.com/Kyndryl-India`, with Project entered separately, or a copied project URL such as `https://dev.azure.com/Kyndryl-India/Terraform%20IaC%20for%20OpenShift%20Multi%20Cluster%20AirGapped/_build`; the backend normalizes the org/project split before discovery.
 
 Non-secret defaults are read from `OPENSHIFT_BUILDER_SOURCE_PATHS`, `OPENSHIFT_BUILDER_ADO_ORG_URL`, `OPENSHIFT_BUILDER_ADO_PROJECT`, `OPENSHIFT_BUILDER_ADO_REPO`, `OPENSHIFT_BUILDER_ADO_BRANCH`, and `OPENSHIFT_BUILDER_ADO_TARGET_DIRECTORY` when present.
 

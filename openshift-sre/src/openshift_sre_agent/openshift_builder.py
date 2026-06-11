@@ -109,14 +109,22 @@ def discover_ado_pipeline_catalog(config: BuilderAdoConfig) -> dict[str, Any]:
     _validate_ado_config(config)
     pipelines: list[BuilderCatalogEntry] = []
     repositories_seen: dict[str, dict[str, Any]] = {}
+    pipeline_rows: list[dict[str, Any]] = []
+    build_definition_entries: list[BuilderCatalogEntry] = []
+    discovery_warnings: list[str] = []
     with httpx.Client(timeout=20.0, follow_redirects=False, headers=_ado_auth_headers(config)) as client:
-        pipelines_response = client.get(
-            _ado_project_url(config, "_apis/pipelines"),
-            params={"api-version": "7.1-preview.1"},
-        )
-        _raise_for_ado_response(pipelines_response, "pipeline discovery")
-        pipelines_response.raise_for_status()
-        pipeline_rows = pipelines_response.json().get("value") or []
+        try:
+            pipelines_response = client.get(
+                _ado_project_url(config, "_apis/pipelines"),
+                params={"api-version": "7.1-preview.1"},
+            )
+            _raise_for_ado_response(pipelines_response, "pipeline discovery")
+            pipelines_response.raise_for_status()
+            pipeline_rows = pipelines_response.json().get("value") or []
+        except httpx.HTTPStatusError as error:
+            if error.response.status_code in {401, 403}:
+                raise
+            discovery_warnings.append(f"Pipelines API discovery returned HTTP {error.response.status_code}; trying build definitions fallback.")
 
         for row in pipeline_rows:
             detail = _fetch_ado_pipeline_detail(client=client, config=config, pipeline_id=row.get("id")) or row
@@ -124,7 +132,7 @@ def discover_ado_pipeline_catalog(config: BuilderAdoConfig) -> dict[str, Any]:
             repository = configuration.get("repository") or {}
             repository_name = str(repository.get("name") or repository.get("id") or "").strip()
             repository_id = str(repository.get("id") or repository.get("name") or config.repository or "").strip()
-            if config.repository and repository_name and config.repository not in {repository_name, repository_id}:
+            if config.repository and repository_name and not _repository_matches(config.repository, repository_name, repository_id):
                 continue
 
             yaml_path = str(configuration.get("path") or "").strip()
@@ -167,6 +175,24 @@ def discover_ado_pipeline_catalog(config: BuilderAdoConfig) -> dict[str, Any]:
                 )
             )
 
+        try:
+            build_definition_entries, build_repositories_seen = _discover_ado_build_definition_catalog(client=client, config=config)
+        except httpx.HTTPStatusError as error:
+            if error.response.status_code in {401, 403}:
+                raise
+            build_repositories_seen = {}
+            discovery_warnings.append(f"Build definitions discovery returned HTTP {error.response.status_code}.")
+        except httpx.HTTPError as error:
+            build_repositories_seen = {}
+            discovery_warnings.append(f"Build definitions discovery failed: {error}.")
+        existing_pipeline_ids = {entry.id for entry in pipelines}
+        for entry in build_definition_entries:
+            if entry.id in existing_pipeline_ids:
+                continue
+            existing_pipeline_ids.add(entry.id)
+            pipelines.append(entry)
+        repositories_seen.update(build_repositories_seen)
+
     return {
         "checked_at": datetime.now(timezone.utc).isoformat(),
         "source_roots": sorted({entry.source_root for entry in pipelines}),
@@ -180,6 +206,12 @@ def discover_ado_pipeline_catalog(config: BuilderAdoConfig) -> dict[str, Any]:
             "repository": config.repository,
             "branch": config.branch,
             "repositories": list(repositories_seen.values())[:50],
+            "discovery_methods": {
+                "pipelines_api_count": len(pipeline_rows),
+                "build_definition_count": len(build_definition_entries),
+                "total_catalog_count": len(pipelines),
+                "warnings": discovery_warnings,
+            },
         },
     }
 
@@ -233,7 +265,11 @@ def validate_ado_connection(config: BuilderAdoConfig) -> dict[str, Any]:
     repository = None
     if config.repository:
         repository = next(
-            (repo for repo in repositories if repo.get("name") == config.repository or repo.get("id") == config.repository),
+            (
+                repo
+                for repo in repositories
+                if _repository_matches(config.repository or "", str(repo.get("name") or ""), str(repo.get("id") or ""))
+            ),
             None,
         )
         if repository is None:
@@ -486,7 +522,7 @@ def _build_catalog_entry(root: Path, path: Path) -> BuilderCatalogEntry:
     title = path.stem.replace("-", " ").replace("_", " ").title()
     description = _describe_entry(kind=kind, relative_path=relative_path, stage_names=stage_names, template_references=template_references, workdir=workdir)
     return BuilderCatalogEntry(
-        id=_slugify(relative_path.rsplit(".", 1)[0]),
+        id=_catalog_entry_id(root=root, relative_path=relative_path),
         kind=kind,
         title=title,
         relative_path=relative_path,
@@ -869,6 +905,21 @@ def _normalize_ado_org_project(organization_url: str, project: str) -> tuple[str
     return parsed._replace(path=normalized_path, params="", query="", fragment="").geturl().rstrip("/"), normalized_project
 
 
+def _repository_matches(configured_repository: str, repository_name: str, repository_id: str | None = None) -> bool:
+    configured = str(configured_repository or "").strip()
+    candidates = [str(repository_name or "").strip(), str(repository_id or "").strip()]
+    if not configured:
+        return True
+    if configured in candidates:
+        return True
+    normalized_configured = _normalize_repo_identity(configured)
+    return any(normalized_configured == _normalize_repo_identity(candidate) for candidate in candidates if candidate)
+
+
+def _normalize_repo_identity(value: str) -> str:
+    return _SLUG_RE.sub("", str(value or "").strip().lower())
+
+
 def _ado_auth_headers(config: BuilderAdoConfig) -> dict[str, str]:
     token = b64encode(f":{config.pat}".encode("utf-8")).decode("ascii")
     return {"Authorization": f"Basic {token}", "Accept": "application/json"}
@@ -905,6 +956,95 @@ def _fetch_ado_pipeline_detail(*, client: httpx.Client, config: BuilderAdoConfig
             params={"api-version": "7.1-preview.1"},
         )
         _raise_for_ado_response(response, "pipeline detail lookup")
+        response.raise_for_status()
+        payload = response.json()
+        return payload if isinstance(payload, dict) else None
+    except httpx.HTTPStatusError:
+        return None
+
+
+def _discover_ado_build_definition_catalog(*, client: httpx.Client, config: BuilderAdoConfig) -> tuple[list[BuilderCatalogEntry], dict[str, dict[str, Any]]]:
+    response = client.get(
+        _ado_project_url(config, "_apis/build/definitions"),
+        params={"api-version": "7.1", "includeAllProperties": "true"},
+    )
+    _raise_for_ado_response(response, "build definition discovery")
+    response.raise_for_status()
+    definition_rows = response.json().get("value") or []
+    entries: list[BuilderCatalogEntry] = []
+    repositories_seen: dict[str, dict[str, Any]] = {}
+
+    for row in definition_rows:
+        detail = _fetch_ado_build_definition_detail(client=client, config=config, definition_id=row.get("id")) or row
+        repository = detail.get("repository") or {}
+        repository_name = str(repository.get("name") or repository.get("id") or "").strip()
+        repository_id = str(repository.get("id") or repository.get("name") or config.repository or "").strip()
+        if config.repository and repository_name and not _repository_matches(config.repository, repository_name, repository_id):
+            continue
+
+        process = detail.get("process") or {}
+        yaml_path = str(
+            process.get("yamlFilename")
+            or process.get("yamlFileName")
+            or process.get("yamlPath")
+            or detail.get("yamlFilename")
+            or detail.get("yamlFileName")
+            or ""
+        ).strip()
+        content = ""
+        if yaml_path and (repository_id or config.repository):
+            content = _fetch_ado_yaml_content(
+                client=client,
+                config=config,
+                repository=repository_id or config.repository or "",
+                path=yaml_path,
+            )
+
+        definition_id = str(detail.get("id") or row.get("id") or detail.get("name") or "definition")
+        title = str(detail.get("name") or row.get("name") or f"Build Definition {definition_id}")
+        relative_path = yaml_path.lstrip("/") or f"azure-pipelines/build-definitions/{_slugify(title)}.yml"
+        source_root = f"azure-devops-build:{config.project}"
+        if repository_name:
+            source_root = f"{source_root}/{repository_name}"
+            repositories_seen[repository_name] = {"id": repository_id, "name": repository_name}
+
+        description_parts = [f"Azure DevOps build definition '{title}' from project {config.project}."]
+        if repository_name:
+            description_parts.append(f"Repository: {repository_name}.")
+        if yaml_path:
+            description_parts.append(f"YAML path: {yaml_path}.")
+        else:
+            description_parts.append("This appears to be a classic build definition or a definition whose YAML path is not exposed by Azure DevOps.")
+        if yaml_path and not content:
+            description_parts.append("YAML content was not returned for this build definition.")
+
+        entries.append(
+            BuilderCatalogEntry(
+                id=f"ado-build-{definition_id}-{_slugify(title)}",
+                kind="pipeline",
+                title=title,
+                relative_path=relative_path,
+                source_root=source_root,
+                description=" ".join(description_parts),
+                stage_names=[match.strip() for match in _STAGE_RE.findall(content) if match.strip()],
+                template_references=[match.strip() for match in _TEMPLATE_REF_RE.findall(content) if match.strip()],
+                workdir=_extract_workdir(content),
+                content=content,
+            )
+        )
+
+    return entries, repositories_seen
+
+
+def _fetch_ado_build_definition_detail(*, client: httpx.Client, config: BuilderAdoConfig, definition_id: Any) -> dict[str, Any] | None:
+    if definition_id is None:
+        return None
+    try:
+        response = client.get(
+            _ado_project_url(config, f"_apis/build/definitions/{definition_id}"),
+            params={"api-version": "7.1", "includeAllProperties": "true"},
+        )
+        _raise_for_ado_response(response, "build definition detail lookup")
         response.raise_for_status()
         payload = response.json()
         return payload if isinstance(payload, dict) else None
@@ -957,6 +1097,21 @@ def _extract_json_object(value: str) -> dict[str, Any] | None:
 def _slugify(value: str) -> str:
     lowered = str(value or "").strip().lower()
     return _SLUG_RE.sub("-", lowered).strip("-") or "builder-item"
+
+
+def _catalog_entry_id(*, root: Path, relative_path: str) -> str:
+    base_id = _slugify(relative_path.rsplit(".", 1)[0])
+    root_label = _source_root_label(root)
+    if root_label:
+        return _slugify(f"{root_label}-{base_id}")
+    return base_id
+
+
+def _source_root_label(root: Path) -> str | None:
+    name = root.name.lower()
+    if name in {"ipi-method", "upi-method", "azure-aro", "aws-rosa", "ibm-z", "openshift-sre"}:
+        return name
+    return None
 
 
 def _dedupe(values: list[str] | tuple[str, ...] | None) -> list[str]:

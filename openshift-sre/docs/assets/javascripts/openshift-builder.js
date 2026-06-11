@@ -157,7 +157,16 @@
     target_directory: nodes.adoTargetDirectory.value.trim() || '/pipelines/generated/openshift',
     pat: nodes.adoPat.value,
   });
-  const hasAdoCredentials = () => Boolean(nodes.adoOrgUrl.value.trim() && nodes.adoProject.value.trim() && nodes.adoPat.value.trim());
+  const adoUrlIncludesProject = () => {
+    try {
+      const parsed = new URL(nodes.adoOrgUrl.value.trim());
+      const pathParts = parsed.pathname.split('/').filter(Boolean);
+      return (parsed.hostname === 'dev.azure.com' && pathParts.length >= 2) || (parsed.hostname.endsWith('.visualstudio.com') && pathParts.length >= 1);
+    } catch {
+      return false;
+    }
+  };
+  const hasAdoCredentials = () => Boolean(nodes.adoOrgUrl.value.trim() && nodes.adoPat.value.trim() && (nodes.adoProject.value.trim() || adoUrlIncludesProject()));
 
   const applyPromptTemplate = (templateId = nodes.promptTemplate.value) => {
     const template = PROMPT_TEMPLATES.find((item) => item.id === templateId) || PROMPT_TEMPLATES[0];
@@ -219,7 +228,15 @@
     const repositories = Array.isArray(payload?.repositories) ? payload.repositories : [];
     const pipelineCount = Number(payload?.ado_pipeline_count ?? payload?.pipeline_count ?? payload?.catalog?.counts?.pipeline_count ?? 0);
     const mergedPipelineCount = Number(payload?.pipeline_count ?? payload?.catalog?.counts?.pipeline_count ?? pipelineCount);
-    nodes.adoSummary.innerHTML = `<section class="agent-console__table-block"><div class="agent-console__history-card-grid"><article class="agent-console__history-card"><p class="agent-console__history-card-label">Organization</p><p class="agent-console__history-card-value">${escapeHtml(payload?.organization_url || '—')}</p></article><article class="agent-console__history-card"><p class="agent-console__history-card-label">Project</p><p class="agent-console__history-card-value">${escapeHtml(payload?.project || '—')}</p></article><article class="agent-console__history-card"><p class="agent-console__history-card-label">Repositories</p><p class="agent-console__history-card-value">${escapeHtml(formatNumber(payload?.repository_count || 0))}</p></article><article class="agent-console__history-card"><p class="agent-console__history-card-label">Branch</p><p class="agent-console__history-card-value">${escapeHtml(payload?.branch || 'develop')}</p></article><article class="agent-console__history-card"><p class="agent-console__history-card-label">ADO pipelines loaded</p><p class="agent-console__history-card-value">${escapeHtml(formatNumber(pipelineCount))}</p></article></div><p class="agent-console__meta">${repositories.length ? `Visible repositories: ${repositories.map((repo) => escapeHtml(repo.name || repo.id || 'repo')).join(', ')}.` : 'Authentication succeeded, but no repositories were returned.'}</p></section>`;
+    const discovery = payload?.ado_catalog?.ado?.discovery_methods || payload?.catalog?.ado?.discovery_methods || {};
+    const discoveryWarnings = Array.isArray(discovery.warnings) ? discovery.warnings : [];
+    if (payload?.organization_url) nodes.adoOrgUrl.value = payload.organization_url;
+    if (payload?.project) nodes.adoProject.value = payload.project;
+    if (payload?.branch) nodes.adoBranch.value = payload.branch;
+    if (payload?.target_directory) nodes.adoTargetDirectory.value = payload.target_directory;
+    if (!nodes.adoRepo.value.trim() && payload?.repository?.name) nodes.adoRepo.value = payload.repository.name;
+    const diagnostics = [`Pipelines API: ${formatNumber(discovery.pipelines_api_count || 0)}`, `Build definitions API: ${formatNumber(discovery.build_definition_count || 0)}`, `ADO catalog total: ${formatNumber(discovery.total_catalog_count ?? pipelineCount)}`];
+    nodes.adoSummary.innerHTML = `<section class="agent-console__table-block"><div class="agent-console__history-card-grid"><article class="agent-console__history-card"><p class="agent-console__history-card-label">Organization</p><p class="agent-console__history-card-value">${escapeHtml(payload?.organization_url || '—')}</p></article><article class="agent-console__history-card"><p class="agent-console__history-card-label">Project</p><p class="agent-console__history-card-value">${escapeHtml(payload?.project || '—')}</p></article><article class="agent-console__history-card"><p class="agent-console__history-card-label">Repositories</p><p class="agent-console__history-card-value">${escapeHtml(formatNumber(payload?.repository_count || 0))}</p></article><article class="agent-console__history-card"><p class="agent-console__history-card-label">Branch</p><p class="agent-console__history-card-value">${escapeHtml(payload?.branch || 'develop')}</p></article><article class="agent-console__history-card"><p class="agent-console__history-card-label">ADO pipelines loaded</p><p class="agent-console__history-card-value">${escapeHtml(formatNumber(pipelineCount))}</p></article></div><p class="agent-console__meta">${repositories.length ? `Visible repositories: ${repositories.map((repo) => escapeHtml(repo.name || repo.id || 'repo')).join(', ')}.` : 'Authentication succeeded, but no repositories were returned.'}</p><p class="agent-console__meta">Discovery diagnostics: ${diagnostics.map((item) => `<code>${escapeHtml(item)}</code>`).join(' · ')}</p>${discoveryWarnings.length ? `<p class="agent-console__meta agent-console__state--warning">${escapeHtml(discoveryWarnings.join(' '))}</p>` : ''}</section>`;
     nodes.adoSummary.innerHTML += `<p class="agent-console__meta">Pipeline selector now has ${escapeHtml(formatNumber(mergedPipelineCount))} executable option(s) from local catalog plus Azure DevOps.</p>`;
   };
 

@@ -63,10 +63,12 @@ services:
       ARCHITECT_VECTOR_DB_PASSWORD: change-me-vector
       ARCHITECT_EMBEDDING_MODEL: nomic-embed-text
       ARCHITECT_RAG_TOP_K: "5"
+      OPENSHIFT_BUILDER_SOURCE_PATHS: /workspace/repo/ipi-method,/workspace/repo/upi-method,/workspace/repo/azure-aro,/workspace/repo/aws-rosa,/workspace/repo/ibm-z,/app
     ports:
       - "8000:8000"
     volumes:
       - ${HOME}/.kube:/root/.kube:ro
+      - ..:/workspace/repo:ro
       - ../site:/app/legacy-site:ro
 
 volumes:
