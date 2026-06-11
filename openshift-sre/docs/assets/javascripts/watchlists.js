@@ -40,8 +40,8 @@
   const externalFields = root.querySelectorAll('[data-watchlist-external-llm-field]');
   let providerCatalog = llmRuntime.fallbackCatalog || {
     configured_provider: 'ollama',
-    configured_model_name: 'gpt-oss:20b',
-    providers: [{ id: 'ollama', label: 'Local Ollama', default_model: 'gpt-oss:20b', default_base_url: 'http://localhost:11434', description: 'Use the local Ollama runtime already supported by the stack.', supports_catalog_refresh: true, suggested_models: ['gpt-oss:20b'] }]
+    configured_model_name: '',
+    providers: [{ id: 'ollama', label: 'Local Ollama', default_model: '', default_base_url: 'http://localhost:11434', description: 'Use the local Ollama runtime already supported by the stack.', supports_catalog_refresh: true, suggested_models: ['gemma4:26b'] }]
   };
 
   function parseCsv(value) {
@@ -62,7 +62,7 @@
   }
 
   function currentProvider() {
-    return llmRuntime.getProvider?.(providerCatalog, currentProviderId()) || providerCatalog.providers?.[0] || { id: 'ollama', label: 'Local Ollama', default_model: 'gpt-oss:20b', default_base_url: 'http://localhost:11434' };
+    return llmRuntime.getProvider?.(providerCatalog, currentProviderId()) || providerCatalog.providers?.[0] || { id: 'ollama', label: 'Local Ollama', default_model: '', default_base_url: 'http://localhost:11434' };
   }
 
   function renderProviderOptions() {
@@ -73,15 +73,20 @@
 
   function renderModelOptions(catalog = null) {
     if (!modelNameInput) return;
-    const currentValue = modelNameInput.value || currentProvider().default_model || providerCatalog.configured_model_name || 'gpt-oss:20b';
+    const catalogModels = Array.isArray(catalog?.models) ? catalog.models : [];
+    const availableNames = catalogModels.map((model) => model?.name || model?.model).filter(Boolean);
+    const requestedValue = modelNameInput.value || currentProvider().default_model || providerCatalog.ollama_selected_model_name || providerCatalog.configured_model_name || '';
+    const currentValue = catalog
+      ? (availableNames.includes(requestedValue) ? requestedValue : (catalog.selected_model_name || catalog.preferred_model_name || catalog.active_model_name || availableNames[0] || requestedValue))
+      : requestedValue;
     const options = new Map();
-    for (const model of (catalog?.models || [])) {
+    for (const model of catalogModels) {
       const name = model?.name || model?.model;
       if (name) {
         options.set(name, name);
       }
     }
-    options.set(currentValue, currentValue);
+    if (currentValue) options.set(currentValue, currentValue);
     modelNameInput.innerHTML = Array.from(options.entries()).map(([value, label]) => `<option value="${value}">${label}</option>`).join('');
     modelNameInput.value = currentValue;
   }

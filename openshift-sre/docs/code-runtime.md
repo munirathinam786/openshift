@@ -388,7 +388,7 @@ In practical terms, the security console now constructs a request body shaped li
   "prompt": "Perform an platform security review using the selected audit profile...",
   "runtime": {
     "cluster_scope": "local-cluster",
-    "local_model_name": "gpt-oss:20b",
+    "local_model_name": "gemma4:26b",
     "ollama_base_url": "http://host.containers.internal:11434",
     "kube_context_name": "default",
     "openshift_api_url_field": "AKIA...",

@@ -338,19 +338,24 @@ def test_docs_home_redirects_to_legacy_index(client):
 
 
 def test_ollama_models_endpoint(client):
+    from dataclasses import replace
+
+    import openshift_sre_agent.api as api_module
+
+    api_module.BASE_SETTINGS = replace(api_module.BASE_SETTINGS, local_model_name="gpt-oss:20b")
     tags_response = MagicMock()
     tags_response.raise_for_status.return_value = None
     tags_response.json.return_value = {
         "models": [
             {
-                "name": "gpt-oss:20b",
-                "model": "gpt-oss:20b",
+                "name": "gemma4:26b",
+                "model": "gemma4:26b",
                 "size": 15742055456,
                 "modified_at": "2026-05-19T10:00:00Z",
                 "details": {
-                    "family": "gptoss",
-                    "parameter_size": "20.9B",
-                    "quantization_level": "MXFP4",
+                    "family": "gemma",
+                    "parameter_size": "26B",
+                    "quantization_level": "Q4_K_M",
                 },
             },
             {
@@ -372,8 +377,8 @@ def test_ollama_models_endpoint(client):
     ps_response.json.return_value = {
         "models": [
             {
-                "name": "gpt-oss:20b",
-                "model": "gpt-oss:20b",
+                "name": "gemma4:26b",
+                "model": "gemma4:26b",
                 "context_length": 8192,
                 "size_vram": 15742055456,
             }
@@ -398,11 +403,42 @@ def test_ollama_models_endpoint(client):
     data = resp.json()
     assert data["api_reachable"] is True
     assert data["configured_model_name"] == "gpt-oss:20b"
+    assert data["active_model_name"] == "gemma4:26b"
+    assert data["selected_model_name"] == "gemma4:26b"
+    assert data["configured_model_available"] is False
     assert data["model_count"] == 2
-    assert data["models"][0]["name"] == "gpt-oss:20b"
+    assert data["models"][0]["name"] == "gemma4:26b"
     assert data["models"][0]["loaded"] is True
     assert data["models"][1]["name"] == "llama3:8b"
     assert data["models"][1]["loaded"] is False
+
+
+def test_ado_project_url_normalizes_copied_project_url():
+    from openshift_sre_agent.openshift_builder import parse_ado_config
+
+    config = parse_ado_config({
+        "organization_url": "https://dev.azure.com/Kyndryl-India/Terraform%20IaC%20for%20OpenShift%20Multi%20Cluster%20AirGapped",
+        "project": "",
+        "repository": "Terraform IaC for OpenShift Multi Cluster AirGapped",
+        "branch": "develop",
+        "pat": "token",
+    })
+
+    assert config.organization_url == "https://dev.azure.com/Kyndryl-India"
+    assert config.project == "Terraform IaC for OpenShift Multi Cluster AirGapped"
+
+
+def test_ado_signin_redirect_reports_pat_guidance():
+    from openshift_sre_agent.openshift_builder import _raise_for_ado_response
+
+    response = httpx.Response(
+        302,
+        headers={"location": "https://spsprodcin2.vssps.visualstudio.com/_signin?realm=dev.azure.com"},
+        request=httpx.Request("GET", "https://dev.azure.com/org/project/_apis/git/repositories"),
+    )
+
+    with pytest.raises(ValueError, match="PAT"):
+        _raise_for_ado_response(response, "repository validation")
 
 
 def test_llm_providers_endpoint(client):

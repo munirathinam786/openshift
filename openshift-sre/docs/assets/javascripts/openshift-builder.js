@@ -81,8 +81,8 @@
 
   let providerCatalog = llmRuntime.fallbackCatalog || {
     configured_provider: 'ollama',
-    configured_model_name: 'gpt-oss:20b',
-    providers: [{ id: 'ollama', label: 'Local Ollama', default_model: 'gpt-oss:20b', default_base_url: 'http://host.containers.internal:11434', description: 'Use the local Ollama runtime already supported by the stack.' }],
+    configured_model_name: '',
+    providers: [{ id: 'ollama', label: 'Local Ollama', default_model: '', default_base_url: 'http://host.containers.internal:11434', description: 'Use the local Ollama runtime already supported by the stack.' }],
   };
   let architectSnapshot = null;
 
@@ -122,7 +122,7 @@
     nodes.providerNote.textContent = provider.description || 'OpenShift Builder can use the same local Ollama runtime or external providers supported by the Architect workspace.';
     if (!useExternal) {
       if (!nodes.ollamaBaseUrl.value.trim()) nodes.ollamaBaseUrl.value = provider.default_base_url || providerCatalog.configured_base_url || 'http://host.containers.internal:11434';
-      if (!nodes.modelName.value.trim()) nodes.modelName.value = provider.default_model || providerCatalog.configured_model_name || 'gpt-oss:20b';
+      if (!nodes.modelName.value.trim()) nodes.modelName.value = provider.default_model || providerCatalog.ollama_selected_model_name || providerCatalog.configured_model_name || '';
     } else {
       if (!nodes.externalModelName.value.trim() && provider.default_model) nodes.externalModelName.value = provider.default_model;
       if (!nodes.externalBaseUrl.value.trim() && provider.default_base_url) nodes.externalBaseUrl.value = provider.default_base_url;
@@ -217,8 +217,10 @@
 
   const renderAdoSummary = (payload) => {
     const repositories = Array.isArray(payload?.repositories) ? payload.repositories : [];
-    const pipelineCount = Number(payload?.pipeline_count ?? payload?.catalog?.counts?.pipeline_count ?? 0);
+    const pipelineCount = Number(payload?.ado_pipeline_count ?? payload?.pipeline_count ?? payload?.catalog?.counts?.pipeline_count ?? 0);
+    const mergedPipelineCount = Number(payload?.pipeline_count ?? payload?.catalog?.counts?.pipeline_count ?? pipelineCount);
     nodes.adoSummary.innerHTML = `<section class="agent-console__table-block"><div class="agent-console__history-card-grid"><article class="agent-console__history-card"><p class="agent-console__history-card-label">Organization</p><p class="agent-console__history-card-value">${escapeHtml(payload?.organization_url || '—')}</p></article><article class="agent-console__history-card"><p class="agent-console__history-card-label">Project</p><p class="agent-console__history-card-value">${escapeHtml(payload?.project || '—')}</p></article><article class="agent-console__history-card"><p class="agent-console__history-card-label">Repositories</p><p class="agent-console__history-card-value">${escapeHtml(formatNumber(payload?.repository_count || 0))}</p></article><article class="agent-console__history-card"><p class="agent-console__history-card-label">Branch</p><p class="agent-console__history-card-value">${escapeHtml(payload?.branch || 'develop')}</p></article><article class="agent-console__history-card"><p class="agent-console__history-card-label">ADO pipelines loaded</p><p class="agent-console__history-card-value">${escapeHtml(formatNumber(pipelineCount))}</p></article></div><p class="agent-console__meta">${repositories.length ? `Visible repositories: ${repositories.map((repo) => escapeHtml(repo.name || repo.id || 'repo')).join(', ')}.` : 'Authentication succeeded, but no repositories were returned.'}</p></section>`;
+    nodes.adoSummary.innerHTML += `<p class="agent-console__meta">Pipeline selector now has ${escapeHtml(formatNumber(mergedPipelineCount))} executable option(s) from local catalog plus Azure DevOps.</p>`;
   };
 
   const renderImplementation = (payload) => {
@@ -281,8 +283,9 @@
       const payload = await fetchJson('/builder/ado/auth', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(buildAdoPayload()) });
       renderAdoSummary(payload);
       if (payload.catalog) renderCatalog(payload.catalog);
-      const pipelineCount = Number(payload?.pipeline_count ?? payload?.catalog?.counts?.pipeline_count ?? 0);
-      setStatus(`Azure DevOps authentication succeeded${pipelineCount ? ` and loaded ${formatNumber(pipelineCount)} pipeline(s)` : ', but no YAML-backed pipelines were returned'}.`, 'ok');
+      const adoPipelineCount = Number(payload?.ado_pipeline_count ?? 0);
+      const totalPipelineCount = Number(payload?.pipeline_count ?? payload?.catalog?.counts?.pipeline_count ?? adoPipelineCount);
+      setStatus(`Azure DevOps authentication succeeded${adoPipelineCount ? ` and pulled ${formatNumber(adoPipelineCount)} ADO pipeline(s)` : ', but no YAML-backed ADO pipelines were returned'}; ${formatNumber(totalPipelineCount)} total option(s) are available for selection.`, 'ok');
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unable to validate Azure DevOps access.';
       renderMessage(nodes.adoSummary, message);

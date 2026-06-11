@@ -1446,6 +1446,10 @@ def _get_ollama_models_catalog(settings: Settings) -> dict:
         "checked_at": datetime.now(timezone.utc).isoformat(),
         "ollama_base_url": settings.ollama_base_url,
         "configured_model_name": settings.local_model_name,
+        "active_model_name": None,
+        "selected_model_name": settings.local_model_name,
+        "preferred_model_name": None,
+        "configured_model_available": False,
         "api_reachable": False,
         "api_error": None,
         "model_count": 0,
@@ -1461,6 +1465,7 @@ def _get_ollama_models_catalog(settings: Settings) -> dict:
                 name = model.get("name") or model.get("model")
                 if name:
                     loaded_models[name] = model
+            snapshot["active_model_name"] = next(iter(loaded_models), None)
     except Exception:  # noqa: BLE001
         loaded_models = {}
 
@@ -1474,11 +1479,13 @@ def _get_ollama_models_catalog(settings: Settings) -> dict:
         return snapshot
 
     models = []
+    discovered_names: set[str] = set()
     for model in payload.get("models", []):
         details = model.get("details") or {}
         name = model.get("name") or model.get("model")
         if not name:
             continue
+        discovered_names.add(name)
         loaded_model = loaded_models.get(name, {})
         models.append(
             {
@@ -1496,14 +1503,46 @@ def _get_ollama_models_catalog(settings: Settings) -> dict:
             }
         )
 
+    for name, loaded_model in loaded_models.items():
+        if name in discovered_names:
+            continue
+        details = loaded_model.get("details") or {}
+        models.append(
+            {
+                "name": name,
+                "model": loaded_model.get("model") or name,
+                "modified_at": None,
+                "size_bytes": loaded_model.get("size"),
+                "size_gib": _format_gib(loaded_model.get("size")),
+                "family": details.get("family"),
+                "parameter_size": details.get("parameter_size"),
+                "quantization_level": details.get("quantization_level"),
+                "loaded": True,
+                "loaded_context_length": loaded_model.get("context_length"),
+                "loaded_size_vram_gib": _format_gib(loaded_model.get("size_vram")),
+            }
+        )
+
+    available_names = {model["name"] for model in models}
+    configured_available = settings.local_model_name in available_names
+    preferred_model_name = (
+        snapshot["active_model_name"]
+        or (settings.local_model_name if configured_available else None)
+        or (models[0]["name"] if models else None)
+    )
+
     models.sort(
         key=lambda model: (
-            0 if model["name"] == settings.local_model_name else 1,
+            0 if model["name"] == preferred_model_name else 1,
             0 if model["loaded"] else 1,
+            0 if model["name"] == settings.local_model_name else 1,
             model["name"],
         )
     )
     snapshot["api_reachable"] = True
+    snapshot["configured_model_available"] = configured_available
+    snapshot["preferred_model_name"] = preferred_model_name
+    snapshot["selected_model_name"] = preferred_model_name or settings.local_model_name
     snapshot["models"] = models
     snapshot["model_count"] = len(models)
     return snapshot
@@ -1512,9 +1551,24 @@ def _get_ollama_models_catalog(settings: Settings) -> dict:
 def _get_llm_provider_catalog() -> dict:
     """Return the provider catalog payload consumed by the browser settings panels."""
 
+    ollama_catalog: dict[str, Any] | None = None
+    ollama_selected_model = BASE_SETTINGS.local_model_name
+    try:
+        ollama_catalog = _get_ollama_models_catalog(BASE_SETTINGS)
+        if ollama_catalog.get("api_reachable"):
+            ollama_selected_model = str(ollama_catalog.get("selected_model_name") or ollama_catalog.get("preferred_model_name") or ollama_selected_model)
+    except Exception:  # noqa: BLE001
+        ollama_catalog = None
+
     providers = []
     for provider_id, metadata in LLM_PROVIDER_METADATA.items():
         defaults = get_llm_provider_defaults(provider_id)
+        default_model = defaults.get("default_model")
+        suggested_models = list(metadata.get("suggested_models") or [])
+        if provider_id == "ollama":
+            default_model = ollama_selected_model
+            live_model_names = [model.get("name") for model in (ollama_catalog or {}).get("models", []) if model.get("name")]
+            suggested_models = list(dict.fromkeys([*live_model_names, ollama_selected_model, *suggested_models]))
         providers.append(
             {
                 "id": provider_id,
@@ -1522,18 +1576,20 @@ def _get_llm_provider_catalog() -> dict:
                 "category": metadata.get("category", "external"),
                 "description": metadata.get("description", ""),
                 "default_base_url": defaults.get("default_base_url"),
-                "default_model": defaults.get("default_model"),
+                "default_model": default_model,
                 "default_api_version": defaults.get("default_api_version"),
                 "supports_catalog_refresh": bool(metadata.get("supports_catalog_refresh")),
-                "suggested_models": list(metadata.get("suggested_models") or []),
+                "suggested_models": suggested_models,
                 "credential_fields": list(metadata.get("credential_fields") or []),
             }
         )
     providers.sort(key=lambda item: (0 if item["id"] == "ollama" else 1, item["label"]))
     return {
         "configured_provider": BASE_SETTINGS.llm_provider,
-        "configured_model_name": BASE_SETTINGS.effective_model_name,
+        "configured_model_name": ollama_selected_model if BASE_SETTINGS.llm_provider == "ollama" else BASE_SETTINGS.effective_model_name,
         "configured_base_url": BASE_SETTINGS.effective_llm_base_url,
+        "ollama_active_model_name": (ollama_catalog or {}).get("active_model_name"),
+        "ollama_selected_model_name": ollama_selected_model,
         "providers": providers,
     }
 
@@ -2289,10 +2345,14 @@ def openshift_builder_ado_auth(request: OpenShiftBuilderAdoConfigRequest) -> dic
         ado_config = parse_ado_config(request.model_dump())
         payload = validate_ado_connection(ado_config)
         pipeline_catalog = discover_ado_pipeline_catalog(ado_config)
+        merged_catalog = merge_builder_catalogs(discover_builder_catalog(), pipeline_catalog)
+        merged_catalog["defaults"] = _get_builder_ui_defaults()
         return {
             **payload,
-            "catalog": pipeline_catalog,
-            "pipeline_count": pipeline_catalog.get("counts", {}).get("pipeline_count", 0),
+            "catalog": merged_catalog,
+            "ado_catalog": pipeline_catalog,
+            "pipeline_count": merged_catalog.get("counts", {}).get("pipeline_count", 0),
+            "ado_pipeline_count": pipeline_catalog.get("counts", {}).get("pipeline_count", 0),
         }
     except ValueError as error:
         raise HTTPException(status_code=400, detail=str(error)) from error

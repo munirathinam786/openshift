@@ -28,9 +28,9 @@ LLM_PROVIDER_METADATA: dict[str, dict[str, Any]] = {
         "category": "local",
         "description": "Use the local Ollama runtime already supported by the stack.",
         "default_base_url": "http://localhost:11434",
-        "default_model": "gpt-oss:20b",
+        "default_model": "",
         "supports_catalog_refresh": True,
-        "suggested_models": ["gpt-oss:20b", "qwen3:8b", "llama3.1:8b"],
+        "suggested_models": ["gemma4:26b", "qwen3:8b", "llama3.1:8b"],
         "credential_fields": [],
     },
     "openai": {
@@ -336,7 +336,7 @@ class Settings:
 
         return cls(
             ollama_base_url=getenv("OLLAMA_BASE_URL", "http://localhost:11434").rstrip("/"),
-            local_model_name=getenv("LOCAL_MODEL_NAME", "gpt-oss:20b"),
+            local_model_name=getenv("LOCAL_MODEL_NAME", "gemma4:26b"),
             cluster_scope=openshift_cluster,
             llm_provider=llm_provider,
             llm_model_name=llm_model_name,

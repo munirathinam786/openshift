@@ -52,7 +52,7 @@ These overrides apply only to the current request and do not rewrite `.env`.
 ```env
 LLM_PROVIDER=ollama
 OLLAMA_BASE_URL=http://localhost:11434
-LOCAL_MODEL_NAME=gpt-oss:20b
+LOCAL_MODEL_NAME=gemma4:26b
 ```
 
 Typical Podman-hosted local runtime on macOS:
@@ -60,7 +60,7 @@ Typical Podman-hosted local runtime on macOS:
 ```env
 LLM_PROVIDER=ollama
 OLLAMA_BASE_URL=http://host.containers.internal:11434
-LOCAL_MODEL_NAME=gpt-oss:20b
+LOCAL_MODEL_NAME=gemma4:26b
 ```
 
 ### OpenAI

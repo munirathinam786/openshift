@@ -432,7 +432,7 @@
     return res.json();
   };
 
-  const apiFetchProviderCatalog = async () => llmRuntime.fetchProviderCatalog?.() || { configured_provider: 'ollama', configured_model_name: 'gpt-oss:20b', providers: [{ id: 'ollama', label: 'Local Ollama', default_model: 'gpt-oss:20b', default_base_url: 'http://localhost:11434', supports_catalog_refresh: true, suggested_models: ['gpt-oss:20b'] }] };
+  const apiFetchProviderCatalog = async () => llmRuntime.fetchProviderCatalog?.() || { configured_provider: 'ollama', configured_model_name: '', providers: [{ id: 'ollama', label: 'Local Ollama', default_model: '', default_base_url: 'http://localhost:11434', supports_catalog_refresh: true, suggested_models: ['gemma4:26b'] }] };
 
   /** Fetch all items from the FinOps approval queue. @returns {Promise<{enabled: boolean, items: Array}>} */
   const apiFetchQueue = async () => {
@@ -608,10 +608,10 @@
   function SettingsPanel({ settings, onChange, modelCatalog, modelsLoading, onRefreshModels, providerCatalog }) {
     const set = (k) => (e) => onChange({ ...settings, [k]: e.target.type === 'checkbox' ? e.target.checked : e.target.value });
     const currentProviderId = llmRuntime.normalizeProviderId?.(providerCatalog, settings.provider) || 'ollama';
-    const provider = llmRuntime.getProvider?.(providerCatalog, currentProviderId) || providerCatalog?.providers?.[0] || { id: 'ollama', label: 'Local Ollama', default_model: 'gpt-oss:20b', default_base_url: 'http://localhost:11434' };
+    const provider = llmRuntime.getProvider?.(providerCatalog, currentProviderId) || providerCatalog?.providers?.[0] || { id: 'ollama', label: 'Local Ollama', default_model: '', default_base_url: 'http://localhost:11434' };
     const useExternal = currentProviderId !== 'ollama';
     const catalogModels = Array.isArray(modelCatalog?.models) ? modelCatalog.models : [];
-    const defaultModel = settings.modelName || modelCatalog?.configured_model_name || provider.default_model || 'gpt-oss:20b';
+    const defaultModel = settings.modelName || modelCatalog?.selected_model_name || modelCatalog?.preferred_model_name || modelCatalog?.active_model_name || modelCatalog?.configured_model_name || provider.default_model || '';
     const optionMap = new Map(catalogModels.map((model) => {
       const suffix = [model.loaded ? 'loaded' : '', model.parameter_size || ''].filter(Boolean).join(' · ');
       return [model.name, suffix ? `${model.name} · ${suffix}` : model.name];
@@ -912,8 +912,8 @@
   function FinOpsApp() {
     const [selectedOp, setSelectedOp] = useState('full-optimizer');
     const [settings, setSettings] = useState({ provider: 'ollama', ollamaBaseUrl: '', modelName: '', externalModelName: '', externalBaseUrl: '', externalApiKey: '', externalApiVersion: '', externalOrganization: '', clusterScope: '', kubeContext: '', openshiftApiUrl: '', openshiftToken: '', openshiftNamespace: '', verifySsl: true });
-    const [modelCatalog, setModelCatalog] = useState({ configured_model_name: 'gpt-oss:20b', models: [] });
-    const [providerCatalog, setProviderCatalog] = useState(llmRuntime.fallbackCatalog || { configured_provider: 'ollama', configured_model_name: 'gpt-oss:20b', providers: [{ id: 'ollama', label: 'Local Ollama', default_model: 'gpt-oss:20b', default_base_url: 'http://localhost:11434', supports_catalog_refresh: true, suggested_models: ['gpt-oss:20b'] }] });
+    const [modelCatalog, setModelCatalog] = useState({ configured_model_name: '', models: [] });
+    const [providerCatalog, setProviderCatalog] = useState(llmRuntime.fallbackCatalog || { configured_provider: 'ollama', configured_model_name: '', providers: [{ id: 'ollama', label: 'Local Ollama', default_model: '', default_base_url: 'http://localhost:11434', supports_catalog_refresh: true, suggested_models: ['gemma4:26b'] }] });
     const [modelsLoading, setModelsLoading] = useState(false);
     const [customPrompt, setCustomPrompt] = useState('');
     const [autoApprove, setAutoApprove] = useState(false);
@@ -961,7 +961,7 @@
           }
           return {
             ...current,
-            modelName: current.modelName || payload.configured_model_name || availableNames[0] || 'gpt-oss:20b',
+            modelName: current.modelName || payload.selected_model_name || payload.preferred_model_name || payload.active_model_name || payload.configured_model_name || availableNames[0] || '',
           };
         });
       } catch (error) {

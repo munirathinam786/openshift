@@ -82,7 +82,7 @@ Runs a single operator prompt through `OpenShiftSreAgent`, stores the run throug
     "llm_api_key": "sk-...",
     "llm_organization": "optional-org-id",
     "ollama_base_url": "http://host.containers.internal:11434",
-    "local_model_name": "gpt-oss:20b",
+    "local_model_name": "gemma4:26b",
     "cluster_scope": "local-cluster",
     "kube_context_name": "default",
     "agent_max_steps": 12,
@@ -159,7 +159,7 @@ This endpoint is designed for larger audit presets such as **SOX** and **HIPAA**
   "runtime": {
     "cluster_scope": "local-cluster",
     "llm_provider": "ollama",
-    "local_model_name": "gpt-oss:20b"
+    "local_model_name": "gemma4:26b"
   },
   "tags": ["security-console", "hipaa"]
 }
@@ -231,7 +231,7 @@ Returns the provider catalog used by the browser pages to populate provider drop
 ```json
 {
   "configured_provider": "ollama",
-  "configured_model_name": "gpt-oss:20b",
+  "configured_model_name": "gemma4:26b",
   "configured_base_url": "http://localhost:11434",
   "providers": [
     {
@@ -289,7 +289,7 @@ Provides the aggregated payload used by `docs/assets/javascripts/history-dashboa
     {
       "run_id": 42,
       "status": "completed",
-      "model_name": "gpt-oss:20b",
+      "model_name": "gemma4:26b",
       "cluster_scope": "local-cluster"
     }
   ]
@@ -479,12 +479,12 @@ When the active provider is not `ollama`, this endpoint is still available for l
 {
   "checked_at": "2026-05-15T15:42:12.345678+00:00",
   "ollama_base_url": "http://host.containers.internal:11434",
-  "configured_model_name": "gpt-oss:20b",
+  "configured_model_name": "gemma4:26b",
   "api_reachable": true,
   "active_model_count": 1,
   "loaded_models": [
     {
-      "name": "gpt-oss:20b",
+      "name": "gemma4:26b",
       "parameter_size": "20.9B",
       "quantization_level": "MXFP4",
       "size_vram_gib": 14.66,

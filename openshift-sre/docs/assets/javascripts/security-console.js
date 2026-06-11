@@ -569,7 +569,7 @@
   }
 
   async function apiFetchProviderCatalog() {
-    return llmRuntime.fetchProviderCatalog?.() || { configured_provider: 'ollama', configured_model_name: 'gpt-oss:20b', providers: [{ id: 'ollama', label: 'Local Ollama', default_model: 'gpt-oss:20b', default_base_url: 'http://localhost:11434', supports_catalog_refresh: true, suggested_models: ['gpt-oss:20b'] }] };
+    return llmRuntime.fetchProviderCatalog?.() || { configured_provider: 'ollama', configured_model_name: '', providers: [{ id: 'ollama', label: 'Local Ollama', default_model: '', default_base_url: 'http://localhost:11434', supports_catalog_refresh: true, suggested_models: ['gemma4:26b'] }] };
   }
 
   function Toast({ toast, onDismiss }) {
@@ -594,10 +594,10 @@
       [key]: event.target.type === 'checkbox' ? event.target.checked : event.target.value
     });
     const currentProviderId = llmRuntime.normalizeProviderId?.(providerCatalog, settings.provider) || 'ollama';
-    const provider = llmRuntime.getProvider?.(providerCatalog, currentProviderId) || providerCatalog?.providers?.[0] || { id: 'ollama', label: 'Local Ollama', default_model: 'gpt-oss:20b', default_base_url: 'http://localhost:11434' };
+    const provider = llmRuntime.getProvider?.(providerCatalog, currentProviderId) || providerCatalog?.providers?.[0] || { id: 'ollama', label: 'Local Ollama', default_model: '', default_base_url: 'http://localhost:11434' };
     const useExternal = currentProviderId !== 'ollama';
     const catalogModels = Array.isArray(modelCatalog?.models) ? modelCatalog.models : [];
-    const defaultModel = settings.modelName || modelCatalog?.configured_model_name || provider.default_model || 'gpt-oss:20b';
+    const defaultModel = settings.modelName || modelCatalog?.selected_model_name || modelCatalog?.preferred_model_name || modelCatalog?.active_model_name || modelCatalog?.configured_model_name || provider.default_model || '';
     const optionMap = new Map(catalogModels.map((model) => {
       const suffix = [model.loaded ? 'loaded' : '', model.parameter_size || ''].filter(Boolean).join(' · ');
       return [model.name, suffix ? `${model.name} · ${suffix}` : model.name];
@@ -861,8 +861,8 @@
       kubeconfigPath: '',
       openshiftVerifySsl: true
     });
-    const [modelCatalog, setModelCatalog] = useState({ configured_model_name: 'gpt-oss:20b', models: [] });
-    const [providerCatalog, setProviderCatalog] = useState(llmRuntime.fallbackCatalog || { configured_provider: 'ollama', configured_model_name: 'gpt-oss:20b', providers: [{ id: 'ollama', label: 'Local Ollama', default_model: 'gpt-oss:20b', default_base_url: 'http://localhost:11434', supports_catalog_refresh: true, suggested_models: ['gpt-oss:20b'] }] });
+    const [modelCatalog, setModelCatalog] = useState({ configured_model_name: '', models: [] });
+    const [providerCatalog, setProviderCatalog] = useState(llmRuntime.fallbackCatalog || { configured_provider: 'ollama', configured_model_name: '', providers: [{ id: 'ollama', label: 'Local Ollama', default_model: '', default_base_url: 'http://localhost:11434', supports_catalog_refresh: true, suggested_models: ['gemma4:26b'] }] });
     const [modelsLoading, setModelsLoading] = useState(false);
     const [selectedFeatures, setSelectedFeatures] = useState(auditProfiles.sox.features);
     const [notes, setNotes] = useState('');
@@ -904,7 +904,7 @@
           }
           return {
             ...current,
-            modelName: current.modelName || payload.configured_model_name || availableNames[0] || 'gpt-oss:20b'
+            modelName: current.modelName || payload.selected_model_name || payload.preferred_model_name || payload.active_model_name || payload.configured_model_name || availableNames[0] || ''
           };
         });
       } catch (error) {

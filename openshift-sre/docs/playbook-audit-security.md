@@ -30,7 +30,7 @@ Example runtime shape used by the UI:
 {
   "runtime": {
     "cluster_scope": "local-cluster",
-    "local_model_name": "gpt-oss:20b",
+    "local_model_name": "gemma4:26b",
     "ollama_base_url": "http://host.containers.internal:11434",
     "kube_context_name": "default",
     "verify_ssl": true

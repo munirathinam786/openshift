@@ -1,7 +1,7 @@
 (() => {
   const FALLBACK_PROVIDER_CATALOG = {
     configured_provider: 'ollama',
-    configured_model_name: 'gpt-oss:20b',
+    configured_model_name: '',
     configured_base_url: 'http://localhost:11434',
     providers: [
       {
@@ -10,10 +10,10 @@
         category: 'local',
         description: 'Use the local Ollama runtime already supported by the stack.',
         default_base_url: 'http://localhost:11434',
-        default_model: 'gpt-oss:20b',
+        default_model: '',
         default_api_version: '',
         supports_catalog_refresh: true,
-        suggested_models: ['gpt-oss:20b', 'qwen3:8b', 'llama3.1:8b'],
+        suggested_models: ['gemma4:26b', 'qwen3:8b', 'llama3.1:8b'],
         credential_fields: []
       }
     ]
@@ -41,7 +41,7 @@
       const ollamaModels = Array.isArray(ollamaCatalog?.models)
         ? ollamaCatalog.models.map((model) => model?.name || model?.model).filter(Boolean)
         : [];
-      return Array.from(new Set([...ollamaModels, ...providerModels, provider.default_model || catalog?.configured_model_name || 'gpt-oss:20b']));
+      return Array.from(new Set([...ollamaModels, ...providerModels, provider.default_model || catalog?.configured_model_name || ''].filter(Boolean)));
     }
     return Array.from(new Set([...providerModels, provider.default_model || catalog?.configured_model_name || ''])).filter(Boolean);
   };

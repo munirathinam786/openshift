@@ -4,7 +4,7 @@
 
 - Python `3.10+`
 - either Ollama running locally **or** credentials for a hosted provider such as OpenAI, Azure OpenAI, Anthropic, Gemini, or OpenRouter
-- an installed local model, for example `gpt-oss:20b`, when you want local inference
+- an installed local model, for example `gemma4:26b`, when you want local inference
 - access to an OpenShift cluster through `~/.kube/config` or an explicit API URL and bearer token
 - Podman installed for the default container workflow
 

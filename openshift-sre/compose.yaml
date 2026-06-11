@@ -42,7 +42,7 @@ services:
     environment:
       LEGACY_SITE_DIR: /app/legacy-site
       OLLAMA_BASE_URL: http://host.containers.internal:11434
-      LOCAL_MODEL_NAME: gpt-oss:20b
+      LOCAL_MODEL_NAME: gemma4:26b
       OPENSHIFT_CLUSTER: local-cluster
       OPENSHIFT_NAMESPACE: openshift-monitoring
       KUBECONFIG_PATH: /root/.kube/config

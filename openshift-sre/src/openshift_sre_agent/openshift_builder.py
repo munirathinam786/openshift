@@ -3,10 +3,12 @@ from __future__ import annotations
 import json
 import os
 import re
+from base64 import b64encode
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
+from urllib.parse import quote, unquote, urlparse
 
 import httpx
 
@@ -107,11 +109,12 @@ def discover_ado_pipeline_catalog(config: BuilderAdoConfig) -> dict[str, Any]:
     _validate_ado_config(config)
     pipelines: list[BuilderCatalogEntry] = []
     repositories_seen: dict[str, dict[str, Any]] = {}
-    with httpx.Client(timeout=20.0, auth=("", config.pat)) as client:
+    with httpx.Client(timeout=20.0, follow_redirects=False, headers=_ado_auth_headers(config)) as client:
         pipelines_response = client.get(
-            f"{config.organization_url.rstrip('/')}/{config.project}/_apis/pipelines",
+            _ado_project_url(config, "_apis/pipelines"),
             params={"api-version": "7.1-preview.1"},
         )
+        _raise_for_ado_response(pipelines_response, "pipeline discovery")
         pipelines_response.raise_for_status()
         pipeline_rows = pipelines_response.json().get("value") or []
 
@@ -216,11 +219,12 @@ def merge_builder_catalogs(*catalogs: dict[str, Any]) -> dict[str, Any]:
 
 def validate_ado_connection(config: BuilderAdoConfig) -> dict[str, Any]:
     _validate_ado_config(config)
-    with httpx.Client(timeout=15.0, auth=("", config.pat)) as client:
+    with httpx.Client(timeout=15.0, follow_redirects=False, headers=_ado_auth_headers(config)) as client:
         repositories_response = client.get(
-            f"{config.organization_url.rstrip('/')}/{config.project}/_apis/git/repositories",
+            _ado_project_url(config, "_apis/git/repositories"),
             params={"api-version": "7.1"},
         )
+        _raise_for_ado_response(repositories_response, "repository validation")
         repositories_response.raise_for_status()
         repositories_payload = repositories_response.json()
 
@@ -378,11 +382,12 @@ def push_files_to_ado(*, config: BuilderAdoConfig, files: list[dict[str, str]]) 
         return []
 
     repository = config.repository or ""
-    with httpx.Client(timeout=20.0, auth=("", config.pat)) as client:
+    with httpx.Client(timeout=20.0, follow_redirects=False, headers=_ado_auth_headers(config)) as client:
         refs_response = client.get(
-            f"{config.organization_url.rstrip('/')}/{config.project}/_apis/git/repositories/{repository}/refs",
+            _ado_project_url(config, f"_apis/git/repositories/{quote(repository, safe='')}/refs"),
             params={"filter": f"heads/{config.branch}", "api-version": "7.1"},
         )
+        _raise_for_ado_response(refs_response, "branch lookup")
         refs_response.raise_for_status()
         refs = refs_response.json().get("value") or []
         if not refs:
@@ -400,13 +405,14 @@ def push_files_to_ado(*, config: BuilderAdoConfig, files: list[dict[str, str]]) 
             for item in files
         ]
         push_response = client.post(
-            f"{config.organization_url.rstrip('/')}/{config.project}/_apis/git/repositories/{repository}/pushes",
+            _ado_project_url(config, f"_apis/git/repositories/{quote(repository, safe='')}/pushes"),
             params={"api-version": "7.1"},
             json={
                 "refUpdates": [{"name": f"refs/heads/{config.branch}", "oldObjectId": old_object_id}],
                 "commits": [{"comment": "OpenShift Builder pipeline implementation update", "changes": changes}],
             },
         )
+        _raise_for_ado_response(push_response, "repository push")
         push_response.raise_for_status()
         push_payload = push_response.json()
 
@@ -426,6 +432,7 @@ def parse_ado_config(payload: dict[str, Any] | None) -> BuilderAdoConfig | None:
     branch = str(payload.get("branch") or "develop").strip() or "develop"
     pat = str(payload.get("pat") or "").strip()
     target_directory = str(payload.get("target_directory") or "/pipelines/generated/openshift").strip() or "/pipelines/generated/openshift"
+    organization_url, project = _normalize_ado_org_project(organization_url, project)
     return BuilderAdoConfig(
         organization_url=organization_url,
         project=project,
@@ -843,14 +850,61 @@ def _validate_ado_config(config: BuilderAdoConfig | None, *, require_repository:
         raise ValueError("Azure DevOps organization URL must start with https:// or http://.")
 
 
+def _normalize_ado_org_project(organization_url: str, project: str) -> tuple[str, str]:
+    parsed = urlparse(organization_url)
+    if not parsed.scheme or not parsed.netloc:
+        return organization_url.rstrip("/"), project.strip("/")
+    path_parts = [unquote(part) for part in parsed.path.strip("/").split("/") if part]
+    normalized_project = project.strip("/")
+    normalized_path_parts = list(path_parts)
+    if parsed.netloc.lower() == "dev.azure.com" and len(path_parts) >= 2:
+        if not normalized_project:
+            normalized_project = path_parts[1]
+        normalized_path_parts = path_parts[:1]
+    elif parsed.netloc.lower().endswith(".visualstudio.com") and path_parts:
+        if not normalized_project:
+            normalized_project = path_parts[0]
+        normalized_path_parts = []
+    normalized_path = "/" + "/".join(quote(part, safe="") for part in normalized_path_parts) if normalized_path_parts else ""
+    return parsed._replace(path=normalized_path, params="", query="", fragment="").geturl().rstrip("/"), normalized_project
+
+
+def _ado_auth_headers(config: BuilderAdoConfig) -> dict[str, str]:
+    token = b64encode(f":{config.pat}".encode("utf-8")).decode("ascii")
+    return {"Authorization": f"Basic {token}", "Accept": "application/json"}
+
+
+def _ado_project_url(config: BuilderAdoConfig, path: str) -> str:
+    return f"{config.organization_url.rstrip('/')}/{quote(config.project, safe='')}/{path.lstrip('/')}"
+
+
+def _raise_for_ado_response(response: httpx.Response, operation: str) -> None:
+    if response.status_code in {301, 302, 303, 307, 308}:
+        location = response.headers.get("location", "")
+        if "_signin" in location or "login" in location.lower():
+            raise ValueError(
+                "Azure DevOps redirected to sign-in during "
+                f"{operation}. Check that the PAT was pasted correctly, is not expired, has Code read access "
+                "(and Code read/write for pushes), and that the organization URL is the org root like "
+                "https://dev.azure.com/Kyndryl-India while Project is entered separately."
+            )
+        raise ValueError(f"Azure DevOps returned redirect {response.status_code} during {operation}. Check the organization URL and project name.")
+    if response.status_code in {401, 403}:
+        raise ValueError(
+            f"Azure DevOps rejected the PAT during {operation} with HTTP {response.status_code}. "
+            "Verify PAT scopes, project access, SSO/organization authorization, and token expiry."
+        )
+
+
 def _fetch_ado_pipeline_detail(*, client: httpx.Client, config: BuilderAdoConfig, pipeline_id: Any) -> dict[str, Any] | None:
     if pipeline_id is None:
         return None
     try:
         response = client.get(
-            f"{config.organization_url.rstrip('/')}/{config.project}/_apis/pipelines/{pipeline_id}",
+            _ado_project_url(config, f"_apis/pipelines/{pipeline_id}"),
             params={"api-version": "7.1-preview.1"},
         )
+        _raise_for_ado_response(response, "pipeline detail lookup")
         response.raise_for_status()
         payload = response.json()
         return payload if isinstance(payload, dict) else None
@@ -867,9 +921,10 @@ def _fetch_ado_yaml_content(*, client: httpx.Client, config: BuilderAdoConfig, r
         params["versionDescriptor.versionType"] = "branch"
     try:
         response = client.get(
-            f"{config.organization_url.rstrip('/')}/{config.project}/_apis/git/repositories/{repository}/items",
+            _ado_project_url(config, f"_apis/git/repositories/{quote(repository, safe='')}/items"),
             params=params,
         )
+        _raise_for_ado_response(response, "YAML content lookup")
         response.raise_for_status()
         if "application/json" in response.headers.get("content-type", "").lower():
             payload = response.json()

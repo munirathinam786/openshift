@@ -47,8 +47,8 @@
   let modelRefreshHandle = null;
   let providerCatalog = llmRuntime.fallbackCatalog || {
     configured_provider: 'ollama',
-    configured_model_name: 'gpt-oss:20b',
-    providers: [{ id: 'ollama', label: 'Local Ollama', default_model: 'gpt-oss:20b', default_base_url: 'http://localhost:11434', description: 'Use the local Ollama runtime already supported by the stack.', supports_catalog_refresh: true, suggested_models: ['gpt-oss:20b'] }]
+    configured_model_name: '',
+    providers: [{ id: 'ollama', label: 'Local Ollama', default_model: '', default_base_url: 'http://localhost:11434', description: 'Use the local Ollama runtime already supported by the stack.', supports_catalog_refresh: true, suggested_models: [] }]
   };
   const troubleshootingSelect = root.querySelector('[data-agent-troubleshooting-scenario]');
   const troubleshootingDetails = root.querySelector('[data-agent-troubleshooting-details]');
@@ -1196,7 +1196,7 @@
 
   const currentProviderId = () => llmRuntime.normalizeProviderId?.(providerCatalog, llmProviderInput?.value) || 'ollama';
 
-  const currentProvider = () => llmRuntime.getProvider?.(providerCatalog, currentProviderId()) || providerCatalog.providers?.[0] || { id: 'ollama', label: 'Local Ollama', default_model: 'gpt-oss:20b', default_base_url: 'http://localhost:11434' };
+  const currentProvider = () => llmRuntime.getProvider?.(providerCatalog, currentProviderId()) || providerCatalog.providers?.[0] || { id: 'ollama', label: 'Local Ollama', default_model: '', default_base_url: 'http://localhost:11434' };
 
   const renderProviderOptions = () => {
     if (!llmProviderInput) {
@@ -1942,9 +1942,15 @@
       return;
     }
 
-    const defaultModel = currentProvider().default_model || modelNameInput.dataset.agentDefaultModel || 'gpt-oss:20b';
-    const currentValue = preferredValue || modelNameInput.value || defaultModel;
     const catalogModels = Array.isArray(catalog?.models) ? catalog.models : [];
+    const catalogNames = catalogModels.map((model) => model?.name || model?.model).filter(Boolean);
+    const requestedValue = preferredValue || modelNameInput.value || modelNameInput.dataset.agentDefaultModel || '';
+    const activeModel = catalog?.preferred_model_name || catalog?.active_model_name || catalogModels.find((model) => model?.loaded)?.name || '';
+    const configuredModel = catalog?.configured_model_name || providerCatalog.configured_model_name || '';
+    const defaultModel = currentProvider().default_model || modelNameInput.dataset.agentDefaultModel || '';
+    const currentValue = catalog
+      ? (catalogNames.includes(requestedValue) ? requestedValue : (activeModel || (catalogNames.includes(configuredModel) ? configuredModel : '') || catalogNames[0] || requestedValue || defaultModel))
+      : (requestedValue || defaultModel || configuredModel);
     const optionMap = new Map();
 
     for (const model of catalogModels) {
@@ -1956,10 +1962,10 @@
       optionMap.set(name, suffix ? `${name} · ${suffix}` : name);
     }
 
-    if (!optionMap.has(currentValue)) {
+    if (currentValue && !optionMap.has(currentValue)) {
       optionMap.set(currentValue, currentValue);
     }
-    if (!optionMap.has(defaultModel)) {
+    if (defaultModel && !optionMap.has(defaultModel)) {
       optionMap.set(defaultModel, defaultModel);
     }
 
@@ -1976,13 +1982,13 @@
     }
     if (currentProviderId() !== 'ollama') {
       modelNameInput.disabled = true;
-      renderModelOptions(null, modelNameInput.value || currentProvider().default_model || providerCatalog.configured_model_name || 'gpt-oss:20b');
+      renderModelOptions(null, modelNameInput.value || currentProvider().default_model || providerCatalog.configured_model_name || '');
       return;
     }
 
-    const currentValue = modelNameInput.value || modelNameInput.dataset.agentDefaultModel || 'gpt-oss:20b';
+    const currentValue = modelNameInput.value || modelNameInput.dataset.agentDefaultModel || '';
     modelNameInput.disabled = true;
-    modelNameInput.innerHTML = `<option value="${escapeHtml(currentValue)}">Loading models…</option>`;
+    modelNameInput.innerHTML = `<option value="${escapeHtml(currentValue)}">Loading models from Ollama…</option>`;
     modelNameInput.value = currentValue;
 
     const query = new URLSearchParams();
@@ -1996,9 +2002,9 @@
       if (!response.ok) {
         throw new Error(payload.detail || `Model list request failed with status ${response.status}`);
       }
-      renderModelOptions(payload, currentValue || payload.configured_model_name || 'gpt-oss:20b');
+      renderModelOptions(payload, currentValue || payload.preferred_model_name || payload.active_model_name || payload.configured_model_name || '');
       if (!silent) {
-        setStatus(`Loaded ${payload.model_count ?? 0} model option(s) from Ollama.`, 'ok');
+        setStatus(`Loaded ${payload.model_count ?? 0} model option(s) from Ollama${payload.preferred_model_name ? `; using ${payload.preferred_model_name}.` : '.'}`, 'ok');
       }
     } catch (error) {
       renderModelOptions(null, currentValue);
@@ -3493,7 +3499,7 @@
 
   refreshPresetOptions();
   await loadProviderCatalog();
-  renderModelOptions(null, modelNameInput?.dataset.agentDefaultModel || 'gpt-oss:20b');
+  renderModelOptions(null, modelNameInput?.dataset.agentDefaultModel || '');
   scheduleModelRefresh({ silent: true });
   llmProviderInput?.addEventListener('change', () => {
     syncProviderVisibility();
