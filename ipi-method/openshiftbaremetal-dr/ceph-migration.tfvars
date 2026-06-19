@@ -35,8 +35,8 @@ ceph_migration_action = "prepare"
 # ---- Namespaces to Migrate ----
 ceph_migration_namespaces = [
   {
-    name         = "agent-builder"
-    pvc_selector = { app = "agent-builder" }
+    name         = "ai-platform"
+    pvc_selector = { app = "ai-platform" }
     exclude_pvcs = []
   },
   # Uncomment to add more namespaces:

@@ -8,7 +8,6 @@ The documentation workflow is driven by five repository files:
 
 | File | Purpose |
 | --- | --- |
-| `generate_agent_builder_docs.py` | Generates Agent Builder code-reference pages from live Terraform and pipeline source files. |
 | `generate_platform_code_reference_docs.py` | Generates the AWS ROSA, Azure ARO, and IBM Z platform code-reference pages from live Terraform and pipeline source files. |
 | `compose.yaml` | Preferred local container workflow for serving the docs with Podman. |
 | `Containerfile` | Container image definition for local MkDocs preview. |
@@ -21,9 +20,6 @@ Together, these files ensure the docs are not maintained by hand alone. They let
 ```text
 Terraform / pipeline source files
         │
-        ├── generate_agent_builder_docs.py
-        │       └── writes markdown pages under docs/code/...
-        │
         ├── generate_platform_code_reference_docs.py
         │       └── writes full-code platform pages under docs/aws-rosa/, docs/azure-aro/, and docs/ibm-z/
         │
@@ -33,16 +29,6 @@ Terraform / pipeline source files
         └── compose.yaml + Containerfile
                 └── build and run local docs preview with Podman
 ```
-
-## `generate_agent_builder_docs.py`
-
-This script reads live source files from the Agent Builder environments and writes Markdown code-reference pages into `docs/code/...`.
-
-### Why the Agent Builder generator matters
-
-- keeps Agent Builder code-reference docs synchronized with the real Terraform and pipeline files
-- avoids manually duplicating large source blocks into documentation pages
-- ensures IPI DR and UPI Agent Builder pages can be regenerated from source instead of being edited by hand
 
 ## `generate_platform_code_reference_docs.py`
 
@@ -67,7 +53,6 @@ The remaining files handle the actual preview environment:
 When Terraform, pipeline, or documentation structure changes, use this flow:
 
 ```bash
-python3 generate_agent_builder_docs.py
 python3 generate_platform_code_reference_docs.py
 podman compose up -d
 ```
@@ -94,7 +79,7 @@ mkdocs-glightbox==0.4.0
 ### Regenerate generated docs
 
 ```bash
-python3 generate_agent_builder_docs.py
+python3 generate_platform_code_reference_docs.py
 ```
 
 ### Preview docs locally
@@ -116,5 +101,4 @@ Before this page existed, the repo already documented the Terraform platforms an
 ## Related pages
 
 - [Home](../index.md)
-- [Agent Builder Deployment Guide](../clusters/terraform-agent-builder.md)
 - [Terraform Code Walkthrough](terraform-code-walkthrough.md)

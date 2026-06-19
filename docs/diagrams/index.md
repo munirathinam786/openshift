@@ -24,10 +24,6 @@ All architecture, cluster, pipeline, and code diagrams are available as interact
 | 11 | ![](architecture/11-ado-pipeline-scope.svg){: style="max-width:200px" } | [:material-download: .drawio](architecture/11-ado-pipeline-scope.drawio) |
 | 12 | ![](architecture/12-ipi-vs-upi-comparison.svg){: style="max-width:200px" } | [:material-download: .drawio](architecture/12-ipi-vs-upi-comparison.drawio) |
 | 13 | ![](architecture/13-protocol-port-map.svg){: style="max-width:200px" } | [:material-download: .drawio](architecture/13-protocol-port-map.drawio) |
-| 20 | ![](architecture/20-agent-builder-architecture.svg){: style="max-width:200px" } | [:material-download: .drawio](architecture/20-agent-builder-architecture.drawio) |
-| 21 | ![](architecture/21-agent-builder-llm-connectivity.svg){: style="max-width:200px" } | [:material-download: .drawio](architecture/21-agent-builder-llm-connectivity.drawio) |
-| 22 | ![](architecture/22-agent-builder-data-flow.svg){: style="max-width:200px" } | [:material-download: .drawio](architecture/22-agent-builder-data-flow.drawio) |
-| 23 | ![](architecture/23-agent-builder-service-map.svg){: style="max-width:200px" } | [:material-download: .drawio](architecture/23-agent-builder-service-map.drawio) |
 
 ## Cluster Diagrams
 
@@ -91,7 +87,6 @@ All architecture, cluster, pipeline, and code diagrams are available as interact
 | 25 | ![](pipeline/25-vm-migration-workflow.svg){: style="max-width:200px" } | [:material-download: .drawio](pipeline/25-vm-migration-workflow.drawio) |
 | 26 | ![](pipeline/26-upi-boot-gate.svg){: style="max-width:200px" } | [:material-download: .drawio](pipeline/26-upi-boot-gate.drawio) |
 | 27 | ![](pipeline/27-ado-prerequisites.svg){: style="max-width:200px" } | [:material-download: .drawio](pipeline/27-ado-prerequisites.drawio) |
-| 30 | ![](pipeline/30-agent-builder-pipeline.svg){: style="max-width:200px" } | [:material-download: .drawio](pipeline/30-agent-builder-pipeline.drawio) |
 
 ## Code / Module Dependency Diagrams
 

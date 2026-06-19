@@ -3,7 +3,7 @@
 # Project information
 site_name: Terraform IaC for OpenShift Multi Cluster AirGapped
 site_url: https://example.com/terraform-iac/
-site_author: Sathishkumar Munirathinam (sathishkumar.munirathinam@kyndryl.com)
+site_author: Sathishkumar Munirathinam (munirathinam786@gmail.com)
 site_description: >-
   Terraform Infrastructure as Code documentation for deploying multi-cluster
   OpenShift environments on bare metal in air-gapped mode with GPU support,
@@ -13,7 +13,8 @@ site_description: >-
 copyright: >-
   Copyright &copy; 2026 — Terraform IaC for OpenShift Multi Cluster AirGapped<br/>
   <strong>Author:</strong> Sathishkumar Munirathinam &nbsp;|&nbsp;
-  <a href="mailto:sathishkumar.munirathinam@kyndryl.com">sathishkumar.munirathinam@kyndryl.com</a>
+  <a href="mailto:munirathinam786@gmail.com">munirathinam786@gmail.com</a>
+  &nbsp;|&nbsp; Licensed under the <a href="https://github.com/kyndryl-global-delivery/Terraform-IaC-for-OpenShift-Multi-Cluster-AirGapped/blob/develop/LICENSE">MIT License</a>
 
 theme:
   icon:
@@ -84,11 +85,6 @@ nav:
     - Architecture: "azure-aro/architecture.md"
     - Terraform Code Reference: "azure-aro/code-reference.md"
     - Pipeline: "azure-aro/pipeline.md"
-  - Agent Builder Factory:
-    - Deployment Guide: "clusters/terraform-agent-builder.md"
-    - Application Packages: "clusters/terraform-agent-builder-packages.md"
-    - Pipeline (Day 1): "pipeline/terraform-agent-builder-pipeline.md"
-    - Pipeline (Day 2): "pipeline/terraform-agent-builder-pipeline-day2.md"
   - Draw.io Diagrams: "diagrams/index.md"
   - CI/CD Pipeline:
     - ADO Pipeline (IPI — Day 1): "pipeline/terraform-ado-pipeline.md"
@@ -107,14 +103,6 @@ nav:
 
   - Terraform Code Walkthrough (Learn to Write):
     - Overview — How the Code is Structured: "code/terraform-code-walkthrough.md"
-    - Agent Builder — Step by Step:
-      - Why No AWS Provider? — Air-Gapped Pattern: "code/ipi-method/agent-builder/providers-explained.md"
-      - versions.tf — Providers Explained: "code/ipi-method/agent-builder/versions-walkthrough.md"
-      - variables.tf — Inputs Explained: "code/ipi-method/agent-builder/variables-walkthrough.md"
-      - terraform.tfvars — Values Explained: "code/ipi-method/agent-builder/tfvars-walkthrough.md"
-      - main.tf — Root Orchestration Explained: "code/ipi-method/agent-builder/main-walkthrough.md"
-      - outputs.tf — Outputs Explained: "code/ipi-method/agent-builder/outputs-walkthrough.md"
-      - All 14 Modules — Deep Dive: "code/ipi-method/agent-builder/modules-walkthrough.md"
 
   - Terraform Code (Reference):
     - IPI DC Primary (ipi-method/openshiftbaremetal):
@@ -157,20 +145,6 @@ nav:
       - acm-dr.tfvars (ACM DR): "code/ipi-method/mgmt-dr/acm-dr-tfvars.md"
       - outputs.tf: "code/ipi-method/mgmt-dr/outputs.md"
       - versions.tf: "code/ipi-method/mgmt-dr/versions.md"
-    - IPI Agent Builder DC (ipi-method/agent-builder):
-      - main.tf: "code/ipi-method/agent-builder/main.md"
-      - variables.tf: "code/ipi-method/agent-builder/variables.md"
-      - terraform.tfvars: "code/ipi-method/agent-builder/tfvars.md"
-      - outputs.tf: "code/ipi-method/agent-builder/outputs.md"
-      - versions.tf: "code/ipi-method/agent-builder/versions.md"
-      - azure-pipelines-agent-builder.yml (Day 1): "code/ipi-method/agent-builder/azure-pipelines-agent-builder.md"
-      - azure-pipelines-agent-builder-day2.yml (Day 2): "code/ipi-method/agent-builder/azure-pipelines-agent-builder-day2.md"
-    - IPI Agent Builder DR (ipi-method/agent-builder-dr):
-      - main.tf: "code/ipi-method/agent-builder-dr/main.md"
-      - variables.tf: "code/ipi-method/agent-builder-dr/variables.md"
-      - terraform.tfvars: "code/ipi-method/agent-builder-dr/tfvars.md"
-      - outputs.tf: "code/ipi-method/agent-builder-dr/outputs.md"
-      - versions.tf: "code/ipi-method/agent-builder-dr/versions.md"
     - IPI Azure DevOps Pipeline:
       - azure-pipelines.yml (Day 1): "code/ipi-method/pipeline/azure-pipelines.md"
       - azure-pipelines-day2.yml (Day 2): "code/ipi-method/pipeline/azure-pipelines-day2.md"
@@ -210,20 +184,6 @@ nav:
       - vm-migration.tfvars: "code/upi-method/openshiftbaremetal-dr/vm-migration-tfvars.md"
       - mtc.tfvars: "code/upi-method/openshiftbaremetal-dr/mtc-tfvars.md"
       - ceph-migration.tfvars: "code/upi-method/openshiftbaremetal-dr/ceph-migration-tfvars.md"
-    - UPI Agent Builder DC (upi-method/agent-builder):
-      - main.tf: "code/upi-method/agent-builder/main.md"
-      - variables.tf: "code/upi-method/agent-builder/variables.md"
-      - terraform.tfvars: "code/upi-method/agent-builder/tfvars.md"
-      - outputs.tf: "code/upi-method/agent-builder/outputs.md"
-      - versions.tf: "code/upi-method/agent-builder/versions.md"
-      - azure-pipelines-agent-builder.yml (Day 1): "code/upi-method/agent-builder/azure-pipelines-agent-builder.md"
-      - azure-pipelines-agent-builder-day2.yml (Day 2): "code/upi-method/agent-builder/azure-pipelines-agent-builder-day2.md"
-    - UPI Agent Builder DR (upi-method/agent-builder-dr):
-      - main.tf: "code/upi-method/agent-builder-dr/main.md"
-      - variables.tf: "code/upi-method/agent-builder-dr/variables.md"
-      - terraform.tfvars: "code/upi-method/agent-builder-dr/tfvars.md"
-      - outputs.tf: "code/upi-method/agent-builder-dr/outputs.md"
-      - versions.tf: "code/upi-method/agent-builder-dr/versions.md"
     - UPI Management DC (upi-method/mgmt-dc):
       - main.tf: "code/upi-method/mgmt-dc/main.md"
       - variables.tf: "code/upi-method/mgmt-dc/variables.md"
@@ -286,7 +246,7 @@ extra_css:
 extra:
   social:
     - icon: fontawesome/solid/envelope
-      link: mailto:sathishkumar.munirathinam@kyndryl.com
+      link: mailto:munirathinam786@gmail.com
       name: Sathishkumar Munirathinam
   generator: false
 

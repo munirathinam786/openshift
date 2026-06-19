@@ -269,3 +269,11 @@ podman run -d -p 8000:8000 -v ./:/docs:Z --name terraform-iac-docs localhost/ter
 
 !!! tip "Podman is the supported local container runtime"
     Use `podman compose` with `compose.yaml` for local documentation preview and validation. The legacy `docker-compose.yaml` file is kept only for compatibility with tooling that still looks for that filename.
+
+## License
+
+This project is licensed under the **MIT License**.
+
+Copyright &copy; 2026 Sathishkumar Munirathinam
+
+See the [LICENSE](https://github.com/kyndryl-global-delivery/Terraform-IaC-for-OpenShift-Multi-Cluster-AirGapped/blob/develop/LICENSE) file for the full license text.

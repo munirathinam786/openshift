@@ -4,7 +4,7 @@ site_url: http://localhost:8000/docs
 repo_name: local/openshift-sre-local-agent
 copyright: >-
   Author: Sathishkumar Munirathinam /
-  <a href="mailto:Sathishkumar.munirathinam@kyndryl.com">Sathishkumar.munirathinam@kyndryl.com</a>
+  <a href="mailto:munirathinam786@gmail.com">munirathinam786@gmail.com</a>
 nav:
   - Home: index.md
   - Architect Workspace: architect.html

@@ -149,7 +149,7 @@
         <mxCell id="a_state" value="terraform.tfstate&#xa;Records resource IDs,&#xa;trigger hashes, status" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#CE93D8;fontColor=#4A148C;strokeColor=#AB47BC;fontSize=10;arcSize=15;shadow=1;" vertex="1" parent="1">
           <mxGeometry x="110" y="585" width="180" height="45" as="geometry"/>
         </mxCell>
-        <mxCell id="a_running" value="Running Services&#xa;14 Agent Builder microservices&#xa;+ OCP operators + monitoring" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#CE93D8;fontColor=#4A148C;strokeColor=#AB47BC;fontSize=10;arcSize=15;shadow=1;" vertex="1" parent="1">
+        <mxCell id="a_running" value="Running Services&#xa;14 AI platform microservices&#xa;+ OCP operators + monitoring" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#CE93D8;fontColor=#4A148C;strokeColor=#AB47BC;fontSize=10;arcSize=15;shadow=1;" vertex="1" parent="1">
           <mxGeometry x="360" y="585" width="200" height="45" as="geometry"/>
         </mxCell>
         <mxCell id="a_outputs" value="outputs.tf&#xa;Console URL, API URL,&#xa;kubeconfig path" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#CE93D8;fontColor=#4A148C;strokeColor=#AB47BC;fontSize=10;arcSize=15;shadow=1;" vertex="1" parent="1">

@@ -31,7 +31,7 @@ Used with the [Ceph Migration Pipeline](../../../pipeline/terraform-ceph-migrati
 
 | Namespace | PVC Selector | Exclude PVCs |
 |-----------|-------------|--------------|
-| `agent-builder` | `app=agent-builder` | — |
+| `ai-platform` | `app=ai-platform` | — |
 
 ## Source Code
 
@@ -66,8 +66,8 @@ ceph_migration_action = "prepare"
 # ---- Namespaces to Migrate ----
 ceph_migration_namespaces = [
   {
-    name         = "agent-builder"
-    pvc_selector = { app = "agent-builder" }
+    name         = "ai-platform"
+    pvc_selector = { app = "ai-platform" }
     exclude_pvcs = []
   },
 ]

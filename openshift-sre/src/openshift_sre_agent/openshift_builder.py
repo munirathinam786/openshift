@@ -937,7 +937,7 @@ def _raise_for_ado_response(response: httpx.Response, operation: str) -> None:
                 "Azure DevOps redirected to sign-in during "
                 f"{operation}. Check that the PAT was pasted correctly, is not expired, has Code read access "
                 "(and Code read/write for pushes), and that the organization URL is the org root like "
-                "https://dev.azure.com/Kyndryl-India while Project is entered separately."
+                "https://dev.azure.com/Example-Org while Project is entered separately."
             )
         raise ValueError(f"Azure DevOps returned redirect {response.status_code} during {operation}. Check the organization URL and project name.")
     if response.status_code in {401, 403}:

@@ -323,7 +323,7 @@ def test_ado_pipeline_discovery_falls_back_to_build_definitions():
             raise AssertionError(f"Unexpected Azure DevOps URL: {url} params={params}")
 
     config = BuilderAdoConfig(
-        organization_url="https://dev.azure.com/Kyndryl-India",
+        organization_url="https://dev.azure.com/Example-Org",
         project="Terraform IaC for OpenShift Multi Cluster AirGapped",
         repository="Terraform IaC for OpenShift Multi Cluster AirGapped",
         branch="develop",
@@ -522,14 +522,14 @@ def test_ado_project_url_normalizes_copied_project_url():
     from openshift_sre_agent.openshift_builder import parse_ado_config
 
     config = parse_ado_config({
-        "organization_url": "https://dev.azure.com/Kyndryl-India/Terraform%20IaC%20for%20OpenShift%20Multi%20Cluster%20AirGapped",
+        "organization_url": "https://dev.azure.com/Example-Org/Terraform%20IaC%20for%20OpenShift%20Multi%20Cluster%20AirGapped",
         "project": "",
         "repository": "Terraform IaC for OpenShift Multi Cluster AirGapped",
         "branch": "develop",
         "pat": "token",
     })
 
-    assert config.organization_url == "https://dev.azure.com/Kyndryl-India"
+    assert config.organization_url == "https://dev.azure.com/Example-Org"
     assert config.project == "Terraform IaC for OpenShift Multi Cluster AirGapped"
 
 

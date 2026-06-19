@@ -196,10 +196,8 @@ Define what URLs and values should be displayed after `terraform apply`.
 
 !!! success "Next Steps"
     Continue to the detailed walkthrough pages for each file:
-    
-    - [versions.tf Walkthrough](ipi-method/agent-builder/versions-walkthrough.md) — Provider configuration
-    - [variables.tf Walkthrough](ipi-method/agent-builder/variables-walkthrough.md) — Input declarations
-    - [terraform.tfvars Walkthrough](ipi-method/agent-builder/tfvars-walkthrough.md) — Value assignment
-    - [main.tf Walkthrough](ipi-method/agent-builder/main-walkthrough.md) — Root orchestration
-    - [outputs.tf Walkthrough](ipi-method/agent-builder/outputs-walkthrough.md) — Output definitions
-    - [Modules Deep Dive](ipi-method/agent-builder/modules-walkthrough.md) — All 14 modules explained
+
+  - [IPI DC Primary — main.tf](ipi-method/openshiftbaremetal/main.md) — Root orchestration example
+  - [IPI DC Primary — variables.tf](ipi-method/openshiftbaremetal/variables.md) — Input declarations
+  - [UPI DC Primary — main.tf](upi-method/main.md) — UPI orchestration reference
+  - [UPI DC Primary — variables.tf](upi-method/variables.md) — UPI input declarations

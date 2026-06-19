@@ -62,7 +62,7 @@ The OpenShift Builder workspace uses the `/builder/*` API group to turn Architec
 - `POST /builder/design/plan` compares the latest OpenShift Architect design snapshot and operator prompt with the discovered catalog and returns recommended pipeline IDs plus missing requirements. When ADO context is supplied, the server merges local catalog entries with the ADO pipeline catalog so selected ADO pipeline IDs can be planned.
 - `POST /builder/implement` packages selected catalog YAML, optionally generates missing implementation files after confirmation, and can push the resulting payload to Azure DevOps. Generated YAML is plan-first and uses placeholders for service connections, state backends, and credentials.
 
-The Azure DevOps organization field accepts either the org root, such as `https://dev.azure.com/Kyndryl-India`, with Project entered separately, or a copied project URL such as `https://dev.azure.com/Kyndryl-India/Terraform%20IaC%20for%20OpenShift%20Multi%20Cluster%20AirGapped/_build`; the backend normalizes the org/project split before discovery.
+The Azure DevOps organization field accepts either the org root, such as `https://dev.azure.com/Example-Org`, with Project entered separately, or a copied project URL such as `https://dev.azure.com/Example-Org/Terraform%20IaC%20for%20OpenShift%20Multi%20Cluster%20AirGapped/_build`; the backend normalizes the org/project split before discovery.
 
 Non-secret defaults are read from `OPENSHIFT_BUILDER_SOURCE_PATHS`, `OPENSHIFT_BUILDER_ADO_ORG_URL`, `OPENSHIFT_BUILDER_ADO_PROJECT`, `OPENSHIFT_BUILDER_ADO_REPO`, `OPENSHIFT_BUILDER_ADO_BRANCH`, and `OPENSHIFT_BUILDER_ADO_TARGET_DIRECTORY` when present.
 
